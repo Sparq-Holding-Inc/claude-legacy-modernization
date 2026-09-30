@@ -9,8 +9,9 @@ unrelated work.
 When the marker says done, it checks:
   1. every path:line or path:line-line in the markdown files resolves to a real
      file and a line inside it,
-  2. every row of a findings table (a table with an Evidence or Citation
-     column) carries a citation or the word "inference",
+  2. every row of a findings table (a table whose header has an Evidence or
+     Citation column) carries a citation, the word "inference", or the word
+     "analysis" for a fact computed from graph.json,
   3. every required JSON output exists and validates against schema.py, and
      every evidence entry in them resolves.
 
@@ -45,7 +46,8 @@ EXT = ("cbl|cob|cobol|cpy|copy|jcl|job|prc|proc|csd|bms|xml|controlm|sh|ksh|bash
        "py|ddl|dcl|dbd|psb|sql|ca7")
 CITATION = re.compile(r"(?<![\w/.\-:])((?:[\w.\-]+/)*[\w.\-]+\.(?:%s)):(\d+)(?:-(\d+))?(?![\w])" % EXT, re.I)
 FENCE = re.compile(r"^\s*(```|~~~)")
-EVIDENCE_HEADER = re.compile(r"\b(evidence|citation|cite)\b", re.I)
+EVIDENCE_HEADER = re.compile(r"^\s*(evidence|citations?|cite)\s*$", re.I)
+LABELS = re.compile(r"\b(inference|analysis)\b", re.I)   # a computed graph fact has no source line
 
 
 def find_out_dir(cwd):
@@ -126,7 +128,7 @@ def check_markdown(path, res):
             k = table_ev_col[1]
             if k >= 0:
                 cell = cells[k] if k < len(cells) else ""
-                if not (CITATION.search(cell) or re.search(r"\binference\b", cell, re.I)):
+                if not (CITATION.search(cell) or LABELS.search(cell)):
                     problems.append("%s line %d: a findings table row has no citation and is not labeled "
                                     "inference: %s" % (rel, i, stripped[:90]))
         else:
@@ -215,7 +217,7 @@ def main():
         return 0
 
     project = os.path.dirname(out_dir)
-    res = Resolver([marker.get("target"), project, cwd])
+    res = Resolver([marker.get("target"), project, cwd, out_dir])
     problems = []
     for name in sorted(os.listdir(out_dir)):
         if name.endswith(".md"):
@@ -261,7 +263,7 @@ def self_check(argv):
     marker = {"require": ["graph.json", "waves.json", "dead-code.json", "risks.json"]}
     if "--wave" in argv:
         marker = {"require": []}
-    res = Resolver([target, os.path.dirname(os.path.abspath(d)), os.getcwd()])
+    res = Resolver([target, os.path.dirname(os.path.abspath(d)), os.getcwd(), os.path.abspath(d)])
     problems = []
     for name in sorted(os.listdir(d)):
         if name.endswith(".md"):

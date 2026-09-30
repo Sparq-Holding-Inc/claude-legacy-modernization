@@ -1,7 +1,9 @@
 ---
 description: Assess a COBOL, CICS, JCL and VSAM codebase for modernization. Scripts extract the coupling graph. Claude cuts the waves and scores the risk.
 argument-hint: '[path] [--target rehost|replatform|refactor|rewrite] [--must-not-break "text"] [--telemetry none|partial|provided] [--wave N]'
-allowed-tools: 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/*)'
+allowed-tools:
+  - 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/*)'
+  - 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/hooks/check_citations.py" *)'
 ---
 
 Assess the codebase with the `modernization-assessment` skill. Then run the
@@ -27,7 +29,8 @@ exists. Ask only for the ones you were not given as flags. If all three came as 
 nothing. Do not proceed on assumptions in an interactive session. The answers change the output.
 
 In a non-interactive session nobody can answer. Use these defaults and say so in
-`00-summary.md`: target `refactor`, must-not-break `not stated`, telemetry `none`.
+`00-summary.md`: target `refactor`, must-not-break `not stated`, telemetry `none`. If all three came
+as flags, write `no defaults applied`.
 
 ## Run
 
@@ -40,7 +43,8 @@ In a non-interactive session nobody can answer. Use these defaults and say so in
 
 2. Follow the `modernization-assessment` skill from Step 0 to Finish. Write every artifact to
    `./modernization-assessment/`. The skill ends by marking the run done. Do not delete the marker
-   yourself. The citation check removes it after it passes.
+   yourself. The citation check removes it after it passes. If the stop hook does not run in your
+   environment, the marker stays at `done`. That is harmless.
 
 3. Finish by printing a short summary in the conversation: the wave count, the single largest risk
    you found, and the top three open questions for the client's engineers.

@@ -63,7 +63,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py
 
 Now read `graph.json`. Start with the `analysis` block. It already holds:
 
-- `entry_points`, `reachable_count`
+- `entry_points`, `reachable_nodes`, `reachable_programs`
 - `dead_code_candidates` (unreachable, dormant, unknown) with `dead_code_reasons`
 - `unresolved_dynamic`: every computed call the script could not resolve
 - `sccs`, `self_recursive`, `articulation_points`, `god_modules`, `fan_in`, `fan_out`
@@ -143,7 +143,10 @@ Cut the system into waves. A wave is valid only if all four hold:
 - it delivers something a business stakeholder can name
 
 Do not invent waves. A system that is one job and a handful of programs is one wave. Say so, and
-say what you would cut if it were ten times larger.
+say what you would cut if it were ten times larger. If the tree has no entry point and no scheduler,
+say the plan is provisional and list what you would need. If one wave holds a high-high unit, say
+plainly that the first-wave rule cannot hold at this size. A program in the unknown bucket goes in
+the wave of the code that might call it, and you say why.
 
 Order the waves by this rule: **earliest waves maximize learning per unit of blast radius.** Not by
 business value. That is the instinct, and it is wrong here. The first wave proves the toolchain,
@@ -227,6 +230,10 @@ Dormant means old, not unused. If a live program calls a dormant program uncondi
 likely runs. Say that in the reason. Keep the extractor's dormant list as it is, and never propose
 deletion on a date alone.
 
+A job that no parsed scheduler names still counts as an entry point, so it never shows in a bucket.
+Read `unscheduled_jobs` and the warnings, and ask whether those jobs still run. If a warning says
+dormancy was not computed, say that in `05-dead-code.md`. An empty dormant list then means not measured.
+
 If the user gave you telemetry, use it to firm up dormant and unknown. If not, every claim is
 provisional and you say so.
 
@@ -253,7 +260,10 @@ All three keys must be present, even when a list is empty. `telemetry` is `none`
 ## Output discipline
 
 - Every claim carries a `path:line` citation or is labeled `inference`.
-- Any table of findings has an `Evidence` column. A row with no citation says `inference`.
+- Any table of findings has a column headed exactly `Evidence`. A row with no citation says `inference`.
+- Cite paths from the project root. A file inside the assessment folder is cited as
+  `modernization-assessment/waves.json:2`. A fact computed in `graph.json`'s `analysis` block has no
+  source line: cite the source line behind it, or write `analysis` in the Evidence cell and name the field.
 - Keep a **Confidence** column. Low-confidence findings are not omitted. They are the ones the
   humans need to go verify.
 - Write `00-summary.md`: the scoping answers, the wave count, the single largest risk, and an

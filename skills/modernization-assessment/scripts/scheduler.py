@@ -51,7 +51,7 @@ def parse_controlm(root, rel):
         elif top == "JOB":
             folder = next((s[1] for s in reversed(stack) if s[0] in ("FOLDER", "SMART_FOLDER")), "")
             job = {"folder": folder, "name": attrs.get("JOBNAME", ""), "member": attrs.get("MEMNAME") or
-                   attrs.get("JOBNAME", ""), "line": line, "ins": [], "outs": []}
+                   attrs.get("JOBNAME", ""), "line": line, "ins": [], "outs": [], "dels": []}
             jobs.append(job)
             stack.append(("JOB", job, line))
         elif top in ("INCOND", "OUTCOND") and stack and stack[-1][0] == "JOB":
@@ -60,6 +60,8 @@ def parse_controlm(root, rel):
                 job["ins"].append((attrs.get("NAME", ""), line))
             elif attrs.get("SIGN", "+") == "+":
                 job["outs"].append((attrs.get("NAME", ""), line))
+            else:
+                job["dels"].append((attrs.get("NAME", ""), line))
             stack.append(("COND", None, line))
         else:
             stack.append(("OTHER", None, line))
@@ -91,6 +93,19 @@ def condition_edges(jobs):
                 if pj is not cj:
                     out.append((pj, cj, pl, cl, nm))
     return out
+
+
+def condition_notes(jobs, rel):
+    """Things the graph cannot show: a condition nobody sets, and a condition a job deletes."""
+    made = {nm for j in jobs for nm, _ in j["outs"]}
+    notes = []
+    for j in jobs:
+        for nm, ln in j["ins"]:
+            if nm not in made:
+                notes.append("%s:%d: job %s waits for condition %s, which no job in this file sets. It is an external input." % (rel, ln, j["name"], nm))
+        for nm, ln in j["dels"]:
+            notes.append("%s:%d: job %s deletes condition %s (SIGN -). That order is not an edge." % (rel, ln, j["name"], nm))
+    return notes
 
 
 def parse_shell(root, rel, known_jcl):

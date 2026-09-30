@@ -42,6 +42,8 @@ LIMITS = [
     "Nested PROC calls, INCLUDE members and jobs submitted through the internal reader are not followed.",
     "EXEC CICS RETURN TRANSID, START and SEND MAP are not edges.",
     "Only Control-M XML and shell wrappers that name JCL files are read as schedulers.",
+    "DCB, LRECL and RECFM are not read, so a record length on a DD is not compared with a copybook.",
+    "LINK and XCTL are both call edges. XCTL never returns, and control flow is not modeled.",
 ]
 
 
@@ -115,6 +117,7 @@ def build(root, as_of, dormant_years=5, use_git=True):
     def loc_of(rel, text, comment=()):
         return cloc.get(rel, loc_plain(text, comment))
 
+    notices = []
     buckets = collections.defaultdict(list)
     for rel in files:
         ext = os.path.splitext(rel)[1].lower()
@@ -236,6 +239,9 @@ def build(root, as_of, dormant_years=5, use_git=True):
         g.node(jid, "jcl_job", "jcl", u.file, u.loc, dates.get(u.file), entry_point=True, line=u.line)
         job_files[os.path.splitext(os.path.basename(u.file))[0].lower()].append(jid)
         steps = jcl.expand_job(u, procs)
+        for s in steps:
+            if s["parent"] is None and "#" in s["id"]:
+                notices.append("%s:%d: job %s repeats a step name. The extractor calls this one %s." % (s["file"], s["line"], u.name, s["id"].split(".", 1)[1]))
         by_id = {s["id"]: s for s in steps}
         execs = []
         for s in steps:
@@ -411,6 +417,7 @@ def build(root, as_of, dormant_years=5, use_git=True):
             jid = schema.job_id(j["member"])
             ensure_job(jid, j["member"])
             g.edge(sid, jid, "call", [(rel, j["line"])])
+        notices += scheduler.condition_notes(r["jobs"], rel)
         for pj, cj, pl, cl, nm in scheduler.condition_edges(r["jobs"]):
             g.edge(schema.sch_id(pj["folder"], pj["name"]), schema.sch_id(cj["folder"], cj["name"]),
                    "temporal", [(rel, pl), (rel, cl)], note="condition %s" % nm)
@@ -470,7 +477,7 @@ def build(root, as_of, dormant_years=5, use_git=True):
         "nodes": nodes,
         "edges": edges,
         "unparsed": sorted(g.unparsed, key=lambda u: (u["file"], u["reason"])),
-        "analysis": analyze.analyze(nodes, edges, as_of, dormant_years),
+        "analysis": analyze.analyze(nodes, edges, as_of, dormant_years, notices),
     }
 
 

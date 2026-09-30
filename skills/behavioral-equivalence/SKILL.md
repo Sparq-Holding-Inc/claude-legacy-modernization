@@ -92,8 +92,8 @@ Look here before you accept that no oracle exists.
 There will be behavior in the legacy system that is simply wrong, and that the client does
 not want reproduced. Every one of these gets an entry in a **Deviation Register**:
 
-| ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact |
-|---|---|---|---|---|---|
+| ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact | Evidence |
+|---|---|---|---|---|---|---|
 
 Nothing gets to differ without a row here. This register is the single most useful artifact
 of the whole migration. It is what you hand the auditor, and it is what stops a defect from

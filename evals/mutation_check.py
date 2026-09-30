@@ -44,7 +44,7 @@ MUTATIONS = [
     ("repeated step names not suffixed", "jcl",
      'sid = "%s.%s" % (unit.name, name) + ("#%d" % seen[name] if seen[name] > 1 else "")',
      'sid = "%s.%s" % (unit.name, name)'),
-    ("Control-M deletions counted as producers", "scheduler", 'elif attrs.get("SIGN", "+") == "+":', "else:"),
+    ("Control-M deletions counted as producers", "scheduler", 'elif attrs.get("SIGN", "+") == "+":', "elif True:"),
     ("shell comments read as submits", "scheduler", 'if raw.lstrip().startswith("#"):\n            continue',
      'if False:\n            continue'),
     ("step order edges off", "extract", "for a, b in zip(execs, execs[1:]):", "for a, b in []:"),

@@ -124,7 +124,7 @@ def _p90(values):
     return vals[max(0, int(len(vals) * 0.9 + 0.999999) - 1)] if vals else 0
 
 
-def analyze(nodes, edges, as_of, dormant_years=5):
+def analyze(nodes, edges, as_of, dormant_years=5, notices=None):
     by_id = {n["id"]: n for n in nodes}
     succ = collections.defaultdict(list)
     for e in edges:
@@ -146,7 +146,10 @@ def analyze(nodes, edges, as_of, dormant_years=5):
             dynamic.append({"src": e["src"], "dst": e["dst"], "evidence": e["evidence"][0]})
     reachable_dynamic = [d for d in dynamic if d["src"] in reach]
 
-    warnings = []
+    warnings = list(notices or [])
+    if nodes and not any(n.get("last_modified") for n in nodes if n["unit_type"] in schema.PROGRAM_TYPES):
+        warnings.append("No last-modified dates exist (the target is not a git repository, or --no-git was used). "
+                        "The dormant bucket was NOT computed. An empty dormant list means not measured.")
     cands = [n["id"] for n in nodes if n["unit_type"] in BUCKET_TYPES]
     unreachable, unknown, dormant, reasons = [], [], [], {}
     threshold = _years_ago(as_of, dormant_years)
@@ -242,10 +245,14 @@ def analyze(nodes, edges, as_of, dormant_years=5):
     if jobs and not sched:
         warnings.append("%d JCL job(s) are in the tree but no scheduler artifact was parsed. The order jobs run "
                         "in across jobs is unknown. Ask for the scheduler export." % len(jobs))
-    if sched:
+    if jobs and sched:
         called = {e["dst"] for e in edges if e["kind"] == "call" and e["src"].startswith("sch:")}
         unscheduled = sorted(n["id"] for n in nodes if n["unit_type"] == "jcl_job" and n["id"] not in called
                              and n.get("path"))
+        if unscheduled:
+            warnings.append("%d JCL job(s) are not named by any parsed scheduler or wrapper. Every job counts as an "
+                            "entry point, so none of them appears in the dead code buckets. Ask whether they still "
+                            "run. See unscheduled_jobs." % len(unscheduled))
 
     kinds = collections.Counter(e["kind"] for e in edges)
     types = collections.Counter(n["unit_type"] for n in nodes)
@@ -253,7 +260,8 @@ def analyze(nodes, edges, as_of, dormant_years=5):
         "as_of": as_of.isoformat(),
         "dormant_years": dormant_years,
         "entry_points": entries,
-        "reachable_count": len(reach),
+        "reachable_nodes": len(reach),
+        "reachable_programs": len([p for p in all_progs if p in reach]),
         "dead_code_candidates": {"unreachable": unreachable, "dormant": dormant, "unknown": unknown},
         "dead_code_reasons": reasons,
         "unresolved_dynamic": dynamic,
