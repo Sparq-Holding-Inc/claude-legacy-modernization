@@ -1,75 +1,124 @@
 # Legacy Modernization Assessor
 
-A Claude Code plugin for the first two weeks of a legacy modernization program — the part
-where you still don't know what you're dealing with.
+A Claude Code plugin for the first two weeks of a mainframe modernization program. That is the part
+where you still do not know what you are dealing with.
 
-Point it at a COBOL, RPG, Oracle ADF, PL/SQL, .NET Framework, or monolithic Java codebase.
-It produces four artifacts an engineering leader can actually take into a steering meeting:
+Point it at a COBOL, CICS, JCL and VSAM codebase. It produces what an engineering leader can take
+into a steering meeting:
 
-1. **A dependency map** — what calls what, which modules are load-bearing, and where the
-   hidden coupling is (shared copybooks, global working-storage, database-mediated coupling,
-   file-format contracts between jobs).
-2. **A risk-ranked migration wave plan** — the codebase cut into waves that can ship
-   independently, ordered so the cheap, low-blast-radius work funds and de-risks the rest.
-3. **A behavioral-equivalence test strategy** — how you prove the new thing does what the
-   old thing did, including where you *can't* prove it and what compensating control covers
-   that gap.
-4. **A dead-code and dark-logic register** — what looks unreachable, what looks reachable but
-   is almost certainly dormant, and what to verify in production telemetry before deleting.
+1. **A dependency map.** What calls what, which datasets are shared, which programs are bound
+   together by a file layout nobody wrote down, and which jobs must run in order. Every edge cites a
+   file and a line.
+2. **A risk-ranked wave plan.** The system cut into waves that can ship on their own. Cheap,
+   low-blast-radius work goes first, so it pays for the rest and teaches the team.
+3. **A dead code register.** Three buckets: unreachable, dormant, and unknown. Unknown is where a
+   computed call could reach the code. Nothing is called dead over a call it cannot see.
+4. **A behavioral-equivalence test strategy.** How you prove the new system does what the old one did,
+   including where you cannot prove it.
 
-## Why this exists
+The same results are written as JSON (`graph.json`, `waves.json`, `dead-code.json`, `risks.json`),
+so another tool can read them.
 
-Most modernization programs fail in the assessment phase, not the build phase. They fail
-because the estimate is built on lines of code rather than on coupling, and because nobody
-wrote down what "correct" means before the rewrite started. This plugin makes Claude do the
-boring, high-value part: read all of it, and write down what it found.
+## Why it works this way
+
+Most modernization programs fail in the assessment, not the build. The estimate rests on lines of
+code instead of coupling. Nobody wrote down what "correct" means before the rewrite started.
+
+Asking a model to read a large mainframe estate and report what is coupled to what gives you
+fluent text and no way to check it. So this plugin splits the work:
+
+- **Scripts find the facts.** A small Python extractor reads the source and builds the graph.
+- **Claude makes the judgments.** How much business logic a program holds, where to cut the waves,
+  what the real risk is, what to do about the edges the scripts could not resolve.
+- **A hook holds Claude to its citations.** A finished assessment cannot leave with a file and line
+  that do not exist.
 
 ## Install
 
 ```
 /plugin marketplace add teamsparq/claude-legacy-modernization
-/plugin install legacy-modernization
+/plugin install legacy-modernization@sparq
 ```
 
-Or clone and load locally:
+To try it from a local clone without installing, point Claude Code at the folder that holds
+`.claude-plugin/`:
 
 ```
-git clone https://github.com/teamsparq/claude-legacy-modernization
-claude plugin validate ./claude-legacy-modernization
+claude --plugin-dir <path to this folder>
 ```
+
+You need Python 3 on your path. The scripts use the standard library only. Nothing to install.
 
 ## Use
 
 ```
-/modernize-scan                      # full assessment of the current repo
-/modernize-scan src/batch            # scope it to a subtree
-/modernize-scan --wave 1             # deep-plan a single wave after the first scan
+/legacy-modernization:modernize-scan                       # assess the current folder
+/legacy-modernization:modernize-scan src/mainframe         # scope it to a subfolder
+/legacy-modernization:modernize-scan --target refactor --must-not-break "month-end close, partner EDI" --telemetry none
+/legacy-modernization:modernize-scan --wave 1              # plan one wave in detail, after the first scan
 ```
 
-Or just ask: *"assess this codebase for modernization"* — the skills trigger on their own.
+Claude asks three scoping questions: the target state (rehost, replatform, refactor or rewrite), what
+must not break, and whether runtime telemetry exists. Pass all three as flags and it asks nothing.
+You can also just ask: "assess this codebase for modernization".
 
-## What's in it
+Everything is written to `./modernization-assessment/`.
 
-| Component | Name | What it does |
-|---|---|---|
-| Command | `/modernize-scan` | Runs the full four-artifact assessment |
-| Skill | `modernization-assessment` | The assessment method: inventory → coupling → waves → estimate |
-| Skill | `behavioral-equivalence` | Designing the test harness that proves the port is correct |
-| Agent | `dependency-cartographer` | Fans out across the codebase to build the coupling graph |
-| Agent | `migration-risk-assessor` | Scores each module for blast radius and port difficulty |
+## What it reads
 
-## Scope and honesty
+| Reads | Notes |
+|---|---|
+| COBOL source | Fixed format. Free format files are listed as not parsed. |
+| Copybooks | Expanded, so a statement inside a copybook counts for every program that copies it. |
+| CICS | `EXEC CICS` LINK, XCTL and file I/O. The CICS system definition (CSD) gives entry points and the CICS file to dataset mapping. |
+| JCL and PROCs | Steps, DDs, PROC expansion, symbolic parameters, DD overrides. |
+| VSAM | Through `SELECT ... ASSIGN`, `OPEN` modes, CICS file I/O and JCL DDs. |
+| Control-M | XML job definitions with conditions. |
+| Shell wrappers | Scripts that name JCL files. |
+| DB2 tables | Table references in `EXEC SQL` become data edges. |
 
-This plugin assesses. It does not port your code. It will tell you, in writing, where its
-own analysis is low-confidence — static analysis of a 30-year-old batch system has real
-limits, and a tool that hides those limits is worse than no tool.
+Anything else that looks like a scheduler is listed as not parsed. It is never skipped in silence.
 
-Outputs are written to `./modernization-assessment/` as Markdown. Nothing is sent anywhere.
+## Where it is weak
+
+Read this before you trust it.
+
+- **It has been measured on one open source benchmark**, AWS CardDemo. The benchmark's answer key was
+  labeled by Claude subagents reading the source. It has not been confirmed by a mainframe
+  engineer. The scores in `evals/RESULTS.md` are provisional until that happens.
+- **A computed call stays unresolved.** The extractor resolves a variable target only from `VALUE`
+  clauses and literal `MOVE`s in the same program. A menu table or a value from a queue is out of its
+  reach. It says so, and the dead code register keeps everything that call could reach in the
+  unknown bucket.
+- **A called subprogram gets no DDs from its caller.** In a real run its files belong to the calling
+  step. The extractor does not model that.
+- **Utility steps take their dataset mode from `DISP`.** An IDCAMS `REPRO` target is `DISP=SHR` and
+  is read as a read. In-stream control cards are not parsed.
+- **JCL `IF/THEN/ELSE` and `COND=` are not modeled.** Step order is file order.
+- **`RETURN TRANSID`, `START`, `SEND MAP`, IMS and MQ are not edges.**
+- **COPY `REPLACING` is not applied.**
+- **The judgment is Claude's.** Wave cuts and risk scores are opinions with cited reasons. Two runs
+  on the same graph can differ. `evals/RESULTS.md` says by how much.
+
+## Privacy
+
+Outputs stay local. Nothing leaves beyond your own Claude session.
+
+The extractor makes no network calls. It is Python standard library only. Claude reads the parts of
+your code that it needs through your Claude session, the way it does in any Claude Code work.
+
+## Evals
+
+`evals/RESULTS.md` holds the scorecard. `evals/README.md` explains how to run it. The sample
+assessment of CardDemo is in `examples/carddemo/`.
+
+## Roadmap
+
+Not supported today: RPG, Oracle ADF, PL/SQL, .NET Framework, and Java. Each needs its own extractor
+and its own benchmark. None is claimed until it has been measured.
 
 ## About
 
-Built and maintained by [Sparq](https://teamsparq.com), a Claude Partner Network services
-partner. The method here is the front end of engagements we run; we open-sourced the
-assessment because the assessment is the part everyone should be able to do for free.
+Sparq is a Select partner in the Claude Partner Network Services Track.
 
-Issues and PRs welcome. Apache-2.0.
+Issues and pull requests are welcome. Apache-2.0. See `LICENSE` and `NOTICE`.

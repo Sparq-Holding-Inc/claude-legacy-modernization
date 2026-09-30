@@ -1,0 +1,14 @@
+Legacy Modernization Assessor
+Copyright 2026 Sparq
+
+Licensed under the Apache License, Version 2.0. See LICENSE.
+
+This repository refers to and analyzes AWS CardDemo:
+https://github.com/aws-samples/aws-mainframe-modernization-carddemo
+Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+CardDemo is licensed under the Apache License, Version 2.0.
+
+CardDemo source is not copied into this repository. The sample assessment in
+examples/carddemo/ cites and analyzes its source files. The file
+evals/carddemo/truth.json labels relationships in that source. Both are
+derived from CardDemo and carry its attribution.
