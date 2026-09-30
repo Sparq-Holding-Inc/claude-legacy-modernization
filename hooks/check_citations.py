@@ -21,6 +21,9 @@ attempt counter, and the stop_hook_active flag as well.
 On a clean check it removes the marker.
 
 Python standard library only. Any error inside the hook lets the stop through.
+
+Claude can run the same checks before it finishes:
+    python3 check_citations.py --check modernization-assessment [--wave]
 """
 
 import datetime
@@ -251,7 +254,28 @@ def main():
     return 0
 
 
+def self_check(argv):
+    """python3 check_citations.py --check DIR [--target PATH]  (same checks, for Claude to run first)"""
+    d = argv[argv.index("--check") + 1]
+    target = argv[argv.index("--target") + 1] if "--target" in argv else os.path.dirname(os.path.abspath(d))
+    marker = {"require": ["graph.json", "waves.json", "dead-code.json", "risks.json"]}
+    if "--wave" in argv:
+        marker = {"require": []}
+    res = Resolver([target, os.path.dirname(os.path.abspath(d)), os.getcwd()])
+    problems = []
+    for name in sorted(os.listdir(d)):
+        if name.endswith(".md"):
+            problems += check_markdown(os.path.join(d, name), res)
+    problems += check_json(d, marker, res)
+    for p in problems[:100]:
+        print("PROBLEM", p)
+    print("citation check: %s" % ("%d problem(s)" % len(problems) if problems else "clean"))
+    return 1 if problems else 0
+
+
 if __name__ == "__main__":
+    if "--check" in sys.argv:
+        sys.exit(self_check(sys.argv))
     try:
         sys.exit(main())
     except Exception as exc:  # a broken hook must never trap the user

@@ -103,16 +103,22 @@ def main():
         print("Baseline already fails: %s. Fix that first." % baseline)
         return 2
     print("baseline: all fixtures pass\n")
-    blind = []
+    blind, table = [], []
     for mut in MUTATIONS:
         failed = run(runner, load_fresh(mut))
         tag = ", ".join(c.split("-")[0] for c in failed) if failed else "NOT CAUGHT"
+        table.append({"mutation": mut[0], "caught_by": [c.split("-")[0] for c in failed],
+                      "equivalent": len(mut) > 4})
         print("%-46s %s" % (mut[0], tag))
         if not failed and len(mut) > 4 and mut[4] == "equivalent":
             print("    (equivalent mutant, not counted as a blind spot)")
         elif not failed:
             blind.append(mut[0])
     load_fresh(None)
+    import json
+    os.makedirs(os.path.join(HERE, "scorecard"), exist_ok=True)
+    json.dump({"mutations": table, "blind_spots": blind}, open(os.path.join(HERE, "scorecard", "mutation.json"), "w"),
+              indent=1)
     eq = sum(1 for m in MUTATIONS if len(m) > 4)
     print("\n%d mutations: %d caught, %d equivalent, %d blind spots" %
           (len(MUTATIONS), len(MUTATIONS) - len(blind) - eq, eq, len(blind)))

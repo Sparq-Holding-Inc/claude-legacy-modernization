@@ -68,7 +68,9 @@ Now read `graph.json`. Start with the `analysis` block. It already holds:
 - `unresolved_dynamic`: every computed call the script could not resolve
 - `sccs`, `self_recursive`, `articulation_points`, `god_modules`, `fan_in`, `fan_out`
 - `data_hubs`: the datasets with the most programs attached
-- `unscheduled_jobs`, `warnings`
+- `unscheduled_jobs`, `warnings` (read the warnings: a missing scheduler is a gap, not a detail)
+- `structure_basis`: fan-in, cycles, articulation points and god modules are computed over reachable
+  programs only, so dead callers do not distort them
 
 Also read `unparsed` and `meta.limits`. A scheduler or source file the extractor could not parse
 is not a footnote. It goes into Open Questions.
@@ -140,6 +142,9 @@ Cut the system into waves. A wave is valid only if all four hold:
 - it has a testable boundary (you can assert equivalence at its edge)
 - it delivers something a business stakeholder can name
 
+Do not invent waves. A system that is one job and a handful of programs is one wave. Say so, and
+say what you would cut if it were ten times larger.
+
 Order the waves by this rule: **earliest waves maximize learning per unit of blast radius.** Not by
 business value. That is the instinct, and it is wrong here. The first wave proves the toolchain,
 the test harness, and the team's port velocity on something that will not take down the month-end
@@ -152,8 +157,10 @@ Invoke the `migration-risk-assessor` agent first. Give it the path to `graph.jso
 scoping answers. It writes `modernization-assessment/risks.json`. Use its quadrants to order the
 waves.
 
-Write `03-waves.md` and `waves.json`. Every unit in `waves.json` must be a node id in
-`graph.json`. Every wave needs `evidence` or `"inference": true`.
+Write `03-waves.md` and `waves.json`. A unit is a program, a JCL job (`job:`), a proc, or a scheduler
+job. Steps, copybooks and datasets move with their owner, so do not list them. Every unit must be a
+node id in `graph.json`. Every wave needs `evidence` or `"inference": true`. Once the plan exists, set
+the `wave` field on each unit in `risks.json`.
 
 ```json
 {
@@ -216,6 +223,10 @@ Three buckets, never two. The extractor computed the candidates. Start from `dea
 bound a computed call (the value comes from a table you can read), say so in the reason, and leave
 the program in unknown.
 
+Dormant means old, not unused. If a live program calls a dormant program unconditionally, it very
+likely runs. Say that in the reason. Keep the extractor's dormant list as it is, and never propose
+deletion on a date alone.
+
 If the user gave you telemetry, use it to firm up dormant and unknown. If not, every claim is
 provisional and you say so.
 
@@ -253,15 +264,18 @@ All three keys must be present, even when a list is empty. `telemetry` is `none`
 ## Finish
 
 Hand off to the `behavioral-equivalence` skill and write `06-test-strategy.md`. An assessment
-without a definition of "correct" is a wish.
+without a definition of "correct" is a wish. If the tree holds no datasets, say the oracle has to
+come from job output, logs and reports, and say what you would ask the client to supply.
 
-Then check your work:
+Then check your work. The first command checks the four JSON files. The second checks every citation
+in the markdown, the same way the stop hook will:
 
 ```
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/schema.py" validate-dir modernization-assessment
+python3 "${CLAUDE_PLUGIN_ROOT}/hooks/check_citations.py" --check modernization-assessment
 ```
 
-Fix every error. Then mark the run done, so the citation check runs when you finish:
+Fix every problem. Then mark the run done, so the citation check runs when you finish:
 
 ```
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/marker.py" done

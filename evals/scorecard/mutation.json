@@ -1,0 +1,239 @@
+{
+ "mutations": [
+  {
+   "mutation": "string literals not masked",
+   "caught_by": [
+    "01",
+    "03",
+    "05",
+    "11",
+    "12",
+    "15",
+    "17",
+    "18",
+    "20",
+    "22"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "COPY never expanded",
+   "caught_by": [
+    "05",
+    "06"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "quoted COPY names unsupported",
+   "caught_by": [
+    "17"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "columns 73 to 80 read as code",
+   "caught_by": [
+    "15"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "comment indicator ignored",
+   "caught_by": [
+    "15"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "dash continuation ignored",
+   "caught_by": [
+    "18"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "constants not resolved",
+   "caught_by": [
+    "03"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "OPEN OUTPUT read as read",
+   "caught_by": [
+    "06",
+    "07",
+    "16"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "layout from READ INTO and WRITE FROM off",
+   "caught_by": [
+    "05"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "layout from FD COPY off",
+   "caught_by": [
+    "06"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "PROC DD overrides ignored",
+   "caught_by": [
+    "16"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "symbolic parameters not substituted",
+   "caught_by": [
+    "16"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "repeated step names not suffixed",
+   "caught_by": [
+    "08"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "Control-M deletions counted as producers",
+   "caught_by": [
+    "19"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "shell comments read as submits",
+   "caught_by": [
+    "10"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "step order edges off",
+   "caught_by": [
+    "08",
+    "16"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "contract edges off",
+   "caught_by": [
+    "05",
+    "06",
+    "07"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "contract confidence always high",
+   "caught_by": [
+    "07"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "computed calls dropped",
+   "caught_by": [
+    "02",
+    "03",
+    "13",
+    "18",
+    "23"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "CSD entry points off",
+   "caught_by": [
+    "05"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "git dates off",
+   "caught_by": [
+    "12"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "subscripted names resolved like plain names",
+   "caught_by": [
+    "23"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "EXEC SQL text visible to CALL scan",
+   "caught_by": [
+    "21"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "CICS DELETE read as read",
+   "caught_by": [
+    "22"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "CICS REWRITE read as read",
+   "caught_by": [
+    "22"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "OPEN I-O read as read",
+   "caught_by": [
+    "22"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "generation and member suffix kept on DSN",
+   "caught_by": [
+    "24"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "temporary datasets kept (equivalent: a later guard drops any name still holding an ampersand)",
+   "caught_by": [],
+   "equivalent": true
+  },
+  {
+   "mutation": "dead code: dynamic calls ignored",
+   "caught_by": [
+    "13"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "dead code: dormancy off",
+   "caught_by": [
+    "12"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "dead code: no entry point guard",
+   "caught_by": [
+    "20"
+   ],
+   "equivalent": false
+  }
+ ],
+ "blind_spots": []
+}

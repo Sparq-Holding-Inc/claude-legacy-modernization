@@ -190,8 +190,13 @@ def analyze(nodes, edges, as_of, dormant_years=5):
                         dormant.append(c)
                         reasons[c] = "reachable, last modified %s, older than %d years" % (lm[:10], dormant_years)
 
-    progs = sorted(n["id"] for n in nodes if n["unit_type"] in schema.PROGRAM_TYPES)
+    all_progs = sorted(n["id"] for n in nodes if n["unit_type"] in schema.PROGRAM_TYPES)
+    # Structure is computed over programs a job or transaction can actually reach. A dead caller must
+    # not raise a program's fan-in or make it look like a wave boundary.
+    progs = [p for p in all_progs if p in reach] if entries else all_progs
     pset = set(progs)
+    basis = ("programs reachable from an entry point (%d of %d)" % (len(progs), len(all_progs))
+             if entries else "all programs (no entry points were found)")
     fan_out, fan_in = collections.defaultdict(set), collections.defaultdict(set)
     call_succ = collections.defaultdict(list)
     for e in edges:
@@ -223,7 +228,7 @@ def analyze(nodes, edges, as_of, dormant_years=5):
 
     hubs = collections.defaultdict(lambda: {"writers": set(), "readers": set()})
     for e in edges:
-        if e["kind"] == "data" and e["dst"] in ds_ids:
+        if e["kind"] == "data" and e["dst"] in ds_ids and (e["src"] in pset or e["src"].startswith("step:")):
             if e["mode"] in ("write", "read_write"):
                 hubs[e["dst"]]["writers"].add(e["src"])
             if e["mode"] in ("read", "read_write"):
@@ -233,6 +238,10 @@ def analyze(nodes, edges, as_of, dormant_years=5):
 
     sched = [n["id"] for n in nodes if n["unit_type"] == "scheduler_job"]
     unscheduled = []
+    jobs = [n for n in nodes if n["unit_type"] == "jcl_job" and n.get("path")]
+    if jobs and not sched:
+        warnings.append("%d JCL job(s) are in the tree but no scheduler artifact was parsed. The order jobs run "
+                        "in across jobs is unknown. Ask for the scheduler export." % len(jobs))
     if sched:
         called = {e["dst"] for e in edges if e["kind"] == "call" and e["src"].startswith("sch:")}
         unscheduled = sorted(n["id"] for n in nodes if n["unit_type"] == "jcl_job" and n["id"] not in called
@@ -248,6 +257,7 @@ def analyze(nodes, edges, as_of, dormant_years=5):
         "dead_code_candidates": {"unreachable": unreachable, "dormant": dormant, "unknown": unknown},
         "dead_code_reasons": reasons,
         "unresolved_dynamic": dynamic,
+        "structure_basis": basis,
         "fan_in": {k: v for k, v in fi.items() if v},
         "fan_out": {k: v for k, v in fo.items() if v},
         "god_modules": god,

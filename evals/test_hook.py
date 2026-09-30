@@ -36,7 +36,7 @@ def project():
 
 
 def marker(proj, state="done", mode="wave"):
-    subprocess.run([sys.executable, MARKER, "start", "--target", proj, "--mode", mode],
+    subprocess.run([sys.executable, MARKER, "start", "--scope", proj, "--mode", mode],
                    cwd=proj, check=True, capture_output=True)
     if state == "done":
         subprocess.run([sys.executable, MARKER, "done"], cwd=proj, check=True, capture_output=True)

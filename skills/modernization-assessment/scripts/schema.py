@@ -333,10 +333,14 @@ def validate_waves(w, graph=None):
     if sorted(x for x in numbers if _is_int(x)) != list(range(1, len(waves) + 1)):
         errs.append("waves: wave numbers must be 1..%d with no gaps" % len(waves))
     if graph is not None:
-        known = {n["id"] for n in graph.get("nodes", [])}
+        kinds = {n["id"]: n.get("unit_type") for n in graph.get("nodes", [])}
+        movable = set(PROGRAM_TYPES) | {"jcl_job", "proc", "scheduler_job"}
         for u in placed:
-            if u not in known:
+            if u not in kinds:
                 errs.append("waves: unit %s is not a node in graph.json" % u)
+            elif kinds[u] not in movable:
+                errs.append("waves: unit %s is a %s. A wave holds programs, JCL jobs, procs or scheduler jobs. "
+                            "Steps, copybooks and datasets move with their owner." % (u, kinds[u]))
         comp = _scc_of(graph)
         by_comp = {}
         for u, n in placed.items():

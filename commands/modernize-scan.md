@@ -11,8 +11,9 @@ Arguments you were given: `$ARGUMENTS`
 
 ## Read the arguments
 
-- The first word that does not start with `--` is the scope. If there is none, assess the current
-  directory.
+- The scope is the first argument that is not a flag and is not the value of a flag. In
+  `--target refactor`, the word `refactor` is a value, not a scope. If there is no scope, assess the
+  current directory.
 - `--target` is the target state: `rehost`, `replatform`, `refactor` or `rewrite`.
 - `--must-not-break` is a quoted list of what must not break.
 - `--telemetry` says whether runtime telemetry exists: `none`, `partial` or `provided`.
@@ -31,9 +32,10 @@ In a non-interactive session nobody can answer. Use these defaults and say so in
 ## Run
 
 1. Once the scope is settled, start the run marker. It turns on the citation check for this run only.
+   `<scope>` is the folder path, or `.` when none was given. It is not the target state.
 
    ```
-   python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/marker.py" start --target <scope>
+   python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/marker.py" start --scope <scope>
    ```
 
 2. Follow the `modernization-assessment` skill from Step 0 to Finish. Write every artifact to
@@ -49,7 +51,7 @@ The full artifacts must already exist in `./modernization-assessment/`. If `grap
 missing, say so and stop. Start the marker with `--mode wave`:
 
 ```
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/marker.py" start --target <scope> --mode wave
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/marker.py" start --scope <scope> --mode wave
 ```
 
 Read `graph.json`, `waves.json` and `risks.json`. Write `07-wave-N-plan.md` for wave N only, with

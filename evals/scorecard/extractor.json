@@ -155,5 +155,139 @@
    154,
    154
   ]
+ },
+ "carddemo": {
+  "seconds": 0.5,
+  "stats": {
+   "call": {
+    "tp": 234,
+    "fp": 0,
+    "fn": 0
+   },
+   "include": {
+    "tp": 318,
+    "fp": 0,
+    "fn": 0
+   },
+   "data": {
+    "tp": 142,
+    "fp": 0,
+    "fn": 0
+   },
+   "contract": {
+    "tp": 50,
+    "fp": 0,
+    "fn": 0
+   },
+   "temporal": {
+    "tp": 100,
+    "fp": 0,
+    "fn": 0
+   }
+  },
+  "diffs": {
+   "call": {
+    "missing": [],
+    "extra": [],
+    "confidence": []
+   },
+   "include": {
+    "missing": [],
+    "extra": [],
+    "confidence": []
+   },
+   "data": {
+    "missing": [],
+    "extra": [],
+    "confidence": []
+   },
+   "contract": {
+    "missing": [],
+    "extra": [],
+    "confidence": []
+   },
+   "temporal": {
+    "missing": [],
+    "extra": [],
+    "confidence": []
+   }
+  },
+  "schema_errors": [],
+  "truth_edges": 844,
+  "graph_edges_in_scope": 844,
+  "graph_edges_total": 1224,
+  "entry_programs": {
+   "truth": [
+    "COACTUPC",
+    "COACTVWC",
+    "COADM01C",
+    "COBIL00C",
+    "COCRDLIC",
+    "COCRDSEC",
+    "COCRDSLC",
+    "COCRDUPC",
+    "COMEN01C",
+    "CORPT00C",
+    "COSGN00C",
+    "COTRN00C",
+    "COTRN01C",
+    "COTRN02C",
+    "COUSR00C",
+    "COUSR01C",
+    "COUSR02C",
+    "COUSR03C"
+   ],
+   "graph": [
+    "COACTUPC",
+    "COACTVWC",
+    "COADM01C",
+    "COBIL00C",
+    "COCRDLIC",
+    "COCRDSEC",
+    "COCRDSLC",
+    "COCRDUPC",
+    "COMEN01C",
+    "CORPT00C",
+    "COSGN00C",
+    "COTRN00C",
+    "COTRN01C",
+    "COTRN02C",
+    "COUSR00C",
+    "COUSR01C",
+    "COUSR02C",
+    "COUSR03C"
+   ],
+   "match": true
+  },
+  "ca7_reported_unparsed": true,
+  "evidence_resolves": [
+   2134,
+   2134
+  ],
+  "evidence_overlap_with_truth": {
+   "call:total": 234,
+   "call:overlap": 234,
+   "contract:total": 50,
+   "contract:overlap": 50,
+   "data:total": 142,
+   "data:overlap": 142,
+   "include:total": 318,
+   "include:overlap": 318,
+   "temporal:total": 100,
+   "temporal:overlap": 100
+  },
+  "unresolved_dynamic": 28,
+  "dead_code_counts": {
+   "unreachable": 2,
+   "dormant": 0,
+   "unknown": 10
+  },
+  "unparsed": [
+   {
+    "kind": "scheduler",
+    "file": "app/scheduler/CardDemo.ca7",
+    "reason": "CA-7 listing, not Control-M XML, not parsed"
+   }
+  ]
  }
 }
