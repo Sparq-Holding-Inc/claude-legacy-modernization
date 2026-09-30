@@ -1,27 +1,36 @@
 {
-  "target_state": "refactor",
-  "waves": [
+ "target_state": "refactor",
+ "waves": [
+  {
+   "wave": 1,
+   "family": "batch-utility",
+   "name": "Nightly batch cycle",
+   "units": [
+    "job:JOBA",
+    "job:JOBB",
+    "job:JOBC",
+    "sch:scripts/nightly.sh"
+   ],
+   "rationale": "All three JCL jobs run only IEFBR14 with no DD statements, and no dataset links them to anything else, so the seed family batch-utility holds and one wave is a sound cut. It carries the whole must-not-break nightly cycle: the wrapper submits JOBA and then JOBB. The wave passes the four tests. The wrapper can be swapped while the old one stays as the fallback. Rollback is reverting that swap. The boundary is job order and return codes. A stakeholder can name it as the nightly cycle on the new platform. The weak test is the boundary, because the tree shows no output to compare. JOBC is carried here only because the extractor counts every unscheduled job as an entry point. The wrapper comment calls it retired, so no port work is planned for it until the client confirms.",
+   "unblocks": "Nothing else in this tree depends on it: no data, contract or call edge reaches these jobs from another unit. In sequencing terms it is a chore, and no later wave exists to unblock. Its value is retiring the shell wrapper and leaving an order and return code harness for whatever the client adds to the tree later.",
+   "blast_radius": "high",
+   "confidence": "low",
+   "evidence": [
     {
-      "wave": 1,
-      "family": "batch-utility",
-      "name": "Nightly batch cycle and its wrapper",
-      "units": [
-        "job:JOBA",
-        "job:JOBB",
-        "job:JOBC",
-        "sch:scripts/nightly.sh"
-      ],
-      "rationale": "The whole tree is one family. All three jobs run only IEFBR14 with no DD statements, so no dataset, copybook or application program is shared and no call, data or contract edge crosses the wave. It is a sound wave on those facts. It is not a proven one: the tree shows no work the jobs do, so a porter is moving an order (JOBA before JOBB, held only by line order in the wrapper) and not any logic. JOBC is in the wave because the extractor counts every job as an entry point. The wrapper calls it retired, so its task is confirm-and-retire, not port.",
-      "unblocks": "Nothing else in this tree. This wave is the whole tree, so it is a chore that carries the must-not-break nightly cycle. It proves the target scheduler can reproduce the JOBA-then-JOBB order.",
-      "blast_radius": "medium",
-      "confidence": "low",
-      "evidence": [
-        {"file": "jcl/JOBA.jcl", "line": 1},
-        {"file": "jcl/JOBB.jcl", "line": 1},
-        {"file": "jcl/JOBC.jcl", "line": 1}
-      ]
+     "file": "jcl/JOBA.jcl",
+     "line": 1
+    },
+    {
+     "file": "jcl/JOBB.jcl",
+     "line": 1
+    },
+    {
+     "file": "jcl/JOBC.jcl",
+     "line": 1
     }
-  ],
-  "unassigned": [],
-  "deviations": []
+   ]
+  }
+ ],
+ "unassigned": [],
+ "deviations": []
 }

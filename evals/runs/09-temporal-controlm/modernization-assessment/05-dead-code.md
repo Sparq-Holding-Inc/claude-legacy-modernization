@@ -1,23 +1,24 @@
 # 05 Dead code
 
-Telemetry: `none`. Every claim in this file is provisional.
+Telemetry: none. Every dead-code claim in this file is provisional, and here that means the register is empty because nothing
+could be tested, not because everything is live. The candidates the extractor computed are in `05a-dead-code-candidates.md`.
+The register is in `modernization-assessment/dead-code.json:1-6`.
 
-## Result
+## The three buckets
 
-| Bucket | Count | Confidence | Evidence |
+| Bucket | Count | Reason | Evidence |
 |---|---|---|---|
-| Unreachable | 0 | low | `analysis` field `dead_code_candidates` |
-| Reachable but dormant | 0, and not measured | low | `analysis` field `warnings` |
-| Unknown | 0 | low | `analysis` field `dead_code_candidates` |
+| Unreachable | 0 | All 7 nodes are reachable from an entry point. Four entry points exist: JOBA, JOBB and their two scheduler entries. | `app/scheduler/nightly.xml:4`, `app/scheduler/nightly.xml:8`, `app/jcl/JOBA.jcl:1`, `app/jcl/JOBB.jcl:1` |
+| Reachable but dormant | 0, not measured | The extractor could not read last-modified dates, because the tree is not a git repository. The dormant bucket was not computed. An empty list here means not measured. | analysis: `warnings`, third entry |
+| Unknown | 0 | No computed call exists, so nothing can be reached by a computed call. | analysis: `unresolved_dynamic` is empty |
 
-## Read this before trusting the empty lists
+## What this does and does not show
 
-- **Dormancy was not computed.** The tree is not a git repository, so no unit has a last-modified date. The extractor's warning says an empty dormant list means not measured. An empty list here is not a finding that nothing is old. `analysis` field `warnings`
-- **There is nothing to be unreachable.** All four scheduler and JCL units are entry points, and the two steps belong to their jobs (`analysis` field `entry_points`). The tree holds no program, copybook or proc, so no unit lacks a caller.
-- **No computed calls exist** (`analysis` field `unresolved_dynamic`), so the unknown bucket is empty for that reason and not because a program was cleared.
-- **No unscheduled jobs.** Both JCL jobs are named by a scheduler entry (`analysis` field `unscheduled_jobs`, `app/scheduler/nightly.xml:4`, `app/scheduler/nightly.xml:8`). Whether those entries still run in production is unknown without telemetry. Job history would show it.
-- **A condition with no consumer.** JOBB-DONE is posted and no job in the file waits on it. This is not dead code, because a consumer may sit outside the tree. It is worth asking about. `app/scheduler/nightly.xml:11`, inference
-
-## What would firm this up
-
-12 months of job history from the scheduler and from SMF: did JOBA and JOBB run every night, with what return codes. Then the dormant question can be answered for the two jobs.
+- There is no COBOL in the tree, so there is no program that could be dead (`modernization-assessment/01-inventory.md:14-17`). The only
+  program named is IEFBR14, a system utility outside the tree (`app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`).
+- Both jobs are named by the scheduler, so neither appears in `unscheduled_jobs` (analysis field, empty). Whether either job still runs in production is a
+  separate question. A scheduler entry that exists is not proof that the job runs. That is a question for the client (see the open questions in `00-summary.md`).
+- One output has no reader inside the tree: condition JOBB-DONE (`app/scheduler/nightly.xml:11`). It is a condition, not a node, so the extractor
+  does not list it as dead. It may feed a folder we were not given (inference).
+- Nothing here can be proposed for deletion. With telemetry `none` and no dates, the right next step is to ask for job run history from the scheduler
+  (the last 12 months), and only then revisit this register.

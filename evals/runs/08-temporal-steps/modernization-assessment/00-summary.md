@@ -2,56 +2,91 @@
 
 ## Scoping answers
 
-| Question | Answer | Source |
+| Question | Answer | Where it came from |
 |---|---|---|
-| Target state | refactor | flag `--target refactor` |
-| What must not break | the nightly batch cycle | flag `--must-not-break` |
-| Runtime telemetry | none | flag `--telemetry none` |
+| Scope | `.` (the work folder) | no scope argument was given |
+| Target state | refactor | the `--target refactor` flag |
+| Must not break | "the nightly batch cycle" | the `--must-not-break` flag |
+| Runtime telemetry | none | the `--telemetry none` flag |
 
-All three came as flags. **No defaults applied.**
+All three answers came as flags, so **no defaults applied**. The run was non-interactive and asked nothing.
 
-With no telemetry, every dead-code claim is provisional. Dormancy was not measured at all, because the
-tree has no last-modified dates.
+Because telemetry is none, every dead-code claim is provisional.
 
-## Result
+## What the tree is
 
-| Finding | Value | Confidence | Evidence |
-|---|---|---|---|
-| Wave count | 1 | low | `modernization-assessment/waves.json:2` |
-| Size of the tree | 3 COBOL programs, 1 JCL job, 0 copybooks, 0 datasets, 0 schedulers | high | `app/jcl/SEQJOB.jcl:1` |
-| Dead code | none unreachable, none unknown, dormant not measured | low | `modernization-assessment/dead-code.json:1` |
+Three COBOL programs and one JCL job, with no copybook, no dataset, no scheduler and no CICS definition
+(`graph.json` field `meta.files_seen`). The extractor found
+11 edges: 4 call, 4 include, 3 temporal, and no data or contract edge. There is one entry point,
+`job:SEQJOB` (`app/jcl/SEQJOB.jcl:1`). Each program holds only `GOBACK` (`app/cbl/PGMA.cbl:4`,
+`app/cbl/PGMB.cbl:4`, `app/cbl/PGMC.cbl:4`). The job runs them in order and then runs IEFBR14
+(`app/jcl/SEQJOB.jcl:2`, `app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:4`, `app/jcl/SEQJOB.jcl:5`).
 
-## Single largest risk
+## Waves
 
-The order of the nightly batch cycle lives only in the file order of `SEQJOB`, and that job uses the
-step name STEP2 twice (`app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:5`). A repeated step name is a JCL
-error on z/OS (inference), so the job may not run as written, and any restart or condition that names
-STEP2 is ambiguous. No scheduler was parsed to say what the real order is. A close second: all three
-programs are empty (`app/cbl/PGMA.cbl:4`), so the real logic, if any, is outside this tree.
+**One wave.** It holds `PGMA`, `PGMB`, `PGMC` and `job:SEQJOB`, target state refactor, with no deviation from the
+extractor's seed (`modernization-assessment/waves.json:1`). Nothing in the tree gives a reason to cut it. The
+argument is in `03-waves.md`.
 
-## Open Questions
+## The single largest risk
 
-For the client's engineers.
+**The only behavior the tree defines is the order of the steps in SEQJOB, and that order is ambiguous.** The step
+name STEP2 is used twice: for PGMB on line 3 and for IEFBR14 on line 5, after STEP3
+(`app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:5`). The extractor orders the steps by file position and calls the
+second one `STEP2#2`, which is its own label. In JCL a step name is meant to be unique, so the job may not run as
+written (inference from JCL rules). Any restart at STEP2, or any `COND=` that names it, is ambiguous. The client
+named the nightly batch cycle as the thing that must not break, and this job is the only candidate for it. A port
+that gets the order or the failure handling wrong would break the cycle, and with no dataset, log or scheduler in
+the tree, there is no oracle in it to catch that (`06-test-strategy.md`).
 
-1. Is `SEQJOB` the nightly batch cycle? Nothing in the tree names it. Which scheduler runs it, and can you send the export? None was parsed (`analysis` field `warnings`).
-2. Line 5 of `SEQJOB` repeats the step name STEP2 and runs IEFBR14 (`app/jcl/SEQJOB.jcl:5`). Is that a copy error? What order do you intend, and does anything restart or test on STEP2?
-3. PGMA, PGMB and PGMC each contain only GOBACK (`app/cbl/PGMA.cbl:4`, `app/cbl/PGMB.cbl:4`, `app/cbl/PGMC.cbl:4`). Are these stubs? Where is the real logic, and where are the datasets? The job has no DD statements (`app/jcl/SEQJOB.jcl:2`).
-4. Can you supply archived job logs, return codes and SYSOUT for SEQJOB over 13 months or more? This is the oracle (see `modernization-assessment/06-test-strategy.md`). Can the old system stay up for a parallel run?
-5. Which programs ran in the last 12 months? With no telemetry and no git dates, dormancy is not measured. Can you send SMF or scheduler history?
-6. Does anything outside this tree call these programs or submit SEQJOB, such as a CICS transaction, an operator command or a shell wrapper? The extractor reads only Control-M XML and shell wrappers that name JCL files.
-7. Are there PROCs, INCLUDE members, IF/THEN/ELSE or COND rules that did not come with this tree? The extractor does not follow nested PROCs or INCLUDE members, and it does not model COND (`modernization-assessment/graph.json:1`, field `meta.limits`).
+A close second is that the tree may not be the real system. Every program is a four line stand-in, and no
+datasets are named. If so, every finding here is void until the client supplies the real source.
+
+## Open Questions for the client's engineers
+
+1. **Which jobs make up "the nightly batch cycle", and is SEQJOB one of them?** Nothing in the tree carries a
+   schedule, and the extractor parsed no scheduler (`analysis` field `warnings`). SEQJOB is the only job in the
+   tree, so it is the only candidate. I did not treat the mapping as settled. Please send the scheduler export
+   (Control-M XML, a calendar, or the shell wrappers) and the job order across jobs.
+2. **Is `app/jcl/SEQJOB.jcl` the production JCL? Why is the step name STEP2 used twice?**
+   (`app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:5`.) Does the job run as written today? What order do the steps run
+   in? Do any restart runbooks, `COND=` cards or other jobs refer to STEP2 by name?
+3. **Are PGMA, PGMB and PGMC the real programs?** Each holds only `GOBACK` (`app/cbl/PGMA.cbl:4`,
+   `app/cbl/PGMB.cbl:4`, `app/cbl/PGMC.cbl:4`). If they are stand-ins, please send the real source, the copybooks
+   they use and the files they read and write. The job has no DD statement at all (`app/jcl/SEQJOB.jcl:2`).
+4. **What does the IEFBR14 step do?** It runs last and has no DD statement in this copy
+   (`app/jcl/SEQJOB.jcl:5`). What did it allocate or delete, and did anything depend on it?
+5. **Can you send run history for SEQJOB for at least 12 months?** Job logs, return codes and step names, with
+   month-end and fiscal year-end nights. With telemetry none, the dead-code register is provisional, and this is
+   also the oracle for `06-test-strategy.md`.
+6. **What outputs does the nightly cycle leave behind, and who reads them?** Archived generations, reports,
+   partner files. The tree shows none, so the behavioral oracle has to come from there.
+7. **When were these files last changed?** The tree is not a git repository, so no unit has a last-modified date
+   and the dormant bucket was not measured (`analysis` field `warnings`). Please send change dates from the source
+   library.
+8. **Is there JCL logic the extractor cannot see?** It does not model `IF/THEN/ELSE` or `COND=`, and reads step
+   order as file order (`meta.limits`). This copy has none (`app/jcl/SEQJOB.jcl:2`), but production may. Are
+   there PROCs, INCLUDE members, stored procedures, IMS, DB2 or MQ pieces outside this tree?
 
 ## Not parsed, and limits that touch this system
 
-Nothing was skipped: `unparsed` is empty (`analysis` and `modernization-assessment/graph.json:1`). These `meta.limits` touch this system:
+Nothing was listed as not parsed (`unparsed` in `graph.json` is empty). These extractor limits touch this
+system (`meta.limits` in `graph.json`):
 
-- IF/THEN/ELSE and COND= in JCL are not modeled. Step order is file order.
-- Only Control-M XML and shell wrappers that name JCL files are read as schedulers. No scheduler was found.
-- A called subprogram gets no DDs from its caller's step, and DCB, LRECL and RECFM are not read.
-- Nested PROC calls and INCLUDE members are not followed.
+- `IF/THEN/ELSE` and `COND=` are not modeled, and step order is file order. This touches SEQJOB directly.
+- Only Control-M XML and shell wrappers are read as schedulers. None is in the tree, so order across jobs is
+  unknown.
+- `DCB`, `LRECL` and `RECFM` are not read. No record layout is known.
+- `SORT` and most in-stream cards are not read. None is in this job.
+- The extractor reads only COBOL, copybooks, JCL, PROCs, CICS definitions, Control-M XML and shell wrappers.
+  Anything else is invisible.
 
-## Method notes
+The other limits (copy replacing, variable call targets, subprogram DDs, nested PROCs, CICS transaction chains,
+LINK and XCTL, free format COBOL) do not touch this tree. It has no copybook, no call between programs, no PROC
+and no CICS.
 
-I did the `migration-risk-assessor` work inline, and wrote `modernization-assessment/risks.json`. I
-skipped the `dependency-cartographer`, since `graph.json` has no unresolved computed call and no low
-or medium confidence edge.
+## Files in this assessment
+
+- `01-inventory.md`, `02a-edge-tables.md`, `03a-wave-seed.md`, `05a-dead-code-candidates.md`: generated facts
+- `02-coupling.md`, `03-waves.md`, `04-estimate.md`, `05-dead-code.md`, `06-test-strategy.md`: the argument
+- `graph.json`, `waves.json`, `risks.json`, `dead-code.json`: the data

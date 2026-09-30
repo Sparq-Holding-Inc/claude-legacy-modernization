@@ -2,73 +2,66 @@
 
 ## Scoping answers
 
-| Question | Answer | Source |
+- Target state: `refactor` (given as a flag).
+- Must not break: "the nightly batch cycle" (given as a flag).
+- Runtime telemetry: `none` (given as a flag). Every dead-code claim is provisional.
+- Scope: `.` (the work folder). It holds 3 source files: `app/jcl/MAINJOB.jcl`, `app/cbl/PGMMAIN.cbl`
+  and `app/cbl/HIDDEN01.cbl`.
+- Defaults: no defaults applied. All three answers came as flags.
+
+## What the tree shows
+
+| Finding | Confidence | Evidence |
 |---|---|---|
-| Target state | refactor | flag `--target refactor` |
-| What must not break | the nightly batch cycle | flag `--must-not-break` |
-| Runtime telemetry | none. Every dead-code claim is provisional. | flag `--telemetry none` |
-
-All three came as flags, so **no defaults applied**. The run was non-interactive, and nothing was
-asked.
-
-## What was assessed
-
-Two COBOL programs and one JCL job, 16 lines in all (`analysis`, field `node_counts`). One entry
-point: `job:MAINJOB` (`app/jcl/MAINJOB.jcl:1`). The extractor read every file. Nothing was left
-unparsed (`analysis`, field `unparsed` is empty).
+| One JCL job, `MAINJOB`, runs one program, `PGMMAIN`, in one step | high | `app/jcl/MAINJOB.jcl:2` |
+| `PGMMAIN` reads a program name with `ACCEPT` and calls it | high | `app/cbl/PGMMAIN.cbl:9` |
+| `HIDDEN01` has no caller and holds no logic | high | `app/cbl/HIDDEN01.cbl:4` |
+| No datasets, copybooks, scheduler, CICS definitions or shared data exist, so there is no data, contract or temporal edge | high | `analysis`, field `edge_counts` |
+| No strongly connected component, god module or articulation point exists | high | `analysis`, fields `sccs`, `god_modules`, `articulation_points` |
 
 ## Wave count
 
-One wave. It holds PGMMAIN and `job:MAINJOB`, in the batch-readonly family, with medium blast radius
-and low confidence (`waves.json`). The read-only label is a fact about the edges the extractor saw.
-It is not proven, because of the largest risk below. HIDDEN01 is not placed.
+**One wave**, confidence `low`: `job:MAINJOB` and `PGMMAIN` (`modernization-assessment/waves.json:5`).
+It is a candidate wave, not yet a valid one: its boundary has no output to compare and its callee
+set is open (`03-waves.md`). It unblocks nothing else in the tree. `HIDDEN01` is not placed. No
+deviations from the extractor's seed. Estimate for wave 1: 4 to 11 person-days if outputs are
+archived, 6 to 16 if not (`04-estimate.md`, `inference`).
 
 ## Largest risk
 
-PGMMAIN calls a program whose name is read at run time by ACCEPT, from a field that has no VALUE
-clause, and CALL has no ON EXCEPTION clause (`app/cbl/PGMMAIN.cbl:8`, `app/cbl/PGMMAIN.cbl:9`). The
-job defines no input (`app/jcl/MAINJOB.jcl:2`). So the whole behavior of this job is decided by a
-value that is not in the tree. Any statement about what it reads, writes or breaks is bounded by
-that unknown. The only other program, HIDDEN01, has no static caller (`app/cbl/HIDDEN01.cbl:1`) and
-is in the unknown dead-code bucket. It must not be deleted on this evidence.
+The computed CALL at `app/cbl/PGMMAIN.cbl:9`. `PGMMAIN` is the only program the only job runs, and the
+program it calls is read with `ACCEPT` at run time (`app/cbl/PGMMAIN.cbl:8`) into a field with no
+initial value (`app/cbl/PGMMAIN.cbl:5`). The JCL supplies no input (`app/jcl/MAINJOB.jcl:2`). So the
+behavior of the whole job cannot be read from the source. A port could pass every test against
+`HIDDEN01` and still be wrong for the program that runs each night. The extractor put `HIDDEN01` in
+the unknown bucket, and nothing in the tree bounds the call. `PGMMAIN` scores high-high
+(`modernization-assessment/risks.json:13`), with `low` confidence.
 
-## Open Questions
+## Open Questions for the client's engineers
 
-Addressed to the client's engineers.
+| # | Question | Why it matters | Evidence |
+|---|---|---|---|
+| 1 | What supplies `WS-PGM-NAME` in production (a `SYSIN` DD, a wrapper, another JCL member), and what values did it hold over the last twelve months? | It decides what the job does, and the extractor resolves a call target only from a `VALUE` clause or a literal `MOVE` in the same program (`meta.limits`, item 3) | `app/cbl/PGMMAIN.cbl:8` |
+| 2 | Which programs can `PGMMAIN` call, and are all of them in the source you gave us? Is `HIDDEN01` one of them, or a leftover stub? | The callee set bounds wave 1 and the dead-code register. A program outside the tree makes wave 1 unfinishable | `app/cbl/PGMMAIN.cbl:9` |
+| 3 | Which jobs make up "the nightly batch cycle", in what order, and under which scheduler? Is `MAINJOB` one of them? | The tree has one job and no scheduler, so this must-not-break item maps to no unit I can confirm. I did not invent a mapping. Only Control-M XML and shell wrappers are read as schedulers (`meta.limits`, item 10) | `analysis`, field `warnings` |
+| 4 | Is the tree a complete extract? Where are the callee programs, copybooks, procs, other jobs, and the datasets the cycle reads and writes? | Nothing in the tree opens a file, and the extractor gives a called subprogram no DDs from its caller's step (`meta.limits`, item 4). The job has no DD at all | `app/jcl/MAINJOB.jcl:2` |
+| 5 | What does the legacy job do when no `SYSIN` is present, the name is blank, or the name matches no program? | The `CALL` has no exception handling. The port must reproduce that behavior, and the tree does not show it | `app/cbl/PGMMAIN.cbl:9` |
+| 6 | Can you supply job logs or SMF records for `MAINJOB` for twelve months, plus archived outputs of the callee, including a month end and a year end? | It is the oracle for wave 1 and the only telemetry that could firm up the unknown bucket | inference |
+| 7 | Can you supply file dates or source control history for the three files? | The tree is not a git repository, so the dormant bucket was not computed. An empty list means not measured | `analysis`, field `warnings` |
+| 8 | Does `MAINJOB` still run, and does anyone on the team read COBOL well enough to sign off the equivalence harness? | With no scheduler, `unscheduled_jobs` cannot flag it, and who signs the deviation register affects the estimate | `analysis`, field `unscheduled_jobs` |
 
-1. Where does the value for the ACCEPT at `app/cbl/PGMMAIN.cbl:8` come from in production: a SYSIN in
-   a proc, a JCL override, the scheduler, or an operator? MAINJOB defines no input
-   (`app/jcl/MAINJOB.jcl:2`).
-2. Which program names has PGMMAIN dispatched to in the last 12 months, and are all of them in this
-   tree? Is HIDDEN01 one of them?
-3. Is MAINJOB part of the nightly batch cycle you named? Which jobs run before and after it? No
-   scheduler artifact was parsed, so we cannot say (`analysis`, field `warnings`).
-4. Does this copy hold every JCL job, proc and copybook, or were some left out? Only one job exists.
-5. What datasets, DB2 tables or queues do the dispatched programs use? MAINJOB has no DD statements.
-6. Do you have last-changed dates for each member? The tree is not a git repository, so dormancy was
-   not measured (`analysis`, field `warnings`).
-7. Are archived outputs for the nightly cycle kept (SYSOUT, reports, GDG generations), and does the
-   window include month end and fiscal year end?
-8. Who on the team can read COBOL and JCL, and who can sign the deviation register?
-9. For the refactor target, where should dispatch by program name live in the new design? A
-   registry needs the closed list of names from question 2.
+**Files not parsed:** none. The extractor listed nothing as skipped (`analysis`, and
+`01-inventory.md`, section "Not parsed").
 
-## Limits that touch this system
+**Limits in `meta.limits` that touch this tree:** items 3 (variable call targets, `PGMMAIN`), 4
+(a called subprogram gets no DDs), 7 (`IF/THEN/ELSE` and `COND=` not modeled, and `MAINJOB` has one
+step, so no effect here) and 10 (scheduler formats) (`modernization-assessment/graph.json:9`). The
+other limits, on copy replacing, in-stream cards, PROCs, CICS transaction chains, DCB and layouts,
+and contract edges, touch nothing here because the tree has no copybooks, procs, CICS definitions or
+datasets.
 
-From `meta.limits` in `graph.json`. There are no files listed as not parsed.
+## Files in this assessment
 
-| Limit | How it touches this system | Evidence |
-|---|---|---|
-| A variable call target is resolved only from VALUE clauses and literal MOVEs in the same program | This is why the call at PGMMAIN line 9 is open. The program has neither. | `app/cbl/PGMMAIN.cbl:9` |
-| A called subprogram gets no DDs from its caller's JCL step | Whatever PGMMAIN calls has no DD mapping in the graph. | `app/jcl/MAINJOB.jcl:2` |
-| Only Control-M XML and shell wrappers that name JCL files are read as schedulers | No scheduler was read. Job order across jobs is unknown. | `analysis` |
-| IF/THEN/ELSE and COND= in JCL are not modeled | MAINJOB has none, so this limit does not change the result. | `app/jcl/MAINJOB.jcl:1` |
-| JCL text inside a COBOL literal makes no edge | None was found (`analysis`, field `embedded_jcl` is empty). | `analysis` |
-
-## Files
-
-| File | Content |
-|---|---|
-| `01-inventory.md`, `02a-edge-tables.md`, `03a-wave-seed.md`, `05a-dead-code-candidates.md` | generated from `graph.json` |
-| `02-coupling.md`, `03-waves.md`, `04-estimate.md`, `05-dead-code.md`, `06-test-strategy.md` | the argument |
-| `graph.json`, `waves.json`, `dead-code.json`, `risks.json` | machine outputs, all validated |
+`graph.json`, `01-inventory.md`, `02-coupling.md`, `02a-edge-tables.md`, `03-waves.md`, `waves.json`,
+`03a-wave-seed.md`, `03a-waves-draft.json`, `04-estimate.md`, `05-dead-code.md`, `dead-code.json`,
+`05a-dead-code-candidates.md`, `06-test-strategy.md`, `risks.json`.

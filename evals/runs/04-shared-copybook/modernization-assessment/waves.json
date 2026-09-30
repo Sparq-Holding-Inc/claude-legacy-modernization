@@ -1,34 +1,9 @@
 {
   "target_state": "refactor",
-  "waves": [
-    {
-      "wave": 1,
-      "family": "none (the seed placed nothing: no entry point in the tree)",
-      "name": "Shared copybook pair (provisional)",
-      "units": ["PROGA", "PROGB"],
-      "rationale": "The seed produced no waves because the tree has no entry point. This wave exists only because the validator rejects an empty plan. PROGA and PROGB both include SHARED01, so a change to that layout reaches both and they should move together. Both score low-low in risks.json, which is the wave one profile. The wave has no deployment or rollback boundary the tree can prove, so it does not meet the four validity tests. Treat it as a placeholder until the client supplies the JCL and scheduler.",
-      "unblocks": "Nothing that can be shown from this tree. This is a chore wave. It proves the toolchain on a shared copybook and nothing more.",
-      "blast_radius": "low",
-      "confidence": "low",
-      "inference": true,
-      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 5}, {"file": "app/cbl/PROGB.cbl", "line": 5}]
-    }
+  "waves": [],
+  "unassigned": [
+    {"id": "PROGA", "reason": "no entry points in the tree. No JCL job, CSD transaction or scheduler runs it, so no family can be assigned."},
+    {"id": "PROGB", "reason": "no entry points in the tree. No JCL job, CSD transaction or scheduler runs it, so no family can be assigned."}
   ],
-  "unassigned": [],
-  "deviations": [
-    {
-      "unit": "PROGA",
-      "from_wave": null,
-      "to_wave": 1,
-      "reason": "Left unassigned by the seed (no entry point in the tree). Placed in wave 1 because schema.py rejects a plan with no waves, and because it shares SHARED01 with PROGB. Not a finding that it belongs first. Provisional.",
-      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 5}]
-    },
-    {
-      "unit": "PROGB",
-      "from_wave": null,
-      "to_wave": 1,
-      "reason": "Left unassigned by the seed (no entry point in the tree). Placed in wave 1 because schema.py rejects a plan with no waves, and because it shares SHARED01 with PROGA. Not a finding that it belongs first. Provisional.",
-      "evidence": [{"file": "app/cbl/PROGB.cbl", "line": 5}]
-    }
-  ]
+  "deviations": []
 }

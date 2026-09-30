@@ -1,57 +1,45 @@
 # 03 Waves
 
-Target state: `refactor`, given as a flag. Machine-readable plan: `modernization-assessment/waves.json`.
+Target state: refactor (given as a flag). The plan is in `waves.json`.
 
-## What the extractor cut
+## The wave count is zero
 
-Nothing. `03a-wave-seed.md` has no waves. The seed puts every entry point in a family, and the tree has no
-entry point: no CSD transaction, JCL job, scheduler job or wrapper (analysis: `entry_points` is empty). Both
-programs went to `unassigned`. The seed's stated reason, "a computed call or a submit inside COBOL could
-reach it", is not what happened here. The tree has no computed call and no embedded JCL. The real reason is
-that nothing starts either program. Inference.
+The tree has no entry point. It holds no JCL job, no CSD transaction, no scheduler job and no shell
+wrapper (`analysis.entry_points` is empty, and `meta.files_seen` in `graph.json` shows zero for every
+kind except COBOL). The wave seed builds waves from the entry points that use each unit
+(`03a-wave-seed.md`). With no entry point it places nothing, and it says so for both programs.
 
-## What this plan does
+I did not invent a wave. `modernization-assessment/waves.json:3` has `"waves": []`, and both programs are
+in `unassigned`. No unit moved, so there are no deviations.
 
-The wave validator rejects a plan with no waves. To produce a plan that validates, both programs are placed
-in one wave by a recorded deviation. This is a placeholder. It is not a finding that a deployable wave exists.
-
-| Wave | Units | Family | Rationale | Blast radius | Confidence | Evidence |
-|---|---|---|---|---|---|---|
-| 1 | PROGA, PROGB | none (no entry point) | One literal CALL ties them together. They move as a unit or not at all. | low | low | `app/cbl/PROGA.cbl:6` |
-
-The four tests for a valid wave, against what the tree shows:
-
-| Test | Result | Evidence |
-|---|---|---|
-| Deployable independently, behind a flag or facade | Cannot be judged. No caller, job or transaction is in the tree to put a flag in front of. | inference |
-| Rollback independently | Cannot be judged. Nothing shows how the load modules are deployed. | inference |
-| Testable boundary | Partly. The boundary is PROGA's DISPLAY output and return code, since neither program touches a dataset. | `app/cbl/PROGA.cbl:5` |
-| Delivers something a stakeholder can name | No. Neither program does business work in the tree. | `app/cbl/PROGB.cbl:4` |
-
-## What wave 1 unblocks
-
-Nothing the tree shows. It is a chore wave. No copybook, dataset or other program depends on either unit.
-
-## Deviations from the seed
-
-| Unit | From | To | Reason | Evidence |
+| Unit | Wave | Reason not placed | Confidence | Evidence |
 |---|---|---|---|---|
-| PROGA | not placed | wave 1 | Placed so the plan validates. It is batch-type and may sit in the nightly batch cycle, but no JCL shows that. | `app/cbl/PROGA.cbl:6` |
-| PROGB | not placed | wave 1 | Moves with its only caller. | `app/cbl/PROGA.cbl:6` |
+| PROGA | none | No entry point reaches it in the tree. It ends in `STOP RUN`, so it looks like a batch main program, but nothing in the tree starts it. | high | `app/cbl/PROGA.cbl:7` |
+| PROGB | none | No entry point in the tree. Its only caller is PROGA, so it belongs wherever PROGA goes. | high | `app/cbl/PROGA.cbl:6` |
 
-## Sequence
+## What the risk scores say
 
-Wave 1 holds the whole tree, so there is no sequence to defend. The real sequence question is where these
-two programs sit inside the nightly batch cycle, and the tree cannot answer it. See Open Questions in
-`00-summary.md`.
+`risks.json` scores both programs low-low (`modernization-assessment/risks.json:13` and
+`modernization-assessment/risks.json:33`). If they were placed, low-low means wave one, where the
+toolchain is proved. The score for PROGA is low confidence. Its blast radius is 2 only because it writes
+nothing and calls one no-op. The real blast radius depends on whether it sits inside the nightly batch
+cycle, and the tree cannot say.
 
-## Risk quadrant
+## What would let a plan be cut
 
-Both units score low-low in `modernization-assessment/risks.json`. Low-low is the wave-one slot, which agrees
-with the placement. PROGA's blast radius score rests on a guess about the surrounding job stream, so its
-confidence is `low`.
+Nothing can be sequenced until the client supplies at least one of these:
 
-| Unit | Port difficulty | Blast radius | Quadrant | Confidence | Evidence |
-|---|---|---|---|---|---|
-| PROGA | 1 | 2 | low-low | low | `app/cbl/PROGA.cbl:6` |
-| PROGB | 1 | 1 | low-low | medium | `app/cbl/PROGB.cbl:4` |
+- the JCL for the nightly batch cycle, with its PROCs
+- a scheduler export (Control-M XML is read by the extractor, and other schedulers are not)
+- a CSD export, if any of this runs under CICS
+
+With those, the extractor can find entry points, the wave seed will place these two programs, and
+`must-not-break` ("the nightly batch cycle") can be mapped to a unit. Until then the four tests for
+a valid wave (independent deploy, independent rollback, a testable boundary and a nameable business
+outcome) cannot be checked against anything.
+
+## What a wave for these two programs would unblock
+
+Nothing that a business stakeholder could name. The pair is a chore for its own sake. If the tree is
+the whole system, it proves the toolchain and nothing else. This is inference, because the full
+system is not in the tree.

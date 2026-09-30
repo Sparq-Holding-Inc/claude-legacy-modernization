@@ -1,19 +1,19 @@
 {
-  "telemetry": "none",
-  "unreachable": [
-    {
-      "id": "PGMDEAD",
-      "reason": "No job step, program or scheduler in the tree runs it, and the tree has no computed call that could reach it. Its only caller edge is out: it calls PGMLIVE, which stays live through PGMMAIN. Provisional: no telemetry, and an entry point outside this tree could still run it.",
-      "confidence": "medium",
-      "evidence": [{"file": "app/cbl/PGMDEAD.cbl", "line": 1}, {"file": "app/cbl/PGMDEAD.cbl", "line": 4}]
-    },
-    {
-      "id": "cpy:UNUSED",
-      "reason": "No program in the tree includes it. Provisional: a program outside the tree could still COPY it.",
-      "confidence": "high",
-      "evidence": [{"file": "app/cpy/UNUSED.cpy", "line": 1}]
-    }
-  ],
-  "dormant": [],
-  "unknown": []
+ "telemetry": "none",
+ "unreachable": [
+  {
+   "id": "PGMDEAD",
+   "reason": "No JCL step, scheduler entry or program names it, and the tree has no computed calls or embedded JCL. Its only edge is an outgoing call to PGMLIVE, which stays live through PGMMAIN. Provisional: telemetry is none, no scheduler was parsed, and the tree holds one JCL job.",
+   "confidence": "medium",
+   "evidence": [{"file": "app/cbl/PGMDEAD.cbl", "line": 4}]
+  },
+  {
+   "id": "cpy:UNUSED",
+   "reason": "No program in the tree has a COPY statement, so nothing includes it.",
+   "confidence": "high",
+   "evidence": [{"file": "app/cpy/UNUSED.cpy", "line": 1}]
+  }
+ ],
+ "dormant": [],
+ "unknown": []
 }

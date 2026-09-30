@@ -1,168 +1,178 @@
 # 02 Coupling
 
-Facts in this file come from `modernization-assessment/graph.json` and are tagged `analysis` when they are computed there. Anything I read from source myself to settle an open edge is tagged `inference` and carries a citation. The open edges were more than 20 (28 computed calls, 16 unmapped DDs, 38 medium confidence call edges between programs), so I did the dependency-cartographer work inline; its findings are in the last section.
+The edge tables are in `modernization-assessment/02a-edge-tables.md`. This file is the argument. Facts come from `modernization-assessment/graph.json`. Anything I read in source to settle an open edge is labeled `inference`.
 
-## The four patterns that constrain the sequence
+The graph has 44 programs, 55 JCL jobs and 1,224 edges: 318 call, 62 contract, 235 data, 476 include and 133 temporal (`analysis` block, `edge_counts`). 99 entry points were found.
 
-### 1. Eight shared datasets are touched from more than one wave, two of them from five
+## The three patterns that constrain the sequence
 
-The call graph is small and almost flat: 318 call edges, no god module, three small cycles. The dependencies that matter are the data ones. Eight datasets are read or written by programs that land in more than one wave. Two of them (account and customer) are touched from five waves, and two more (card and cross reference) from four.
+### 1. The transaction master's history lives in one GDG that three routes write
 
-| Dataset | Waves whose programs touch it | Writers | Readers | Evidence |
+This is the pattern that most limits the plan, and no edge in `graph.json` shows it whole.
+
+| Step | What happens | Evidence |
+|---|---|---|
+| TRANBKP unloads the transaction master to a new generation, then deletes and redefines the KSDS empty | The generation is the only copy of history until COMBTRAN reloads it | `app/jcl/TRANBKP.jcl:33`, `app/jcl/TRANBKP.jcl:40`, `app/jcl/TRANBKP.jcl:54` |
+| POSTTRAN runs CBTRN02C, which opens the transaction master for OUTPUT | It only works because TRANBKP emptied the file first | `app/cbl/CBTRN02C.cbl:256`, `scripts/run_posting.sh:23`, `scripts/run_posting.sh:26` |
+| COMBTRAN sorts generation (0) with SYSTRAN (0) and REPROs the result back | It reads whichever generation is newest at that moment | `app/jcl/COMBTRAN.jcl:23`, `app/jcl/COMBTRAN.jcl:24`, `app/jcl/COMBTRAN.jcl:26` |
+| The transaction report job unloads the master into a new TRANSACT.BKUP generation as its first step | Running the report moves generation (0) | `app/jcl/TRANREPT.jcl:26`, `app/jcl/TRANREPT.jcl:33` |
+| The online report screen submits JCL text that calls proc TRANREPT, which does the same unload | Any signed-on user can move generation (0) at any time | `app/cbl/CORPT00C.cbl:94`, `app/cbl/CORPT00C.cbl:517`, `app/proc/TRANREPT.prc:31` |
+| The generation group keeps five generations and scratches the oldest | Five report runs between TRANBKP and COMBTRAN would scratch the backup | `app/jcl/DEFGDGB.jcl:24`, `app/jcl/DEFGDGB.jcl:26`, `app/jcl/DEFGDGB.jcl:27` |
+
+The report route is `inference` for the collision itself. The graph holds the pieces (the include edges from CORPT00C's literal, the datasets), but not the conclusion that a report run between TRANBKP and COMBTRAN hands COMBTRAN an unload of an empty file. Whether it happens depends on how the client's scheduler serializes these jobs. See Open Questions in `modernization-assessment/00-summary.md`. A port that replaces GDGs with some other versioning has to give every reader the same meaning of "latest".
+
+### 2. Data coupling: shared masters with writers on both sides of the wave line
+
+`analysis.data_hubs` names the datasets with the most programs attached. The contract edges are all `high`, which means both sides copy the same layout copybook. It does not mean they are equal (`meta.limits`).
+
+| Dataset | Writers | Readers | What makes it hard | Evidence |
 |---|---|---|---|---|
-| ACCTDATA.VSAM.KSDS | 2, 3, 5, 6, 7 | 4 | 11 | analysis: `data_hubs`; layout `app/cpy/CVACT01Y.cpy:4` |
-| CUSTDATA.VSAM.KSDS | 2, 3, 5, 6, 7 | 1 | 7 | analysis: `data_hubs`; layout `app/cpy/CVCUS01Y.cpy:4` |
-| CARDDATA.VSAM.KSDS | 2, 3, 5, 6 | 1 | 6 | analysis: `data_hubs`; layout `app/cpy/CVACT02Y.cpy:4` |
-| CARDXREF.VSAM.KSDS | 2, 5, 6, 7 | 0 | 8 | analysis: `data_hubs`; layout `app/cpy/CVACT03Y.cpy:4` |
-| TRANSACT.VSAM.KSDS | 3, 5, 6 | 3 | 11 | analysis: `data_hubs`; layout `app/cpy/CVTRA05Y.cpy:4` |
-| USRSEC.VSAM.KSDS | 3, 6 | 3 | 5 | analysis: `data_hubs`; layout `app/cpy/CSUSR01Y.cpy:17` |
-| CARDXREF alternate index path | 3, 6, 7 | 0 | 5 | analysis: `data_hubs`; `app/jcl/XREFFILE.jcl:90` |
-| EXPORT.DATA | 2, 5 | 1 | 1 | analysis: contract edge CBEXPORT to CBIMPORT; `app/cbl/CBEXPORT.cbl:65`, `app/cbl/CBIMPORT.cbl:37` |
+| Account master ACCTDATA | 4 | 11 | CBTRN02C, CBACT04C, COACTUPC and COBIL00C write it. The refresh job deletes it and rebuilds it from a flat file, so online updates since the flat file was cut are discarded | `app/cbl/CBTRN02C.cbl:51`, `app/cbl/COACTUPC.cbl:573`, `app/jcl/ACCTFILE.jcl:25`, `app/jcl/ACCTFILE.jcl:61` |
+| Transaction master TRANSACT | 3 | 11 | Batch posting, online add and bill payment all write it, and each builds keys its own way (last key plus one online) | `app/cbl/CBTRN02C.cbl:34`, `app/cbl/COBIL00C.cbl:217`, `app/cbl/COTRN02C.cbl:449` |
+| Sign-on file USRSEC | 3 | 5 | Written by the three user-admin screens, read by sign-on with the same layout. Passwords are eight characters, stored and compared in clear | `app/cbl/COSGN00C.cbl:223`, `app/cpy/CSUSR01Y.cpy:21`, `app/cbl/COUSR01C.cbl:157` |
+| Cross reference CARDXREF | 0 | 8 | No program writes it. Every read is a lookup, and posting rejects a card the file lacks | `app/cbl/CBTRN02C.cbl:40`, `app/cbl/CBTRN02C.cbl:385` |
+| Category balances TCATBALF | 1 | 4 | CBTRN02C updates it; the refresh job rebuilds it before each posting run | `app/cbl/CBTRN02C.cbl:57`, `app/jcl/TCATBALF.jcl:25`, `scripts/run_posting.sh:20` |
+| DB2 table TRANSACTION_TYPE | 3 | 2 | Read by the DB2 screens and unloaded to TRANTYPE.PS for the report | `app/app-transaction-type-db2/cbl/COTRTLIC.cbl:338`, `app/app-transaction-type-db2/cbl/COBTUPDT.cbl:137` |
 
-All 62 contract edges are `high`: each pair of programs copies the same layout copybook. That is good news for a port and it is the weakest kind of proof; the extractor says high means a shared layout, not proven equal (`meta.limits`). The five record layouts above are the real interfaces of this system, and no document describes them. The wave plan lets each reader move before its writer and read the legacy file through an access facade, which is the only way to move a reader early. The system of record for each master flips in the wave that holds its first writing program.
+The readers count in `analysis.data_hubs` includes JCL steps as well as programs. ACCTDATA has ten reading programs and one reading step, and TRANSACT has five reading programs and six reading steps.
 
-### 2. The nightly cycle is a chain held together by wrapper order and sleeps
+The sequence consequence: the seed puts read-only online screens (wave 3) before the batch and online writers (waves 5 and 6). The screens will read masters that legacy programs still write. That needs a shared data path. It is a precondition of wave 3, not a wave of its own.
 
-`scripts/run_full_batch.sh` submits the cycle as CLOSEFIL, the refresh jobs, TRANBKP, POSTTRAN, INTCALC, TRANBKP again, COMBTRAN, TRANIDX and OPENFIL (`scripts/run_full_batch.sh:13-66`). It waits with `sleep` (`scripts/run_full_batch.sh:14`, `:48`, `:52`, `:59`, `:63`) and checks no return code. The submit is a `put` to the job entry system, so completion is not awaited. Order is enforced by hope and timing, not by the scheduler (inference).
+### 3. Temporal coupling lives in three schedulers that do not agree
 
-The data flow inside the chain is just as fragile.
+The daily cycle is defined in three places, and only two are parsed.
 
-- TRANBKP backs the transaction master up to a new generation, then deletes and redefines it empty (`app/jcl/TRANBKP.jcl:23-33`, `:40-46`, `:54-67`).
-- POSTTRAN then runs CBTRN02C, which opens the transaction master for OUTPUT (`app/cbl/CBTRN02C.cbl:256`). That only works on the empty file TRANBKP left behind (inference).
-- INTCALC writes a generation of SYSTRAN (`app/jcl/INTCALC.jcl:37-41`).
-- COMBTRAN merges `TRANSACT.BKUP(0)` and `SYSTRAN(0)` and loads the result into the master (`app/jcl/COMBTRAN.jcl:23-26`, `:41-48`). Because `run_full_batch.sh` runs TRANBKP twice (`scripts/run_full_batch.sh:29`, `:55`), generation 0 at that point holds only the day's postings, not the history (inference). Ask the client whether that is intended (see Open Questions in `00-summary.md`).
-- The generation bases must exist first: `app/jcl/DEFGDGB.jcl:24-59` and `app/jcl/DALYREJS.jcl:24-28`.
+| Source | What it says | Evidence |
+|---|---|---|
+| Shell wrappers (parsed) | Close files, refresh account master, refresh category balances, TRANBKP, POSTTRAN, TRANIDX, open files, with sleeps of 5 and 10 seconds between submits | `scripts/run_posting.sh:13`, `scripts/run_posting.sh:14`, `scripts/run_posting.sh:27`, `scripts/run_posting.sh:34` |
+| Control-M daily folder (parsed) | CLOSEFIL, TRANBKP, WAITSTEP, OPENFIL. It has no POSTTRAN | `app/scheduler/CardDemo.controlm:4`, `app/scheduler/CardDemo.controlm:8`, `app/scheduler/CardDemo.controlm:14`, `app/scheduler/CardDemo.controlm:20` |
+| CA-7 listing (not parsed) | CLOSEFIL triggers CBPAUP0J, which triggers POSTTRAN, then WAITSTEP, then OPENFIL. Other chains run TRANTYPE, TRANCATG and TCATBALF. It names no ACCTFILE, CARDFILE, XREFFILE, CUSTFILE, TRANBKP, INTCALC or COMBTRAN | `app/scheduler/CardDemo.ca7:43`, `app/scheduler/CardDemo.ca7:70`, `app/scheduler/CardDemo.ca7:97`, `app/scheduler/CardDemo.ca7:124` |
 
-The CA-7 listing, which the extractor could not parse, describes a different trigger order: CLOSEFIL triggers CBPAUP0J, and CBPAUP0J triggers POSTTRAN (`app/scheduler/CardDemo.ca7:43`, `:70`). CBPAUP0J is an IMS job that purges expired authorizations (`app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl:25`). So in production the posting job may wait for an IMS job that sits in wave 7 (inference from a file the extractor did not read).
+The CA-7 row is `inference`: the extractor lists that file as not parsed, and I read it by hand. Ordering in the wrappers is by submit time plus a sleep, so it is not an enforced dependency. Two more ordering facts matter:
 
-### 3. Batch and online are kept apart by closing files, not by locking
+- A Control-M condition makes the weekly transaction-type refresh (wave 7) run before the weekly disclosure-group folder starts (wave 1): `app/scheduler/CardDemo.controlm:28`, `app/scheduler/CardDemo.controlm:34`. That is an edge from the last wave back to the first.
+- The report's reference data flows backwards too. TRANEXTR (wave 7) unloads DB2 to TRANTYPE.PS, job TRANTYPE (wave 5) reloads the VSAM file from it, and CBTRN03C reads that file: `app/app-transaction-type-db2/jcl/TRANEXTR.jcl:19`, `app/jcl/TRANTYPE.jcl:56`, `app/cbl/CBTRN03C.cbl:39`. The graph has no dataset edge for TRANEXTR because its dataset names use the symbol `&HLQ` (`app/app-transaction-type-db2/jcl/TRANEXTR.jcl:34`), so this path is `inference`.
 
-CLOSEFIL issues a CEMT close for five CICS files (`app/jcl/CLOSEFIL.jcl:26-30`). CBTRN02C opens the account master for I-O (`app/cbl/CBTRN02C.cbl:311`) and CBACT04C does the same (`app/cbl/CBACT04C.cbl:291`), while COACTUPC rewrites the same records under a CICS lock (`app/cbl/COACTUPC.cbl:3894-3900`). Nothing else separates them (inference). A target that lets online updates continue during the batch window needs real transactional isolation, and that is a design change, not a port.
-
-### 4. The system is wired partly through text the extractor does not follow
-
-| What is hidden | Where | What it hides | Evidence |
-|---|---|---|---|
-| JCL inside a COBOL literal | CORPT00C writes job lines to the JOBS queue | The online way to run proc TRANREPT and CBTRN03C | `app/cbl/CORPT00C.cbl:94`, `app/cbl/CORPT00C.cbl:517`, `app/csd/CARDDEMO.CSD:499` |
-| Program names in PARM | IMS BMP and DLI jobs | CBPAUP0C, PAUDBLOD, PAUDBUNL, DBUNLDGS | `app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl:25`, `app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL:27`, `app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL:39`, `app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL:27` |
-| Program name in TSO input | MNTTRDB2 | COBTUPDT with DB2 plan CARDDEMO | `app/app-transaction-type-db2/jcl/MNTTRDB2.jcl:30` |
-| Symbolic dataset names | TRANEXTR uses `&HLQ` | It writes the TRANTYPE and TRANCATG flat files that two reload jobs read | `app/app-transaction-type-db2/jcl/TRANEXTR.jcl:25`, `app/app-transaction-type-db2/jcl/TRANEXTR.jcl:73`, `app/jcl/TRANTYPE.jcl:57` |
-| A scheduler file the extractor cannot parse | CA-7 listing | Trigger chains for 17 jobs, including POSTTRAN (two of them, CLOSEFIL1 and CLOSEFIL2, are not in the tree) | `app/scheduler/CardDemo.ca7:43`, `app/scheduler/CardDemo.ca7:70` |
-| IDCAMS and SORT control cards | Every reload job | Which side of a dataset is written; a REPRO into a VSAM shows as a read | `app/jcl/ACCTFILE.jcl:61`, `app/jcl/COMBTRAN.jcl:48` |
-
-## Cluster graph
-
-The graph is at cluster level. Numbers are the wave each cluster lands in.
+## Cluster map
 
 ```mermaid
-graph LR
-  FD["Front door SCC: COSGN00C COMEN01C COADM01C (3)"]
-  VIEW["Read only views (3)"]
-  OW["Online writers: COACTUPC COCRDUPC COBIL00C COTRN02C COUSR* (6)"]
-  RPT["Report request: CORPT00C + proc TRANREPT (5)"]
-  CYC["Nightly cycle: POSTTRAN INTCALC TRANBKP COMBTRAN TRANIDX (5)"]
-  RLD["Master reload jobs: ACCTFILE TCATBALF XREFFILE (5) CARDFILE (6)"]
-  REF["Reference reloads: DISCGRP TRANTYPE TRANCATG CUSTFILE (4)"]
-  MST[("Shared masters: ACCT CARD XREF CUST TRANSACT USRSEC TCATBAL")]
-  STM["Statements and export (5)"]
-  AUTH["Authorization: COPAUA0C COPAUS0-2C CBPAUP0J (7)"]
-  TTY["Transaction type DB2: COTRTLIC COTRTUPC MNTTRDB2 TRANEXTR (7)"]
-  SCH["Schedulers: Control-M, CA-7, shell wrappers"]
-  FD --> VIEW
-  FD --> OW
-  FD --> RPT
-  FD --> AUTH
-  FD --> TTY
-  OW --> MST
-  VIEW --> MST
-  CYC --> MST
-  RLD --> MST
-  REF --> CYC
-  RPT --> MST
-  STM --> MST
-  AUTH --> MST
-  TTY --> REF
-  SCH --> CYC
-  SCH --> RLD
-  AUTH -. "CA-7 trigger" .-> CYC
+graph TD
+  subgraph Front["Online front door (wave 3)"]
+    SGN[COSGN00C]
+    MEN[COMEN01C]
+    ADM[COADM01C]
+  end
+  subgraph Screens["Read-only screens (wave 3)"]
+    VIEW[COACTVWC COCRDSLC COTRN00C COTRN01C]
+  end
+  subgraph Writers["Online writers (wave 6)"]
+    WR[COACTUPC COCRDUPC COBIL00C COTRN02C COUSR01-03C]
+  end
+  subgraph Masters["VSAM masters"]
+    ACCT[(ACCTDATA)]
+    TRAN[(TRANSACT)]
+    USR[(USRSEC)]
+    CARD[(CARDDATA)]
+  end
+  subgraph Cycle["Nightly cycle (wave 5)"]
+    REF[refresh jobs]
+    BKP[TRANBKP]
+    POST[POSTTRAN CBTRN02C]
+    INT[INTCALC CBACT04C]
+    COMB[COMBTRAN]
+    REP[TRANREPT CBTRN03C]
+  end
+  subgraph Rpt["Report request (wave 5)"]
+    RPT[CORPT00C]
+    JOBQ[JOBS queue]
+  end
+  subgraph Auth["Authorization and DB2 (wave 7)"]
+    AUTH[COPAUA0C COPAUS0-2C]
+    DB2T[COTRTLIC COTRTUPC TRANEXTR]
+  end
+  SGN --> MEN --> VIEW
+  MEN --> WR
+  MEN --> RPT --> JOBQ --> REP
+  MEN --> AUTH
+  VIEW --> ACCT & TRAN & CARD
+  WR --> ACCT & TRAN & USR & CARD
+  REF --> ACCT & CARD
+  BKP --> TRAN
+  POST --> TRAN & ACCT
+  INT --> ACCT
+  COMB --> TRAN
+  REP --> TRAN
+  DB2T -. reference feed .-> REP
 ```
 
 ## Strongly connected components
 
-They move whole. The plan keeps each in one wave, and the validator rejects a plan that splits one.
+They move whole. The validator rejects a plan that splits one. `waves.json` keeps all three intact.
 
-| Component | Members | Wave | Evidence |
+| Component | Wave | Why it is a cycle | Evidence |
 |---|---|---|---|
-| Front door | COADM01C, COMEN01C, COSGN00C | 3 | analysis: `sccs`; `app/cbl/COSGN00C.cbl:231`, `app/cbl/COSGN00C.cbl:236`, `app/cbl/COMEN01C.cbl:199` |
-| Authorization screens | COPAUS0C, COPAUS1C | 7 | analysis: `sccs`; `app/app-authorization-ims-db2-mq/cbl/COPAUS0C.cbl:316` |
-| Transaction list and view | COTRN00C, COTRN01C | 3 | analysis: `sccs`; `app/cbl/COTRN00C.cbl:188` |
+| COADM01C, COMEN01C, COSGN00C | 3 | Sign-on sends users to the menus, and both menus can return to sign-on | `app/cbl/COSGN00C.cbl:231`, `app/cbl/COSGN00C.cbl:236`, `app/cbl/COMEN01C.cbl:201` |
+| COTRN00C, COTRN01C | 3 | The list and the detail screen return to each other | `app/cbl/COTRN00C.cbl:188`, `app/cbl/COTRN01C.cbl:126` |
+| COPAUS0C, COPAUS1C | 7 | The summary and the detail screen return to each other | `app/app-authorization-ims-db2-mq/cbl/COPAUS0C.cbl:316`, `app/app-authorization-ims-db2-mq/cbl/COPAUS1C.cbl:185` |
 
-Self recursive: COCRDLIC and COPAUS0C (analysis: `self_recursive`).
+COCRDLIC and COPAUS0C also call themselves (`analysis.self_recursive`): `app/cbl/COCRDLIC.cbl:538`, `app/app-authorization-ims-db2-mq/cbl/COPAUS0C.cbl:192`.
 
 ## God modules
 
-None by the extractor's rule (top decile of fan-in and fan-out) (analysis: `god_modules`). Size is the better warning here. COACTUPC is 3,368 lines with 43 REDEFINES and 51 GO TO (`app/cbl/COACTUPC.cbl:4`). No static call edge points at it; users reach it through the menu router or its own transaction id (`app/csd/CARDDEMO.CSD:306`), so it can be strangled behind the menu router rather than ported wholesale.
+`analysis.god_modules` lists COPAUS0C, COTRN00C and COTRN01C. Treat the list with care. The test is the top decile of fan-in and fan-out in a graph where the largest fan-in among them is 1 (`analysis.fan_in`), so COTRN00C and COTRN01C are flagged for being a two-screen pair, not for being a hub. They move as one cycle in wave 3. COPAUS0C is the real case: 792 lines, self-recursive, six IMS calls, and a cycle with COPAUS1C. It stays in wave 7 and needs a facade in front of the IMS access before it moves (`inference`, from `app/app-authorization-ims-db2-mq/cbl/COPAUS0C.cbl:322`).
+
+The programs that are hubs in the ordinary sense are COMEN01C and COSGN00C, each with 12 callers (`analysis.fan_in`). They are the menu router and the sign-on front door, and every online wave passes through them.
 
 ## Articulation points
 
-| Point | What it separates | Evidence |
-|---|---|---|
-| CBTRN02C, CBACT04C, CBTRN03C | The batch posting programs from the datasets they share | analysis: `articulation_points` |
-| CBACT01C, CBEXPORT, CBIMPORT, CBSTM03A | Extract, export and statement programs from the same datasets | analysis: `articulation_points` |
-| COSGN00C, COADM01C | The front door from the online programs behind it | analysis: `articulation_points` |
-| COPAUS0C, COPAUS1C, COPAUS2C | The authorization screens from DB2 and IMS | analysis: `articulation_points` |
-| ACCTDATA, CARDDATA, CARDXREF, CUSTDATA, EXPORT.DATA | The five datasets that join the most programs | analysis: `articulation_points` |
+`analysis.articulation_points` lists 19 nodes, computed over call edges between programs plus data edges from programs to datasets (`analysis.articulation_basis`). Read the list with the basis in mind.
 
-The basis is call edges between programs plus program to dataset edges, so the natural wave boundaries are the five datasets, which is where the wave plan puts them.
+- Six are datasets: ACCTDATA, CARDDATA, CARDXREF, CUSTDATA, EXPORT.DATA and the DB2 table. These are real boundaries. The account master is the strongest: four writers, and it is where waves 5 and 6 meet.
+- COSGN00C, COADM01C, COPAUS0C, COPAUS1C and COPAUS2C are real wave boundaries for the online and authorization clusters.
+- The batch programs on the list (CBACT01C, CBACT04C, CBEXPORT, CBIMPORT, CBSTM03A, CBTRN02C, CBTRN03C) are flagged mostly because private output datasets hang off them as leaves, for example the three outputs of CBACT01C at `app/cbl/CBACT01C.cbl:35`. That is `inference`. Only CBTRN02C and CBACT04C, which share ACCTDATA and TCATBALF, sit on a boundary that matters.
 
-## The honest boundary
+## The honest boundary: computed calls
 
-- 28 computed calls, all `EXEC CICS XCTL` (analysis: `unresolved_dynamic`). Three take the target from the menu tables and are bounded to 17 online programs (`app/cpy/COMEN02Y.cpy:28`, `app/cpy/COADM02Y.cpy:29`). Two, in COCRDLIC, take it from CCARD-NEXT-PROG, which the program sets from its own literals (`app/cbl/COCRDLIC.cbl:195`, `app/cbl/COCRDLIC.cbl:203`). The other 23 take it from the COMMAREA field CDEMO-TO-PROGRAM and cannot be bounded from source.
-- Eight file types are not read: DB2 DCLGEN and DDL, IMS DBD and PSB, DB2 control cards, assembler source and macros, and the CA-7 listing (analysis: `unparsed`). The DB2 tables and the IMS database are therefore not in the graph at all.
-- IF, THEN, ELSE and COND in JCL are not modeled (`meta.limits`). Step order is file order. `app/jcl/TRANBKP.jcl:51` has `COND=(4,LT)` on the define step.
-- Not one edge exists for EXEC CICS RETURN TRANSID, START or SEND MAP (`meta.limits`), so transaction to transaction flow is missing.
-- Extractor warnings I read: two jobs repeat a step name (`app/jcl/DEFCUST.jcl:32`, `app/jcl/TRANREPT.jcl:37`); a real JCL converter may reject that (inference), so TRANREPT as written may not run.
+28 computed calls (`analysis.unresolved_dynamic`) are all `EXEC CICS XCTL PROGRAM(variable)`. The extractor could not resolve the variable. I read each site and the MOVEs that feed it. Every reach set below comes from literal MOVEs in the same program, from the two menu tables (`app/cpy/COMEN02Y.cpy:28`, `app/cpy/COADM02Y.cpy:29`), or from a field set by the calling program. All of them name online programs. None names a batch program, so none can reach CBTRN01C. Confidence is `high` where a table or a single literal is the only source, and `medium` where a COMMAREA field set by a caller can also feed the target, because the calling chain is not modeled (`meta.limits`: RETURN TRANSID and START are not edges).
 
-## Findings from the open edges (dependency-cartographer work, inline)
+| Caller and line | Reach set (inference) | Confidence | Evidence |
+|---|---|---|---|
+| COACTUPC 956 | COMEN01C, or the program that transferred in | medium | `app/cbl/COACTUPC.cbl:956`, `app/cbl/COACTUPC.cbl:939`, `app/cbl/COACTUPC.cbl:941` |
+| COACTVWC 349 | COMEN01C, or the program that transferred in | medium | `app/cbl/COACTVWC.cbl:349`, `app/cbl/COACTVWC.cbl:336`, `app/cbl/COACTVWC.cbl:338` |
+| COADM01C 145 | one of the six names in COADM02Y: COUSR00C, COUSR01C, COUSR02C, COUSR03C, COTRTLIC, COTRTUPC | high | `app/cbl/COADM01C.cbl:145`, `app/cpy/COADM02Y.cpy:29`, `app/cpy/COADM02Y.cpy:53` |
+| COADM01C 168 | COSGN00C | high | `app/cbl/COADM01C.cbl:168`, `app/cbl/COADM01C.cbl:166` |
+| COBIL00C 281 | COSGN00C or COMEN01C | medium | `app/cbl/COBIL00C.cbl:281`, `app/cbl/COBIL00C.cbl:276`, `app/cbl/COBIL00C.cbl:130` |
+| COCRDLIC 538 | COCRDLIC, COCRDSLC or COCRDUPC | medium | `app/cbl/COCRDLIC.cbl:538`, `app/cbl/COCRDLIC.cbl:526`, `app/cbl/COCRDLIC.cbl:554` |
+| COCRDLIC 566 | COCRDLIC, COCRDSLC or COCRDUPC | medium | `app/cbl/COCRDLIC.cbl:566`, `app/cbl/COCRDLIC.cbl:592`, `app/cbl/COCRDLIC.cbl:600` |
+| COCRDSLC 331 | COMEN01C, or the program that transferred in | medium | `app/cbl/COCRDSLC.cbl:331`, `app/cbl/COCRDSLC.cbl:318`, `app/cbl/COCRDSLC.cbl:320` |
+| COCRDUPC 473 | COMEN01C, or the program that transferred in | medium | `app/cbl/COCRDUPC.cbl:473`, `app/cbl/COCRDUPC.cbl:451`, `app/cbl/COCRDUPC.cbl:453` |
+| COMEN01C 156 | COPAUS0C only, guarded by the WHEN at line 147 | high | `app/cbl/COMEN01C.cbl:156`, `app/cbl/COMEN01C.cbl:147`, `app/cpy/COMEN02Y.cpy:89` |
+| COMEN01C 184 | any of the other ten names in COMEN02Y | high | `app/cbl/COMEN01C.cbl:184`, `app/cpy/COMEN02Y.cpy:28`, `app/cpy/COMEN02Y.cpy:83` |
+| COMEN01C 201 | COSGN00C | high | `app/cbl/COMEN01C.cbl:201`, `app/cbl/COMEN01C.cbl:199` |
+| COPAUS0C 322 | COPAUS1C, COPAUS0C or COMEN01C, all named constants | high | `app/app-authorization-ims-db2-mq/cbl/COPAUS0C.cbl:322`, `app/app-authorization-ims-db2-mq/cbl/COPAUS0C.cbl:316`, `app/app-authorization-ims-db2-mq/cbl/COPAUS0C.cbl:236` |
+| COPAUS0C 674 | COSGN00C | high | `app/app-authorization-ims-db2-mq/cbl/COPAUS0C.cbl:674`, `app/app-authorization-ims-db2-mq/cbl/COPAUS0C.cbl:669` |
+| COPAUS1C 367 | COPAUS0C, a named constant | high | `app/app-authorization-ims-db2-mq/cbl/COPAUS1C.cbl:367`, `app/app-authorization-ims-db2-mq/cbl/COPAUS1C.cbl:34` |
+| CORPT00C 548 | COSGN00C or COMEN01C | medium | `app/cbl/CORPT00C.cbl:548`, `app/cbl/CORPT00C.cbl:543`, `app/cbl/CORPT00C.cbl:188` |
+| COTRN00C 192 | COTRN01C | high | `app/cbl/COTRN00C.cbl:192`, `app/cbl/COTRN00C.cbl:188` |
+| COTRN00C 518 | COSGN00C or COMEN01C | medium | `app/cbl/COTRN00C.cbl:518`, `app/cbl/COTRN00C.cbl:513`, `app/cbl/COTRN00C.cbl:123` |
+| COTRN01C 205 | COSGN00C, COMEN01C or COTRN00C | medium | `app/cbl/COTRN01C.cbl:205`, `app/cbl/COTRN01C.cbl:200`, `app/cbl/COTRN01C.cbl:126` |
+| COTRN02C 508 | COSGN00C or COMEN01C | medium | `app/cbl/COTRN02C.cbl:508`, `app/cbl/COTRN02C.cbl:503`, `app/cbl/COTRN02C.cbl:138` |
+| COTRTLIC 620 | COADM01C, COTRTUPC, or the program that transferred in | medium | `app/app-transaction-type-db2/cbl/COTRTLIC.cbl:620`, `app/app-transaction-type-db2/cbl/COTRTLIC.cbl:603`, `app/app-transaction-type-db2/cbl/COTRTLIC.cbl:638` |
+| COTRTUPC 457 | COADM01C, or the program that transferred in | medium | `app/app-transaction-type-db2/cbl/COTRTUPC.cbl:457`, `app/app-transaction-type-db2/cbl/COTRTUPC.cbl:440`, `app/app-transaction-type-db2/cbl/COTRTUPC.cbl:442` |
+| COUSR00C 196 | COUSR02C | high | `app/cbl/COUSR00C.cbl:196`, `app/cbl/COUSR00C.cbl:192` |
+| COUSR00C 206 | COUSR03C | high | `app/cbl/COUSR00C.cbl:206`, `app/cbl/COUSR00C.cbl:202` |
+| COUSR00C 514 | COSGN00C or COADM01C | medium | `app/cbl/COUSR00C.cbl:514`, `app/cbl/COUSR00C.cbl:509`, `app/cbl/COUSR00C.cbl:126` |
+| COUSR01C 175 | COSGN00C or COADM01C | medium | `app/cbl/COUSR01C.cbl:175`, `app/cbl/COUSR01C.cbl:168`, `app/cbl/COUSR01C.cbl:94` |
+| COUSR02C 258 | COSGN00C or COADM01C | medium | `app/cbl/COUSR02C.cbl:258`, `app/cbl/COUSR02C.cbl:253`, `app/cbl/COUSR02C.cbl:114` |
+| COUSR03C 205 | COSGN00C or COADM01C | medium | `app/cbl/COUSR03C.cbl:205`, `app/cbl/COUSR03C.cbl:200`, `app/cbl/COUSR03C.cbl:113` |
 
-Everything below is inference, labeled and cited.
+What this means for the rest of the analysis. The 28 calls are bounded, so the online reach is closed: no online program can end in a program outside the 17 named in the two tables plus COSGN00C, COMEN01C, COADM01C. It is not proven, because the caller-set fields are populated across transactions and the chains through EXEC CICS RETURN TRANSID are not in the graph. Waves 3, 5, 6 and 7 hold the callers (CORPT00C is in wave 5), so none of them has `high` confidence.
 
-### Computed calls
+Other open edges the extractor did not model, all `inference` from reading the cited lines:
 
-| Site | Target field | Reachable set I can prove | Still open | Evidence |
-|---|---|---|---|---|
-| COMEN01C:156 and :184 | CDEMO-MENU-OPT-PGMNAME | The 11 programs in the menu table (COACTVWC, COACTUPC, COCRDLIC, COCRDSLC, COCRDUPC, COTRN00C, COTRN01C, COTRN02C, CORPT00C, COBIL00C, COPAUS0C) | Nothing; a `DUMMY` option is intercepted at line 149 | `app/cpy/COMEN02Y.cpy:28`, `app/cpy/COMEN02Y.cpy:89`, `app/cbl/COMEN01C.cbl:149` |
-| COADM01C:145 | CDEMO-ADMIN-OPT-PGMNAME | The 6 programs in the admin table (COUSR00C to COUSR03C, COTRTLIC, COTRTUPC) | Nothing | `app/cpy/COADM02Y.cpy:29`, `app/cpy/COADM02Y.cpy:53` |
-| COCRDLIC:538 and :566 | CCARD-NEXT-PROG | COCRDSLC and COCRDUPC (and COMEN01C on the return path) | Nothing | `app/cbl/COCRDLIC.cbl:195`, `app/cbl/COCRDLIC.cbl:203`, `app/cbl/COCRDLIC.cbl:187` |
-| 23 other sites with CDEMO-TO-PROGRAM | COMMAREA field set by the calling screen | The literals the extractor found (COSGN00C, COMEN01C, COADM01C, COTRN00C, COTRN01C, COUSR02C, COUSR03C, COPAUS0C, COPAUS1C, COTRTUPC) | Whether any other program moves a name into the field before an XCTL | `app/cbl/COBIL00C.cbl:276`, `app/cbl/CORPT00C.cbl:543`, `app/cbl/COUSR00C.cbl:196` |
-
-Consequence: I read none of the six batch programs in the unknown bucket as a likely target of these calls. A CICS XCTL to a program that opens native COBOL files or makes IMS batch calls would fail at its first open. That is my reading, not proof, and the validator keeps them in unknown.
-
-### Unmapped DDs
-
-| Program and DD | What I found | Evidence |
-|---|---|---|
-| CBSTM03B TRNXFILE, XREFFILE, CUSTFILE, ACCTFILE | A called subprogram; its caller CBSTM03A runs in CREASTMT step STEP040, whose DDs serve it | `app/jcl/CREASTMT.JCL:83`, `app/jcl/CREASTMT.JCL:86` |
-| CBIMPORT CARDOUT | No DD by that name in the job. The program opens it at start, so the job as written cannot open its outputs | `app/cbl/CBIMPORT.cbl:63`, `app/jcl/CBIMPORT.jcl:33-60` |
-| PAUDBLOD INFILE1 and INFILE2 | Mapped in the LOADPADB job to the two IMS export files | `app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL:36`, `app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL:38` |
-| PAUDBUNL OUTFIL1 and OUTFIL2 | Mapped in UNLDPADB to the same two files, so UNLDPADB writes what LOADPADB reads | `app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL:48`, `app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL:53` |
-| COBTUPDT INPFILE | Mapped in MNTTRDB2 to a dataset literally named INPFILE | `app/app-transaction-type-db2/jcl/MNTTRDB2.jcl:27` |
-| CBTRN01C, six DDs | No JCL step runs the program | inference: no job names it |
-
-### Contract edges
-
-There are no `medium` contract edges to compare; all 62 are `high` (analysis: `edge_counts`, contract table in `02a-edge-tables.md`). Two facts the extractor cannot see turn them into risks:
-
-| Fact | Why it matters | Evidence |
-|---|---|---|
-| COBIL00C and COTRN02C take the highest key plus one to make a transaction id | It can collide with ids that CBTRN02C takes from the daily file | `app/cbl/COBIL00C.cbl:212-219`, `app/cbl/COTRN02C.cbl:444-451` |
-| CBACT04C makes ids from its PARM date and a counter | INTCALC hardcodes the PARM | `app/cbl/CBACT04C.cbl:476-479`, `app/jcl/INTCALC.jcl:22` |
-| Online bill payment and manual add write a transaction but not the category balance | Posting and interest use that file | `app/cbl/COBIL00C.cbl:233`, `app/cbl/CBTRN02C.cbl:440` |
-
-### Not modeled and worth a look
-
-| Item | Finding | Evidence |
-|---|---|---|
-| Report request | CORPT00C overrides both the sort window and DATEPARM from the screen; the batch job uses the fixed 2022 window | `app/cbl/CORPT00C.cbl:98-125`, `app/jcl/TRANREPT.jcl:43-44` |
-| Batch jobs sent from CICS | The JOBS queue is defined in the CSD | `app/csd/CARDDEMO.CSD:499` |
-| Transaction CDV1 | Points to program COCRDSEC, which has no source in the tree | `app/csd/CARDDEMO.CSD:388` |
+- **Internal reader.** CORPT00C builds JCL text and writes it to queue JOBS: `app/cbl/CORPT00C.cbl:94`, `app/cbl/CORPT00C.cbl:517`, `app/csd/CARDDEMO.CSD:499`. The queue is defined as "submit jobs from CICS" and transaction CR00 runs CORPT00C (`app/csd/CARDDEMO.CSD:409`). The extractor noticed the literal and made no edge.
+- **Nested procs.** Proc TRANREPT calls proc REPROC at `app/proc/TRANREPT.prc:21`. Nested procs are not followed (`meta.limits`), so the graph does not show that the online report route also runs the REPROC unload.
+- **Symbolic dataset names.** `app/app-transaction-type-db2/jcl/TRANEXTR.jcl:34` and seven other lines use `&HLQ`. The graph has no dataset edge for job TRANEXTR at all, although it backs up, deletes and unloads TRANTYPE.PS and TRANCATG.PS (`app/app-transaction-type-db2/jcl/TRANEXTR.jcl:45`, `app/app-transaction-type-db2/jcl/TRANEXTR.jcl:57`). `app/app-transaction-type-db2/jcl/CREADB21.jcl:29` has the same pattern.
+- **CICS file state.** CLOSEFIL closes five files in region CICSAWSA and OPENFIL reopens them (`app/jcl/CLOSEFIL.jcl:26`, `app/jcl/OPENFIL.jcl:26`). No edge records that the online region must be quiet while a refresh job runs. CARDFILE and CUSTFILE close their own files through SDSF steps, so the CLOSEFIL list does not include the card and customer masters.
+- **Assembler.** COBDATFT and MVSWAIT are called at `app/cbl/CBACT01C.cbl:231` and `app/cbl/COBSWAIT.cbl:38` and their source is in `app/asm/COBDATFT.asm:1` and `app/asm/MVSWAIT.asm:1`, which are not parsed.
+- **Scheduler not parsed.** The CA-7 listing names jobs the extractor calls unscheduled: CBPAUP0J, CREASTMT, PRTCATBL, READACCT, READCARD, READCUST, READXREF and TXT2PDF1 (`app/scheduler/CardDemo.ca7:51`, `app/scheduler/CardDemo.ca7:476`, `app/scheduler/CardDemo.ca7:545`, `app/scheduler/CardDemo.ca7:348`, `app/scheduler/CardDemo.ca7:375`, `app/scheduler/CardDemo.ca7:402`, `app/scheduler/CardDemo.ca7:429`, `app/scheduler/CardDemo.ca7:503`). Eight of the 35 unscheduled jobs are therefore scheduled. The other 27 include the transaction report job TRANREPT.

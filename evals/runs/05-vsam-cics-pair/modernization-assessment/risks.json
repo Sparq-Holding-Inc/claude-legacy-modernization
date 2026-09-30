@@ -1,55 +1,47 @@
 {
-  "units": [
+ "units": [
+  {
+   "id": "PROGR",
+   "port_difficulty": {
+    "score": 2,
+    "why": "One CICS READ into a copybook record and a RETURN, with no arithmetic or branching. The only care is decoding the packed decimal ACCT-BAL and the display key ACCT-ID."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Read-only against the ACCTDAT file and reversible by routing transaction TRNR back to the old program. A wrong decode of ACCT-BAL would be silent, but nothing in the tree consumes what it reads."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "Reads the ACCTDAT file that PROGW writes, with the same ACCTREC layout on both sides.",
+   "confidence": "medium",
+   "evidence": [
     {
-      "id": "PROGR",
-      "port_difficulty": {
-        "score": 2,
-        "why": "One CICS READ into a two-field record and a RETURN, no branching or arithmetic. The only hazard is exposing the COMP-3 balance as a decimal type."
-      },
-      "blast_radius": {
-        "score": 2,
-        "why": "Read only, so a wrong result is reversible by routing TRNR back. The program never uses the record it reads, so a bad read is loud only if the READ itself fails."
-      },
-      "quadrant": "low-low",
-      "wave": 1,
-      "driving_fact": "Reads ACCTDAT with the ACCTREC layout that PROGW writes, so the read must decode the same 17 byte record the writer produces.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/cbl/PROGR.cbl",
-          "line": 7
-        },
-        {
-          "file": "app/cpy/ACCTREC.cpy",
-          "line": 3
-        }
-      ]
-    },
-    {
-      "id": "PROGW",
-      "port_difficulty": {
-        "score": 2,
-        "why": "One CICS WRITE and a RETURN, no logic. The packed decimal balance must be written byte for byte, and the WRITE semantics (add only, duplicate key, commit at RETURN) must be kept."
-      },
-      "blast_radius": {
-        "score": 4,
-        "why": "Only writer of the account KSDS in the tree. A wrong layout or key is silent, the write is not reversible from the program, and every reader of the file, including any unseen nightly batch job, would see it."
-      },
-      "quadrant": "low-high",
-      "wave": 2,
-      "driving_fact": "Writes the KSDS that PROGR reads through the same ACCTREC copybook, and the tree does not contain the nightly batch cycle that may also use the file.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/cbl/PROGW.cbl",
-          "line": 7
-        },
-        {
-          "file": "app/cpy/ACCTREC.cpy",
-          "line": 3
-        }
-      ]
+     "file": "app/cbl/PROGR.cbl",
+     "line": 7
     }
-  ],
-  "do_not_port": []
+   ]
+  },
+  {
+   "id": "PROGW",
+   "port_difficulty": {
+    "score": 2,
+    "why": "One CICS WRITE from a copybook record and a RETURN, with no arithmetic or branching. The port is plumbing. The packed decimal ACCT-BAL is written as is, and neither program moves a value into ACCT-ID or ACCT-BAL, so what it writes cannot be derived from the source."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Writes the account balance record to a VSAM KSDS, a system of record, and a write cannot be rolled back by rerouting the transaction. A layout or packed decimal error is silent. Any nightly batch reader or writer of the same file is outside the tree, so the score could be 5."
+   },
+   "quadrant": "low-high",
+   "wave": 2,
+   "driving_fact": "The only writer of the ACCTDAT file in the tree, and the nightly batch cycle that must not break is not in the tree, so its use of this file is unknown.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/PROGW.cbl",
+     "line": 7
+    }
+   ]
+  }
+ ],
+ "do_not_port": []
 }

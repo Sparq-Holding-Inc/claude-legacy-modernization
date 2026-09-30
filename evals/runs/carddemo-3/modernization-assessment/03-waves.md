@@ -1,78 +1,145 @@
 # 03 Waves
 
-Target state: refactor, meaning the same behavior in restructured code, in services, in the same or a new language. Seven waves. The machine-readable plan is `modernization-assessment/waves.json`. It starts from the extractor's seed (`03a-wave-seed.md`) and changes it only for reasons I can cite. There are 18 recorded deviations, listed below. Every unit in the plan is a node in `graph.json`.
+Target state: refactor (same behavior, restructured code). The plan starts from the extractor's seed (`modernization-assessment/03a-wave-seed.md`) and changes it in 13 places, each for a reason I can cite. Every change is in `modernization-assessment/waves.json` under `deviations` and repeated below. Scores come from `modernization-assessment/risks.json`.
 
-## The plan
+## The plan at a glance
 
 | Wave | Name | Units | Blast radius | Confidence | Evidence |
 |---|---|---|---|---|---|
-| 1 | Batch brackets, GDG bases and utility definers | 17 | medium | medium | `app/jcl/CLOSEFIL.jcl:26`, `app/jcl/DEFGDGB.jcl:24`, `app/jcl/DALYREJS.jcl:24` |
-| 2 | Read-only extract and print batch | 15 | low | medium | `app/jcl/READACCT.jcl:32`, `app/cbl/CBACT01C.cbl:231` |
-| 3 | Sign-on, menu and read-only online screens | 7 | medium | medium | `app/cbl/COSGN00C.cbl:223`, `app/cpy/COMEN02Y.cpy:21` |
-| 4 | Master data loaders and reference data jobs | 29 | high | medium | `scripts/remote_refresh.sh:16`, `app/jcl/ACCTFILE.jcl:40`, `app/jcl/CARDFILE.jcl:85` |
-| 5 | Daily posting, interest, transaction report and statements | 23 | high | medium | `app/jcl/POSTTRAN.jcl:23`, `app/jcl/TRANREPT.jcl:59`, `app/cbl/CBTRN02C.cbl:256` |
-| 6 | Online writers: accounts, cards, bill payment, transactions, users | 9 | high | medium | `app/cbl/COACTUPC.cbl:4066`, `app/cbl/COBIL00C.cbl:212` |
-| 7 | IMS, DB2 and MQ subsystem | 23 | high | low | `app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl:25`, `app/app-transaction-type-db2/jcl/MNTTRDB2.jcl:30` |
+| 1 | Setup utilities and CICS file fences | 8 | medium | medium | `app/jcl/CLOSEFIL.jcl:26` |
+| 2 | Read only batch and the import job | 12 | low | medium | `app/jcl/READACCT.jcl:1` |
+| 3 | Sign on, menus and read only screens | 7 | medium | low | `app/csd/CARDDEMO.CSD:317` |
+| 4 | Build and demo jobs | 11 | low | medium | `app/jcl/DEFGDGD.jcl:39` |
+| 5 | Batch that writes the shared masters | 51 | high | medium | `app/jcl/POSTTRAN.jcl:23` |
+| 6 | Online writers | 9 | high | low | `app/cbl/COACTUPC.cbl:573` |
+| 7 | IMS, DB2 and MQ subsystems | 25 | high | low | `app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl:956` |
 
-One unit is not placed: CBTRN01C. Nothing in the tree runs it. See `05-dead-code.md`.
+One unit is not placed: CBTRN01C, in the unknown dead code bucket (`modernization-assessment/05-dead-code.md`). Waves 3, 6 and 7 hold programs with computed calls, so none of them can be `high` confidence, and none is.
 
-The order follows the seed's families: batch with no application program, read-only batch, read-only online, batch data jobs, batch writers, online writers, subsystems. The seed is a sound default for a system where the shared data is the hard part, because it moves readers before writers and leaves the shared stores for last. The extractor cannot see inside in-stream cards, JCL text in COBOL and program names in a PARM, so it mis-filed some units. My own risk scoring moved a few more. Those are the 18 deviations.
+## Do the waves pass the four tests
 
-## Why each wave passes the four tests
+A wave is valid only if it can be deployed independently, rolled back independently, has a testable boundary, and delivers something a stakeholder can name.
 
-A wave is valid only if it deploys independently, rolls back independently, has a testable boundary and delivers something a stakeholder can name.
-
-| Wave | Deploys behind a flag or facade | Rolls back by | Testable boundary | What a stakeholder can name | Evidence |
+| Wave | Deploy alone | Roll back alone | Testable boundary | Nameable deliverable | Evidence |
 |---|---|---|---|---|---|
-| 1 | The scheduler runs the ported bracket jobs against the legacy CICS region. | Point the scheduler back at the old JCL. | Return codes and GDG bases created. | "The batch scheduler runs on the new platform." | `app/jcl/CLOSEFIL.jcl:26` |
-| 2 | Each program runs beside the legacy one on the same masters. | Stop running the ported job. | Diff of the printed files (the READ jobs write files nobody else reads). | "Master data can be read and printed from the new platform." | `app/jcl/READACCT.jcl:32` |
-| 3 | A router in front of the CICS regions sends sign-on, menu and the list and view screens to the new UI and everything else to CICS. | Route back. | Screen contents for a fixed set of user actions against the seed masters. | "Users sign on and browse on the new platform." | `app/cpy/COMEN02Y.cpy:21` |
-| 4 | The loaders run against the shared store through the data facade. | Reload from the PS files with the legacy loader. | Record counts and a read-back through the wave 2 print jobs. | "Master data can be refreshed from the new platform." | `scripts/remote_refresh.sh:16` |
-| 5 | The posting, interest and report jobs run through the data facade while the online writers stay on CICS. | Restore a pre-run snapshot of ACCTDATA, TCATBALF and the transaction master, and rerun the legacy job. The legacy cycle snapshots only the transaction master (TRANBKP) and reloads the other two from PS files, so the port must add the snapshot. | Daily file in. Masters, DALYREJS and TRANREPT out. | "Daily posting and the transaction report run on the new platform." | `app/jcl/POSTTRAN.jcl:23`, `scripts/run_posting.sh:17`, `scripts/run_posting.sh:23` |
-| 6 | The online writers move behind the router. | Route back and restore the masters from backup. | Screen and master contents after a scripted sequence. | "CICS is retired for this application." | `app/cbl/COACTUPC.cbl:4066` |
-| 7 | Each subsystem moves with its data store. | Per subsystem. Not assessed here. | Not assessed here. | "The mainframe is retired." | inference: the DB2, IMS and MQ definitions are not parsed |
+| 1 | yes | yes | weak: no logic | no. It is a chore. | `app/jcl/CBADMCDJ.jcl:27` |
+| 2 | yes | yes, discard the output | yes, file diff | yes: the record layouts and first golden masters | `app/cbl/CBACT01C.cbl:231` |
+| 3 | only behind a router facade | yes, route back at the facade | yes, screen and reply diff | yes: browse on the new stack | `app/cbl/COMEN01C.cbl:156` |
+| 4 | yes | yes | weak | no. It is a chore. | `app/jcl/TXT2PDF1.JCL:31` |
+| 5 | only with a data access facade over the masters | yes, if the legacy job stays runnable on a frozen copy | yes, replay diff | yes: the nightly batch window | `app/jcl/POSTTRAN.jcl:23` |
+| 6 | only with the same facade | yes | yes | yes: online maintenance | `app/cbl/COBIL00C.cbl:212` |
+| 7 | not until IMS and MQ targets are chosen | unknown | not assessable | yes | inference |
 
-Wave 5 is only valid if the VSAM masters are served through one data facade to both the new batch and the legacy online programs. ACCTDATA has four writers and TRANSACT has three across waves 5 and 6 (`02-coupling.md`). Without the facade, wave 5 splits the writers of one file across two platforms and fails the "deploys independently" test. This is what I would put behind a facade so that a high-high unit can move: a record-level access service that owns the ACCTDATA, TRANSACT, TCATBALF, CARDXREF and CUSTDATA files, honors the CLOSEFIL and OPENFIL window, and keeps the 300 and 350 byte layouts.
+Waves 1 and 4 fail the fourth test and I kept them anyway, because the plan should not invent or merge waves for tidiness. Wave 1 and wave 4 are chores, and the recommendation is to retire most of them and run them alongside wave 2, not before it. Nothing in them proves the port toolchain, so wave 2 is the real first wave.
 
-## What moved and why
+## Where the plan puts the risk
 
-These are the changes to the seed. Reason 3 in the skill is "something the extractor could not see changes what a unit is". Reason 1 is a must-not-break item or a dependency. Each row has cited evidence.
+The plan puts 15 high-high units in wave 5 of 7, 4 in wave 6 and 7 in wave 7. None is in the first half. The three must-not-break items are in wave 5, not last, because the online writers of wave 6 and everything in wave 3 read the datasets they write. They cannot move last. What has to sit behind a facade first is the set of shared VSAM masters (account, card, cross reference, customer, transaction, category balance): a data access service that both the legacy CICS programs and the new batch code call, so that the writer can move without moving every reader. Without it, wave 5 has no safe way to hand the files over.
+
+## Where each must-not-break item lands
+
+| Must not break | Client's words mapped to units | Wave | Confidence | Evidence |
+|---|---|---|---|---|
+| Daily transaction posting | job:POSTTRAN, CBTRN02C, and the chain job:TRANBKP, job:COMBTRAN, job:TRANIDX around it | 5 | high | `app/jcl/POSTTRAN.jcl:23`, `app/cbl/CBTRN02C.cbl:256` |
+| The account and card master refresh | job:ACCTFILE and job:CARDFILE, listed as "Refresh Account Master file" and "Refresh Card Master", with companions job:CUSTFILE and job:XREFFILE. My mapping from the captions, inference. | 5 | medium | `scripts/remote_refresh.sh:16`, `scripts/remote_refresh.sh:19` |
+| The transaction report | job:TRANREPT, proc:TRANREPT, CBTRN03C, and the online request CORPT00C | 5 | high | `app/jcl/TRANREPT.jcl:59`, `app/cbl/CORPT00C.cbl:94` |
+
+The "master refresh" mapping is the weakest. The tree has no program or job called refresh. It is named only in the wrapper's comments. It could also mean the READACCT and READCARD listing jobs, or the online update programs COACTUPC and COCRDUPC. That is in Open Questions.
+
+## Wave by wave
+
+### Wave 1. Setup utilities and CICS file fences
+
+Units: job:CBADMCDJ, job:CLOSEFIL, job:DEFCUST, job:ESDSRRDS, job:FTPJCLS, job:LISTFILS, job:OPENFIL, job:RACFCMDS.
+
+- Rationale. These jobs run no application program. CLOSEFIL and OPENFIL send CEMT commands to CICS region CICSAWSA (`app/jcl/CLOSEFIL.jcl:26`) and work unchanged on the mainframe, so they need no port until wave 5. Most of the rest is retirement: `do_not_port` lists FTPJCLS, DEFCUST, ESDSRRDS, LISTFILS, RACFCMDS and CBADMCDJ.
+- Port order. Nothing has to be ported. First find and remove the clear text login in `app/jcl/FTPJCL.JCL:33`, and rotate it.
+- Test harness. None needed. A pipeline dry run is enough.
+- Rollback. The JCL is unchanged. Nothing moves.
+
+### Wave 2. Read only batch and the import job
+
+Units: CBACT01C, CBACT02C, CBACT03C, CBCUS01C, CBIMPORT, COBSWAIT, job:CBIMPORT, job:READACCT, job:READCARD, job:READCUST, job:READXREF, job:WAITSTEP.
+
+- Port order. CBACT02C, CBACT03C, CBCUS01C (plain read and print), then CBACT01C (replace assembler COBDATFT, `app/cbl/CBACT01C.cbl:231`), then COBSWAIT and WAITSTEP (replace the assembler wait with a sleep, and see the note on the 36 second delay in `modernization-assessment/02-coupling.md`), then CBIMPORT once its job has the missing CARDOUT DD (`app/cbl/CBIMPORT.cbl:63`).
+- Test harness. Golden master from the sample inputs in `app/data/EBCDIC` and `app/data/ASCII`, run through the legacy programs on the client's emulator (`samples/m2`) to capture SYSOUT. Decimal type with zero tolerance for money fields, following the copybooks `app/cpy/CVACT01Y.cpy:7`.
+- Rollback. Run the legacy job. Output is discarded.
+- Note. CBCUS01C prints every customer record, including the SSN, to SYSOUT (`app/cbl/CBCUS01C.cbl:78`). Do not copy that into a new logging path.
+
+### Wave 3. Sign on, menus and read only screens
+
+Units: COACTVWC, COADM01C, COCRDSLC, COMEN01C, COSGN00C, COTRN00C, COTRN01C.
+
+- Port order. COTRN00C and COTRN01C as a pair, COACTVWC, COCRDSLC, and last the router component COSGN00C, COMEN01C, COADM01C as one unit behind a facade that can still dispatch by program name to legacy transactions (`app/cpy/COMEN02Y.cpy:28`).
+- Test harness. Screen level replay: captured 3270 input and expected map output, or characterization tests marked provisional. The oracle is the weakest of any wave.
+- Rollback. Point the router back at the CICS transaction. Sign on is a data change too: COSGN00C compares a clear text password field (`app/cbl/COSGN00C.cbl:223`), and `risks.json` recommends replacing it with an identity provider, not porting it.
+- Dependency. These programs read masters that legacy batch still writes, so a read path over the legacy VSAM files, or a replicated copy with a known lag, is required until wave 5.
+
+### Wave 4. Build and demo jobs
+
+Units: job:CBLDBMS, job:CICCMP, job:CNJBATMP, job:DEFGDGD, job:IMSMQCMP, job:INTRDRJ1, job:INTRDRJ2, job:TXT2PDF1, proc:BUILDBAT, proc:BUILDBMS, proc:BUILDONL.
+
+- Port order. Retire the seven build jobs and procs (replace with the new pipeline). Move DEFGDGD (generation bases for reference data backups) and TXT2PDF1 into the wave 5 statement work: TXT2PDF1 needs the REXX exec library at `app/jcl/TXT2PDF1.JCL:31`, which is not in the tree.
+- Test harness. None for the build jobs. TXT2PDF1 is diffed with the statement output in wave 5.
+- Rollback. Keep the mainframe build until the new pipeline builds wave 7's sources.
+
+### Wave 5. Batch that writes the shared masters
+
+Units: 51, listed in `modernization-assessment/waves.json`. The internal order below is my recommendation, and each step is a sub-deliverable of the one wave. It is not a new wave.
+
+| Step | Units | Why here | Confidence | Evidence |
+|---|---|---|---|---|
+| 5.0 Data facade and generation bases | A data access service over the VSAM masters. DEFGDGB, DALYREJS, REPTFILE (fix the two limits for TRANREPT first). | Everything after it writes through the facade. The two definitions of TRANREPT disagree on retention. | medium | `app/jcl/DEFGDGB.jcl:38`, `app/jcl/REPTFILE.jcl:27` |
+| 5.1 Reference data reloads | TRANTYPE, TRANCATG, DISCGRP, DUSRSECJ | Read only by later steps, so they prove the reload pattern with the lowest blast. DISCGRP feeds the interest rate. | medium | `app/jcl/DISCGRP.jcl:36` |
+| 5.2 Master reloads (must-not-break refresh) | XREFFILE, CUSTFILE, ACCTFILE, CARDFILE, TCATBALF, TRANFILE | Order follows the wrapper. Verify the CICS fences per job first. ACCTFILE and XREFFILE have none of their own. | medium | `scripts/remote_refresh.sh:16`, `app/jcl/ACCTFILE.jcl:25` |
+| 5.3 Daily posting (must-not-break) | TRANBKP, POSTTRAN with CBTRN02C, COMBTRAN, TRANIDX | Parallel run against production input for at least one month end. Port CBTRN02C alone, keep TRANBKP and COMBTRAN on legacy until posting matches. | medium | `scripts/run_posting.sh:23`, `app/cbl/CBTRN02C.cbl:256` |
+| 5.4 Interest | INTCALC with CBACT04C | Needs posting stable first, since it reads the category balances that CBTRN02C updates. | medium | `app/cbl/CBACT04C.cbl:464`, `app/jcl/INTCALC.jcl:22` |
+| 5.5 Report (must-not-break) | CSUTLDTC, CBTRN03C, proc TRANREPT, job TRANREPT, CORPT00C, PRTCATBL | The online request and the batch report move together. The date window hard coded in the batch job has to become a parameter. | medium | `app/jcl/TRANREPT.jcl:43`, `app/cbl/CORPT00C.cbl:94` |
+| 5.6 Statements and export | CREASTMT, CBSTM03A, CBSTM03B, CBEXPORT, job CBEXPORT | Rewrite CBSTM03A from its behavior (ALTER and control block code), do not transliterate it. | low | `app/cbl/CBSTM03A.CBL:300` |
+| 5.7 Scheduler cut over | The nine Control-M entries and four wrapper scripts, one folder at a time | Each folder cuts over as a unit. Bridge the CA-7 trigger from CBPAUP0J to POSTTRAN and the Control-M gate from MNTTRDB2 until wave 7. | low | `app/scheduler/CardDemo.ca7:70`, `app/scheduler/CardDemo.controlm:34` |
+
+- Test harness. See `modernization-assessment/06-test-strategy.md`. Parallel run for 5.3 and 5.4, golden masters from GDG generations for 5.5, byte compare of the reload targets for 5.1 and 5.2.
+- Rollback. Keep the legacy job runnable on a frozen copy of each master until parallel runs are clean for a full cycle. Restore from the backup generation: the generation groups keep five generations (`app/jcl/DEFGDGB.jcl:26`), so a rollback point older than five runs does not exist. Say so to the client.
+- Do not port: job:REPRTEST and job:SORTTEST are samples that the seed placed here.
+
+### Wave 6. Online writers
+
+Units: COACTUPC, COBIL00C, COCRDLIC, COCRDUPC, COTRN02C, COUSR00C, COUSR01C, COUSR02C, COUSR03C.
+
+- Port order. COUSR00C to COUSR03C first (small, but sign on reads their file), then COTRN02C, COCRDLIC with COCRDUPC, COBIL00C (new transaction id scheme, not read last key plus one: `app/cbl/COBIL00C.cbl:212`), and last COACTUPC (about 4,200 lines, 43 REDEFINES, `app/cbl/COACTUPC.cbl:3888`).
+- Test harness. Screen replay plus a database diff of the masters after each scripted scenario. Add concurrency cases for the transaction id.
+- Rollback. Router flag back to the CICS transaction, which is only safe while the legacy masters still get every write. That is the reason the facade from wave 5 has to stay until this wave ends.
+
+### Wave 7. IMS, DB2 and MQ subsystems
+
+Units: 25, listed in `modernization-assessment/waves.json`.
+
+- Port order. Decide the target for IMS, DB2 and MQ first. Then DB2 (COTRTLIC, COTRTUPC, COBTUPDT, CREADB2, MNTTRDB2, TRANEXTR), then the IMS unload and load utilities, then the authorization decision COPAUA0C with its viewers (COPAUS0C and COPAUS1C move together), then MQ services COACCT01 and CODATE01.
+- Test harness. Not assessable from this tree: DBD, PSB, DDL and MQ definitions are not read. Ask for them.
+- Rollback. Unknown.
+
+## Changes to the extractor's seed
 
 | Unit | From | To | Reason | Evidence |
 |---|---|---|---|---|
-| CORPT00C | 3 | 5 | Embedded JCL. It builds the job that runs the report and writes it to the JOBS queue. It is the online front of the must-not-break report, so it moves with the report. The menu in wave 3 must route to the legacy program until wave 5. | `app/cbl/CORPT00C.cbl:94`, `app/cbl/CORPT00C.cbl:517` |
-| proc:TRANREPT | not placed | 5 | The proc that program's embedded JCL runs. | `app/proc/TRANREPT.prc:1` |
-| CSUTLDTC | 3 | 5 | The seed moves a shared unit with its earliest user. With CORPT00C in wave 5, nothing in wave 3 calls it. | `app/cbl/CORPT00C.cbl:392`, `app/cbl/COTRN02C.cbl:393` |
-| job:TRANIDX | 1 | 5 | IDCAMS cards are not read. It builds the alternate index over the shared transaction master, after POSTTRAN, every cycle. | `app/jcl/TRANIDX.jcl:53`, `scripts/run_posting.sh:30` |
-| job:TRANBKP, sch:DAILY-TransactionBackup/TRANBKP | 4 | 5 | It empties the master that CBTRN02C opens OUTPUT. They share one lifecycle. Also high-high in `risks.json`, so it goes to the last wave that keeps the lifecycle inside one boundary. | `app/jcl/TRANBKP.jcl:40`, `app/cbl/CBTRN02C.cbl:256` |
-| job:COMBTRAN, sch:MONTHLY-InterestCalculation/COMBTRAN | 4 | 5 | It rebuilds the master from the TRANBKP generation and the INTCALC output. High-high in `risks.json`. | `app/jcl/COMBTRAN.jcl:22`, `app/jcl/INTCALC.jcl:41` |
-| job:MNTTRDB2, sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2, COBTUPDT | 1, 1, not placed | 7 | An in-stream `RUN PROGRAM(COBTUPDT)` card. It is a DB2 batch program. | `app/app-transaction-type-db2/jcl/MNTTRDB2.jcl:30` |
-| job:TRANEXTR, sch:WEEKLY-TransactionTypesDBRefresh/TRANEXTR | 1 | 7 | In-stream DSNTIAUL SQL against the transaction type tables. | `app/app-transaction-type-db2/jcl/TRANEXTR.jcl:65` |
-| job:CREADB2 | 1 | 7 | DB2 create and load steps. | `app/app-transaction-type-db2/jcl/CREADB21.jcl:52` |
-| CBPAUP0C, DBUNLDGS, PAUDBLOD, PAUDBUNL | not placed | 7 | Named in the IMS driver PARM of jobs in wave 7. | `app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl:25`, `app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL:27`, `app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL:27`, `app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL:39` |
+| CORPT00C | 3 | 5 | Must-not-break transaction report. The online request builds JCL for proc TRANREPT and writes it to an internal reader queue. Porting it early builds a bridge to legacy JCL that wave 5 throws away. | `app/cbl/CORPT00C.cbl:94`, `app/cbl/CORPT00C.cbl:517`, `app/csd/CARDDEMO.CSD:499` |
+| proc:TRANREPT | not placed | 5 | Named only in JCL text inside COBOL, so the seed left it out. It runs CBTRN03C for the report. | `app/cbl/CORPT00C.cbl:94`, `app/proc/TRANREPT.prc:1` |
+| CSUTLDTC | 3 | 5 | A callee moves with the earliest family of its callers. After CORPT00C moved, the callers are in waves 5 and 6. Also high-high in `risks.json`. | `app/cbl/CORPT00C.cbl:392`, `app/cbl/COTRN02C.cbl:393`, `app/cbl/COACTUPC.cbl:4232` |
+| job:CREADB2 | 1 | 7 | The steps are DB2 utilities driven by control members that the extractor does not read, so the seed saw no DB2 use. | `app/app-transaction-type-db2/jcl/CREADB21.jcl:52`, `app/app-transaction-type-db2/jcl/CREADB21.jcl:65` |
+| sch:DAILY-TransactionBackup/CLOSEFIL | 1 | 5 | The folder is one high confidence chain ending in wave 5 job TRANBKP. A chain split across waves cannot be cut over as a unit. | `app/scheduler/CardDemo.controlm:5`, `app/scheduler/CardDemo.controlm:9` |
+| sch:DAILY-TransactionBackup/WAITSTEP | 2 | 5 | Same chain. | `app/scheduler/CardDemo.controlm:11`, `app/scheduler/CardDemo.controlm:15` |
+| sch:DAILY-TransactionBackup/OPENFIL | 1 | 5 | Same chain. | `app/scheduler/CardDemo.controlm:17`, `app/scheduler/CardDemo.controlm:21` |
+| sch:MONTHLY-InterestCalculation/CLOSEFIL | 1 | 5 | Chain ending in wave 5 jobs INTCALC and COMBTRAN. | `app/scheduler/CardDemo.controlm:66`, `app/scheduler/CardDemo.controlm:70` |
+| sch:MONTHLY-InterestCalculation/WAITSTEP | 2 | 5 | Same chain. | `app/scheduler/CardDemo.controlm:78`, `app/scheduler/CardDemo.controlm:82` |
+| sch:MONTHLY-InterestCalculation/OPENFIL | 1 | 5 | Same chain. | `app/scheduler/CardDemo.controlm:84`, `app/scheduler/CardDemo.controlm:88` |
+| sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL | 1 | 5 | Chain ending in wave 5 job DISCGRP. It also waits for a wave 7 condition (MNTTRDB2), which needs a bridge, and I left that as a dependency, not a move. | `app/scheduler/CardDemo.controlm:35`, `app/scheduler/CardDemo.controlm:34` |
+| sch:WEEKLY-DisclosureGroupsRefresh/WAITSTEP | 2 | 5 | Same chain. | `app/scheduler/CardDemo.controlm:41`, `app/scheduler/CardDemo.controlm:45` |
+| sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL | 1 | 5 | Same chain. | `app/scheduler/CardDemo.controlm:47`, `app/scheduler/CardDemo.controlm:51` |
 
-## What I checked and left alone
+The JCL jobs CLOSEFIL, OPENFIL and WAITSTEP stay in waves 1 and 2, because a job definition can be ported ahead of the schedule that uses it. I did not move any unit because of its name, and I did not merge or cut waves. Wave 5 has 51 units and one argument describes it, so it needs no cut (see the rule in the skill), but the order inside it matters more than the wave boundary.
 
-| Question | Decision | Evidence |
+## What could not be sequenced
+
+| Unit | Reason | Evidence |
 |---|---|---|
-| Wave 4 holds 29 units, above the 25 unit line. Does an argument need it cut? | No. Eleven of the 29 are mainframe build and test tooling (five sample compile jobs, four build procs, REPRTEST, SORTTEST) and are retired, not ported. That leaves 18 to move. Two more (INTRDRJ1 and INTRDRJ2) are provisional retirements. No cut and no articulation point is needed. | `samples/jcl/BMSCMP.jcl:38`, analysis: `do_not_port` in `risks.json` |
-| Should the wave 4 loaders go later, since a loader is not needed by wave 2 or 3 readers? | No. The loaders are how the seed data gets reloaded before every wave 5 and wave 6 test run, and the client named the refresh as must-not-break. | `scripts/remote_refresh.sh:16`, `scripts/remote_refresh.sh:20` |
-| CARDFILE is high-high and sits at wave 4. Rule: move it to the last wave that breaks no dependency. | It stays. ACCTFILE and CARDFILE are the two halves of one must-not-break item, and splitting that item across waves 4 and 5 is worse than one high-high unit at the middle of the plan. It is a loader with a bounded blast radius (card master only) and a read-back check in wave 2. Dependency and the must-not-break item win over the quadrant. | `scripts/remote_refresh.sh:16`, `scripts/remote_refresh.sh:20` |
-| XREFFILE and TRANFILE were first scored high-high. | Rescored to 2 for port difficulty. They are the same delete, define and REPRO pattern as ACCTFILE, plus an alternate index. The offsets in the alternate index are still a contract, and the test strategy covers them. | `app/jcl/TRANFILE.jcl:82`, `app/jcl/CARDFILE.jcl:85` |
-| Any high-high unit in the first half (waves 1 to 3)? | None. Waves 1 to 3 hold only low-low, low-high and high-low units. | analysis: `quadrant` in `risks.json` |
-| Is any strongly connected component split? | No. The validator checks it. | analysis: `sccs` in `graph.json` |
-| Wave 7 is the last wave and holds most of the high-high units. Is that a problem? | It is the plan. COPAUA0C (real-time card authorization) scores 5 and 5 and should be strangled behind a facade, not ported. The wave is the least certain because none of DB2, IMS or MQ is parsed here. | `app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl:400` |
-
-## Units retired instead of ported
-
-These are in `do_not_port` in `risks.json`. A team that ports them pays for them twice. Five are the mainframe compile jobs and four are the build procs they use, all under `samples/`. REPRTEST, SORTTEST and LISTFILS are test and listing jobs. RACFCMDS holds RACF definitions that should be translated into the target identity service, not ported as code. UNUSED1Y is a copybook nothing includes. DEFCUST, INTRDRJ1 and INTRDRJ2 are provisional: ask the client first.
-
-## What the plan does not settle
-
-Three items outside the plan that will change it.
-
-| Item | Why it can change the plan | Evidence |
-|---|---|---|
-| The CA-7 listing says CBPAUP0J triggers POSTTRAN. If that is the live schedule, wave 5 depends on a wave 7 job. | The scheduler must keep running across platforms, or the trigger is re-cut. | `app/scheduler/CardDemo.ca7:43`, `app/scheduler/CardDemo.ca7:70` |
-| Telemetry is none. Any unit I placed as live because a job names it may not run. | A unit that never runs drops out of its wave. | inference |
-| DB2, IMS and MQ definitions are not parsed. | Wave 7 grows or splits once someone reads them. | inference |
+| CBTRN01C | Not reached by any static edge. Named by no JCL, CSD or program. Bounded computed calls do not name it, but that is inference, so it stays unknown. Ask whether someone runs it by hand. | `app/cbl/CBTRN01C.cbl:1` |

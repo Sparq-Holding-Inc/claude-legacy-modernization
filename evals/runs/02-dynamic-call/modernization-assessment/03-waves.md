@@ -1,45 +1,53 @@
 # 03 Waves
 
-Target state: refactor. The plan is in `modernization-assessment/waves.json`.
+Target state: refactor. The number of waves is zero.
 
-## What the seed gave
+## Why there is no wave plan
 
-The extractor's seed put no unit in any wave. The tree has no JCL job, scheduler job, CSD transaction or shell wrapper, so there is no entry point, and the seed places a unit only by the family of the entry points that use it (`03a-wave-seed.md`). Both programs came back as not placed, because a computed call could reach them (analysis field `wave_seed`, `app/cbl/PROGA.cbl:9`).
+The extractor finds no entry point in this tree: no JCL job, no CSD transaction, no scheduler job and
+no shell wrapper (`03a-wave-seed.md`, analysis `entry_points` is empty). A wave is built from the
+family of the entry points that use a unit. With no entry point there is no family, so the seed
+places nothing. `03a-waves-draft.json` has an empty `waves` list and both programs in `unassigned`.
+I kept that. `waves.json` has `"waves": []` and lists `PROGA` and `PROGB` in `unassigned`, with a
+reason for each. I invented no wave and made no deviation.
 
-## The plan
+Nothing can be sequenced until the client supplies JCL, a CSD or a scheduler export.
 
-| Wave | Units | Family | Blast radius | Confidence | Evidence |
-|---|---|---|---|---|---|
-| 1 | PROGA, PROGB | none. The seed placed nothing. | high | low | `modernization-assessment/waves.json:5`, `app/cbl/PROGA.cbl:9`. Inference: the grouping is forced, not derived from a family. |
+## Units not placed
 
-One wave. I did not cut more, because nothing in the graph supports a cut: no strongly connected component, no articulation point and no god module (`02-coupling.md`).
+| Unit | Reason | Confidence | Evidence |
+|---|---|---|---|
+| `PROGA` | No entry point names it. It makes a computed call, so what it starts is unknown. | high | `app/cbl/PROGA.cbl:9` |
+| `PROGB` | No entry point and no static caller. `PROGA`'s computed call could name it, and that cannot be proven or ruled out. | high | `app/cbl/PROGB.cbl:1`, `app/cbl/PROGA.cbl:9` |
 
-Why the wave exists at all: `schema.py` rejects a `waves.json` with an empty `waves` list, so a plan that placed no unit could not pass validation. The two programs are put together in one wave as a deviation, not because a family says so. This is a limit of the plan, not a finding about the system. A real wave plan needs the JCL and scheduler files that the tree lacks.
+## The four tests for a valid wave, and where each fails
 
-The four tests for a valid wave, for wave 1:
-
-| Test | Holds? | Evidence |
+| Test | Result for this tree | Evidence |
 |---|---|---|
-| Deployable independently, behind a flag or a facade | Yes, if a program registry sits in front of the dynamic `CALL` | `app/cbl/PROGA.cbl:9`. Inference. |
-| Rollback independently | Yes, since neither program writes data | inference |
-| Testable boundary | Only once the `ACCEPT` input and the called program's output are captured. Not shown in the tree. | `app/cbl/PROGA.cbl:8`. Inference. |
-| Delivers something a stakeholder can name | No. Nothing in the tree ties to the nightly batch cycle. This wave is a chore until the real cycle is supplied. | inference |
+| Can deploy independently, behind a flag or facade | Cannot be answered. No entry point shows how either program is started. | analysis (`entry_points`, warning "No entry points were found") |
+| Can roll back independently | Cannot be answered for the same reason. | analysis (`entry_points`) |
+| Has a testable boundary | The boundary of `PROGA` is the name it reads and whatever that program does. The name source is not in the tree. | `app/cbl/PROGA.cbl:8` |
+| Delivers something a stakeholder can name | Cannot be answered. The must-not-break item, the nightly batch cycle, maps to no unit in the tree. | inference |
 
-## What the wave unblocks
+## Risk quadrants, for when the plan exists
 
-Nothing that can be shown from this tree. Its value is that the registry list it produces (every program name the input can carry) is the first input the rest of the wave plan needs. Inference.
+`risks.json` scores both programs. `PROGB` is low-low, and `PROGA` is low-high on thin evidence. If
+JCL later shows `PROGA` is the driver of the nightly cycle, it stops being a candidate for an early
+wave. Its blast radius would then be the whole cycle, and the computed call would be the thing to put
+behind a facade first. That is a possibility, not a finding, because nothing in the tree ties
+`PROGA` to the nightly cycle.
 
-## Where the risk quadrant and the plan disagree
+| Unit | Port difficulty | Blast radius | Quadrant | Confidence | Evidence |
+|---|---|---|---|---|---|
+| `PROGA` | 2 | 3 | low-high | low | `app/cbl/PROGA.cbl:9` |
+| `PROGB` | 1 | 1 | low-low | medium | `app/cbl/PROGB.cbl:4` |
 
-`PROGA` is high-high (port difficulty 3, blast radius 4, `modernization-assessment/risks.json:5`) and it is in the only wave, so it is in the first half by default. I did not move it, because there is nowhere later to put it. Stated plainly: a high-high unit is in the first wave. What would have to sit behind a facade first is a registry that maps the run-time program name to a known target, and refuses any name not on the list. `PROGB` is low-low.
+## What the client must supply so waves can be cut
 
-## Deviations
+- The JCL that runs `PROGA`, with its SYSIN or PARM. This creates an entry point.
+- The scheduler export for the nightly batch cycle, so that the cycle maps to units and job order
+  becomes a temporal edge.
+- The list of program names that reach the `ACCEPT`, so the computed call can be bounded.
 
-| Unit | From wave | To wave | Reason | Evidence |
-|---|---|---|---|---|
-| PROGA | not placed | 1 | The seed placed nothing because the tree has no entry point. Placed only so the plan has a wave. | `app/cbl/PROGA.cbl:9`. Inference. |
-| PROGB | not placed | 1 | Kept with PROGA because the computed call could name it, so the two cannot be proven independent. | `app/cbl/PROGB.cbl:4`, `app/cbl/PROGA.cbl:9` |
-
-## Not placed
-
-Nothing is left in `unassigned` (`modernization-assessment/waves.json:29`).
+Until then the plan is empty on purpose. A confident plan built on two programs and one unresolved
+call would look rigorous and be wrong.

@@ -1,9 +1,17 @@
 {
-  "telemetry": "none",
-  "unreachable": [],
-  "dormant": [
-    {"id": "OLDPGM", "reason": "Reachable and last modified 2011-03-04, more than 5 years before 2026-09-30, but PGMMAIN calls it unconditionally (first statement, before NEWPGM), so it very likely runs every cycle. Dormant means old, not unused. Instrument it, do not delete it. With no telemetry this claim is provisional.", "confidence": "low",
-     "evidence": [{"file": "app/cbl/OLDPGM.cbl", "line": 1}, {"file": "app/cbl/PGMMAIN.cbl", "line": 4}]}
-  ],
-  "unknown": []
+ "telemetry": "none",
+ "unreachable": [],
+ "dormant": [
+  {
+   "id": "OLDPGM",
+   "reason": "Not modified since 2011-03-04, which is older than 5 years as of 2026-09-30. But PGMMAIN calls it unconditionally at line 4, and PGMMAIN was added in 2026, so it very likely runs on every MAINJOB run. Old, not unused. Instrument it, do not delete it. There is no telemetry, so this is provisional.",
+   "confidence": "medium",
+   "last_modified": "2011-03-04",
+   "evidence": [
+    {"file": "app/cbl/OLDPGM.cbl", "line": 1},
+    {"file": "app/cbl/PGMMAIN.cbl", "line": 4}
+   ]
+  }
+ ],
+ "unknown": []
 }

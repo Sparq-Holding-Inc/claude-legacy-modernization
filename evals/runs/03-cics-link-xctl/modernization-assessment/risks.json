@@ -1,114 +1,117 @@
 {
-  "units": [
+ "units": [
+  {
+   "id": "PROGA",
+   "port_difficulty": {
+    "score": 3,
+    "why": "26 lines of routing, but one LINK target comes from the caller's COMMAREA and cannot be bounded, and LINK returns while XCTL never does."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Sole articulation point: it reaches the three other programs plus an unbounded computed target, but the source reads and writes no dataset and no must-not-break item maps to it."
+   },
+   "quadrant": "high-high",
+   "wave": null,
+   "driving_fact": "LINK PROGRAM(WS-ANY-PGM) at line 16 takes its target from DFHCOMMAREA (line 15), which nothing in the tree sets.",
+   "confidence": "medium",
+   "evidence": [
     {
-      "id": "PROGA",
-      "port_difficulty": {
-        "score": 3,
-        "why": "About 26 lines of pure routing, but one LINK target comes from the caller's COMMAREA, so what it can reach cannot be bounded, and XCTL never returns."
-      },
-      "blast_radius": {
-        "score": 3,
-        "why": "The only program in the tree with callees (fan-out 3) and the articulation point; a wrong port misroutes silently, but nothing in the tree ties it to the nightly batch cycle."
-      },
-      "quadrant": "high-high",
-      "wave": 1,
-      "driving_fact": "Line 15 moves DFHCOMMAREA to WS-ANY-PGM and line 16 LINKs to it, so a caller outside this tree chooses the target program.",
-      "confidence": "low",
-      "evidence": [
-        {
-          "file": "app/cbl/PROGA.cbl",
-          "line": 15
-        },
-        {
-          "file": "app/cbl/PROGA.cbl",
-          "line": 16
-        }
-      ]
+     "file": "app/cbl/PROGA.cbl",
+     "line": 15
     },
     {
-      "id": "PROGB",
-      "port_difficulty": {
-        "score": 1,
-        "why": "Four lines: it only returns to its caller. No logic, no arithmetic, no data."
-      },
-      "blast_radius": {
-        "score": 2,
-        "why": "One static caller, PROGA, which links it first at line 12; a missing program would fail loudly with PGMIDERR, and nothing shows it on the batch path."
-      },
-      "quadrant": "low-low",
-      "wave": 1,
-      "driving_fact": "PROGA links to it by literal name on its first statement, a high confidence call edge.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/cbl/PROGA.cbl",
-          "line": 12
-        },
-        {
-          "file": "app/cbl/PROGB.cbl",
-          "line": 4
-        }
-      ]
+     "file": "app/cbl/PROGA.cbl",
+     "line": 16
     },
     {
-      "id": "PROGC",
-      "port_difficulty": {
-        "score": 1,
-        "why": "Four lines: it only returns. No logic, no arithmetic, no data."
-      },
-      "blast_radius": {
-        "score": 2,
-        "why": "One static caller, PROGA, by XCTL through a field that holds only the literal PROGC; loud failure, and nothing shows it on the batch path."
-      },
-      "quadrant": "low-low",
-      "wave": 1,
-      "driving_fact": "WS-NEXT-PGM is assigned once, at line 19, to PROGC, and line 20 transfers control to it.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/cbl/PROGA.cbl",
-          "line": 19
-        },
-        {
-          "file": "app/cbl/PROGA.cbl",
-          "line": 20
-        },
-        {
-          "file": "app/cbl/PROGC.cbl",
-          "line": 4
-        }
-      ]
-    },
-    {
-      "id": "PROGD",
-      "port_difficulty": {
-        "score": 1,
-        "why": "Four lines: it only returns. No logic, no arithmetic, no data."
-      },
-      "blast_radius": {
-        "score": 1,
-        "why": "Its only static edge is an XCTL that sits after an XCTL that never returns, so PROGA probably never reaches it; only the COMMAREA-driven LINK could."
-      },
-      "quadrant": "low-low",
-      "wave": 1,
-      "driving_fact": "The XCTL to PROGD at line 23 follows an unconditional XCTL at line 20, and XCTL does not return control.",
-      "confidence": "low",
-      "inference": true,
-      "evidence": [
-        {
-          "file": "app/cbl/PROGA.cbl",
-          "line": 20
-        },
-        {
-          "file": "app/cbl/PROGA.cbl",
-          "line": 23
-        },
-        {
-          "file": "app/cbl/PROGD.cbl",
-          "line": 4
-        }
-      ]
+     "file": "app/cbl/PROGA.cbl",
+     "line": 20
     }
-  ],
-  "do_not_port": []
+   ]
+  },
+  {
+   "id": "PROGB",
+   "port_difficulty": {
+    "score": 1,
+    "why": "The whole body is EXEC CICS RETURN, with no logic, no data and no copybook."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Linked from one program, returns to it, touches no dataset. May be a stub, so the real body could be elsewhere."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "Statically linked from PROGA at line 12 and contains only a RETURN.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/PROGB.cbl",
+     "line": 4
+    },
+    {
+     "file": "app/cbl/PROGA.cbl",
+     "line": 12
+    }
+   ]
+  },
+  {
+   "id": "PROGC",
+   "port_difficulty": {
+    "score": 1,
+    "why": "The whole body is EXEC CICS RETURN, with no logic, no data and no copybook."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "It is the program PROGA transfers to and never gets control back from, so it ends the chain. Its body is empty, which may mean a stub."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "XCTL target of PROGA at line 20 (literal PROGC moved at line 19), so control never returns to PROGA.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/PROGC.cbl",
+     "line": 4
+    },
+    {
+     "file": "app/cbl/PROGA.cbl",
+     "line": 19
+    },
+    {
+     "file": "app/cbl/PROGA.cbl",
+     "line": 20
+    }
+   ]
+  },
+  {
+   "id": "PROGD",
+   "port_difficulty": {
+    "score": 1,
+    "why": "The whole body is EXEC CICS RETURN, with no logic, no data and no copybook."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Its only static caller sits after an unconditional XCTL, so it looks unreachable by control flow. A computed LINK could still reach it."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "The static XCTL to PROGD at line 23 follows the unconditional XCTL to PROGC at line 20, so it cannot run unless that first XCTL fails.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/PROGD.cbl",
+     "line": 4
+    },
+    {
+     "file": "app/cbl/PROGA.cbl",
+     "line": 20
+    },
+    {
+     "file": "app/cbl/PROGA.cbl",
+     "line": 23
+    }
+   ]
+  }
+ ],
+ "do_not_port": []
 }

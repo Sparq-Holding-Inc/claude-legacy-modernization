@@ -9,26 +9,18 @@
     "job:CBADMCDJ",
     "job:CLOSEFIL",
     "job:CREADB2",
-    "job:DALYREJS",
     "job:DEFCUST",
-    "job:DEFGDGB",
     "job:ESDSRRDS",
     "job:FTPJCLS",
     "job:LISTFILS",
-    "job:MNTTRDB2",
     "job:OPENFIL",
     "job:RACFCMDS",
-    "job:REPTFILE",
-    "job:TRANEXTR",
-    "job:TRANIDX",
     "sch:DAILY-TransactionBackup/CLOSEFIL",
     "sch:DAILY-TransactionBackup/OPENFIL",
     "sch:MONTHLY-InterestCalculation/CLOSEFIL",
     "sch:MONTHLY-InterestCalculation/OPENFIL",
     "sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL",
-    "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL",
-    "sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2",
-    "sch:WEEKLY-TransactionTypesDBRefresh/TRANEXTR"
+    "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL"
    ],
    "rationale": null,
    "unblocks": null,
@@ -40,11 +32,11 @@
      "line": 1
     },
     {
-     "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
+     "file": "app/jcl/CBADMCDJ.jcl",
      "line": 1
     },
     {
-     "file": "app/app-transaction-type-db2/jcl/TRANEXTR.jcl",
+     "file": "app/jcl/CLOSEFIL.jcl",
      "line": 1
     }
    ]
@@ -128,39 +120,17 @@
    "family": "batch-data-jobs",
    "name": null,
    "units": [
-    "job:ACCTFILE",
-    "job:CARDFILE",
     "job:CBLDBMS",
     "job:CICCMP",
-    "job:CIDBCMP",
     "job:CNJBATMP",
-    "job:COMBTRAN",
-    "job:CUSTFILE",
     "job:DEFGDGD",
-    "job:DISCGRP",
-    "job:DUSRSECJ",
     "job:IMSMQCMP",
     "job:INTRDRJ1",
     "job:INTRDRJ2",
-    "job:PRTCATBL",
-    "job:REPRTEST",
-    "job:SORTTEST",
-    "job:TCATBALF",
-    "job:TRANBKP",
-    "job:TRANCATG",
-    "job:TRANFILE",
-    "job:TRANTYPE",
     "job:TXT2PDF1",
-    "job:XREFFILE",
-    "proc:BLDCIDB2",
     "proc:BUILDBAT",
     "proc:BUILDBMS",
-    "proc:BUILDONL",
-    "proc:REPROC",
-    "sch:DAILY-TransactionBackup/TRANBKP",
-    "sch:MONTHLY-InterestCalculation/COMBTRAN",
-    "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP",
-    "sch:scripts/remote_refresh.sh"
+    "proc:BUILDONL"
    ],
    "rationale": null,
    "unblocks": null,
@@ -168,16 +138,16 @@
    "confidence": null,
    "evidence": [
     {
-     "file": "app/jcl/ACCTFILE.jcl",
-     "line": 58
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 39
     },
     {
-     "file": "app/jcl/CARDFILE.jcl",
-     "line": 72
+     "file": "app/jcl/INTRDRJ1.JCL",
+     "line": 9
     },
     {
-     "file": "app/jcl/COMBTRAN.jcl",
-     "line": 25
+     "file": "app/jcl/INTRDRJ2.JCL",
+     "line": 9
     }
    ]
   },
@@ -192,12 +162,36 @@
     "CBSTM03B",
     "CBTRN02C",
     "CBTRN03C",
+    "job:ACCTFILE",
+    "job:CARDFILE",
     "job:CBEXPORT",
+    "job:COMBTRAN",
     "job:CREASTMT",
+    "job:CUSTFILE",
+    "job:DALYREJS",
+    "job:DEFGDGB",
+    "job:DISCGRP",
+    "job:DUSRSECJ",
     "job:INTCALC",
     "job:POSTTRAN",
+    "job:PRTCATBL",
+    "job:REPRTEST",
+    "job:REPTFILE",
+    "job:SORTTEST",
+    "job:TCATBALF",
+    "job:TRANBKP",
+    "job:TRANCATG",
+    "job:TRANFILE",
+    "job:TRANIDX",
     "job:TRANREPT",
+    "job:TRANTYPE",
+    "job:XREFFILE",
+    "proc:REPROC",
+    "sch:DAILY-TransactionBackup/TRANBKP",
+    "sch:MONTHLY-InterestCalculation/COMBTRAN",
     "sch:MONTHLY-InterestCalculation/INTCALC",
+    "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP",
+    "sch:scripts/remote_refresh.sh",
     "sch:scripts/run_full_batch.sh",
     "sch:scripts/run_interest_calc.sh",
     "sch:scripts/run_posting.sh"
@@ -260,7 +254,9 @@
    "family": "subsystem",
    "name": null,
    "units": [
+    "CBPAUP0C",
     "COACCT01",
+    "COBTUPDT",
     "CODATE01",
     "COPAUA0C",
     "COPAUS0C",
@@ -268,11 +264,20 @@
     "COPAUS2C",
     "COTRTLIC",
     "COTRTUPC",
+    "DBUNLDGS",
+    "PAUDBLOD",
+    "PAUDBUNL",
     "job:CBPAUP0J",
+    "job:CIDBCMP",
     "job:DBPAUTP0",
     "job:LOADPADB",
+    "job:MNTTRDB2",
+    "job:TRANEXTR",
     "job:UNLDGSAM",
-    "job:UNLDPADB"
+    "job:UNLDPADB",
+    "proc:BLDCIDB2",
+    "sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2",
+    "sch:WEEKLY-TransactionTypesDBRefresh/TRANEXTR"
    ],
    "rationale": null,
    "unblocks": null,
@@ -288,40 +293,20 @@
      "line": 141
     },
     {
-     "file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl",
-     "line": 24
+     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
+     "line": 222
     }
    ]
   }
  ],
  "unassigned": [
   {
-   "id": "CBPAUP0C",
-   "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
-  },
-  {
    "id": "CBTRN01C",
-   "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
-  },
-  {
-   "id": "COBTUPDT",
-   "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
-  },
-  {
-   "id": "DBUNLDGS",
-   "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
-  },
-  {
-   "id": "PAUDBLOD",
-   "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
-  },
-  {
-   "id": "PAUDBUNL",
-   "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
+   "reason": "not reached by any static edge, and 28 reachable computed call(s) could target it, for example at app/cbl/COACTUPC.cbl:956"
   },
   {
    "id": "proc:TRANREPT",
-   "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
+   "reason": "named in JCL text inside CORPT00C at app/cbl/CORPT00C.cbl:94, which a running program can submit"
   }
  ]
 }

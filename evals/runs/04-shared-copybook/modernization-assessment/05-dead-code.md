@@ -1,29 +1,36 @@
 # 05 Dead code
 
-Telemetry: `none`. Every claim here is provisional. The candidate list is in `05a-dead-code-candidates.md`. The machine readable version is `dead-code.json`.
+Telemetry: none. Every claim in this file is provisional. The machine readable register is `modernization-assessment/dead-code.json`. The extractor's candidate tables are in `modernization-assessment/05a-dead-code-candidates.md`.
 
-## The tree has no entry point
+## Why the register is nearly empty
 
-The extractor found no CSD transaction, JCL job, scheduler job or wrapper (`analysis`, field `entry_points` is empty). So nothing can be proven unreachable. Every candidate is unknown. The extractor said so in its warnings (`analysis`, field `warnings`).
+- The tree has no entry point (`analysis.entry_points` is empty). Nothing can be proven unreachable, because unreachable needs a static path from an entry point and there is none to start from. So the extractor put every candidate in unknown.
+- No last-modified dates exist. The target is not a git repository, so the dormant bucket was not computed. The empty dormant list means not measured, not "nothing is dormant" (warning at `modernization-assessment/graph.json:152`).
+- No JCL exists, so `analysis.unscheduled_jobs` is empty. That is not evidence that every job is scheduled. There are no jobs.
+- There are no computed calls (`analysis.unresolved_dynamic` is empty). The unknown bucket is therefore not open because of a computed call. It is open because no entry point exists.
 
-## Dormancy was not measured
+## Unreachable
 
-The tree is not a git repository, so no last-modified date exists (`analysis`, field `warnings`). The dormant bucket was NOT computed. The empty dormant list means not measured. It does not mean nothing is old.
+None. No claim of unreachable is safe here.
 
-## The three buckets
+## Reachable but dormant
 
-| Bucket | Units | Confidence | Evidence |
+None, and not measured. Instrument, do not delete, once dates and telemetry exist.
+
+## Unknown
+
+| Unit | Reason | Confidence | Evidence |
 |---|---|---|---|
-| Unreachable | none | not applicable | analysis, field `dead_code_candidates` |
-| Reachable but dormant | none. Not measured. | not applicable | analysis, field `warnings` |
-| Unknown | PROGA | low | `app/cbl/PROGA.cbl:1` |
-| Unknown | PROGB | low | `app/cbl/PROGB.cbl:1` |
-| Unknown | cpy:SHARED01 | low | `app/cpy/SHARED01.cpy:1` |
+| PROGA | No entry point in the tree runs it. It may run from JCL or a scheduler the client did not supply | low | `app/cbl/PROGA.cbl:1` |
+| PROGB | No entry point in the tree runs it. It may run from JCL or a scheduler the client did not supply | low | `app/cbl/PROGB.cbl:1` |
+| cpy:SHARED01 | Two programs include it, so it is live if either program runs. It sits in unknown because its owners do | low | `app/cpy/SHARED01.cpy:1`, `app/cbl/PROGA.cbl:5`, `app/cbl/PROGB.cbl:5` |
 
-The copybook is included by both programs (`app/cbl/PROGA.cbl:5`, `app/cbl/PROGB.cbl:5`). It stays in the unknown bucket for as long as they do.
+I did not move any unit from unknown to unreachable, and I add no deletion proposal. A confident dead-code claim over a tree with no entry point is how something that runs once a year at fiscal close gets deleted.
 
-## What to ask the client
+## What would firm this up
 
-- Does any job, scheduler entry or CICS transaction run PROGA or PROGB? If yes, the missing JCL or scheduler needs to come into the tree, and this file gets redone.
-- Which programs ran in the last 12 months? Job logs or SMF records would answer this. See `06-test-strategy.md`.
-- Nothing here is a proposal to delete. A program with no entry point in a partial tree may run every night in the part that was not supplied.
+| Ask | Effect | Confidence | Evidence |
+|---|---|---|---|
+| The JCL library, CSD and scheduler export | The extractor can find entry points, and the unknown bucket splits into reachable and unreachable | high | analysis (field `entry_points`) |
+| 12 months of job logs or SMF records | Turns dormant and unknown from speculation to evidence, and removes the provisional label | high | inference |
+| Source control history or last-modified dates | Lets the extractor compute the dormant bucket | high | analysis (field `warnings`) |

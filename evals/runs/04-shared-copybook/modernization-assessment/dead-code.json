@@ -3,23 +3,11 @@
   "unreachable": [],
   "dormant": [],
   "unknown": [
-    {
-      "id": "PROGA",
-      "reason": "The tree has no entry point, so nothing can be proven unreachable. It may be the target of a job or scheduler that was not supplied.",
-      "confidence": "low",
-      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 1}]
-    },
-    {
-      "id": "PROGB",
-      "reason": "The tree has no entry point, so nothing can be proven unreachable. It may be the target of a job or scheduler that was not supplied.",
-      "confidence": "low",
-      "evidence": [{"file": "app/cbl/PROGB.cbl", "line": 1}]
-    },
-    {
-      "id": "cpy:SHARED01",
-      "reason": "Both PROGA and PROGB include it, so it lives or dies with them. Nothing can be proven unreachable while the programs are unknown.",
-      "confidence": "low",
-      "evidence": [{"file": "app/cpy/SHARED01.cpy", "line": 1}, {"file": "app/cbl/PROGA.cbl", "line": 5}, {"file": "app/cbl/PROGB.cbl", "line": 5}]
-    }
+    {"id": "PROGA", "reason": "The tree has no entry point, so nothing can be proven unreachable. Dormancy was not measured, because there are no last-modified dates.", "confidence": "low",
+     "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 1}]},
+    {"id": "PROGB", "reason": "The tree has no entry point, so nothing can be proven unreachable. Dormancy was not measured, because there are no last-modified dates.", "confidence": "low",
+     "evidence": [{"file": "app/cbl/PROGB.cbl", "line": 1}]},
+    {"id": "cpy:SHARED01", "reason": "Two programs include it, so it is used if either program runs. Whether either program runs is unknown, because the tree has no entry point.", "confidence": "low",
+     "evidence": [{"file": "app/cpy/SHARED01.cpy", "line": 1}, {"file": "app/cbl/PROGA.cbl", "line": 5}, {"file": "app/cbl/PROGB.cbl", "line": 5}]}
   ]
 }

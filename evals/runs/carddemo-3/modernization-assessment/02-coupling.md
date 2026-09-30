@@ -1,164 +1,144 @@
 # 02 Coupling
 
-Target state: refactor. Must not break: daily transaction posting, the account and card master refresh, the transaction report. Telemetry: none.
+`modernization-assessment/02a-edge-tables.md` holds every edge the extractor found. This file is the argument: what the coupling does to the sequence. The extractor's facts are cited to source. What I settled by reading source is labeled `inference` in the Evidence column. Target state is refactor, must-not-break is "daily transaction posting, the account and card master refresh, and the transaction report", telemetry is none.
 
-`02a-edge-tables.md` holds every edge the extractor found. This file holds the argument. Anything I found by reading source that is not an edge in `graph.json` is labeled inference and cited. The 28 computed calls are worked at the end, inline, as the dependency-cartographer would.
+Scale: 44 programs, 55 JCL jobs, 110 dataset nodes and 1,224 edges (318 call, 62 contract, 235 data, 476 include, 133 temporal). Of the edges, 254 are medium or low confidence or unresolved. Of those, 28 are computed calls and 16 are unmapped DDs, which I worked by hand below.
 
 ## The three patterns that constrain the sequence
 
-### 1. Shared VSAM masters with writers on both sides of the batch and online split
-
-The two files that posting touches have writers in batch and in online, and they are read by most of the system. This is data coupling and contract coupling at the same time. All 62 contract edges are `high`, which the extractor defines as "both sides COPY the same layout". It does not mean the layouts were proven equal (`meta.limits` in `graph.json`, analysis).
-
-| Dataset | Writers | Readers | What it means for the sequence | Evidence |
+| # | Pattern | Why it constrains the waves | Confidence | Evidence |
 |---|---|---|---|---|
-| ACCTDATA.VSAM.KSDS | 4: CBTRN02C, CBACT04C, COACTUPC, COBIL00C | 11 | Posting and interest (wave 5) and account update and bill payment (wave 6) write the same records. Balances are the field they all touch. | `app/cbl/CBTRN02C.cbl:547`, `app/cbl/CBACT04C.cbl:352`, `app/cbl/COACTUPC.cbl:4066`, `app/cbl/COBIL00C.cbl:379` |
-| TRANSACT.VSAM.KSDS | 3: CBTRN02C, COTRN02C, COBIL00C | 11 | The batch opens it OUTPUT and the online programs add records with the highest key plus 1. Three id schemes share one key space. | `app/cbl/CBTRN02C.cbl:256`, `app/cbl/COTRN02C.cbl:444`, `app/cbl/COBIL00C.cbl:212` |
-| TCATBALF.VSAM.KSDS | 1 writer, 4 readers | 4 | Posting adds to it and interest reads it. The loader TCATBALF resets it before posting in `run_posting.sh`. | `app/cbl/CBTRN02C.cbl:508`, `scripts/run_posting.sh:20` |
-| CUSTDATA.VSAM.KSDS | 1 writer (COACTUPC), 7 readers | 7 | The account update writes two masters in one task. | `app/cbl/COACTUPC.cbl:4086` |
-| USRSEC.VSAM.KSDS | 3 writers, 5 readers | 5 | Sign-on reads what the user programs write. | `app/cbl/COSGN00C.cbl:212` |
+| 1 | Shared VSAM masters written from three different waves | The account master has 4 writer programs and 11 readers, and the transaction master has 3 writers and 11 readers. Account master writers: CBTRN02C and CBACT04C (wave 5), COACTUPC and COBIL00C (wave 6). Transaction master writers: CBTRN02C (wave 5), COBIL00C and COTRN02C (wave 6). A wave 5 port of the batch writers cannot own the file alone until wave 6 ends. A data access facade has to sit in front of these masters from wave 5 to the end of wave 6. | high | analysis: `data_hubs` (ds:AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS, ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS), `app/cbl/CBTRN02C.cbl:34`, `app/cbl/CBACT04C.cbl:356`, `app/cbl/COBIL00C.cbl:512`, `app/cbl/COTRN02C.cbl:713` |
+| 2 | A hand built batch and online interlock, and rebuilds that destroy the master first | CLOSEFIL closes five CICS files and OPENFIL reopens them. CARDFILE, CUSTFILE and TRANFILE close and open their own files, but ACCTFILE and XREFFILE have no CEMT step and rely on CLOSEFIL. CBTRN02C opens the transaction master for OUTPUT, so posting only works on an empty file. TRANBKP makes it empty by deleting and redefining the cluster. The order TRANBKP, POSTTRAN, COMBTRAN is therefore a data dependency, not a preference. | high | `app/jcl/CLOSEFIL.jcl:26`, `app/jcl/ACCTFILE.jcl:25`, `app/jcl/CARDFILE.jcl:26`, `app/cbl/CBTRN02C.cbl:256`, `app/jcl/TRANBKP.jcl:40`, `app/jcl/COMBTRAN.jcl:24` |
+| 3 | Three schedule descriptions that each cover a different part of one night | The wrapper script run_posting.sh runs CLOSEFIL, ACCTFILE, TCATBALF, TRANBKP, POSTTRAN, TRANIDX, OPENFIL. Control-M has a daily folder with CLOSEFIL, TRANBKP, WAITSTEP, OPENFIL and no POSTTRAN. The CA-7 listing has CLOSEFIL, CBPAUP0J, POSTTRAN, WAITSTEP, OPENFIL and no TRANBKP. Nothing in the tree says which one production uses. In CA-7 an IMS purge job (wave 7) triggers the posting job (wave 5). | medium | `scripts/run_posting.sh:13`, `app/scheduler/CardDemo.controlm:5`, `app/scheduler/CardDemo.ca7:43`, `app/scheduler/CardDemo.ca7:70` |
 
-The layout contract also lives in places the extractor does not read (`meta.limits`: in-stream IDCAMS and SORT cards are not read, and DCB and LRECL are not compared with copybooks). I read them by hand. Each is a place a copybook change breaks a port silently.
+### Pattern 1 in detail: the contract is in JCL byte offsets as well as copybooks
 
-| Contract held outside the copybook | Where | Evidence |
-|---|---|---|
-| Account master key 11, record 300. Matches CVACT01Y (11 digit id, 300 bytes). | IDCAMS DEFINE in ACCTFILE | `app/jcl/ACCTFILE.jcl:40` |
-| Card cross reference alternate index on the account id (key length 11 at offset 16) | IDCAMS DEFINE in CARDFILE | `app/jcl/CARDFILE.jcl:85` |
-| Transaction record 350. The report sorts by card number at offset 263 and by processed date at offset 305, both hard-coded. They match CVTRA05Y (card number on line 15 of the copybook, processed timestamp on line 17). | SORT symbol cards in TRANREPT.jcl, the proc, and the JCL text in CORPT00C | `app/jcl/TRANREPT.jcl:41`, `app/proc/TRANREPT.prc:39`, `app/cpy/CVTRA05Y.cpy:15` |
-| Transaction alternate index keys the timestamp at offset 304 (zero based) | IDCAMS DEFINE in TRANIDX | `app/jcl/TRANIDX.jcl:27` |
-| Transaction id is the first 16 bytes. COMBTRAN merges on it. | SORT symbol card in COMBTRAN | `app/jcl/COMBTRAN.jcl:28` |
-| Type and category reference records are 60 bytes built by SQL CAST and CONCAT with a REPEAT('0',8) pad. That is the layout the report's TRANTYPE and TRANCATG files get after the weekly extract. | In-stream SQL in TRANEXTR | `app/app-transaction-type-db2/jcl/TRANEXTR.jcl:65` |
+All 62 contract edges are `high`: both sides copy the same layout copybook. That says the COBOL agrees with itself. It does not cover the JCL control cards, which the extractor does not read and which address the same records by byte position.
 
-No contract edge is `medium`, so there is no edge the extractor itself flagged as a layout risk. The risk is the ones it cannot see. The daily transaction file has no writer in the tree, and CBTRN02C translates it field by field from layout CVTRA06Y into CVTRA05Y before it writes (`app/cbl/CBTRN02C.cbl:425`). That is a layout contract with a producer outside the tree. Inference.
+| Where the layout is used by offset | What it assumes | Confidence | Evidence |
+|---|---|---|---|
+| TRANREPT sort symbols | Card number at position 263 for 16 bytes and the processing date at position 305 for 10 bytes | high | `app/jcl/TRANREPT.jcl:41` |
+| Statement job SORT and OUTREC | Moves the card number in front of the first 262 bytes, sorts on it, and copies 50 bytes from position 279 | high | `app/jcl/CREASTMT.JCL:53` |
+| Alternate index on the transaction master | Key of 26 bytes at offset 304 (position 305) is the processing timestamp | high | `app/jcl/TRANIDX.jcl:27` |
+| Combine job | Transaction id in positions 1 to 16 | high | `app/jcl/COMBTRAN.jcl:28` |
+| Category balance print | Account at position 1 for 11 bytes, type at 12, category at 14, balance at 18 | high | `app/jcl/PRTCATBL.jcl:47` |
 
-### 2. A hidden temporal protocol around the transaction master
+These offsets agree with the copybook today (`app/cpy/CVTRA05Y.cpy:5`). Any change to the transaction record in a port breaks all five silently. They are the first thing the harness in `modernization-assessment/06-test-strategy.md` must pin.
 
-Nothing in the call graph says posting depends on a backup job. It does. CBTRN02C opens the transaction master for OUTPUT (`app/cbl/CBTRN02C.cbl:256`). TRANBKP copies it to a GDG generation, then deletes and redefines it empty (`app/jcl/TRANBKP.jcl:40`). Then POSTTRAN fills it. COMBTRAN later merges the backup with the interest transactions and reloads it (`app/jcl/COMBTRAN.jcl:22`). So a port that treats CBTRN02C as "append transactions" changes the behavior of the cycle. That reading of OPEN OUTPUT on a VSAM file is inference: I did not run it.
+### Pattern 2 in detail: who closes what
 
-Three shell wrappers hold three different orders of the same jobs. Control-M holds pieces. The CA-7 listing, which the extractor cannot parse, holds a fourth view.
+| Job | Closes before it rewrites | Has its own CEMT step | Evidence |
+|---|---|---|---|
+| ACCTFILE (account master, must-not-break) | ACCTDAT, only if CLOSEFIL ran first | no | `app/jcl/ACCTFILE.jcl:25` |
+| CARDFILE (card master, must-not-break) | CARDDAT and CARDAIX | yes | `app/jcl/CARDFILE.jcl:26` |
+| CUSTFILE | CUSTDAT | yes | `app/jcl/CUSTFILE.jcl:26` |
+| XREFFILE | CCXREF and CXACAIX, only if CLOSEFIL ran first | no | `app/jcl/XREFFILE.jcl:22` |
+| TRANFILE | TRANSACT and CXACAIX | yes | `app/jcl/TRANFILE.jcl:26` |
+| POSTTRAN | TRANSACT and ACCTDAT, only if CLOSEFIL ran first | no | `app/jcl/POSTTRAN.jcl:23` |
 
-| Order | Jobs in sequence | Evidence |
-|---|---|---|
-| `run_posting.sh` | CLOSEFIL, ACCTFILE, TCATBALF, TRANBKP, POSTTRAN, TRANIDX, OPENFIL | `scripts/run_posting.sh:13`, `scripts/run_posting.sh:26`, `scripts/run_posting.sh:34` |
-| `run_full_batch.sh` | CLOSEFIL, the ten master reloads, POSTTRAN, INTCALC, TRANBKP, COMBTRAN, TRANIDX, OPENFIL. It submits TRANBKP twice, at Job 6 and Job 14. | `scripts/run_full_batch.sh:29`, `scripts/run_full_batch.sh:47`, `scripts/run_full_batch.sh:55`, `scripts/run_full_batch.sh:62` |
-| `run_interest_calc.sh` | CLOSEFIL, INTCALC, TRANBKP, COMBTRAN, TRANIDX, OPENFIL | `scripts/run_interest_calc.sh:19`, `scripts/run_interest_calc.sh:23` |
-| Control-M, daily | CLOSEFIL, TRANBKP, WAITSTEP, OPENFIL. POSTTRAN is not in it. | `app/scheduler/CardDemo.controlm:5`, `app/scheduler/CardDemo.controlm:11` |
-| CA-7 listing (not parsed) | CLOSEFIL triggers CBPAUP0J, which triggers POSTTRAN, then WAITSTEP, then OPENFIL. An IMS purge job gates posting. | `app/scheduler/CardDemo.ca7:43`, `app/scheduler/CardDemo.ca7:70`, `app/scheduler/CardDemo.ca7:97`, `app/scheduler/CardDemo.ca7:124` |
+CLOSEFIL closes TRANSACT, CCXREF, ACCTDAT, CXACAIX and USRSEC (`app/jcl/CLOSEFIL.jcl:26`), so run alone ACCTFILE, XREFFILE and POSTTRAN rely on a fence that a scheduler or a wrapper has to have run. WAITSTEP is the only synchronisation: a fixed 36 seconds (`app/jcl/WAITSTEP.jcl:26`). The account master refresh deletes and redefines the cluster and reloads it from a flat file (`app/jcl/ACCTFILE.jcl:61`), so any balance posted since the flat file was cut is lost. That is the refresh's intended meaning only if this is a non-production copy. That has to be asked (see `modernization-assessment/00-summary.md`).
 
-Two consequences. First, the bracket jobs CLOSEFIL and OPENFIL are part of the data contract: every batch job that writes a VSAM master assumes CICS has closed it (`app/jcl/CLOSEFIL.jcl:26`). While any online writer is on CICS (until wave 6), the bracket has to stay. Second, POSTTRAN in wave 5 waits on CBPAUP0J, which belongs to wave 7. The scheduler has to keep orchestrating across the old and new platforms until wave 7 or the trigger has to be re-cut. That trigger is inference from a listing the extractor could not read.
+### Pattern 3 in detail: the schedulers disagree
 
-### 3. Reach through text the extractor does not follow
+| Scheduler artifact | Chain it defines | What is missing | Confidence | Evidence |
+|---|---|---|---|---|
+| Wrapper `scripts/run_posting.sh` | CLOSEFIL, ACCTFILE, TCATBALF, TRANBKP, POSTTRAN, TRANIDX, OPENFIL | none of the interest jobs | medium | `scripts/run_posting.sh:13` |
+| Wrapper `scripts/run_full_batch.sh` | Refresh jobs, POSTTRAN, INTCALC, TRANBKP, COMBTRAN, TRANIDX, OPENFIL. Step "Refresh Transaction Data" runs TRANBKP, not TRANFILE. | TRANFILE and TRANCATG | medium | `scripts/run_full_batch.sh:29` |
+| Control-M daily folder | CLOSEFIL, TRANBKP, WAITSTEP, OPENFIL | POSTTRAN | high | `app/scheduler/CardDemo.controlm:5` |
+| Control-M monthly folder | CLOSEFIL, INTCALC, COMBTRAN, WAITSTEP, OPENFIL | TRANBKP between INTCALC and COMBTRAN, which the wrapper has | high | `app/scheduler/CardDemo.controlm:66`, `scripts/run_interest_calc.sh:23` |
+| CA-7 listing (not parsed by the extractor) | CLOSEFIL, CBPAUP0J, POSTTRAN, WAITSTEP, OPENFIL; also READACCT, READCARD, READCUST, READXREF; CREASTMT then TXT2PDF1; PRTCATBL | TRANBKP, TRANIDX, ACCTFILE, CARDFILE, TRANREPT | medium | `app/scheduler/CardDemo.ca7:43` |
+| Control-M weekly folders | The disclosure group folder starts only after the transaction type DB2 job MNTTRDB2 (a wave 7 unit) posts its condition | | high | `app/scheduler/CardDemo.controlm:28` |
 
-The extractor makes no edge for JCL text inside COBOL, for in-stream `RUN PROGRAM` cards, or for a program named in a `PARM`. Each of these hides a real dependency. I found them by reading and they changed the wave plan.
+The CA-7 rows are my reading of a listing the extractor could not parse (inference), taken from the TRIGGERED JOBS blocks: `app/scheduler/CardDemo.ca7:43`, `app/scheduler/CardDemo.ca7:70`, `app/scheduler/CardDemo.ca7:97`, `app/scheduler/CardDemo.ca7:124`. The same listing triggers jobs CLOSEFIL1 and CLOSEFIL2 (`app/scheduler/CardDemo.ca7:216`) that have no JCL in the tree.
 
-| Hidden edge (inference) | What it changes | Evidence |
-|---|---|---|
-| CORPT00C builds a job that runs PROC=TRANREPT and writes it to the JOBS queue. The proc runs the sort and CBTRN03C. | The transaction report has an online front. CORPT00C is not a read-only screen. It moves with the report. | `app/cbl/CORPT00C.cbl:94`, `app/cbl/CORPT00C.cbl:517`, `app/proc/TRANREPT.prc:57` |
-| MNTTRDB2 runs COBTUPDT from an in-stream DSN card. | A "utility" job is a DB2 batch program. COBTUPDT is live weekly, not unknown. | `app/app-transaction-type-db2/jcl/MNTTRDB2.jcl:30` |
-| CBPAUP0J, LOADPADB, UNLDPADB, UNLDGSAM name their IMS programs in the driver PARM. | Four programs in the unknown bucket are run by jobs. | `app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl:25`, `app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL:27`, `app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL:39`, `app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL:27` |
-| TRANEXTR unloads the transaction type and category tables from DB2 to PS files. TRANTYPE and TRANCATG reload them into the VSAM files the report reads. | The report's reference data comes from DB2 (wave 7), one weekly cycle behind. A wave 5 test that ignores it uses stale reference data. | `app/app-transaction-type-db2/jcl/TRANEXTR.jcl:65`, `app/jcl/TRANREPT.jcl:69` |
-| The weekly Control-M folder for the disclosure group refresh starts only after MNTTRDB2 finishes. | Two wave 1 and wave 4 scheduler jobs wait on a wave 7 job. The scheduler stays. | `app/scheduler/CardDemo.controlm:28`, `app/scheduler/CardDemo.controlm:34` |
-| The CSD defines program and transaction COCRDSEC (CDV1). No source for it is in the tree. | A live entry point with no code to assess. | `app/csd/CARDDEMO.CSD:211`, `app/csd/CARDDEMO.CSD:390` |
-
-## Clusters
-
-The graph below is at cluster level on purpose. Solid arrows are calls or job steps. Dashed arrows are the hidden edges above.
+## Cluster map
 
 ```mermaid
 flowchart LR
-  subgraph online[Online CICS]
-    SIGN[Sign-on, menu, admin<br/>COSGN00C COMEN01C COADM01C]
-    ACCT[Account and card<br/>COACTVWC COACTUPC COCRD*]
-    TRN[Transactions<br/>COTRN00C COTRN01C COTRN02C COBIL00C]
-    RPTF[Report front<br/>CORPT00C]
-    USR[User admin<br/>COUSR00C to COUSR03C]
-  end
-  subgraph batch[Batch cycle]
-    LOAD[Master loaders<br/>ACCTFILE CARDFILE XREFFILE CUSTFILE TRANFILE TCATBALF]
-    POST[Posting<br/>POSTTRAN CBTRN02C]
-    LIFE[Transaction master lifecycle<br/>TRANBKP COMBTRAN TRANIDX]
-    INT[Interest<br/>INTCALC CBACT04C]
-    REP[Report<br/>TRANREPT CBTRN03C]
-    STM[Statements<br/>CREASTMT CBSTM03A CBSTM03B]
-    READ[Read and print<br/>READACCT READCARD READCUST READXREF]
-    BRK[Brackets<br/>CLOSEFIL OPENFIL WAITSTEP]
-  end
-  subgraph sub[Subsystems]
-    AUTH[Authorization IMS DB2 MQ<br/>COPAUA0C COPAUS0C COPAUS1C COPAUS2C CBPAUP0J]
-    TYPE[Transaction type DB2<br/>COTRTLIC COTRTUPC MNTTRDB2 TRANEXTR]
-  end
-  ACCTDATA[(ACCTDATA)]
-  TRANSACT[(TRANSACT)]
-  REFDATA[(TRANTYPE TRANCATG)]
-  SIGN --> ACCT
-  SIGN --> TRN
-  SIGN --> RPTF
-  SIGN --> USR
-  ACCT --> ACCTDATA
-  TRN --> TRANSACT
-  TRN --> ACCTDATA
-  POST --> ACCTDATA
-  POST --> TRANSACT
-  INT --> ACCTDATA
-  LIFE --> TRANSACT
-  LOAD --> ACCTDATA
-  READ --> ACCTDATA
-  STM --> TRANSACT
-  REP --> TRANSACT
-  REP --> REFDATA
-  BRK --> POST
-  RPTF -.->|JCL text, JOBS queue| REP
-  AUTH -.->|CA-7 trigger| POST
-  TYPE -.->|weekly extract| REFDATA
+  FE["Front end router<br/>COSGN00C COMEN01C COADM01C<br/>SCC, fan-in 12"]
+  ORO["Online read screens<br/>COACTVWC COCRDSLC COTRN00C COTRN01C"]
+  OWR["Online writers<br/>COACTUPC COBIL00C COCRDUPC COTRN02C COUSR00C-03C"]
+  MAS[("VSAM masters<br/>ACCT CARD XREF CUST TRANSACT TCATBAL USRSEC")]
+  FENCE["CEMT fences<br/>CLOSEFIL OPENFIL WAITSTEP"]
+  POST["Posting chain<br/>TRANBKP POSTTRAN COMBTRAN TRANIDX INTCALC"]
+  LOAD["Master reload jobs<br/>ACCTFILE CARDFILE CUSTFILE XREFFILE TRANFILE DISCGRP TCATBALF"]
+  REP["Report pipeline<br/>CORPT00C to TDQ JOBS to TRANREPT and CBTRN03C"]
+  STM["Statements<br/>CREASTMT CBSTM03A CBSTM03B TXT2PDF1"]
+  SUB["IMS DB2 MQ subsystems<br/>COPAUA0C COPAUS0-2C COTRT* CBPAUP0J"]
+  SCH["Schedulers<br/>wrappers, Control-M, CA-7"]
+  FE --> ORO
+  FE --> OWR
+  FE --> REP
+  FE --> SUB
+  ORO --> MAS
+  OWR --> MAS
+  POST --> MAS
+  LOAD --> MAS
+  REP --> MAS
+  STM --> MAS
+  SCH --> FENCE
+  FENCE --> POST
+  FENCE --> LOAD
+  SUB -. "CA-7 trigger" .-> POST
 ```
 
-## Strongly connected components
+The dotted edge exists only in the unparsed CA-7 listing. It is inference.
 
-They move as a unit or not at all. The plan keeps each in one wave, and the validator checks it.
+## Strongly connected components, god modules, articulation points
 
-| Component | Members | Wave | Evidence |
-|---|---|---|---|
-| Sign-on, menu, admin | COADM01C, COMEN01C, COSGN00C | 3 | analysis: `sccs` in `graph.json` |
-| Pending authorization view | COPAUS0C, COPAUS1C | 7 | analysis: `sccs` in `graph.json` |
-| Transaction list and view | COTRN00C, COTRN01C | 3 | analysis: `sccs` in `graph.json` |
-
-COCRDLIC and COPAUS0C also call themselves (`self_recursive`). COCRDLIC calls itself through CCARD-NEXT-PROG (`app/cbl/COCRDLIC.cbl:538`).
-
-## God modules
-
-The extractor finds none by fan-in and fan-out (analysis: `god_modules` is empty; the basis is the 38 reachable programs). Fan-in is small across the board. The highest are COMEN01C and COSGN00C with 12 callers each, and both return control through computed XCTL, so I would not call them god modules. Size is a different measure. COACTUPC has 3,368 lines and holds the account and customer update, the change detection and the locking in one program (`app/cbl/COACTUPC.cbl:4066`). It cannot be ported in one pass. It is the one unit I would strangle behind a facade rather than transliterate, and it sits in wave 6 for that reason.
-
-## Articulation points
-
-These are the natural wave boundaries. The basis is call edges between programs plus data edges from programs to datasets (analysis: `articulation_basis`).
-
-| Point | Why it matters for the cut | Evidence |
-|---|---|---|
-| CBTRN02C, CBTRN03C, CBACT04C, CBSTM03A, CBEXPORT | The wave 5 batch programs are all articulation points. Wave 5 is cut where the seam is. | analysis: `articulation_points` |
-| CBACT01C, CBIMPORT | Wave 2 read-only programs. | analysis: `articulation_points` |
-| COSGN00C, COADM01C | The sign-on and admin entry of the wave 3 component. | analysis: `articulation_points` |
-| COPAUS0C, COPAUS1C, COPAUS2C | The authorization chain in wave 7. | analysis: `articulation_points` |
-| COCRDSLC | The card view program that COCRDLIC chains to. | analysis: `articulation_points` |
-| ACCTDATA, CARDDATA, CARDXREF, CUSTDATA, EXPORT.DATA | Five datasets are articulation points. The data seam, not the call graph, decides how the system can be split. | analysis: `articulation_points` |
-
-## The honest boundary: 28 computed calls
-
-Every online program ends in an XCTL whose target is a variable. The extractor found the literals moved into some of them and left the rest as `?dynamic` nodes (28 sites, all `low`, `resolved: false`). Because there are more than 20, I worked them as the dependency-cartographer would. What I can prove and what stays open:
-
-| Sites | Target field | What the source proves | What stays open | Evidence |
+| Fact | Units | What it means for the waves | Confidence | Evidence |
 |---|---|---|---|---|
-| COMEN01C 156, 184 | CDEMO-MENU-OPT-PGMNAME | The value is one of the 11 names in the menu table: COACTVWC, COACTUPC, COCRDLIC, COCRDSLC, COCRDUPC, COTRN00C, COTRN01C, COTRN02C, CORPT00C, COBIL00C, COPAUS0C. | Nothing. Bounded. | `app/cpy/COMEN02Y.cpy:21`, `app/cpy/COMEN02Y.cpy:28`, `app/cpy/COMEN02Y.cpy:89` |
-| COADM01C 145 | CDEMO-ADMIN-OPT-PGMNAME | One of six: COUSR00C, COUSR01C, COUSR02C, COUSR03C, COTRTLIC, COTRTUPC. | Nothing. Bounded. | `app/cpy/COADM02Y.cpy:22`, `app/cpy/COADM02Y.cpy:29`, `app/cpy/COADM02Y.cpy:53` |
-| COCRDLIC 538, 566 | CCARD-NEXT-PROG | One of COCRDSLC, COCRDUPC or COCRDLIC itself. | Nothing. Bounded. | `app/cbl/COCRDLIC.cbl:526`, `app/cbl/COCRDLIC.cbl:554`, `app/cbl/COCRDLIC.cbl:600` |
-| The other 23 sites (COACTUPC 956, COACTVWC 349, COADM01C 168, COBIL00C 281, COCRDSLC 331, COCRDUPC 473, COMEN01C 201, COPAUS0C 322 and 674, COPAUS1C 367, CORPT00C 548, COTRN00C 192 and 518, COTRN01C 205, COTRN02C 508, COTRTLIC 620, COTRTUPC 457, COUSR00C 196, 206 and 514, COUSR01C 175, COUSR02C 258, COUSR03C 205) | CDEMO-TO-PROGRAM | The program either moves in a literal (COSGN00C, COMEN01C, COADM01C or a sibling) or copies CDEMO-FROM-PROGRAM, the name the caller left in the COMMAREA. | The COMMAREA value comes from whichever program transferred in. It is bounded to programs that record their own name before an XCTL, which is the online set, but it cannot be proved from one program's source. | `app/cbl/COACTUPC.cbl:941`, `app/cbl/COTRN01C.cbl:119`, `app/cbl/COUSR02C.cbl:116`, `app/cbl/COMEN01C.cbl:199` |
+| Strongly connected component | COADM01C, COMEN01C, COSGN00C | Sign on and both menus call each other. They move as one unit, and they route to every online transaction. They need a facade that can still dispatch by name to legacy programs. | high | analysis: `sccs`, `app/cbl/COMEN01C.cbl:156` |
+| Strongly connected component | COTRN00C, COTRN01C | List and view call each other. One unit. | high | analysis: `sccs`, `app/cbl/COTRN00C.cbl:192` |
+| Strongly connected component | COPAUS0C, COPAUS1C | Summary and detail call each other. One unit, in wave 7. | high | analysis: `sccs`, `app/app-authorization-ims-db2-mq/cbl/COPAUS0C.cbl:322` |
+| Self recursive | COCRDLIC, COPAUS0C | Cannot be ported as straight line code. Both are online screens. | high | analysis: `self_recursive`, `app/cbl/COCRDLIC.cbl:538` |
+| God modules | COPAUS0C, COTRN00C, COTRN01C | Strangle behind a facade, never port wholesale. Caveat: each has fan-in 1 and fan-out 3, so the flag comes from a low percentile threshold on a small graph. The real hubs by fan-in are COMEN01C (12), COSGN00C (12) and COADM01C (7), which the flag misses because their fan-out is 1 or 2. | medium | analysis: `god_modules`, `fan_in` |
+| Articulation points (programs) | CBACT01C, CBACT04C, CBEXPORT, CBIMPORT, CBSTM03A, CBTRN02C, CBTRN03C, COCRDSLC | Removing any of them disconnects part of the graph, so they are candidate cut points inside wave 5: CBTRN02C, CBACT04C, CBTRN03C and CBSTM03A. | medium | analysis: `articulation_points` |
+| Articulation points (datasets) | ACCTDATA, CARDDATA, CARDXREF and CUSTDATA KSDS, EXPORT.DATA, the DB2 transaction type table | The masters are single points through which the parts of the graph connect. This is why the data facade is the first thing wave 5 needs. | medium | analysis: `articulation_points` |
 
-What follows for dead code: a CICS XCTL can only reach a program that has a CSD definition. The CSD defines the online programs (`app/csd/CARDDEMO.CSD:173`) and does not define CBTRN01C or any other batch program. So I infer that none of the 28 sites reaches an unknown-bucket batch program. The extractor cannot say that and the validator will not let me move a program to unreachable on it, so the unknown bucket stays as it is.
+## What the extractor could not settle, and what I settled by reading source
 
-What the extractor does not model, and I did not chase further:
+This is the work the extractor left. Every conclusion in this section is inference, and each row is cited to the lines it rests on.
 
-| Not modeled | Where it shows | Evidence |
+### The 28 computed calls
+
+All 28 are `EXEC CICS XCTL PROGRAM(variable)` in online programs. The variable is a field the program does not fix at compile time. Grouped by variable:
+
+| Callers and lines | Variable | Values it can take | Basis | Evidence |
+|---|---|---|---|---|
+| COMEN01C (156, 184) | CDEMO-MENU-OPT-PGMNAME | 11 names: COACTVWC, COACTUPC, COCRDLIC, COCRDSLC, COCRDUPC, COTRN00C, COTRN01C, COTRN02C, CORPT00C, COBIL00C, COPAUS0C | Option index is checked against the count of 11 | inference: `app/cpy/COMEN02Y.cpy:28`, `app/cpy/COMEN02Y.cpy:89`, `app/cbl/COMEN01C.cbl:127` |
+| COADM01C (145) | CDEMO-ADMIN-OPT-PGMNAME | 6 names: COUSR00C, COUSR01C, COUSR02C, COUSR03C, COTRTLIC, COTRTUPC | Option index is checked against the count of 6 | inference: `app/cpy/COADM02Y.cpy:29`, `app/cpy/COADM02Y.cpy:53`, `app/cbl/COADM01C.cbl:131` |
+| COCRDLIC (538, 566) | CCARD-NEXT-PROG | COCRDSLC and COCRDUPC | Each XCTL follows a MOVE of a literal constant | inference: `app/cbl/COCRDLIC.cbl:526`, `app/cbl/COCRDLIC.cbl:554` |
+| COMEN01C 201, COADM01C 168, COBIL00C 281, CORPT00C 548, COTRN00C 192 and 518, COTRN01C 205, COTRN02C 508, COUSR00C 196, 206 and 514, COUSR01C 175, COUSR02C 258, COUSR03C 205 | CDEMO-TO-PROGRAM | COSGN00C, COMEN01C, COADM01C, and from list programs COTRN01C, COTRN00C, COUSR02C and COUSR03C | Every value is a literal MOVE in the same program | inference: `app/cbl/COTRN00C.cbl:188`, `app/cbl/COTRN01C.cbl:126`, `app/cbl/COUSR00C.cbl:192`, `app/cbl/COUSR00C.cbl:202` |
+| COACTVWC 349, COACTUPC 956, COCRDSLC 331, COCRDUPC 473, COTRTLIC 620, COTRTUPC 457 | CDEMO-TO-PROGRAM | The menu or admin program, or the calling program's name copied from the COMMAREA | Set from CDEMO-FROM-PROGRAM, which callers fill with their own name. The COMMAREA path is not provable from source alone | inference: `app/cbl/COACTVWC.cbl:336`, `app/cbl/COACTVWC.cbl:338`, `app/cbl/COMEN01C.cbl:154` |
+| COPAUS0C 322 and 674, COPAUS1C 367 | CDEMO-TO-PROGRAM | COPAUS1C, COMEN01C, COPAUS0C, COSGN00C and COPAUS2C | Working storage constants WS-PGM-AUTH-SMRY, WS-PGM-MENU and WS-PGM-AUTH-DTL, and a literal | inference: `app/app-authorization-ims-db2-mq/cbl/COPAUS0C.cbl:192`, `app/app-authorization-ims-db2-mq/cbl/COPAUS0C.cbl:316`, `app/app-authorization-ims-db2-mq/cbl/COPAUS1C.cbl:185` |
+
+Result. Every value I can find is the name of an online program that one of the four CSD files defines (`app/csd/CARDDEMO.CSD:173`, `app/app-authorization-ims-db2-mq/csd/CRDDEMO2.csd:18`, `app/app-transaction-type-db2/csd/CRDDEMOD.csd:11`). No computed call can reach a batch program, and no source, CSD or JCL file names CBTRN01C. The one part I cannot prove is the COMMAREA path, so I do not move any dead code item toward unreachable (see `modernization-assessment/05-dead-code.md`). The menu names COPAUS0C and the two DB2 admin programs, so the front end in wave 3 routes into waves 6 and 7.
+
+### The 16 unmapped DDs
+
+| Program and DDs | What is really true | Evidence |
 |---|---|---|
-| RETURN TRANSID chains between transactions | Sign-on returns with a transaction id chosen at run time | `app/cbl/COSGN00C.cbl:99` |
-| Submit through the internal reader from a program | CORPT00C, covered above | `app/cbl/CORPT00C.cbl:462` |
-| JCL COND on a step | TRANBKP defines the new master only if the earlier steps return 4 or less. TRANEXTR steps also carry COND. | `app/jcl/TRANBKP.jcl:51`, `app/app-transaction-type-db2/jcl/TRANEXTR.jcl:65` |
-| Nested procs | TRANREPT.prc calls REPROC, and REPROC reads its control card from a library member | `app/proc/TRANREPT.prc:21`, `app/proc/REPROC.prc:28` |
+| CBSTM03B (TRNXFILE, XREFFILE, ACCTFILE, CUSTFILE) | A called subprogram uses the caller step's DDs. CREASTMT step 040 maps all four. So the statement job reads the rebuilt transaction copy, the cross reference, the account master and the customer master, and the graph does not show those reads. | `app/jcl/CREASTMT.JCL:83` |
+| CBIMPORT (CARDOUT) | The job defines CUSTOUT, ACCTOUT, XREFOUT, TRNXOUT and ERROUT but not CARDOUT, which the program opens. As written the job cannot run. | `app/cbl/CBIMPORT.cbl:63`, `app/jcl/CBIMPORT.jcl:43` |
+| CBTRN01C (six DDs) | No JCL of any kind runs it. | `app/cbl/CBTRN01C.cbl:29` |
+| COBTUPDT (INPFILE) | The DSN step maps INPFILE to a dataset that is itself named INPFILE, which looks like a placeholder. | `app/app-transaction-type-db2/jcl/MNTTRDB2.jcl:27` |
+| PAUDBLOD (INFILE1, INFILE2) | Mapped in the job that starts it through DFSRRC00. | `app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL:36` |
+| PAUDBUNL (OUTFIL1, OUTFIL2) | Mapped in the job that starts it through DFSRRC00. | `app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL:48` |
+
+### What is not modeled and matters
+
+| Item | Why it matters | Evidence |
+|---|---|---|
+| Online report submit through a transient data queue | CORPT00C writes 80 byte JCL lines to queue JOBS, defined as an extra partition on DD INREADER. The report job is submitted by the online system, so there is a batch job with no scheduler entry at all. | `app/cbl/CORPT00C.cbl:517`, `app/csd/CARDDEMO.CSD:499` |
+| Nested proc | Proc TRANREPT calls proc REPROC, and its own first line is `//REPROC PROC`. Nested calls are not followed. | `app/proc/TRANREPT.prc:1`, `app/proc/TRANREPT.prc:21` |
+| IF and COND in JCL | Step order in the graph is file order. COND=(4,LT) on the TRANBKP define step and COND=(0,NE) on CREASTMT steps change which steps run. | `app/jcl/TRANBKP.jcl:51`, `app/jcl/CREASTMT.JCL:56` |
+| Assembler and macros | COBDATFT, MVSWAIT and the macros are not parsed. CBACT01C and COBSWAIT call them. | `app/cbl/CBACT01C.cbl:231`, `app/cbl/COBSWAIT.cbl:38` |
+| DB2, IMS and MQ | DDL, DCLGEN, DBD, PSB and control cards are not read, so wave 7 coupling is a lower bound. | `app/app-transaction-type-db2/jcl/CREADB21.jcl:52`, `app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl:24` |
+| Generation data set retention | Bases are defined twice with different limits: TRANREPT with 10 and with 5. Whichever job ran first wins. | `app/jcl/REPTFILE.jcl:27`, `app/jcl/DEFGDGB.jcl:38` |
+| Job defects that a port would copy | TRANREPT has a repeated step name and a hard coded 2022 date window. INTCALC passes a fixed date as its PARM. | `app/jcl/TRANREPT.jcl:37`, `app/jcl/TRANREPT.jcl:43`, `app/jcl/INTCALC.jcl:22` |
+
+## The honest boundary
+
+The graph is a lower bound for wave 7 (IMS, DB2, MQ), for the online navigation that runs through the COMMAREA, and for anything a program submits at run time. It is close to complete for the batch posting, reload and report chain, and that is where the must-not-break items live. Eight entries on the not-parsed list, covering 30 files, are not read (see `modernization-assessment/01-inventory.md`). The CA-7 listing among them names eight jobs that the extractor's unscheduled list counts as unscheduled.

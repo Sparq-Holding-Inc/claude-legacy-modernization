@@ -1,46 +1,57 @@
 # 04 Estimate
 
-One wave, so one estimate. The ranges are inference. There is no size, velocity or team data in the
-tree to compute them from.
+Target state: refactor. One wave, so one estimate. It is a range in person-days, and it is an
+inference throughout. There is no port velocity to measure, no history for this team, and only 12
+lines of source in the tree (`jcl/JOBA.jcl:1`, `scripts/nightly.sh:6`). A line-count model would say
+"under a day" and would be wrong, because the lines are not where the cost is.
 
 ## Method
 
-I weighed the factors the skill lists, in its order of weight, against what the graph shows.
+The estimate follows what moves the cost, in the order the skill gives, and not lines of code.
 
-| Factor | This wave | Evidence |
-|---|---|---|
-| Coupling edges crossing the wave boundary | 0 call, 0 data, 0 contract. 1 temporal edge, inside the wave. | analysis (`edge_counts`) |
-| Behavioral oracle | None in the tree. It must come from job logs and scheduler history. | inference |
-| God modules in the wave | none | analysis (`god_modules`) |
-| Business logic in the database | none visible: no DB2 or dataset node | analysis (`node_counts`) |
-| Someone who can read the source language | unknown. The source is a 6-line shell script and three 2-line JCL members. | `scripts/nightly.sh:3` |
-
-## Wave 1 range
-
-| Wave | Range | Basis | Evidence |
+| Factor | State in this tree | Confidence | Evidence |
 |---|---|---|---|
-| 1 | 3 to 10 person-days, including the equivalence harness | The port is hours. The rest is finding out what `submit` does, collecting job history and building the order check. | inference |
+| Coupling edges crossing the wave boundary | None cross it. All edges are inside the wave. One temporal edge must be kept. | high | `scripts/nightly.sh:4`, `scripts/nightly.sh:5` |
+| Behavioral oracle | None in the tree. No dataset, no archive, no log. It has to come from the client. | high | analysis field `data_hubs` |
+| God modules in the wave | None | high | analysis field `god_modules` |
+| Business logic in the database | Not visible. No SQL and no DB2 table is named. | medium | analysis field `node_counts` |
+| Team can read the source language | Not known. The source is JCL and a shell wrapper. | low | inference |
 
-## The assumptions the range is most sensitive to
+## Wave 1, Nightly batch cycle: 7 to 16 person-days
 
-1. **The jobs in production are the jobs in the tree.** The range assumes each job is a no-op step
-   (`jcl/JOBA.jcl:2`, `jcl/JOBB.jcl:2`). If production JCL runs application programs, this estimate does
-   not apply. It needs a fresh scan, and the cost moves by an order of magnitude.
-2. **`submit` returns when the job is submitted, and only the submit order matters.** If JOBB must wait
-   for JOBA to end with return code 0, add about 1 to 2 person-days to map the condition into the
-   target scheduler, and to test the failure paths. The wrapper does not settle it
-   (`scripts/nightly.sh:4`, `scripts/nightly.sh:5`).
-3. **The client can supply at least a month of job history.** If not, add about 2 to 3 person-days to
-   capture run logs before the harness has anything to compare.
+| Part of the work | Range | Method | Confidence | Evidence |
+|---|---|---|---|---|
+| Discovery: what `submit` does, why JOBB follows JOBA, what the jobs really run, whether JOBC is retired | 2 to 5 days | Interviews and reading run history. Most of the range is waiting for the client. | low | inference |
+| Harness: order, return codes, failure cases, DST and month-end timing, run against the legacy chain first | 3 to 6 days | One comparison script over job logs, plus a handful of fault-injection runs. | low | inference |
+| Port: express the order and the stop-on-failure rule in the target orchestration, and move JOBA and JOBB | 1 to 3 days | The source is six shell lines and four JCL lines. | medium | `scripts/nightly.sh:3`, `jcl/JOBA.jcl:2`, `jcl/JOBB.jcl:2` |
+| Parallel run and cutover watch across one business cycle that includes a month-end | 1 to 2 days of effort, and about a month of calendar time | Watch, diff, sign the deviation register. | low | inference |
+
+The sum of the ranges is 7 to 16 person-days. Cost is dominated by discovery and verification. The
+port is the smallest part.
+
+### The assumptions this range is most sensitive to
+
+1. **Assumes the tree is the whole nightly chain, and that JOBA and JOBB really run only IEFBR14.** If the
+   production jobs run application programs or DD statements that were not supplied, this estimate does not
+   hold. Each real program becomes its own unit, needs its own oracle, and the range at least doubles.
+2. **Assumes `submit` returns without waiting for the job to finish** (inference, see `02-coupling.md`),
+   so the harness has to read completion from JES output or scheduler logs and not from the wrapper. If
+   `submit` does wait and passes the return code back, the harness shrinks by about 2 days.
+3. **Assumes 12 months of run history exists for the chain, including a month-end.** If it does not,
+   the oracle falls back to characterization tests written from the source, which here would prove
+   almost nothing. Then verification grows by about half and the confidence of every claim drops.
 
 ## Where Claude Code helps and where it does not
 
-Claude Code is strong at the mechanical part: re-expressing the two `submit` lines as a dependency
-chain in the target scheduler, with a test that asserts the order. It cannot tell what `submit` does,
-what JOBA and JOBB are for, or whether JOBC is retired. Those need the client's engineers. Inference.
+| Work | Claude Code | Confidence | Evidence |
+|---|---|---|---|
+| Translate the wrapper's order and stop-on-failure into a target workflow definition | Strong. This is mechanical transliteration with a test. | medium | `scripts/nightly.sh:3`, `scripts/nightly.sh:4`, `scripts/nightly.sh:5` |
+| Write the comparison harness over job logs and return codes | Strong, once the client supplies a sample of logs | medium | inference |
+| Say why JOBB follows JOBA | Cannot. The tree gives no reason. A person who runs the cycle has to say. | high | `jcl/JOBB.jcl:2` |
+| Say whether JOBC is retired | Cannot. A comment claims it and no data confirms it. | high | `scripts/nightly.sh:2`, `scripts/nightly.sh:6` |
+| Recover what the jobs do in production | Cannot. It is not in the tree. | high | `jcl/JOBA.jcl:2` |
 
-## Target state
+## What this estimate does not cover
 
-The target is `refactor`. This tree has no application code to restructure, so the refactor label
-applies to the wrapper only. Whether `rehost` would describe the real work better is the client's call.
-Inference.
+It covers only what is in the tree. It says nothing about whatever the real nightly cycle runs, and no
+estimate for the rest of the client's system can be derived from it.

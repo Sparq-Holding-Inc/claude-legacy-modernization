@@ -3,7 +3,7 @@
  "unreachable": [
   {
    "id": "cpy:UNUSED1Y",
-   "reason": "No program includes it and no static path reaches it. It holds a user-shaped record with a password field and a 2022 version stamp, so it looks like a template left over from the user file layout. A copybook cannot be the target of a computed CALL.",
+   "reason": "No program includes it and no entry point reaches it. Seven lines. Safe to propose for deletion once the client confirms nothing outside the tree copies it. No telemetry, so provisional.",
    "confidence": "high",
    "evidence": [
     {
@@ -16,27 +16,8 @@
  "dormant": [],
  "unknown": [
   {
-   "id": "CBPAUP0C",
-   "reason": "The extractor has no edge to it because it does not read the PARM of a DFSRRC00 step. Job CBPAUP0J runs it as an IMS BMP, and the CA-7 listing chains CBPAUP0J ahead of POSTTRAN. So it very likely runs. Kept in unknown on the extractor's evidence, never proposed for deletion. Ask whether the purge is still needed.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl",
-     "line": 25
-    },
-    {
-     "file": "app/scheduler/CardDemo.ca7",
-     "line": 70
-    },
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/CBPAUP0C.cbl",
-     "line": 310
-    }
-   ]
-  },
-  {
    "id": "CBTRN01C",
-   "reason": "No step, wrapper or scheduler entry in the tree runs it, and its six DDs are mapped by no JCL. 28 reachable computed calls could target it in the extractor's model. Those calls are CICS XCTL to programs defined in the CSD, and this batch program is not defined there, which bounds them but does not close the bucket. It is the one program with no sign of a caller. Ask the client before it is ported or dropped.",
+   "reason": "No JCL step, CSD entry, scheduler entry or literal in the tree names it, and its six DDs map to no JCL. Twenty-eight computed calls in reachable code could in principle target it. Every value the tree moves into those targets names an online program, and the two menu tables list only online programs, so it is probably not a call target. That bound is inference, so it stays unknown. It reads the daily transaction file and the masters and writes nothing, so it looks like a check-only twin of the posting program that nobody runs.",
    "confidence": "low",
    "evidence": [
     {
@@ -44,135 +25,19 @@
      "line": 29
     },
     {
-     "file": "app/csd/CARDDEMO.CSD",
-     "line": 173
-    }
-   ]
-  },
-  {
-   "id": "COBTUPDT",
-   "reason": "The extractor has no edge to it because it does not read the RUN PROGRAM command inside an IKJEFT01 step. MNTTRDB2 runs it, and the weekly Control-M folder runs MNTTRDB2. So it very likely runs. Kept in unknown, not proposed for deletion.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
-     "line": 30
+     "file": "app/cpy/COMEN02Y.cpy",
+     "line": 28
     },
     {
-     "file": "app/scheduler/CardDemo.controlm",
-     "line": 27
-    }
-   ]
-  },
-  {
-   "id": "DBUNLDGS",
-   "reason": "The extractor has no edge to it because it does not read the PARM of a DFSRRC00 step. Job UNLDGSAM runs it as a DL/I unload. No scheduler names UNLDGSAM, so how often it runs is unknown. Kept in unknown.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL",
-     "line": 27
-    },
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
-     "line": 136
-    }
-   ]
-  },
-  {
-   "id": "PAUDBLOD",
-   "reason": "The extractor has no edge to it because it does not read the PARM of a DFSRRC00 step. Job LOADPADB runs it as an IMS BMP. No scheduler names LOADPADB, so how often it runs is unknown. Kept in unknown.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL",
-     "line": 27
-    },
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL",
-     "line": 142
-    }
-   ]
-  },
-  {
-   "id": "PAUDBUNL",
-   "reason": "The extractor has no edge to it because it does not read the PARM of a DFSRRC00 step. Job UNLDPADB runs it as a DL/I unload. No scheduler names UNLDPADB, so how often it runs is unknown. Kept in unknown.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL",
-     "line": 39
-    },
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/PAUDBUNL.CBL",
-     "line": 132
-    }
-   ]
-  },
-  {
-   "id": "cpy:IMSFUNCS",
-   "reason": "Included only by DBUNLDGS, PAUDBLOD and PAUDBUNL, which are in this bucket and are run by IMS jobs. It follows them.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
-     "line": 136
-    },
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL",
-     "line": 142
-    },
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/PAUDBUNL.CBL",
-     "line": 132
-    }
-   ]
-  },
-  {
-   "id": "cpy:PADFLPCB",
-   "reason": "Included only by DBUNLDGS, which is run by an IMS job. It follows it.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
-     "line": 156
-    }
-   ]
-  },
-  {
-   "id": "cpy:PASFLPCB",
-   "reason": "Included only by DBUNLDGS, which is run by an IMS job. It follows it.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
-     "line": 155
-    }
-   ]
-  },
-  {
-   "id": "cpy:PAUTBPCB",
-   "reason": "Included by DBUNLDGS, PAUDBLOD and PAUDBUNL, which are run by IMS jobs. It follows them.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
-     "line": 154
-    },
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL",
-     "line": 161
-    },
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/PAUDBUNL.CBL",
-     "line": 150
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 184
     }
    ]
   },
   {
    "id": "proc:TRANREPT",
-   "reason": "Named only in JCL text inside CORPT00C, which a running program writes to the JOBS TD queue for submission, so it has no edge and is unknown, not unreachable. It is the proc the online report path runs. The batch job TRANREPT does not call it. It carries a copy of the same steps. Must-not-break: do not delete.",
-   "confidence": "low",
+   "reason": "Named only in JCL text inside CORPT00C, which writes that text to the JOBS queue at run time. CORPT00C is reachable through CSD transaction CR00, so this proc very likely runs every time a user requests the transaction report. It stays unknown because the extractor has no edge for it. No telemetry, so provisional.",
+   "confidence": "medium",
    "evidence": [
     {
      "file": "app/cbl/CORPT00C.cbl",
@@ -180,15 +45,11 @@
     },
     {
      "file": "app/cbl/CORPT00C.cbl",
-     "line": 518
+     "line": 517
     },
     {
      "file": "app/csd/CARDDEMO.CSD",
-     "line": 499
-    },
-    {
-     "file": "app/proc/TRANREPT.prc",
-     "line": 57
+     "line": 409
     }
    ]
   }

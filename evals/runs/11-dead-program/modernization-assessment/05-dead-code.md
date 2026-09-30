@@ -1,43 +1,57 @@
 # 05 Dead code
 
-The extractor's candidates are in `05a-dead-code-candidates.md`. The machine-readable register is `modernization-assessment/dead-code.json`. I kept the extractor's buckets as they are and moved nothing.
+Telemetry: none. Every claim below is provisional. The extractor's candidates are in
+`modernization-assessment/05a-dead-code-candidates.md`. The register is in
+`modernization-assessment/dead-code.json`.
 
-**Every claim below is provisional.** Telemetry is `none`, so nobody has shown which programs ran in the last 12 months. Static reachability says what can run. It does not say what does run.
+## Read this first
 
-## Two limits on the register
-
-- **The dormant bucket was not computed.** No file has a last-modified date, because the tree is not a git repository (analysis: `warnings`). The empty dormant list means not measured. It does not mean nothing is dormant. PGMMAIN and PGMLIVE are reachable on paper, and whether they have run in 5 years is not known.
-- **No scheduler was parsed.** One JCL job is in the tree and no scheduler artifact names it (analysis: `warnings`). `unscheduled_jobs` is empty because the extractor only fills it when a scheduler was parsed (analysis: `unscheduled_jobs`), so an empty list here means not measured. Every job counts as an entry point, so `job:MAINJOB` cannot show up as dead in any bucket. Whether it still runs is an open question, not a finding.
+- **Dormancy was not computed.** The extractor warned: "No last-modified dates exist ... The dormant bucket
+  was NOT computed. An empty dormant list means not measured." Every `last_modified` in `graph.json` is
+  null, because the work folder is not a git repository. The empty dormant bucket below is not a finding
+  that nothing is dormant. `PGMMAIN`, `PGMLIVE` and `job:MAINJOB` are reachable and their age is unknown.
+  (analysis: `warnings`)
+- **No scheduler was parsed.** The extractor warned that one JCL job is in the tree with no scheduler
+  artifact. `analysis.unscheduled_jobs` is empty, and here that means not measured. It does not mean the
+  job is scheduled. Ask whether `job:MAINJOB` still runs. (inference)
+- **The tree holds one JCL job.** A program that only some other JCL runs would look unreachable here.
+  This is why `PGMDEAD` is `medium`, not `high`.
 
 ## Unreachable
 
+Proposed for deletion. `PGMDEAD` needs the three confirmations listed under the table first.
+
 | Unit | Reason | Confidence | Evidence |
 |---|---|---|---|
-| PGMDEAD | No job step, program or scheduler in the tree runs it, and there is no computed call that could reach it. Its one statement calls PGMLIVE, which stays live through PGMMAIN, so deleting PGMDEAD leaves the live path whole | medium | `app/cbl/PGMDEAD.cbl:1`, `app/cbl/PGMDEAD.cbl:4` |
-| `cpy:UNUSED` | No program in the tree includes it | high | `app/cpy/UNUSED.cpy:1` |
+| `PGMDEAD` | No JCL step, scheduler entry or program names it. The tree has no computed calls and no JCL text inside a COBOL literal. Its only edge is an outgoing call to `PGMLIVE`. That call does not keep it alive, and `PGMLIVE` stays live through `PGMMAIN`. | medium | `app/cbl/PGMDEAD.cbl:4` |
+| `cpy:UNUSED` | None of the three COBOL programs has a `COPY` statement, so nothing includes it. A copybook is bound at compile time, so a computed call cannot reach it. | high | `app/cpy/UNUSED.cpy:1` |
 
-Proposal: instrument first, then delete. Deleting PGMDEAD on static evidence alone is defensible for the tree as given. Two things keep it provisional. Telemetry is none. And an entry point outside this tree, such as another JCL library or a scheduler, could still run it.
+What to confirm before deleting `PGMDEAD`:
 
-A note on direction. PGMDEAD calls a live program, but a live program does not call PGMDEAD. Calling a live program does not make a program live (`app/cbl/PGMDEAD.cbl:4`, `app/cbl/PGMMAIN.cbl:4`).
+1. Twelve months of job logs or SMF records show no run of it, by any job (telemetry).
+2. The full JCL library and scheduler export hold no step with `PGM=PGMDEAD`.
+3. No operator procedure or TSO command runs it by name. The extractor reads only PARM and RUN cards for
+   named programs (`meta.limits`).
 
 ## Reachable but dormant
 
-Empty, and not measured. See the first limit above. Propose PGMMAIN and PGMLIVE for instrumentation, not deletion. Dormant means old, not unused, and PGMMAIN is called by a job step unconditionally (`app/jcl/MAINJOB.jcl:2`), so it very likely runs.
+Empty, and not measured. See "Read this first". If the client supplies change dates from the library
+manager, rerun the extractor with real dates.
 
 | Unit | Reason | Confidence | Evidence |
 |---|---|---|---|
-| none | not computed: no last-modified dates | low | analysis: `dead_code_candidates.dormant` |
+| none computed | Dormancy needs last-modified dates and the tree has none | low | analysis: `dead_code_candidates.dormant` is empty and `warnings` says not computed |
 
 ## Unknown
 
-Empty. The tree has no computed call (analysis: `unresolved_dynamic`) and no embedded JCL (analysis: `embedded_jcl`), so nothing can reach an unreached program without a static edge. That is true of this tree only. A computed call in code outside it is invisible here.
+Empty. There are no computed calls, so nothing keeps this bucket open. Nothing was moved toward or away
+from unknown.
 
 | Unit | Reason | Confidence | Evidence |
 |---|---|---|---|
-| none | no computed call or embedded JCL in the tree | medium | analysis: `dead_code_candidates.unknown` |
+| none | `unresolved_dynamic` is empty | high | analysis: `unresolved_dynamic` and `dead_code_candidates.unknown` |
 
-## What to ask
+## Changes to the extractor's buckets
 
-- Job history or SMF records for `job:MAINJOB`, PGMMAIN, PGMLIVE and PGMDEAD over the last 12 months.
-- Whether any JCL library, scheduler, or CICS definition outside this tree names PGMDEAD or `cpy:UNUSED`.
-- Source-control history or member timestamps, so the dormant bucket can be computed.
+None. The extractor put `PGMDEAD` and `cpy:UNUSED` in unreachable, and both stay there. I found no
+run-time submit, no embedded JCL and no computed call that would move either toward unknown.

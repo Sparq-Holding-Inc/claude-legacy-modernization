@@ -5,7 +5,7 @@
   "unknown": [
     {
       "id": "HIDDEN01",
-      "reason": "No static edge reaches it. PGMMAIN, which the job MAINJOB runs, makes a computed call whose target comes from ACCEPT, and this is the only other program in the tree. No telemetry exists, so it stays unknown. Do not delete it.",
+      "reason": "No JCL step or program names it. The computed CALL at PGMMAIN.cbl:9 takes its target from an ACCEPT at run time, so it could name HIDDEN01. The target set cannot be bounded from the source, and there is no telemetry. Do not delete it.",
       "confidence": "low",
       "evidence": [
         {"file": "app/cbl/HIDDEN01.cbl", "line": 1},

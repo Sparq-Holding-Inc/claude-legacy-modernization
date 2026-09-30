@@ -14,8 +14,10 @@ Batch jobs that run application programs and write nothing another entry point u
 
 `PGMMAIN`, `job:MAINJOB`
 
+Computed calls in this wave, so its confidence cannot be high: `PGMMAIN`.
+
 ## Not placed
 
 | Unit | Reason |
 |---|---|
-| HIDDEN01 | no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json. |
+| HIDDEN01 | not reached by any static edge, and 1 reachable computed call(s) could target it, for example at app/cbl/PGMMAIN.cbl:9 |

@@ -1,60 +1,9 @@
 {
-  "target_state": "refactor",
-  "waves": [
-    {
-      "wave": 1,
-      "family": "none (the seed placed no unit; both programs are outside every family)",
-      "name": "Whole tree behind a program registry",
-      "rationale": "The tree holds two programs and no JCL, scheduler or CSD, so the extractor found no entry point and the seed put no unit in any family. The validator needs at least one wave, so both programs are placed together here as one unit of work. They cannot be split on evidence: PROGA makes a computed CALL at line 9 whose target is read by ACCEPT at line 8, so PROGB could be its callee. This is a wave of last resort, not a sound family. It holds a high-high unit (PROGA) in the only wave there is, so it needs a facade first: a registry that maps the run-time program name to a known target and rejects any name not on the list. Confidence is low because the real entry points, callee set and schedule are outside the tree.",
-      "unblocks": "Nothing that can be shown from this tree. It would unblock the wave plan for the rest of the system once the JCL and scheduler are supplied, because the registry list is the first thing those files must fill in.",
-      "blast_radius": "high",
-      "confidence": "low",
-      "inference": true,
-      "evidence": [
-        {
-          "file": "app/cbl/PROGA.cbl",
-          "line": 9
-        },
-        {
-          "file": "app/cbl/PROGB.cbl",
-          "line": 4
-        }
-      ],
-      "units": [
-        "PROGA",
-        "PROGB"
-      ]
-    }
-  ],
-  "unassigned": [],
-  "deviations": [
-    {
-      "unit": "PROGA",
-      "from_wave": null,
-      "to_wave": 1,
-      "reason": "Seed placed nothing because the tree has no entry point. Placed in wave 1 only so the plan has a wave: schema.py rejects an empty waves list. A computed call the extractor could not resolve means PROGA cannot be proven to sit in any family. Inference.",
-      "evidence": [
-        {
-          "file": "app/cbl/PROGA.cbl",
-          "line": 9
-        }
-      ]
-    },
-    {
-      "unit": "PROGB",
-      "from_wave": null,
-      "to_wave": 1,
-      "reason": "Seed placed nothing. Kept with PROGA because PROGA's computed call could name it, so the two cannot be proven independent. Inference.",
-      "evidence": [
-        {
-          "file": "app/cbl/PROGB.cbl",
-          "line": 4
-        },
-        {
-          "file": "app/cbl/PROGA.cbl",
-          "line": 9
-        }
-      ]
-    }
-  ]
+ "target_state": "refactor",
+ "waves": [],
+ "unassigned": [
+  {"id": "PROGA", "reason": "No entry points in the tree: no JCL job, CSD transaction or scheduler names it. It makes a computed call, so it cannot be sequenced until the client supplies JCL, a CSD or a scheduler export."},
+  {"id": "PROGB", "reason": "No entry points in the tree and no static caller. PROGA's computed call could reach it, so it cannot be sequenced until the client supplies JCL, a CSD or a scheduler export."}
+ ],
+ "deviations": []
 }

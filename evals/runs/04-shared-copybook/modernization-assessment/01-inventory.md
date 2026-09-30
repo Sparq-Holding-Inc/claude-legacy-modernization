@@ -42,7 +42,8 @@ Nothing was skipped.
 - COPY REPLACING is not applied. A copybook is expanded as written.
 - A variable call target is resolved only from VALUE clauses and literal MOVEs in the same program.
 - A called subprogram gets no DDs from its caller's JCL step.
-- IDCAMS, SORT and other in-stream control cards are not read. Dataset modes on utility steps come from DISP only.
+- SORT and most in-stream control cards are not read. IDCAMS DELETE, DEFINE, ALTER, REPRO, BLDINDEX, IMPORT and EXPORT cards are read for the datasets they change, but only as facts. The dataset mode on a utility step's edge still comes from DISP. A card that uses a symbol (&HLQ) is skipped.
+- The program a step runs is read from PARM for DFSRRC00 and from a RUN PROGRAM card for IKJEFT01. Other drivers that start a program by name are not read.
 - IF/THEN/ELSE and COND= in JCL are not modeled. Step order is file order.
 - Nested PROC calls and INCLUDE members are not followed. JCL text inside a COBOL literal is noticed, but it makes no edge. A proc or program it names is called unknown, never unreachable.
 - EXEC CICS RETURN TRANSID, START and SEND MAP are not edges.

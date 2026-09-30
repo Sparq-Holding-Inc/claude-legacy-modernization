@@ -1,38 +1,89 @@
 {
-  "units": [
+ "units": [
+  {
+   "id": "PGMMAIN",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Five lines: one CALL to PGMLIVE and GOBACK, with no data, arithmetic, files or branching."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Nothing in the tree reads or writes data here, and a wrong port fails loudly as an abend or a bad return code, but it is the only program the only job runs."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "The only program job:MAINJOB runs, and its whole body is a call to PGMLIVE.",
+   "confidence": "medium",
+   "evidence": [
     {
-      "id": "PGMMAIN",
-      "port_difficulty": {"score": 1, "why": "Five lines: one literal CALL of PGMLIVE and a GOBACK, no files, no arithmetic, no branches."},
-      "blast_radius": {"score": 2, "why": "Runs at step S1 of the only job in the tree, writes nothing, and a wrong port abends loudly on the missing call."},
-      "quadrant": "low-low",
-      "wave": 1,
-      "driving_fact": "The only program job:MAINJOB runs, and its only statement of substance is a static call to PGMLIVE.",
-      "confidence": "medium",
-      "evidence": [{"file": "app/cbl/PGMMAIN.cbl", "line": 4}, {"file": "app/jcl/MAINJOB.jcl", "line": 2}]
+     "file": "app/cbl/PGMMAIN.cbl",
+     "line": 4
     },
     {
-      "id": "PGMLIVE",
-      "port_difficulty": {"score": 1, "why": "Four lines, GOBACK only: no data, no logic, nothing to mistranslate."},
-      "blast_radius": {"score": 2, "why": "A leaf with one reachable caller (PGMMAIN), no datasets, and no silent-failure path."},
-      "quadrant": "low-low",
-      "wave": 1,
-      "driving_fact": "Leaf program with fan-in 1 over reachable programs. PGMDEAD also calls it, but PGMDEAD is unreachable.",
-      "confidence": "medium",
-      "evidence": [{"file": "app/cbl/PGMLIVE.cbl", "line": 4}, {"file": "app/cbl/PGMMAIN.cbl", "line": 4}]
-    },
-    {
-      "id": "job:MAINJOB",
-      "port_difficulty": {"score": 1, "why": "One EXEC PGM step with no DD statements, no COND, no proc, nothing to translate beyond the step."},
-      "blast_radius": {"score": 3, "why": "The only entry point and the only candidate for the nightly batch cycle the client said must not break; job order and restart rules are unknown."},
-      "quadrant": "low-high",
-      "wave": 1,
-      "driving_fact": "Sole entry point in the tree. No scheduler artifact was parsed, so where it sits in the nightly cycle is not established.",
-      "confidence": "low",
-      "evidence": [{"file": "app/jcl/MAINJOB.jcl", "line": 1}, {"file": "app/jcl/MAINJOB.jcl", "line": 2}]
+     "file": "app/jcl/MAINJOB.jcl",
+     "line": 2
     }
-  ],
-  "do_not_port": [
-    {"id": "PGMDEAD", "reason": "Unreachable: no job step, program or scheduler in the tree runs it, and the tree holds no computed call. Its only statement calls PGMLIVE, which stays live through PGMMAIN. Provisional, since telemetry is none. Instrument, then delete."},
-    {"id": "cpy:UNUSED", "reason": "No program in the tree includes it. Delete it once nobody outside the tree is confirmed to COPY it."}
-  ]
+   ]
+  },
+  {
+   "id": "PGMLIVE",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Four lines and the body is GOBACK, so there is no logic to port."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Only reachable caller is PGMMAIN and it touches no data, but a port that drops the entry point makes PGMMAIN's CALL abend."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "An empty subprogram called by PGMMAIN. Its other caller PGMDEAD is unreachable.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/PGMLIVE.cbl",
+     "line": 4
+    },
+    {
+     "file": "app/cbl/PGMMAIN.cbl",
+     "line": 4
+    }
+   ]
+  },
+  {
+   "id": "job:MAINJOB",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Two JCL lines: a JOB card and one EXEC PGM step, with no DD, PARM, COND or proc."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "The only candidate in the tree for the must-not-break nightly batch cycle, and no scheduler is parsed so its successors and return code checks are unknown."
+   },
+   "quadrant": "low-high",
+   "wave": 1,
+   "driving_fact": "Only job in the tree and the only entry point. The tree cannot show what runs after it or depends on its return code.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/MAINJOB.jcl",
+     "line": 1
+    },
+    {
+     "file": "app/jcl/MAINJOB.jcl",
+     "line": 2
+    }
+   ]
+  }
+ ],
+ "do_not_port": [
+  {
+   "id": "PGMDEAD",
+   "reason": "No JCL step, scheduler entry or program in the tree runs it, and the tree has no computed calls. Propose for deletion, provisional until run telemetry or the full JCL library confirms it."
+  },
+  {
+   "id": "cpy:UNUSED",
+   "reason": "No program in the tree includes it. Delete it."
+  }
+ ]
 }

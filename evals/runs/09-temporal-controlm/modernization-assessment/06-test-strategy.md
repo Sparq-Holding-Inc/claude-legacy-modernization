@@ -1,82 +1,103 @@
 # 06 Test strategy
 
-Skill used: `behavioral-equivalence`. The bar is this: for the nights the cycle really runs, the new platform starts the same jobs in the same order on the same conditions, and every difference was decided and written down.
+The bar is not "it passes tests". For the inputs the nightly cycle actually sees, the new schedule must produce the same
+observable behavior as the old one. Where it does not, someone decided that on purpose, and it is written in the deviation register at the end.
 
-## The tree holds no datasets
+## What must not break, and where it lands
 
-Neither job maps a dataset (`app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`), and `analysis` field `data_hubs` is empty. So the oracle cannot be a dataset diff. It has to come from **job output, logs, scheduler history and reports**. The client should supply:
+The client said "the nightly batch cycle" must not break. It maps to the Control-M folder NIGHTLY
+(`app/scheduler/nightly.xml:3`) and its two jobs (`app/scheduler/nightly.xml:4`, `app/scheduler/nightly.xml:8`). That is wave 1
+(`modernization-assessment/waves.json:5`). The match is by name only, so it is provisional (inference). The tree does not say the
+two jobs are the whole cycle. Whether a second folder, or more jobs, belong to the cycle is an open question in `00-summary.md`.
 
-1. Scheduler history for 12 months or more: for each night, JOBA and JOBB start time, end time, return code, order date, and when each condition was added and deleted.
-2. SYSOUT and job logs for a sample of nights, including month end and year end.
-3. What adds EXTERNAL-FEED, and a record of when it arrived each night. `app/scheduler/nightly.xml:5`
-4. Whatever consumes JOBB-DONE and the reports or files the cycle produces, if any. `app/scheduler/nightly.xml:11`
-5. Confirmation of what runs behind IEFBR14 in production. `app/jcl/JOBA.jcl:2`
+## The oracle for wave 1
 
-## Oracle for wave 1
+The tree holds no dataset (analysis: `data_hubs` is empty, and `modernization-assessment/01-inventory.md:33-36` lists none), and both jobs run
+only IEFBR14 (`app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`). There is no file output to diff. So the oracle has to come from what the scheduler and the job
+logs record, not from data. In descending strength:
 
-| Rank | Oracle | Available? | Use | Evidence |
-|---|---|---|---|---|
-| 1 | Parallel run: the old and new schedulers both receive the same EXTERNAL-FEED and the results are compared | Ask. Teams often assume it is impossible. The jobs run a do-nothing utility, so a second run has no side effect visible in this tree | Preferred for wave 1 | `app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`, inference |
-| 2 | Replay of captured scheduler history | Depends on the client supplying item 1 in the list above | Fallback | inference |
-| 3 | Golden master from archived job logs | Depends on the client supplying item 2 in the list above | Fallback for boundary dates | inference |
-| 4 | Characterization tests from the source | Weakest. The source is two null steps and a condition chain | Only as provisional cover for the assertions below | `app/scheduler/nightly.xml:4-12` |
+| Rank | Oracle | Fit for wave 1 | Evidence |
+|---|---|---|---|
+| 1 | Parallel run: the legacy Control-M folder and the new schedule both run against the same real EXTERNAL-FEED events, and the two run histories are diffed | Best fit. The jobs do no work, so running both is cheap and safe. Ask for it first, before accepting anything weaker. | `app/scheduler/nightly.xml:5` |
+| 2 | Replay of captured scheduler history: the condition and job event log for at least 13 months, so it holds month end and year end | Good. Needs the client's Control-M history export. | inference |
+| 3 | Golden master from archived job logs: return codes, start and end order of JOBA and JOBB per night | Free test cases nobody thinks to use. Also the telemetry that the dead-code register needs. | inference |
+| 4 | Characterization tests written from the XML | Weakest. It encodes what nine lines of XML say, not what the scheduler does. Label any coverage from it provisional. | `app/scheduler/nightly.xml:4-12` |
 
-## Assertions that come from the scheduler definition
+Wave 1 should use rank 1 or 2. Rank 4 alone is not an acceptable bar for the client's must-not-break item.
 
-These are the temporal edges the harness must keep. Each is stated in the XML.
+## What to ask the client to supply
 
-| ID | Assertion | Evidence |
+Because the tree has no data, the oracle has to be requested. This is the list:
+
+1. The Control-M run history and the condition add and delete log for the NIGHTLY folder, 13 months or more.
+2. The JES job output for JOBA and JOBB for the same period, with return codes.
+3. The name of whatever sets EXTERNAL-FEED (`app/scheduler/nightly.xml:5`).
+4. The name of whatever waits for JOBB-DONE (`app/scheduler/nightly.xml:11`), and the archived output of that consumer.
+5. The production JCL members, if IEFBR14 is a stand-in.
+6. The Control-M calendars and any month-end or year-end folder variations.
+
+## Normalize before you diff
+
+A naive diff of two run histories fails every night for reasons that do not matter. Agree this spec, and have a person sign it. Each row is a place a real bug can hide.
+
+| Item | Treatment | Why it is safe, or the risk | Evidence |
+|---|---|---|---|
+| Job numbers, run ids, scheduler-assigned sequence numbers | Ignore | They differ by system and carry no behavior | inference |
+| Wall-clock start and end times | Compare the order and the gap between the two jobs, not the clock | The order is the behavior. Absolute time is not. | `app/scheduler/nightly.xml:9` |
+| ODAT (the order date) | Keep it. Compare per order date | Conditions are dated (inference from Control-M semantics) | `app/scheduler/nightly.xml:5`, `app/scheduler/nightly.xml:9` |
+| Order of JOBA and JOBB | Never normalize | JOBB waits for JOBA-DONE, so the order is not incidental | `app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9` |
+| Conditions set and deleted | Never normalize. Compare the full set per night, including the delete of JOBA-DONE | The delete decides what happens on a rerun | `app/scheduler/nightly.xml:10` |
+| Return codes | Compare exactly | A different code can change what the scheduler does next | `app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2` |
+| Numeric fields | Not applicable in this tree. If production members handle money, compare in a decimal type with zero tolerance | Packed decimal rounds differently from IEEE floats | inference |
+
+## Cover the input space deliberately
+
+Production replay covers the ordinary night well and the dangerous nights badly. Add these cases on purpose:
+
+| Case | What must hold | Evidence |
 |---|---|---|
-| T1 | JOBA does not start until EXTERNAL-FEED exists for the order date | `app/scheduler/nightly.xml:5` |
-| T2 | JOBA ending OK adds JOBA-DONE for the order date | `app/scheduler/nightly.xml:6` |
-| T3 | JOBB does not start until JOBA-DONE exists for the order date | `app/scheduler/nightly.xml:9` |
-| T4 | JOBB ending OK removes JOBA-DONE | `app/scheduler/nightly.xml:10` |
-| T5 | JOBB ending OK adds JOBB-DONE | `app/scheduler/nightly.xml:11` |
-| T6 | Each condition is scoped to the order date (ODATE `ODAT`) | `app/scheduler/nightly.xml:5`, `app/scheduler/nightly.xml:9` |
+| EXTERNAL-FEED never arrives | JOBA does not start, JOBB does not start, and the cycle is reported late | `app/scheduler/nightly.xml:5` |
+| EXTERNAL-FEED arrives twice for one order date | Same result as the legacy folder gives. We do not know what that is (inference) | `app/scheduler/nightly.xml:5` |
+| JOBA ends with a non-zero code | JOBA-DONE is not added, and JOBB does not run | `app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9` |
+| JOBB is rerun after a good run | It waits, because JOBB deleted JOBA-DONE. A rerun starts only after JOBA runs again or the condition is added by hand (inference from Control-M semantics) | `app/scheduler/nightly.xml:10` |
+| JOBB ends badly, so JOBA-DONE may stay behind | Reproduce whatever legacy does. Do not assume it is sane. This is the "bad data already in there" case | `app/scheduler/nightly.xml:10` |
+| The cycle runs across midnight or the order date rolls | Conditions carry the order date, so check which date each one gets | `app/scheduler/nightly.xml:5`, `app/scheduler/nightly.xml:6` |
+| Month end, quarter end, fiscal year end, leap day, DST change | The nightly cycle behaves as legacy did. The tree shows no calendar, so ask whether these nights differ | inference |
+| Nothing arrives at all for several nights, then a burst | Same catch-up behavior as legacy | inference |
 
-The words "ending OK" in T2, T4 and T5, and the reading of the order date scope in T6, are `inference` from how Control-M behaves. The file states the conditions and the signs and not the trigger. Confirm both with the client.
+The plugin also asks for "the paths that only run at fiscal close". We cannot see any here. If the client's close calendar changes this folder, that is the case most likely to
+be missed, and it is the first thing to ask about.
 
-## Cases to add beyond the normal night
+## Mainframe traps for the spec
 
-| Case | What to check | Evidence |
+| Trap | Status in this tree | Evidence |
 |---|---|---|
-| JOBA fails, then is rerun | JOBA-DONE is added only after the good run, and JOBB does not run in between | inference |
-| JOBB fails, then is rerun | JOBA-DONE is still there to release the rerun. If JOBB only deletes it on success, the rerun works. If the target deletes it early, the rerun stalls | `app/scheduler/nightly.xml:10`, inference |
-| JOBB rerun after a good run | JOBA-DONE has already been deleted, so JOBB should wait. Decide whether that is wanted | `app/scheduler/nightly.xml:10`, inference |
-| EXTERNAL-FEED late or missing | JOBA and JOBB both wait, and the alert behavior matches the old system | `app/scheduler/nightly.xml:5`, inference |
-| Order date roll over: a run that crosses midnight | The conditions stay tied to the order date, not the calendar date | `app/scheduler/nightly.xml:5`, inference |
-| Month end, quarter end, fiscal year end, leap day, DST change | The cycle still starts and ends in order. The schedule attributes are not in the tree, so the calendar has to come from the client | `app/scheduler/nightly.xml:4`, inference |
-| Zero record and maximum size input | Not testable from this tree, since no dataset is named. Ask what the cycle processes | `app/jcl/JOBA.jcl:2` |
+| Packed decimal (COMP-3) | Not present. No COBOL in the tree | `modernization-assessment/01-inventory.md:14-17` |
+| EBCDIC collating sequence and KSDS key order | Not present. No dataset | analysis: `data_hubs` is empty |
+| REDEFINES | Not present | `modernization-assessment/01-inventory.md:14-17` |
+| Record padding and low values | Not present | analysis: `data_hubs` is empty |
+| Job order | Present. This is the one temporal edge the harness must keep: JOBA before JOBB | `app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9` |
 
-## Normalization spec (short, for a human to sign)
+## Deviation register
 
-- Job numbers, run ids, scheduler order ids and log timestamps: ignore the value, keep the order.
-- Start and end times: compare order, not clock time. Allow a stated delay for scheduler polling.
-- Return codes: compare exactly. No tolerance.
-- Whitespace and padding in logs: ignore trailing whitespace only.
-
-Each line is an assertion that a difference does not matter. Keep the list at this length.
-
-## Mainframe traps for this tree
-
-- **Packed decimal, collating sequence, REDEFINES, record padding:** none appears, since there is no COBOL, copybook or dataset (`meta.files_seen`). They become relevant if the real work is elsewhere. Add them to this spec as soon as source arrives.
-- **Job order:** the one trap that does apply. The temporal edge in `graph.json` is the list of orders the harness keeps. `app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9`
-
-## Deviation Register
-
-Empty until the port exists. Nothing may differ without a row.
+Nothing may differ from legacy without a row here. It is empty now, because no port exists.
 
 | ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact | Evidence |
 |---|---|---|---|---|---|---|
-| D0 | none recorded | none recorded | not applicable | not applicable | not applicable | inference |
 
 ## Exit bar for wave 1
 
-- The replay or parallel run diff is clean for a full business cycle, including a month end, modulo the normalization spec and the register.
-- Assertions T1 to T6 and every case above pass.
-- The harness is in version control and runs in CI.
-- The register is signed by someone with authority.
+Wave 1 is done when all of these hold:
 
-## Keep the harness
+- the run-history diff is clean for the full replay window, modulo the normalization spec and the deviation register
+- every case in the input-space table passes
+- the harness is under version control and runs in CI
+- the deviation register is signed by someone with the authority to sign it
+- the consumer of JOBB-DONE has confirmed it still gets the signal (`app/scheduler/nightly.xml:11`)
 
-After cutover it becomes the regression suite for the scheduling layer. It is the only executable statement of the cycle's order that will exist, because the order is not in the JCL. `app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9`
+Not when the new schedule loads. Not when it passes tests written alongside it, since those hold the porter's understanding, which is the thing under test.
+
+## Keep the harness after cutover
+
+The comparison harness becomes the regression suite for the new schedule. Budget for maintaining it. For a nightly cycle it is also the only
+executable statement of the order and the conditions, since the jobs themselves do nothing.

@@ -1,43 +1,38 @@
 # 05 Dead code
 
-Telemetry: `none`, given as a flag. Every claim here is provisional. Machine-readable form:
-`modernization-assessment/dead-code.json`. Candidates from the extractor: `05a-dead-code-candidates.md`.
+Telemetry: none. Every claim in this file is provisional. The machine-readable form is
+`dead-code.json`. The extractor's own tables are in `05a-dead-code-candidates.md`.
 
-## Result
+## Two warnings from the extractor
 
-No unit is unreachable, none is dormant, and both are unknown. The extractor put both there, and the
-assessment keeps them there.
+- **No entry points.** No CSD transaction, JCL job, scheduler job or wrapper was found. Nothing can be
+  proven unreachable, so every candidate is unknown (`analysis.warnings`).
+- **Dormancy was not computed.** No last-modified dates exist, because the tree is not a git
+  repository (`meta.git_dates` is false in `graph.json`). The dormant list is empty because it was
+  not measured. It does not mean nothing is dormant.
+
+## The three buckets
 
 | Bucket | Units | Confidence | Evidence |
 |---|---|---|---|
-| Unreachable | none | not applicable | analysis: `dead_code_candidates.unreachable` is empty |
-| Reachable but dormant | none. Not measured, see below | not applicable | analysis: `warnings`, the dormant bucket was not computed |
-| Unknown | PROGA | low | `app/cbl/PROGA.cbl:1` |
-| Unknown | PROGB | low | `app/cbl/PROGA.cbl:6` |
+| Unreachable | none | high | analysis field `dead_code_candidates` |
+| Reachable but dormant | none. Not measured. | low | analysis field `warnings` |
+| Unknown | PROGA, PROGB | low | `app/cbl/PROGA.cbl:6` |
 
-## Why unknown and not unreachable
+## Unknown
 
-The tree has no entry point (analysis: `entry_points` is empty). A program can only be proven unreachable
-by a walk from an entry point, so nothing here can be. The tree also does not include the JCL and scheduler
-files that would name PROGA. A program outside the tree may start it. Deleting either on this evidence would be
-a guess. The validator forbids moving a unit from unknown to unreachable, and this assessment does not.
+| Unit | Why it is unknown | Confidence | Evidence |
+|---|---|---|---|
+| PROGA | No entry point exists in the tree, so nothing reaches it statically. It ends in `STOP RUN`, so it looks like a main program that a job outside the tree starts. It is not a candidate for deletion. | low | `app/cbl/PROGA.cbl:7` |
+| PROGB | Same cause. It is statically called by PROGA, so if PROGA runs, PROGB runs. | low | `app/cbl/PROGA.cbl:6` |
 
-PROGB is a special case. Its only caller is PROGA, which calls it unconditionally
-(`app/cbl/PROGA.cbl:6`). If PROGA runs, PROGB runs. The two share one fate. Inference.
+No computed call keeps this bucket open (`analysis.unresolved_dynamic` is empty). The bucket is open for
+a different reason: the tree has no way to start anything. I moved nothing toward unreachable.
 
-## Dormant was not measured
+## What to ask before any deletion
 
-The work folder is not a git repository, so no last-modified date exists for either program
-(`app/cbl/PROGA.cbl:1`, `app/cbl/PROGB.cbl:1`, and the warning in analysis: `warnings`). The empty dormant
-list means not measured, not none. To measure it, supply the source-control history or the member-change
-dates from the mainframe library.
-
-## Unscheduled jobs
-
-`analysis.unscheduled_jobs` is empty because there are no jobs. That is a gap, not a clean bill. Ask
-whether a job runs PROGA (Open Questions in `00-summary.md`).
-
-## What would firm this up
-
-Twelve months of job logs or SMF records that show whether PROGA ran, and a listing of the production load
-library that shows whether a PROGB module exists there. Without them every line above stays provisional.
+- Do the jobs that run PROGA still run? A job that no parsed scheduler names is an entry point. Here
+  the extractor has no job to test (`analysis.unscheduled_jobs` is empty).
+- Can the client supply 12 months of job history (SMF type 30 or the scheduler run log) for PROGA?
+  That turns the unknown bucket into evidence.
+- Can the client supply source-control dates for the two files?

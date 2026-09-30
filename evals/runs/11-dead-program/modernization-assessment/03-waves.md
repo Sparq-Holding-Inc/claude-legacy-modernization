@@ -1,47 +1,62 @@
 # 03 Waves
 
-Target state: **refactor** (given by `--target refactor`). The machine-readable plan is `modernization-assessment/waves.json`. It starts from the extractor's seed in `03a-wave-seed.md`.
+Target state: refactor. The plan is in `modernization-assessment/waves.json`. It starts from the extractor's
+seed (`modernization-assessment/03a-wave-seed.md`) and changes nothing. There are no deviations.
 
 ## The plan
 
-One wave. The extractor put the only entry point, `job:MAINJOB`, in the `batch-readonly` family. That is the first of the seven fixed families, and the others are empty (analysis: `wave_seed`).
+| Wave | Family | Name | Units | Blast radius | Confidence | Evidence |
+|---|---|---|---|---|---|---|
+| 1 | batch-readonly | The one batch chain | `job:MAINJOB`, `PGMMAIN`, `PGMLIVE` | medium | medium | `app/jcl/MAINJOB.jcl:1`, `app/jcl/MAINJOB.jcl:2`, `app/cbl/PGMMAIN.cbl:4` |
 
-| Wave | Family | Units | Blast radius | Confidence | Evidence |
-|---|---|---|---|---|---|
-| 1 | batch-readonly | `job:MAINJOB`, `PGMMAIN`, `PGMLIVE` | low | medium | `app/jcl/MAINJOB.jcl:1` |
+One wave. The seed's other six families are empty. This tree has one entry point and it touches no shared
+data, so there is nothing to sequence. I did not invent waves to fill the families. The only way to get a
+second wave would be to cut a three-unit chain that one sentence describes.
 
-Not placed: `PGMDEAD`. It is unreachable, so it is not ported. See `05-dead-code.md`. The copybook `cpy:UNUSED` is unreferenced and has no owner to move with.
+## Why wave 1 stands, and where it is weak
 
-## Why one wave is the honest answer
+The four tests for a valid wave:
 
-I did not invent a second wave. A cut needs a reason I can cite, and none of the four reasons in the skill applies.
-
-- **A must-not-break item, a strongly connected component or a facade dependency forces a move.** No strongly connected component exists (analysis: `sccs`). The one must-not-break item, "the nightly batch cycle", cannot be tied to a unit with evidence, since the only job in the tree is `job:MAINJOB` and no scheduler names it. I treat the job as the likely holder of that cycle. That is inference.
-- **A wave holds more than 25 units.** It holds three.
-- **Something the extractor could not see changes what a unit is.** No computed call and no embedded JCL exist (analysis: `unresolved_dynamic`, `embedded_jcl`).
-- **`risks.json` puts a unit in high-high and its family puts it early.** No unit is high-high. The scores are low-low for both programs and low-high for the job (`modernization-assessment/risks.json:2`).
-
-Deviations from the seed: none. A plan with no deviations is a fine answer.
-
-## Wave 1. Nightly batch job, whole tree
-
-| Test | Holds? | Confidence | Evidence |
+| Test | Result | Confidence | Evidence |
 |---|---|---|---|
-| Deploys independently, behind a flag or facade | Yes. The job is the only entry point and touches no shared data, so a second copy of the job can run beside the old one | medium | `app/jcl/MAINJOB.jcl:2` |
-| Rolls back independently | Yes. It writes no dataset, so there is nothing to undo | medium | `app/cbl/PGMMAIN.cbl:4` |
-| Has a testable boundary | Weakly. There is no dataset to compare, so the boundary is the job return code, the job log and what the real job writes | low | inference |
-| Delivers something a stakeholder can name | Only if `job:MAINJOB` is the nightly batch cycle. If it is, the wave is that cycle. If not, it is a toolchain proof | low | inference |
+| Deploys independently, behind a flag or facade | Yes. The job is the switch: run the legacy job or the ported job. The switch itself lives in a scheduler the tree does not hold. | medium | `app/jcl/MAINJOB.jcl:2`, analysis: `warnings` names the missing scheduler |
+| Rolls back independently | Yes. Nothing else in the tree reads or writes anything this wave produces. | medium | analysis: `data_hubs` and `contract` edges are empty |
+| Has a testable boundary | Weakly. The job has no DD statement, so its only observable output is its return code and log. See `modernization-assessment/06-test-strategy.md`. | low | `app/jcl/MAINJOB.jcl:2` |
+| Delivers something a stakeholder can name | Only if the client confirms `job:MAINJOB` is the nightly batch cycle. Nothing in the tree says it is nightly. | low | inference |
 
-**Unblocks.** Nothing else in the tree depends on this wave. On this evidence it is a chore: it proves the toolchain and the harness. If the real nightly cycle has more jobs than this tree shows, the plan needs a second look, and this wave becomes the first of several.
+The plan does not decide the fourth test. It is the first open question for the client.
 
-**Order inside the wave.** Port the leaf first, then its caller, then the job.
+## What wave 1 unblocks
 
-1. PGMLIVE (`app/cbl/PGMLIVE.cbl:4`)
-2. PGMMAIN (`app/cbl/PGMMAIN.cbl:4`)
-3. `job:MAINJOB` step S1 (`app/jcl/MAINJOB.jcl:2`)
+Nothing inside the tree. No live unit outside the wave depends on it, and the only other caller of `PGMLIVE`
+is `PGMDEAD`, which is unreachable (`app/cbl/PGMDEAD.cbl:4`). Until the client confirms the nightly batch
+cycle maps to `job:MAINJOB`, wave 1 is a chore. Its value is proving the port toolchain and the
+job-level comparison harness. Inference.
 
-**Rollback.** Keep the legacy job. Run the ported job beside it. Switch the scheduler entry for `job:MAINJOB` between the two. Rolling back is a scheduler change. The scheduler export is not in the tree, so this procedure is inference until someone supplies it.
+## Risk quadrants against the plan
 
-## What I would put behind a facade
+| Unit | Port difficulty | Blast radius | Quadrant | Confidence | Evidence |
+|---|---|---|---|---|---|
+| `PGMMAIN` | 1 | 2 | low-low | medium | `app/cbl/PGMMAIN.cbl:4` |
+| `PGMLIVE` | 1 | 2 | low-low | medium | `app/cbl/PGMLIVE.cbl:4` |
+| `job:MAINJOB` | 1 | 3 | low-high | low | `app/jcl/MAINJOB.jcl:1` |
 
-Nothing. No unit is high-high, and no god module exists (analysis: `god_modules`).
+No unit is high-high, so no risk-based move applies. `job:MAINJOB` is low-high: the port is easy and the
+verification is the work. That is why the harness is proven inside the wave before the cutover, not after.
+Both axes come from `modernization-assessment/risks.json`, which the risk scoring produced. No combined
+score exists, by design.
+
+## Not placed
+
+| Unit | Reason | Confidence | Evidence |
+|---|---|---|---|
+| `PGMDEAD` | Unreachable. No JCL step, scheduler entry or program runs it and the tree has no computed calls. Proposed for deletion, not for a wave. | medium | `app/cbl/PGMDEAD.cbl:4` |
+| `cpy:UNUSED` | A copybook with no includer has no owner to move with. It is not a unit. It is in the dead-code register. | high | `app/cpy/UNUSED.cpy:1` |
+
+If `PGMDEAD` turns out to run, it joins wave 1. It only calls `PGMLIVE`, so no other wave would change.
+
+## Deviations from the seed
+
+None. A plan with no deviations is a fine answer here. No must-not-break item, strongly connected component,
+facade dependency, computed call or unparsed file forces a unit into another wave
+(analysis: `sccs`, `unresolved_dynamic` and `unparsed` are all empty). No wave holds more than 25 units.

@@ -1,18 +1,28 @@
 {
-  "target_state": "refactor",
-  "waves": [
+ "target_state": "refactor",
+ "waves": [
+  {
+   "wave": 1,
+   "family": "batch-readonly",
+   "name": "SEQJOB batch job, whole tree",
+   "units": [
+    "PGMA",
+    "PGMB",
+    "PGMC",
+    "job:SEQJOB"
+   ],
+   "rationale": "One entry point, no dataset, no call between programs, no strongly connected component, no god module and no articulation point, so there is nothing to cut and the seed's single wave stands. It passes the four wave tests only weakly: it can sit behind a job-level switch and roll back to the old JCL (inference), and its boundary is the job's step order and return codes, but the tree holds no dataset, so the oracle must come from outside the tree. The family name is batch-readonly because the extractor found no shared write. That is an absence of evidence, since the tree has no DD statement at all. The step name STEP2 is used twice (lines 3 and 5), so the run order is file order and is not certain. No deviation from the seed.",
+   "unblocks": "Nothing inside the tree. No later wave, copybook or dataset depends on it, so in dependency terms it is a chore. It is the whole system, so the deliverable is the nightly cycle on the target platform, if the client confirms SEQJOB is that cycle.",
+   "blast_radius": "medium",
+   "confidence": "medium",
+   "evidence": [
     {
-      "wave": 1,
-      "family": "batch-readonly",
-      "name": "Sequenced batch job",
-      "units": ["PGMA", "PGMB", "PGMC", "job:SEQJOB"],
-      "rationale": "One job, three programs, no shared dataset. The seed puts the whole system in one family, and that is sound: there is no second entry point to sequence against, no data hub, no cycle and no computed call. The programs are empty (GOBACK only), so the family test 'writes nothing shared' holds by absence of code, not by proof of behavior. The one constraint is the step order in SEQJOB, which lives only in JCL file order. It can be deployed and rolled back as one job, and its boundary is testable by step order and return codes.",
-      "unblocks": "Nothing else in this tree depends on it. It is the whole system, so it works as the proof of the toolchain, and it is a chore beyond that until the real program bodies and the scheduler export arrive.",
-      "blast_radius": "medium",
-      "confidence": "low",
-      "evidence": [{"file": "app/jcl/SEQJOB.jcl", "line": 1}]
+     "file": "app/jcl/SEQJOB.jcl",
+     "line": 1
     }
-  ],
-  "unassigned": [],
-  "deviations": []
+   ]
+  }
+ ],
+ "unassigned": [],
+ "deviations": []
 }

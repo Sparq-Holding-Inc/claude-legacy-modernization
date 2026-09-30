@@ -1,51 +1,58 @@
 # 03 Waves
 
-Target state: `refactor` (given as a flag). The plan is `waves.json`. The extractor's seed was kept as it was. No deviations.
+Target state: refactor (`modernization-assessment/waves.json:2`). Refactor means the same behavior in restructured code. Here the
+"code" is two do-nothing JCL jobs and a scheduler file, so what gets restructured is the schedule and its conditions.
 
-## Wave count
+The plan is the extractor's seed (`03a-wave-seed.md`), kept as it was. The seed cut one wave. I found no reason to change it.
 
-One wave.
+## The plan
 
 | Wave | Family | Units | Blast radius | Confidence | Evidence |
 |---|---|---|---|---|---|
-| 1. Nightly batch cycle (JOBA then JOBB) | batch-utility | `job:JOBA`, `job:JOBB`, `sch:NIGHTLY/JOBA`, `sch:NIGHTLY/JOBB` | high | medium | `app/jcl/JOBA.jcl:1`, `app/jcl/JOBB.jcl:1`, `app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9` |
+| 1 | batch-utility | `job:JOBA`, `job:JOBB`, `sch:NIGHTLY/JOBA`, `sch:NIGHTLY/JOBB` | medium | medium | `app/jcl/JOBA.jcl:1`, `app/jcl/JOBB.jcl:1`, `modernization-assessment/waves.json:5` |
 
-## Why one wave, and why it is sound
+There is one wave. No unit is left unplaced (`modernization-assessment/waves.json:24`) and there are no deviations (`modernization-assessment/waves.json:25`).
 
-The four tests from the skill, applied to wave 1:
+## Wave 1. Nightly batch cycle: JOBA then JOBB
 
-| Test | Result | Evidence |
+**Why it is one wave.** The four units have one coupling between them, the JOBA-DONE condition (`app/scheduler/nightly.xml:6`,
+`app/scheduler/nightly.xml:9`). It forces JOBA before JOBB. Splitting the pair across waves would put a scheduler order across a wave
+boundary, so it stays whole.
+
+**The four wave tests.**
+
+| Test | Answer | Evidence |
 |---|---|---|
-| Deployed independently, behind a flag or facade | Yes, as a unit. Both JCL members and both scheduler entries move together. The tree has no other unit that calls them or shares data with them | `analysis` fields `fan_in` and `data_hubs`, both empty |
-| Rolled back independently | Yes. Restore the old scheduler folder and keep the old JCL. Rollback needs the old scheduler to stay reachable, which is `inference` | inference |
-| Testable boundary | Yes. The boundary is the condition chain: what starts JOBA, when JOBA-DONE is posted, when JOBB starts, when JOBA-DONE is removed, when JOBB-DONE is posted | `app/scheduler/nightly.xml:5`, `app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9`, `app/scheduler/nightly.xml:10`, `app/scheduler/nightly.xml:11` |
-| Delivers something a stakeholder can name | Yes. The must-not-break item, "the nightly batch cycle", runs on the new platform in the same order | `app/scheduler/nightly.xml:3` |
+| Deploys independently, behind a flag or facade | Yes. Nothing outside the folder calls into it and the jobs share no dataset. The switch is which scheduler holds the NIGHTLY folder. | `app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2` |
+| Rolls back independently | Yes, by re-enabling the legacy folder. The catch is the conditions: EXTERNAL-FEED must reach one scheduler only, and JOBB-DONE must go to the same consumer as before. | `app/scheduler/nightly.xml:5`, `app/scheduler/nightly.xml:11` |
+| Has a testable boundary | Yes. Assert the order of the two jobs, the conditions each sets and clears, and each return code. There is no data at the boundary. | `app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9`, `app/scheduler/nightly.xml:10` |
+| Delivers something a stakeholder can name | Yes: the nightly batch cycle, the item the client said must not break. The name match to the folder is inference. | `app/scheduler/nightly.xml:3` |
 
-It cannot be cut in two. The order between the jobs exists only as the condition JOBA-DONE (`app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9`). The extractor computed no articulation point (`analysis` field `articulation_points`), and a cut at the condition would need a bridge between two schedulers for a wave that holds two jobs.
+**What it unblocks.** Nothing else in this tree. It is the only wave, and no program, dataset or copybook depends on it. By
+dependency it is a chore. It matters because it is the client's must-not-break item, and because it pins the condition contract
+(EXTERNAL-FEED in, JOBB-DONE out) that any later scheduler port has to keep.
 
-## What the wave unblocks
+**Confidence is medium, not high.** The sequence is not in doubt, because there is only one wave and one internal order. What is in doubt
+is whether the tree is the whole cycle (inference). Both jobs run only IEFBR14 (`app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`), which
+does nothing. Either the real work sits in members we were not given, or the cycle is a set of pure scheduling signals. I did not
+raise the confidence above medium, and I did not lower it further, because no edge is low confidence and there are no computed calls.
 
-Nothing else in this tree. In dependency terms it is a chore, and the plan says so. Its value is that it proves scheduler semantics (an external input, a posted condition, a consumed and deleted condition) that later waves from the wider estate will reuse. `analysis`
+**Blast radius is medium.** The jobs do no work in this tree, so a bad port cannot corrupt data here. What it can do is start the cycle at the wrong time,
+run JOBB before JOBA, or fail to set JOBB-DONE, and any of those is silent if nobody watches the folder (inference).
 
-## Units in the wave
+## Risk quadrants and how they were used
 
-| Unit | What it is | Confidence | Evidence |
-|---|---|---|---|
-| `job:JOBA` | JCL job, one step running IEFBR14 | high | `app/jcl/JOBA.jcl:1` |
-| `job:JOBB` | JCL job, one step running IEFBR14 | high | `app/jcl/JOBB.jcl:1` |
-| `sch:NIGHTLY/JOBA` | Control-M job. Waits on EXTERNAL-FEED, posts JOBA-DONE | high | `app/scheduler/nightly.xml:4` |
-| `sch:NIGHTLY/JOBB` | Control-M job. Waits on JOBA-DONE, deletes it, posts JOBB-DONE | high | `app/scheduler/nightly.xml:8` |
+Both jobs score low port difficulty and blast radius 3, which the plugin calls low-high (`modernization-assessment/risks.json:13`,
+`modernization-assessment/risks.json:42`). A low-high unit is safe to do early, once the equivalence harness is proven. Its wave is the
+first and only one, so the quadrant and the family agree and no move was needed (rule 4 of the change reasons does not fire).
 
-Steps (`step:JOBA.S1`, `step:JOBB.S1`) move with their jobs. `ext:IEFBR14` is a system utility outside the tree and is not a unit.
+| Reason to change the plan | Fired | Evidence |
+|---|---|---|
+| Must-not-break item, strongly connected component or facade forces a move | No. The must-not-break item maps to this wave already, and there is no strongly connected component | analysis: `sccs` is empty |
+| A wave over 25 units needs a cut | No. The wave holds 4 units | `modernization-assessment/waves.json:8` |
+| Something the extractor could not see changes what a unit is | No. No computed call, nothing unparsed, no JCL text in a COBOL literal | analysis: `unresolved_dynamic`, `embedded_jcl` and `unparsed` are empty |
+| A high-high unit sits in an early family | No. There is no high-high unit | `modernization-assessment/risks.json:13` |
 
-## Risk quadrant check
+## Not placed
 
-`risks.json` puts both jobs in `low-high`: the port is easy and being wrong is costly. The skill says that quadrant is safe early once the equivalence harness is proven. The plan puts it first because it is the only wave. The harness in `06-test-strategy.md` must be in place before this wave ships. `modernization-assessment/risks.json:13`, `modernization-assessment/risks.json:42`
-
-## Deviations from the seed
-
-None. A plan with no deviations is a fine answer here. The seed placed every unit and left none unassigned (`analysis` field `wave_seed`).
-
-## What would change this plan
-
-If the real cycle runs application programs that are not in this tree, this wave is only the scheduling layer of a larger system, and the count above is too low. That is `inference` and is the second open question in `00-summary.md`.
+Nothing. Every unit is placed (`modernization-assessment/waves.json:24`).

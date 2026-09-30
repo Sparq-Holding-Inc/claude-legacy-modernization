@@ -1,37 +1,48 @@
 # 05 Dead code
 
-Telemetry is `none`. Every claim here is provisional.
+Telemetry: none. Every claim in this file is provisional. There is no run history to firm up any bucket.
 
-## Buckets
+## The three buckets
 
-The extractor put nothing in any of the three buckets, and I kept it that way. `dead-code.json` has
-all three keys, each empty, with `telemetry` set to `none`.
+The extractor computed no candidate for any bucket (`05a-dead-code-candidates.md`, `modernization-assessment/dead-code.json:1`).
 
-| Bucket | Count | Note | Evidence |
-|---|---|---|---|
-| Unreachable | 0 | Every node is reachable from an entry point. | analysis (`dead_code_candidates.unreachable`) |
-| Dormant | 0, not measured | The tree is not a git repository, so no unit has a last-modified date. The dormant bucket was NOT computed. An empty list means not measured. | analysis (`warnings`) |
-| Unknown | 0 | No computed call exists that could hide a target. | analysis (`unresolved_dynamic`) |
-
-## JOBC
-
-| Unit | What the source shows | Status | Confidence | Evidence |
+| Bucket | Extractor result | Why | Confidence | Evidence |
 |---|---|---|---|---|
-| job:JOBC | The wrapper comment says JOBC is retired and its submit line is commented out. No parsed scheduler names it. | Not in any bucket, by design. A job no parsed scheduler names is still an entry point. Retirement candidate, unconfirmed. | low | `scripts/nightly.sh:2`, `scripts/nightly.sh:6` |
+| Unreachable | Empty | Every JCL job and the wrapper is an entry point, and the tree has no program, copybook or dataset that could sit behind them. | high | analysis field `dead_code_candidates` |
+| Reachable but dormant | Empty, and **not measured** | The tree is not a git repository, so no unit has a last-modified date. The dormancy rule could not run. An empty list here means not measured. | high | analysis field `warnings` |
+| Unknown | Empty | No computed call exists, so nothing is held open by one. | high | analysis field `unresolved_dynamic` |
 
-The extractor lists JOBC under `unscheduled_jobs`. It is not called dead, for these reasons:
+`dead-code.json` has all three keys, each empty, and `telemetry` set to `none`.
 
-- A comment says the job is retired. It does not prove the job never runs. Someone may still submit it by
-  hand, or another scheduler that this scan did not read may still run it. That is inference.
-- With telemetry `none`, nothing shows whether JOBC ran in the last 12 months.
-- Its one step runs `IEFBR14` (`jcl/JOBC.jcl:2`), so keeping it costs almost nothing. Deleting it on a
-  comment costs more than keeping it.
+## The one unit that needs a decision: job:JOBC
 
-I moved nothing from one bucket to another and added nothing to `dead-code.json`. JOBC is in
-`do_not_port` in `risks.json` as a provisional entry: confirm, then retire it.
+JOBC is in no bucket, and that is the extractor's rule doing its job, not a finding that it is live.
 
-## What would firm this up
+| Unit | Status | Confidence | Evidence |
+|---|---|---|---|
+| job:JOBC | An entry point that no parsed scheduler or wrapper runs. It is listed in `unscheduled_jobs`. The wrapper comment calls it retired, and the submit line is commented out. | low | `scripts/nightly.sh:2`, `scripts/nightly.sh:6`, `jcl/JOBC.jcl:1` |
 
-- A year of job history or scheduler logs showing whether JOBC ran.
-- The owner's answer to whether anything outside `scripts/nightly.sh` submits it.
-- Last-modified dates for the three JCL members, from source control the tree does not carry.
+What is fact and what is not:
+
+- Fact: the wrapper does not submit JOBC. The submit line is commented out (`scripts/nightly.sh:6`).
+- Fact: the file `jcl/JOBC.jcl` is still in the tree (`jcl/JOBC.jcl:1`).
+- Claim, not proven: the comment says JOBC is retired (`scripts/nightly.sh:2`). It is a comment. It is
+  not run history.
+- Open: the JOBC job could still be run by hand, by another scheduler the tree does not hold, or by a
+  job that submits it from inside another job (inference).
+
+I did not put JOBC in `unreachable`. It is an entry point, so it is reachable by definition, and a
+comment is not evidence to delete on. I did not put it in `unknown` either, because that bucket
+is for units a computed call could reach, and none exists. I did not invent a fourth bucket. The
+finding is carried in three other places: the Open Questions in `00-summary.md`, `do_not_port` in
+`modernization-assessment/risks.json:104` (provisional, hold from the port), and the wave rationale.
+
+**Proposal.** Instrument first. Ask the client for job run history for JOBC. If there are no runs for a
+full business cycle including year-end, propose retirement. Do not delete on the comment.
+
+## What the extractor could not see
+
+- The extractor never opened whatever runs the wrapper (a scheduler, cron or an operator). A second
+  wrapper or a scheduler that submits JOBC would not be in the tree (inference).
+- `ext:IEFBR14` is a system utility outside the tree. It is not dead code and not in scope for removal
+  (`jcl/JOBA.jcl:2`).

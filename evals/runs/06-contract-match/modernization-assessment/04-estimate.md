@@ -1,55 +1,58 @@
 # 04 Estimate
 
-This is an estimate by method, per wave. It is inference throughout. Effort is in person-days for a
-small team that can read COBOL and JCL, with a target runtime and a decimal type already chosen. The
-estimate is driven by the edges crossing each wave boundary, not by lines of code. The tree is 32
-lines of COBOL and 9 lines of JCL (`app/cbl/PGMR.cbl:16`, `app/cbl/PGMW.cbl:16`,
-`app/jcl/READJOB.jcl:4`, `app/jcl/WRITEJOB.jcl:5`). Line count would say a day. The coupling says
-otherwise.
+Every number here is inference. No port velocity was measured, and no telemetry or oracle exists yet.
+The ranges are engineer-days for one engineer who reads COBOL and JCL, and they include the harness for
+the wave. They are not a quote. The size of the system is 32 lines of COBOL, 3 lines of copybook and 9
+lines of JCL (`app/cbl/PGMR.cbl:16`, `app/cbl/PGMW.cbl:16`, `app/cpy/LAYOUTX.cpy:3`). The port is small.
+The evidence that it is correct is the work.
 
-## Range per wave
+## Method
 
-| Wave | Range (person-days) | Driver | Confidence | Evidence |
-|---|---|---|---|---|
-| 1. Reader side | 3 to 8 | Toolchain proof, reading a packed decimal record in the target, a harness that decodes the dataset. Two units. | low | `app/cbl/PGMR.cbl:13`, `app/cpy/LAYOUTX.cpy:3` |
-| 2. Writer of the master file | 4 to 10 | One contract edge and one data hub to prove equal byte for byte, and no oracle in the tree. Two units. | low | `app/cbl/PGMW.cbl:14`, `app/jcl/WRITEJOB.jcl:4` |
-| Test harness and oracle capture (shared) | 3 to 8 | Getting archived outputs, job logs and a scheduler export from the client. Mostly waiting. | low | inference |
-| Total | 10 to 26 | | low | inference |
+The estimate is not built from line counts. It is built from what the skill weighs, in order:
 
-Do not read the total as a commitment. This tree is a fragment. It has no CICS, no scheduler, no
-data and no tests. It may be all of the system or one corner of a large one. The range assumes it is
-the whole system.
+| Driver | What this tree shows | Effect on the range | Evidence |
+|---|---|---|---|
+| Coupling edges crossing the wave boundary | One contract edge, PGMW to PGMR, on one dataset | Sets the harness. One boundary file to compare | `app/cbl/PGMW.cbl:11`, `app/cbl/PGMR.cbl:11` |
+| Behavioral oracle | None in the tree. The dataset name is here, its contents are not | The largest swing. See assumption 3 | inference |
+| God modules in the wave | None | No facade work | analysis, field `god_modules` |
+| Logic in the database | No DB2 node exists in the graph | None | analysis, field `node_counts` |
+| Someone who reads the source language | Unknown | Assumed yes. If not, add the time to learn it | inference |
 
-## Assumptions the range is most sensitive to
+## Ranges per wave
 
-1. Assumes PGMR is the only reader of SPARQ.TEST.MASTER. If other programs outside this tree read it,
-   wave 2 roughly doubles, because each reader is another consumer of the layout to prove equal
-   (`analysis` field `data_hubs` counts one reader, in this tree only).
-2. Assumes the 15 byte copybook record and the LRECL=80 in the JCL can be reconciled by a decision, for
-   example that the runtime pads to 80. If real files hold 15 byte records that other tools read, or 80
-   byte records with a used filler that the copybook does not describe, wave 1 and wave 2 each add 2 to
-   4 days to find and fix the disagreement (`app/cpy/LAYOUTX.cpy:3`, `app/jcl/WRITEJOB.jcl:4`).
-3. Assumes an archived copy of SPARQ.TEST.MASTER, or a job log of a WRITEJOB run, can be had. If not,
-   the oracle is characterization from source, which is provisional, and PGMW's unset record
-   (`app/cbl/PGMW.cbl:14`) cannot be settled from the source. Add 3 to 5 days and mark wave 2 provisional.
+| Wave | Range (engineer-days) | What is in it | Evidence |
+|---|---|---|---|
+| 1. Reader job | 3 to 6 | Port PGMR and the READJOB step, build the LAYOUTX decoder, prove the new reader opens and reads the legacy file | `app/cbl/PGMR.cbl:13` |
+| 2. Writer job | 4 to 8 | Port PGMW and the WRITEJOB allocation, golden master compare of the output file, decide the uninitialized record and LRECL questions | `app/cbl/PGMW.cbl:14`, `app/jcl/WRITEJOB.jcl:4` |
+| Shared: oracle collection and harness | 3 to 10 | Get a saved copy of the dataset and job output, set up the normalization spec and the deviation register | inference |
 
-## What moves the estimate here
+Total: about 10 to 24 engineer-days. The spread is mostly the shared line, and the shared line is mostly
+one question: does an oracle exist.
 
-In rough order of weight, for this tree:
+## The assumptions the range is most sensitive to
 
-- Coupling edges crossing the wave boundary: one contract edge, one data hub, zero calls.
-- Behavioral oracle: none in the tree.
-- God modules: none. Fan-in is zero (`analysis` field `god_modules`).
-- Business logic in a database: none seen. No DB2 in the tree.
-- Team skill: unknown. Ask whether anyone at the client can read the source.
+1. **The file on disk holds 15 byte records.** The copybook gives 15 bytes by hand
+   (`app/cpy/LAYOUTX.cpy:2`, `app/cpy/LAYOUTX.cpy:3`) and the DD says `LRECL=80`
+   (`app/jcl/WRITEJOB.jcl:4`). If the real file holds 80 byte records with 65 bytes of filler, wave 2
+   grows by about 1 to 3 days. The port then has to reproduce the filler value, and the reader has to
+   skip it.
+2. **The two jobs in the tree are the whole nightly cycle.** No scheduler was parsed
+   (`analysis`, field `warnings`). If the scheduler export names other jobs that read or write
+   SPARQ.TEST.MASTER, each extra reader adds about 1 to 2 days, and the cut between wave 1 and wave 2
+   moves.
+3. **A saved copy of the dataset or of the job output exists.** If it does, the harness is a golden
+   master compare. If it does not, the harness has to be built from characterization tests, the
+   weakest oracle. Add about 3 to 5 days, and every wave stays provisional.
+4. **PGMW is the real program and not a stub.** It writes a record it never fills
+   (`app/cbl/PGMW.cbl:13`, `app/cbl/PGMW.cbl:14`). If the client has a fuller version, the tree is not
+   the system, and this estimate does not apply to it.
 
 ## Where Claude Code can do the mechanical port, and where it cannot
 
-| Part | Claude Code | Confidence | Evidence |
+| Part | Claude Code | Why | Evidence |
 |---|---|---|---|
-| Transliterating PGMR and PGMW into the target language | Strong, given a test harness. Each is one open, one read or write, one close. | high | `app/cbl/PGMR.cbl:13`, `app/cbl/PGMW.cbl:13` |
-| Packed decimal encode and decode of `S9(7)V99 COMP-3` in a decimal type | Strong, and checkable by unit test against known byte strings. | high | `app/cpy/LAYOUTX.cpy:3` |
-| Rewriting the two JCL jobs into the target scheduler | Strong for the step and the DD. The DISP and DCB semantics need a human decision. | medium | `app/jcl/WRITEJOB.jcl:3` |
-| Deciding what PGMW should write when it moves no data into the record | Cannot. It needs an archived output or an owner who knows the intent. | low | `app/cbl/PGMW.cbl:14` |
-| Deciding whether LRECL=80 or the 15 byte layout is the truth | Cannot. It needs the catalog entry for the dataset. | low | `app/jcl/WRITEJOB.jcl:4` |
-| Finding the nightly order and other readers of the dataset | Cannot. It is not in the tree. | low | `analysis` field `warnings` |
+| PGMR and PGMW transliteration | Strong | Each is a sequential open, one I/O statement, close. There is no branching | `app/cbl/PGMR.cbl:13`, `app/cbl/PGMW.cbl:13` |
+| Packed decimal codec for LR-AMT | Strong with a test | The encoding is fixed and checkable with known byte strings | `app/cpy/LAYOUTX.cpy:3` |
+| JCL allocation to target storage semantics | Partial | The NEW, CATLG and DELETE dispositions map to a design choice, not a translation | `app/jcl/WRITEJOB.jcl:3` |
+| What the record means | Cannot | No field names beyond LR-KEY and LR-AMT and no rules in the code | `app/cpy/LAYOUTX.cpy:2` |
+| Why LRECL=80, and whether writing an unfilled record is intended | Cannot | The intent is not in the source. It needs the client | `app/jcl/WRITEJOB.jcl:4`, `app/cbl/PGMW.cbl:14` |

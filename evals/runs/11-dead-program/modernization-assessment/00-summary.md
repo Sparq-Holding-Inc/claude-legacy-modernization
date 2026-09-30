@@ -1,65 +1,85 @@
 # 00 Summary
 
-Scope: the whole work folder (`.`). Files read: 3 COBOL programs, 1 copybook, 1 JCL job. Nothing was skipped (analysis: `unparsed` is empty). No git dates, no scheduler artifact, no cloc.
+Assessment of `app/`, run non-interactively with these arguments: `--target refactor --must-not-break
+"the nightly batch cycle" --telemetry none`. No defaults applied: all three scoping answers came as flags.
 
 ## Scoping answers
 
-| Question | Answer | Source |
+| Question | Answer | Where it came from |
 |---|---|---|
 | Target state | refactor | `--target refactor` |
-| What must not break | the nightly batch cycle | `--must-not-break "the nightly batch cycle"` |
-| Runtime telemetry | none | `--telemetry none` |
+| What must not break | "the nightly batch cycle" | `--must-not-break` |
+| Runtime telemetry | none, so every dead-code claim is provisional | `--telemetry none` |
 
-All three came as flags: **no defaults applied.** Nobody was asked anything.
+## The tree
 
-Telemetry is `none`, so every dead-code claim in this assessment is provisional.
+3 COBOL programs, 1 copybook, 1 JCL job, 4 edges (3 call, 1 include). No dataset, no scheduler, no PROC, no
+CICS definition. The extractor skipped no file (`graph.json` lists no `unparsed` entry). Source is 17 lines
+in all (analysis: `node_counts`). The whole live system is `job:MAINJOB` running `PGMMAIN`, which calls
+`PGMLIVE` (`app/jcl/MAINJOB.jcl:2`, `app/cbl/PGMMAIN.cbl:4`).
 
-## Headline
-
-- **Wave count: 1.** `job:MAINJOB`, `PGMMAIN` and `PGMLIVE` move together (`modernization-assessment/waves.json:2`). No cycle, no data hub, no god module, no deviation from the extractor's seed.
-- **Dead code: 2 unreachable candidates, 0 dormant (not measured), 0 unknown.** `PGMDEAD` and `cpy:UNUSED`. PGMDEAD calls a live program, but nothing calls PGMDEAD, and deleting it leaves the live path whole (`app/cbl/PGMDEAD.cbl:4`, `app/cbl/PGMMAIN.cbl:4`).
-- **Effort: 3.5 to 9 person-days, low confidence** (`04-estimate.md`). The harness is most of it, not the port.
-
-## Largest risk
-
-**The one thing that must not break, the nightly batch cycle, cannot be traced in this tree.** The only job is `job:MAINJOB`. No scheduler artifact was parsed. The tree has no dataset, no archived output and no telemetry (analysis: `warnings`). The programs hold no logic (`app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMLIVE.cbl:4`). So the port is easy, but nothing on file can prove the ported job is correct, and nothing shows that this job is the whole cycle. The job scores low-high in `modernization-assessment/risks.json:24`. The work is verification. That is inference.
-
-## Findings
+## Headline findings
 
 | Finding | Confidence | Evidence |
 |---|---|---|
-| One entry point, one linear chain: job, step S1, PGMMAIN, PGMLIVE | high | `app/jcl/MAINJOB.jcl:2` |
-| PGMDEAD is unreachable and cpy:UNUSED is unreferenced | medium | `app/cbl/PGMDEAD.cbl:4` |
-| PGMLIVE has fan-in 1 over reachable programs, and 2 raw callers | high | analysis: `fan_in` |
-| No data, contract or temporal edge exists, which is a gap, not proof of independence | medium | analysis: `edge_counts` |
-| Cross-job order is unknown | high | analysis: `warnings` |
+| One wave. `job:MAINJOB`, `PGMMAIN` and `PGMLIVE` are one chain that touches no shared data. The plan has no deviations from the extractor's seed. | medium | `app/jcl/MAINJOB.jcl:1`, `modernization-assessment/waves.json:2` |
+| Wave 1 unblocks nothing inside the tree. It is a chore unless the client confirms the job is the nightly batch cycle. | low | inference |
+| `PGMDEAD` is unreachable. Nothing in the tree runs it. Propose it for deletion once telemetry or the full JCL library confirms. | medium | `app/cbl/PGMDEAD.cbl:4` |
+| `cpy:UNUSED` is included by nothing. Delete it. | high | `app/cpy/UNUSED.cpy:1` |
+| No strongly connected component, god module or articulation point, and no computed call. The unknown dead-code bucket is empty. | high | analysis: `sccs`, `god_modules`, `articulation_points`, `unresolved_dynamic` |
+| Port effort is small (0.5 to 1.5 person-days). The wave total is 4.5 to 11.5 person-days, most of it the harness. | low | inference |
 
-## Open questions for the client's engineers
+## Largest risk
 
-1. **Is `job:MAINJOB` the nightly batch cycle, or one job in it?** Where is the scheduler export (Control-M, CA-7, or a wrapper script) that defines the cycle, with its predecessors and successors? The tree has none (analysis: `warnings`). Without it the must-not-break item cannot be tied to units.
-2. **Is this tree the whole system, or an extract?** PGMMAIN only calls PGMLIVE, and PGMLIVE only returns (`app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMLIVE.cbl:4`). Where is the business logic? Are there other JCL libraries, PROCs, CICS definitions or programs outside this folder?
-3. **Can you supply 12 months of job history or SMF records** for `job:MAINJOB`, PGMMAIN, PGMLIVE and PGMDEAD? That turns the dead-code register from provisional into evidence, and it is also the first oracle for the harness.
-4. **Does anything outside this tree run PGMDEAD or COPY `cpy:UNUSED`?** A submit from another job, an internal reader, or a scheduler entry would move PGMDEAD out of the unreachable bucket (`app/cbl/PGMDEAD.cbl:1`, `app/cpy/UNUSED.cpy:1`).
-5. **What does the production `job:MAINJOB` read and write?** Its step has no DD statement (`app/jcl/MAINJOB.jcl:2`). Which datasets, GDGs, reports and partner extracts does the real job produce? These are the golden masters.
-6. **Can you supply last-modified dates?** The tree is not under git, so the dormant bucket was not computed (analysis: `warnings`). Source-control history or member timestamps would let it be measured.
-7. **Does the nightly cycle have `IF/THEN/ELSE` or `COND=` logic, restart points, or run different steps at month-end and year-end?** The extractor does not model them, and step order is taken as file order (`app/jcl/MAINJOB.jcl:2`).
-8. **Who on the team can read COBOL and JCL, and can a parallel run of the legacy and ported job be scheduled on production input?** This decides the oracle for wave 1 and the harness cost (`06-test-strategy.md`).
+The nightly batch cycle cannot be shown to be unbroken from this tree. The only candidate unit,
+`job:MAINJOB`, has no DD statement, so its only observable is a return code, and no scheduler says what
+runs after it or tests that code (`app/jcl/MAINJOB.jcl:2`, analysis: `warnings`). A port could pass every
+test we can write here and still break the cycle. The tree may also be a fragment of the real cycle
+(inference). This is why `job:MAINJOB` scores low-high in `modernization-assessment/risks.json`: an easy
+port and a hard verification.
 
-## Not parsed
+## Files
 
-Nothing. The extractor listed no unparsed file (analysis: `unparsed` is empty).
+- `01-inventory.md`, `02a-edge-tables.md`, `03a-wave-seed.md`, `03a-waves-draft.json` and
+  `05a-dead-code-candidates.md`: generated by the extractor's renderer.
+- `02-coupling.md`, `03-waves.md`, `04-estimate.md`, `05-dead-code.md`, `06-test-strategy.md`: the judgment.
+- `graph.json`, `waves.json`, `dead-code.json`, `risks.json`: the machine outputs.
 
-## Extractor limits that touch this system
+## Open Questions
 
-The extractor lists 12 limits (`meta.limits` in `graph.json`). These touch this system.
+For the client's own engineers.
 
-| Limit | How it touches this system | Confidence | Evidence |
-|---|---|---|---|
-| Only Control-M XML and shell wrappers that name JCL files are read as schedulers | No scheduler was parsed, so cross-job order and the nightly cycle are unknown | high | analysis: `warnings` |
-| `IF/THEN/ELSE` and `COND=` in JCL are not modeled. Step order is file order | This job has neither, but the real cycle may | medium | `app/jcl/MAINJOB.jcl:2` |
-| DCB, LRECL and RECFM are not read | The step has no DD, so no record length was compared with a layout | medium | `app/jcl/MAINJOB.jcl:2` |
-| `EXEC CICS RETURN TRANSID`, `START` and `SEND MAP` are not edges | No CICS call appears in the tree. Online chains outside it are invisible | low | inference |
-| A called subprogram gets no DDs from its caller's JCL step | PGMLIVE is called by PGMMAIN and has no file of its own | medium | `app/cbl/PGMMAIN.cbl:4` |
-| A variable call target resolves only from VALUE clauses and literal MOVEs | Every call in the tree is a literal, so nothing was left to resolve | medium | `app/cbl/PGMMAIN.cbl:4` |
+1. Is `job:MAINJOB` the nightly batch cycle, or one job inside it? What is the cycle's full job list, and
+   which scheduler runs it? The must-not-break item maps to no unit the tree names, and I did not invent a
+   mapping (`app/jcl/MAINJOB.jcl:1`). The extractor found no scheduler: "no scheduler artifact was parsed".
+2. What runs after `job:MAINJOB`, and does any successor test its return code? The tree holds no `COND=` or
+   scheduler condition, and the extractor does not model JCL `IF` or `COND=` in any case (`meta.limits`).
+3. Does any JCL, scheduler entry, operator procedure or TSO command outside this tree run `PGMDEAD`? Can
+   you supply 12 or more months of job logs or SMF records to settle it? The tree cannot show it, and
+   telemetry is none (`app/cbl/PGMDEAD.cbl:4`).
+4. Is the source in this tree the source behind the production load modules? `PGMMAIN` and `PGMLIVE` hold no
+   logic (`app/cbl/PGMLIVE.cbl:4`). A nightly cycle whose only program does nothing suggests a stub or a
+   stripped copy. Inference.
+5. What does `job:MAINJOB` produce that anyone consumes: a return code, a log, a report, a message? The job
+   has no DD statement (`app/jcl/MAINJOB.jcl:2`). This decides the oracle. It also touches the extractor
+   limit that a called subprogram gets no DDs from its caller's step: `PGMLIVE` is one, and here it is moot.
+6. What compile and link options and which load library bind `PGMMAIN` to `PGMLIVE`? The tree holds no
+   compile or link deck. The CALL is by literal (`app/cbl/PGMMAIN.cbl:4`).
+7. When was each program last changed? The work folder is not a git repository, so every `last_modified` is
+   null and dormancy was not computed. Can the library manager (Endevor, ChangeMan or similar) supply dates?
+8. Does the estate hold anything the extractor does not read: assembler, PL/I, REXX, DB2 stored
+   procedures, IMS, MQ, or a scheduler other than Control-M XML or a shell wrapper? The extractor listed no
+   file as not parsed, but that means only that it saw nothing it recognised and skipped (`meta.limits`).
+9. Does the team have anyone who can read COBOL and JCL? It changes the estimate (`04-estimate.md`).
 
-The rest (COPY REPLACING, IDCAMS and SORT control cards, nested PROC calls, JCL text inside a COBOL literal, the high-versus-proven contract note, LINK and XCTL as one edge kind) do not apply, since the tree has no COPY, no utility step, no PROC, no contract edge and no CICS.
+## Limits in `meta.limits` that touch this system
+
+Four of the thirteen limits touch this tree. The other nine do not, because the tree has no COPY statement,
+no variable CALL, no CICS, no PROC, no DD, no PARM-driven program, no utility card and no embedded JCL.
+
+- COBOL is read as fixed format. All three programs are read that way and none is listed as not parsed.
+- A called subprogram gets no DDs from its caller's JCL step. Moot: the step has no DD.
+- IF/THEN/ELSE and `COND=` in JCL are not modeled. The job has one step and shows neither
+  (`app/jcl/MAINJOB.jcl:2`).
+- Only Control-M XML and shell wrappers that name JCL files are read as schedulers. The tree has neither.
+  Any other scheduler is invisible.

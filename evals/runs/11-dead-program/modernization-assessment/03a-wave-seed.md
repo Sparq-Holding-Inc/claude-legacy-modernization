@@ -18,4 +18,4 @@ Batch jobs that run application programs and write nothing another entry point u
 
 | Unit | Reason |
 |---|---|
-| PGMDEAD | dead code candidate, unreachable. See dead-code.json. |
+| PGMDEAD | no static path from any entry point and no reachable computed call in the tree |

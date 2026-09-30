@@ -1,57 +1,87 @@
 # 06 Test strategy
 
-The bar: for the inputs this system really sees, the ported `PROGA` and `PROGB` produce the same outputs as the legacy ones, and any difference was chosen on purpose and recorded. The must-not-break item is "the nightly batch cycle". Target state is refactor, and telemetry is `none`.
+This follows the `behavioral-equivalence` skill. "Correct" here means: for the names `PROGA` actually
+receives in production, the ported dispatcher starts the same program and produces the same
+outputs as the legacy one. Where it differs, someone chose that and wrote it down.
 
-## The oracle has to come from outside the tree
+The tree has no waves, so the oracle is chosen per unit for now. Every choice below is provisional.
 
-The tree holds no datasets, no JCL, no reports and no archived outputs (analysis field `data_hubs` is empty, and `01-inventory.md` lists no dataset). So the oracle has to come from job output, logs and reports the client holds. Ask the client to supply:
+## The tree holds no datasets
 
-1. The values `PROGA` read at its `ACCEPT` (`app/cbl/PROGA.cbl:8`) over at least 12 months, covering month-end, quarter-end and fiscal year-end.
-2. The job logs, return codes and SYSOUT for every run that started `PROGA`. Also SMF records showing which programs it called. These double as the telemetry the dead-code register lacks.
-3. The nightly batch cycle: job names, order, the files each job reads and writes, and archived GDG generations of those files.
-4. Output the called programs sent to partners or reports, since what left the building is already an executable specification.
+The extractor found no dataset, VSAM file or DB2 table (analysis `data_hubs` is empty, and
+`edge_counts` has one call edge and nothing else). So there is no file in the tree that can act
+as a golden master. The oracle has to come from job output, logs and reports. The tree also holds no
+JCL, so the job that runs the programs is not in it either.
 
-## Oracle per wave
+## Pick the oracle
 
-| Wave | Oracle, strongest available first | Confidence | Evidence |
+| Unit | Oracle, strongest available | Why | Fallback | Confidence | Evidence |
+|---|---|---|---|---|---|
+| `PROGA` | Captured production traffic replay: the names supplied to `ACCEPT`, and the return code and output of what each starts, over a window that includes month-end and fiscal year-end. | The input is one short field, so capture is cheap. The result depends on what the named program does, so the capture must include that program's outputs. | Parallel run of the old and new dispatcher on the same names, if the old job can stay up. Ask for it before settling for anything weaker. | low | `app/cbl/PROGA.cbl:8`, `app/cbl/PROGA.cbl:9` |
+| `PROGB` | Characterization test from source: the program returns to its caller and does nothing else. | There is no data. This is the weakest oracle, and it is enough only because the program has no behavior to encode. Label the coverage provisional. | Confirm against a job log that shows a caller receiving control back with a normal return code. | medium | `app/cbl/PROGB.cbl:4` |
+| The nightly batch cycle (the must-not-break item) | Parallel run, or replay of archived outputs from the cycle. | It maps to no unit in this tree. I have not tied it to `PROGA` or `PROGB`. | Report archives, GDG generations and extract files sent to partners. | low | inference |
+
+## What to ask the client to supply
+
+The oracle for this system does not exist in the tree. Ask for:
+
+1. Job logs and SMF records for the runs that start `PROGA`, for at least 12 months. They show
+   which program names were started, return codes and run times. They are also the telemetry the
+   dead-code register needs.
+2. The SYSIN or PARM values given to `PROGA`, and the JCL that supplies them.
+3. Archived outputs of the nightly batch cycle: reports, extracts, and GDG generations of every
+   file it writes. Each generation is a golden master with a date on it.
+4. Extracts sent to partners from the cycle. What left the building is already a specification.
+5. The load library or source list that says which program names the `ACCEPT` can match.
+
+## Normalize before you diff
+
+Write this spec down and have a person sign it. Each line is a place a real defect can hide.
+
+- Run timestamps, job ids and page numbers in the output of programs `PROGA` starts. Normalize.
+- Trailing spaces in the name. `WS-PGM-NAME` is `PIC X(8)` (`app/cbl/PROGA.cbl:5`), so a shorter name
+  is padded with spaces and a longer input is cut to 8 characters. Decide whether the port trims,
+  and test both. This is inference from the picture clause.
+- Case of the name. The source does not fold case. The port must not change it silently. Inference.
+- Any packed decimal or money the started programs produce. Compare in a decimal type with zero
+  tolerance. `PROGA` and `PROGB` hold no arithmetic, so this applies to programs outside the tree.
+- Record order and collating sequence in any output file the started programs write. EBCDIC order is
+  not ASCII order. Confirm whether order was incidental before dropping it.
+- Return code and abend behavior. `PROGA` ends with `STOP RUN` (`app/cbl/PROGA.cbl:10`), which ends the
+  whole run unit, and `PROGB` ends with `GOBACK` (`app/cbl/PROGB.cbl:4`), which returns to its
+  caller. The port must keep that difference, including which return code the job sees.
+
+## Cover the input space deliberately
+
+| Case | What to check | Confidence | Evidence |
 |---|---|---|---|
-| 1 (PROGA, PROGB) | Captured production input replay: the recorded `ACCEPT` values fed to the port, with the called programs' output diffed. Fallback: golden master from archived reports and job output. Last resort: characterization tests from source, labeled provisional. | low | `app/cbl/PROGA.cbl:8`, `app/cbl/PROGA.cbl:9`. The choice among the three is inference, since none of the data is in the tree. |
+| A name that matches a program | `PROGA` starts it, and control comes back to `STOP RUN`. | medium | `app/cbl/PROGA.cbl:9`, `app/cbl/PROGA.cbl:10` |
+| A name that matches no program | The call has no `ON EXCEPTION` phrase. Capture what the legacy runtime does (abend, return code, message). The port must reproduce it or record it in the deviation register. | low | inference: `app/cbl/PROGA.cbl:9` |
+| Empty input, blank name | Same as above, and a common source of an unplanned abend. | low | inference: `app/cbl/PROGA.cbl:8` |
+| A name of exactly 8 characters and a name longer than 8 | Truncation to the `PIC X(8)` field. | low | inference: `app/cbl/PROGA.cbl:5` |
+| `PROGA` names itself | A self call. Not modeled by the extractor. Confirm whether it recurses or is refused. | low | inference: `app/cbl/PROGA.cbl:9` |
+| A name that appears only at month-end or fiscal year-end | The capture window must include it. This is the case most likely to be missed and found six months after cutover. | low | inference |
+| Bad data already in the input source | Whatever malformed values the legacy job already receives must be reproduced, not fixed. | low | inference |
 
-Parallel run is worth asking about first. `PROGA` is small and stateless in the tree, so running the old and new side by side on the same input is cheap if the old system stays up. Inference.
+## Order
 
-## Normalization spec
-
-Keep it short and have a human sign it off.
-
-| Item | Rule | Evidence |
-|---|---|---|
-| Timestamps, run ids, sequence and page numbers | Mask in both outputs. | inference |
-| Trailing spaces in the program name | `WS-PGM-NAME` is `PIC X(8)`, so a short name is padded with spaces. Compare after trimming only if the legacy call also ignores the padding. | `app/cbl/PROGA.cbl:5` |
-| Monetary fields in called programs | Decimal type, zero tolerance. None appears in the two programs, but the callees may use packed decimal. | inference |
-| Record order and collating sequence | Not applicable to the two programs. The callees' sort order has to be confirmed once they are known. | inference |
-| Job order | The graph holds no temporal edge, so no order can be taken from it. The nightly cycle's order must come from the client. | analysis field `edge_counts` |
-
-## Boundary cases to add
-
-- Empty input: a blank or zero-length name given to `CALL` (`app/cbl/PROGA.cbl:8`).
-- A name longer than 8 characters, or in lower case.
-- A name that matches no program. `CALL` has no `ON EXCEPTION`, so the legacy behavior is the runtime's own error path (`app/cbl/PROGA.cbl:9`). Reproduce it, or change it on purpose and log it below.
-- A name that matches `PROGB`, which returns at once (`app/cbl/PROGB.cbl:4`).
-- Any name that only appears at fiscal close. This is the path most often lost in a cutover (inference: the names in the input are not visible in the tree).
+The graph has no temporal edge, because no JCL or scheduler is in the tree. So this harness has no list
+of job orders to keep yet. When the nightly cycle's JCL and scheduler arrive, every temporal edge in
+`graph.json` becomes an ordering the harness must keep.
 
 ## Deviation register
 
-Nothing may differ without a row here. One row is open now.
+Nothing is allowed to differ without a row. It starts empty.
 
 | ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact | Evidence |
 |---|---|---|---|---|---|---|
-| D-001 | A name that matches no program makes the `CALL` fail in the runtime's own way, since nothing handles the failure | To be decided: reject names not in the registry, with a logged reason | Registry facade for wave 1 (`03-waves.md`) | not yet approved | Unknown until the callee set and the batch cycle are known | `app/cbl/PROGA.cbl:9`. Inference on the runtime behavior. |
+| none yet | | | | | | inference: no deviation is proposed |
 
-## Exit bar for wave 1
+## Exit bar for the first wave, once one exists
 
 - Replay diff is clean, modulo the normalization spec and the deviation register.
-- Every boundary case above passes.
+- Every targeted case above passes, including the unknown-name case.
 - The harness is under version control and runs in CI.
-- The deviation register is signed by someone with authority to sign it.
+- A person with authority signs the deviation register.
 
-Keep the harness after cutover. It is the regression suite for the modernized system and the only executable specification of what `PROGA` dispatched to.
+Keep the harness after cutover. It is the only executable specification this system will have.

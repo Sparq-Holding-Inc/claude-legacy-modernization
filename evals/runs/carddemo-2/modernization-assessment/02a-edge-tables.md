@@ -96,12 +96,12 @@ Datasets with the most programs attached. Ordering constraint: every writer runs
 | AWS.M2.CARDDEMO.TRANSACT.BKUP | 3 | 3 | `app/jcl/COMBTRAN.jcl:23` |
 | AWS.M2.CARDDEMO.CARDXREF.VSAM.AIX.PATH | 0 | 5 | `app/cbl/COACTUPC.cbl:581`, `app/cbl/COACTUPC.cbl:3654` |
 | AWS.M2.CARDDEMO.TCATBALF.VSAM.KSDS | 1 | 4 | `app/cbl/CBACT04C.cbl:28`, `app/cbl/CBACT04C.cbl:236`, +1 more |
+| db2:CARDDEMO.TRANSACTION_TYPE | 3 | 2 | `app/app-transaction-type-db2/cbl/COBTUPDT.cbl:137`, `app/app-transaction-type-db2/cbl/COBTUPDT.cbl:171`, +1 more |
 | AWS.M2.CARDDEMO.CNTL | 0 | 4 | `app/jcl/PRTCATBL.jcl:29`, `app/proc/REPROC.prc:27` |
 | AWS.M2.CARDDEMO.ESDSRRDS.PS | 2 | 2 | `app/jcl/ESDSRRDS.jcl:26` |
 | CEE.SCEELKED | 0 | 4 | `samples/proc/BUILDONL.prc:99` |
 | OEM.IMS.IMSP.DBDLIB | 0 | 4 | `app/app-authorization-ims-db2-mq/jcl/DBPAUTP0.jcl:22` |
 | OEM.IMS.IMSP.PSBLIB | 0 | 4 | `app/app-authorization-ims-db2-mq/jcl/DBPAUTP0.jcl:21` |
-| OEMA.IMS.IMSP.SDFSRESL | 0 | 4 | `app/app-authorization-ims-db2-mq/jcl/DBPAUTP0.jcl:20` |
 
 ## Program to program calls
 
@@ -263,8 +263,8 @@ The extractor could not resolve these statically. Any program without a static c
 |---|---|
 | Strongly connected components (move together or not at all) | COADM01C, COMEN01C, COSGN00C; COPAUS0C, COPAUS1C; COTRN00C, COTRN01C |
 | Self recursive programs | COCRDLIC, COPAUS0C |
-| Articulation points (candidate wave boundaries) | CBACT01C, CBACT04C, CBEXPORT, CBIMPORT, CBSTM03A, CBTRN02C, CBTRN03C, COADM01C, COCRDSLC, COPAUS0C, COPAUS1C, COPAUS2C, COSGN00C, ds:AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS, ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS, ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS, ds:AWS.M2.CARDDEMO.CUSTDATA.VSAM.KSDS, ds:AWS.M2.CARDDEMO.EXPORT.DATA |
-| God modules (top decile fan-in and fan-out) | none |
+| Articulation points (candidate wave boundaries) | CBACT01C, CBACT04C, CBEXPORT, CBIMPORT, CBSTM03A, CBTRN02C, CBTRN03C, COADM01C, COCRDSLC, COPAUS0C, COPAUS1C, COPAUS2C, COSGN00C, ds:AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS, ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS, ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS, ds:AWS.M2.CARDDEMO.CUSTDATA.VSAM.KSDS, ds:AWS.M2.CARDDEMO.EXPORT.DATA, ds:db2:CARDDEMO.TRANSACTION_TYPE |
+| God modules (top decile fan-in and fan-out) | COPAUS0C, COTRN00C, COTRN01C |
 
 Fan-in leaders:
 

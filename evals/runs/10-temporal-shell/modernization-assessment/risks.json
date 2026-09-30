@@ -1,61 +1,110 @@
 {
-  "units": [
+ "units": [
+  {
+   "id": "sch:scripts/nightly.sh",
+   "port_difficulty": {
+    "score": 2,
+    "why": "Six lines of shell that submit two jobs in order; what the submit command does and where it runs are not in the tree."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "It is the nightly cycle: it alone sets the JOBA then JOBB order and stops on a failed submit, and a port that runs the jobs in parallel breaks the must-not-break item silently."
+   },
+   "quadrant": "low-high",
+   "wave": 1,
+   "driving_fact": "The wrapper is named 'Nightly chain' and holds the only ordering of JOBA before JOBB, at medium confidence.",
+   "confidence": "low",
+   "evidence": [
     {
-      "id": "job:JOBA",
-      "port_difficulty": {"score": 1, "why": "One step, EXEC PGM=IEFBR14, no DD statements, no dataset touched."},
-      "blast_radius": {"score": 3, "why": "Runs first in the nightly cycle the client said must not break, and the only order edge in the graph starts here. The tree shows no work it does, so its real effect is unknown."},
-      "quadrant": "low-high",
-      "wave": 1,
-      "driving_fact": "Submitted first by scripts/nightly.sh. The one temporal edge (JOBA before JOBB, medium confidence) starts at this job.",
-      "confidence": "low",
-      "evidence": [
-        {"file": "scripts/nightly.sh", "line": 4},
-        {"file": "jcl/JOBA.jcl", "line": 2}
-      ]
+     "file": "scripts/nightly.sh",
+     "line": 4
     },
     {
-      "id": "job:JOBB",
-      "port_difficulty": {"score": 1, "why": "One step, EXEC PGM=IEFBR14, no DD statements, no dataset touched."},
-      "blast_radius": {"score": 3, "why": "Second job of the must-not-break nightly cycle. Its position after JOBA is recorded only as line order in the wrapper, so a port can change it without any abend."},
-      "quadrant": "low-high",
-      "wave": 1,
-      "driving_fact": "Submitted second by scripts/nightly.sh, after JOBA. Nothing but line order says JOBB must follow JOBA.",
-      "confidence": "low",
-      "evidence": [
-        {"file": "scripts/nightly.sh", "line": 5},
-        {"file": "jcl/JOBB.jcl", "line": 2}
-      ]
-    },
-    {
-      "id": "job:JOBC",
-      "port_difficulty": {"score": 1, "why": "One step, EXEC PGM=IEFBR14, no DD statements, no dataset touched."},
-      "blast_radius": {"score": 1, "why": "The wrapper comment calls it retired and its only submit is commented out. Unverified: no telemetry, and only one scheduler was parsed."},
-      "quadrant": "low-low",
-      "wave": 1,
-      "driving_fact": "No parsed scheduler runs it. The only submit is commented out at scripts/nightly.sh:6 and the header comment says it is retired.",
-      "confidence": "low",
-      "evidence": [
-        {"file": "scripts/nightly.sh", "line": 2},
-        {"file": "scripts/nightly.sh", "line": 6},
-        {"file": "jcl/JOBC.jcl", "line": 2}
-      ]
-    },
-    {
-      "id": "sch:scripts/nightly.sh",
-      "port_difficulty": {"score": 2, "why": "Six lines. The work is to reproduce what submit does and to stop on failure as set -e does. submit is not defined in the tree."},
-      "blast_radius": {"score": 4, "why": "The only place the JOBA-then-JOBB order and the JOBC retirement are recorded. A port that loses line order changes the nightly cycle with no abend."},
-      "quadrant": "low-high",
-      "wave": 1,
-      "driving_fact": "The order of the two jobs exists only as line order in this wrapper, and set -e ties the JOBB submit to the JOBA submit succeeding.",
-      "confidence": "low",
-      "evidence": [
-        {"file": "scripts/nightly.sh", "line": 3},
-        {"file": "scripts/nightly.sh", "line": 4},
-        {"file": "scripts/nightly.sh", "line": 5}
-      ]
+     "file": "scripts/nightly.sh",
+     "line": 5
     }
-  ],
-  "do_not_port": [
-    {"id": "job:JOBC", "reason": "Provisional. The wrapper calls it retired (scripts/nightly.sh:2) and does not submit it (scripts/nightly.sh:6). Confirm with the owner, with telemetry none this is a comment and not proof. If confirmed, retire it. Do not port it."}
-  ]
+   ]
+  },
+  {
+   "id": "job:JOBA",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Runs only IEFBR14 with no DD statements, so it does nothing the tree can show."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "First job of the must-not-break nightly cycle and JOBB is ordered after it, but the tree shows no dataset effect, so the real blast is unknown."
+   },
+   "quadrant": "low-high",
+   "wave": 1,
+   "driving_fact": "The wrapper submits it first, and JOBB is ordered after it with no dataset to explain why.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "jcl/JOBA.jcl",
+     "line": 2
+    },
+    {
+     "file": "scripts/nightly.sh",
+     "line": 4
+    }
+   ]
+  },
+  {
+   "id": "job:JOBB",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Runs only IEFBR14 with no DD statements, so it does nothing the tree can show."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Second job of the must-not-break nightly cycle. It runs only if the JOBA submit succeeds, but the tree shows no dataset effect, so the real blast is unknown."
+   },
+   "quadrant": "low-high",
+   "wave": 1,
+   "driving_fact": "The only temporal edge in the graph ends here: JOBA before JOBB, from the order of two submit lines.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "jcl/JOBB.jcl",
+     "line": 2
+    },
+    {
+     "file": "scripts/nightly.sh",
+     "line": 5
+    }
+   ]
+  },
+  {
+   "id": "job:JOBC",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Runs only IEFBR14 with no DD statements, so it does nothing the tree can show."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "The wrapper comment calls it retired and its submit is commented out, so nothing in the tree runs it."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "The wrapper comment says JOBC is retired and its submit line is commented out.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "scripts/nightly.sh",
+     "line": 2
+    },
+    {
+     "file": "scripts/nightly.sh",
+     "line": 6
+    }
+   ]
+  }
+ ],
+ "do_not_port": [
+  {
+   "id": "job:JOBC",
+   "reason": "Provisional. The wrapper says JOBC is retired and its submit is commented out (scripts/nightly.sh:2, scripts/nightly.sh:6). Hold it out of the port until the client confirms no other scheduler or person still submits it. Do not delete it on a comment alone, and there is no telemetry to confirm."
+  }
+ ]
 }

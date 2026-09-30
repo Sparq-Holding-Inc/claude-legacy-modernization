@@ -1,47 +1,51 @@
 {
-  "units": [
+ "units": [
+  {
+   "id": "PROGA",
+   "port_difficulty": {
+    "score": 2,
+    "why": "Four executable lines that ACCEPT a program name and CALL it, so the code is trivial but the target needs a dispatch table, and what belongs in that table is unknown."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "It starts whatever program name it is given at run time, so a wrong port could run the wrong program or none, quietly, and the reachable set cannot be bounded from the source."
+   },
+   "quadrant": "low-high",
+   "wave": null,
+   "driving_fact": "The CALL target WS-PGM-NAME has no VALUE clause and is set only by ACCEPT, so the set of programs it can start is unbounded.",
+   "confidence": "low",
+   "evidence": [
     {
-      "id": "PROGA",
-      "port_difficulty": {
-        "score": 3,
-        "why": "Ten lines, no arithmetic, but it CALLs a program whose name is read at run time by ACCEPT, so the port needs a run-time program registry and the callee set is not in the tree."
-      },
-      "blast_radius": {
-        "score": 4,
-        "why": "Its callee is chosen by run-time input, so it can start any program on the load library, including one on the nightly batch cycle; the tree has no JCL to show what feeds it, and the failure would surface only for the input values that hit a missing or renamed target."
-      },
-      "quadrant": "high-high",
-      "wave": 1,
-      "driving_fact": "CALL WS-PGM-NAME at line 9 takes a name that only ACCEPT at line 8 sets, so its reach cannot be bounded from source.",
-      "confidence": "low",
-      "evidence": [
-        {
-          "file": "app/cbl/PROGA.cbl",
-          "line": 9
-        }
-      ]
+     "file": "app/cbl/PROGA.cbl",
+     "line": 8
     },
     {
-      "id": "PROGB",
-      "port_difficulty": {
-        "score": 1,
-        "why": "Four lines: PROGRAM-ID then GOBACK. No data, no logic."
-      },
-      "blast_radius": {
-        "score": 2,
-        "why": "It does nothing and touches no data; it is one of the programs PROGA could dispatch to, but nothing in the tree calls it by name."
-      },
-      "quadrant": "low-low",
-      "wave": 1,
-      "driving_fact": "PROCEDURE DIVISION holds only GOBACK.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/cbl/PROGB.cbl",
-          "line": 4
-        }
-      ]
+     "file": "app/cbl/PROGA.cbl",
+     "line": 9
     }
-  ],
-  "do_not_port": []
+   ]
+  },
+  {
+   "id": "PROGB",
+   "port_difficulty": {
+    "score": 1,
+    "why": "The program body is a single GOBACK with no logic, data or files."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "It does nothing, so a wrong port changes no data and no output, but a caller that expects a side effect from it would not show up in this tree."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "PROGB has no static caller and no entry point, and PROGA's computed CALL could name it, so it is unknown, not dead.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/PROGB.cbl",
+     "line": 4
+    }
+   ]
+  }
+ ],
+ "do_not_port": []
 }

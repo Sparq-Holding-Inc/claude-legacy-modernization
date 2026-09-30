@@ -1,43 +1,56 @@
 # 05 Dead code
 
-Telemetry: none. Every claim here is provisional. Two warnings from `analysis` shape this file:
-no last-modified dates exist because the tree is not a git repository, so the dormant bucket was
-**not computed** and its empty list means not measured. No scheduler artifact was parsed.
+Telemetry is `none` (given as a flag). Every claim below is provisional. Nothing here is a proposal
+to delete. The candidates are in `05a-dead-code-candidates.md` and the register is in
+`modernization-assessment/dead-code.json`.
 
-`dead-code.json` holds the same three buckets in machine form.
+## The three buckets
 
 | Bucket | Units | Confidence | Evidence |
 |---|---|---|---|
 | Unreachable | none | high | `analysis`, field `dead_code_candidates` |
-| Reachable but dormant | none. Not measured, because there are no dates. | low | `analysis`, field `warnings` |
-| Unknown | HIDDEN01 | low | `app/cbl/HIDDEN01.cbl:1`, `app/cbl/PGMMAIN.cbl:9` |
+| Reachable but dormant | none. **Not measured**, see below | low | `analysis`, field `warnings` |
+| Unknown | `HIDDEN01` | low | `app/cbl/PGMMAIN.cbl:9` |
 
-## Unknown. HIDDEN01
+## Unknown: `HIDDEN01`
 
-No static edge reaches HIDDEN01. PGMMAIN is reachable from the only entry point, `job:MAINJOB`
-(`app/jcl/MAINJOB.jcl:2`), and PGMMAIN makes a computed call (`app/cbl/PGMMAIN.cbl:9`). HIDDEN01 is
-the only other program in the tree, so it is the one program that call can be shown to reach.
+No JCL step, program or scheduler names `HIDDEN01` (`analysis`, field `dead_code_reasons`). The
+extractor did not put it in unreachable, because reachable code makes a computed call. `PGMMAIN`
+issues `CALL WS-PGM-NAME` (`app/cbl/PGMMAIN.cbl:9`), and the name is read with `ACCEPT`
+(`app/cbl/PGMMAIN.cbl:8`) into a field with no `VALUE` clause (`app/cbl/PGMMAIN.cbl:5`). Any program
+without a static caller might be the target, and `HIDDEN01` is the only one in the tree.
 
-The tree cannot say whether that happens. The name comes from ACCEPT (`app/cbl/PGMMAIN.cbl:8`) and
-no input is defined for the job. The extractor put it in unknown, and it stays there. Do not propose
-it for deletion. A program of four lines that does nothing (`app/cbl/HIDDEN01.cbl:4`) is cheap to
-keep and confusing to lose: a deleted callee turns a working dispatch into a failure at run time.
+I did not move it, and I could not bound the call: the value is not in the source. `inference`
 
-What would settle it: 12 months of job logs for MAINJOB, showing which program names the ACCEPT
-received. If HIDDEN01 appears, it moves to the live set and into wave 1. If it never appears and
-the input list is closed, it can move toward unreachable, and only then with a client signature.
+`HIDDEN01` holds no logic (`app/cbl/HIDDEN01.cbl:4`). A program that does nothing is a plausible dead
+stub. It is equally plausible as a placeholder that a run-time name selects, which is the shape of
+something that runs once a year. The source cannot tell those apart. `inference`
 
-## Unreachable
+## Unreachable: none
 
-Nothing. Every other node is reachable, or is the computed target node itself.
+With one computed call in reachable code, no program can be called unreachable. The extractor's rule
+is that a program is unreachable only when no reachable code makes a computed call
+(`05a-dead-code-candidates.md`, first section). While `app/cbl/PGMMAIN.cbl:9` stands, this bucket
+stays empty for any program without a caller.
 
-## Dormant
+## Dormant: not measured
 
-Not computed. Ask for the last change date of each member, from the client's source manager, and
-re-run with those dates.
+The tree is not a git repository, so no file has a last-modified date, and the dormant bucket was not
+computed (`analysis`, field `warnings`). The empty dormant list means not measured, not that nothing
+is dormant. `PGMMAIN` and `job:MAINJOB` are reachable, and their age is unknown
+(`01-inventory.md`, Programs table). Ask for the source control history, or file dates from the
+client.
 
-## Unscheduled jobs
+## Jobs the scheduler was not asked about
 
-`analysis` lists none, because a job that no parsed scheduler names is still an entry point, so
-MAINJOB never shows in a bucket. It is the only job and no scheduler was parsed, so whether the job
-still runs is a question for the client. See `00-summary.md`.
+`analysis.unscheduled_jobs` is empty, because with no scheduler artifact the extractor treats every
+job as an entry point. `job:MAINJOB` therefore never shows in a bucket (`analysis`, fields
+`entry_points` and `unscheduled_jobs`). That does not show that it still runs. It is in the Open
+Questions.
+
+## What would firm this up
+
+- Twelve months of job logs or SMF records for `MAINJOB`: which programs ran, and what the
+  `ACCEPT` supplied. That single input would settle the unknown bucket for `HIDDEN01`. `inference`
+- The `SYSIN` or wrapper that feeds `WS-PGM-NAME`. The JCL in the tree has none
+  (`app/jcl/MAINJOB.jcl:2`).

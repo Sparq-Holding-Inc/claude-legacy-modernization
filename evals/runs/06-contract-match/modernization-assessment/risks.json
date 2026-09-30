@@ -1,93 +1,93 @@
 {
-  "units": [
+ "units": [
+  {
+   "id": "PGMR",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Opens, reads one record and closes. There is no logic and the record is never used."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Read only and produces no output, but it is the only consumer on the shared contract and its place in the nightly cycle is unconfirmed."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "Reads SPARQ.TEST.MASTER through copybook LAYOUTX, the layout PGMW writes (contract edge, high).",
+   "confidence": "medium",
+   "evidence": [
     {
-      "id": "PGMR",
-      "port_difficulty": {
-        "score": 1,
-        "why": "Opens one file, reads one record, closes it. No arithmetic, no branches, no output. The COMP-3 field in the layout is never touched."
-      },
-      "blast_radius": {
-        "score": 2,
-        "why": "Writes nothing and no other unit calls it. A layout or record length break makes it fail at OPEN or READ, which is loud. Whether it sits on the nightly cycle is not visible in the tree."
-      },
-      "quadrant": "low-low",
-      "wave": 1,
-      "driving_fact": "Reads SPARQ.TEST.MASTER through the same LAYOUTX copybook the writer uses.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/cbl/PGMR.cbl",
-          "line": 13
-        }
-      ]
-    },
-    {
-      "id": "PGMW",
-      "port_difficulty": {
-        "score": 2,
-        "why": "Mechanically trivial: opens output, writes one record, closes. The care is the byte layout of the packed decimal field, and that the code never sets the record fields before the WRITE, so the bytes written depend on what the runtime leaves in the buffer."
-      },
-      "blast_radius": {
-        "score": 4,
-        "why": "Sole writer of the dataset PGMR reads by a shared but undocumented layout. The copybook record is 15 bytes and the JCL asks for LRECL=80. Wrong bytes are silent for any reader that does not do arithmetic on the amount. No archived output is in the tree."
-      },
-      "quadrant": "low-high",
-      "wave": 2,
-      "driving_fact": "Writes SPARQ.TEST.MASTER; the record layout is the only contract with the reader, and the WRITE at line 14 follows no MOVE.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/cbl/PGMW.cbl",
-          "line": 14
-        }
-      ]
-    },
-    {
-      "id": "job:READJOB",
-      "port_difficulty": {
-        "score": 1,
-        "why": "One EXEC PGM step and one DD with DISP=SHR."
-      },
-      "blast_radius": {
-        "score": 2,
-        "why": "Read only, so a failed run can be rerun. Its place in the nightly order is unknown because no scheduler was parsed."
-      },
-      "quadrant": "low-low",
-      "wave": 1,
-      "driving_fact": "Reads SPARQ.TEST.MASTER with DISP=SHR and names no DCB, so the record length comes from the catalog.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/jcl/READJOB.jcl",
-          "line": 3
-        }
-      ]
-    },
-    {
-      "id": "job:WRITEJOB",
-      "port_difficulty": {
-        "score": 2,
-        "why": "One step. The DD carries dataset lifecycle (NEW,CATLG,DELETE), space and a DCB (RECFM=FB, LRECL=80) that the target must state on purpose."
-      },
-      "blast_radius": {
-        "score": 4,
-        "why": "Creates the dataset the reader consumes. DISP=NEW fails on a second run unless something outside this tree removes the dataset first. The LRECL disagrees with the 15 byte copybook record."
-      },
-      "quadrant": "low-high",
-      "wave": 2,
-      "driving_fact": "Allocates SPARQ.TEST.MASTER with LRECL=80 while LAYOUTX describes 15 bytes.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/jcl/WRITEJOB.jcl",
-          "line": 3
-        },
-        {
-          "file": "app/jcl/WRITEJOB.jcl",
-          "line": 4
-        }
-      ]
+     "file": "app/cbl/PGMR.cbl",
+     "line": 13
     }
-  ],
-  "do_not_port": []
+   ]
+  },
+  {
+   "id": "PGMW",
+   "port_difficulty": {
+    "score": 2,
+    "why": "No logic, but it writes a record with a packed decimal field and never moves any value into it."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Sole writer of the shared master, so a layout break is silent for the reader, and its nightly-cycle membership is unconfirmed."
+   },
+   "quadrant": "low-high",
+   "wave": 2,
+   "driving_fact": "Sole writer of SPARQ.TEST.MASTER. Its record layout LAYOUTX is the undocumented API that PGMR reads.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/PGMW.cbl",
+     "line": 14
+    }
+   ]
+  },
+  {
+   "id": "job:READJOB",
+   "port_difficulty": {
+    "score": 1,
+    "why": "One step, one DD with DISP=SHR and a SYSOUT. Nothing to translate."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Reads the master only. It must run after WRITEJOB has cataloged the dataset, and no scheduler in the tree enforces that."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "Reads the dataset WRITEJOB creates, with DISP=SHR, and no scheduler orders the two jobs.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/READJOB.jcl",
+     "line": 3
+    }
+   ]
+  },
+  {
+   "id": "job:WRITEJOB",
+   "port_difficulty": {
+    "score": 2,
+    "why": "One step, but the allocation carries DISP=(NEW,CATLG,DELETE), one track of space and LRECL=80 that a port must reproduce."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Creates the shared master. Its LRECL=80 is not compared with the 15 byte layout, and a rerun against an existing dataset fails at allocation."
+   },
+   "quadrant": "low-high",
+   "wave": 2,
+   "driving_fact": "Creates SPARQ.TEST.MASTER as NEW,CATLG with LRECL=80, while the copybook describes a shorter record (inference).",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/WRITEJOB.jcl",
+     "line": 3
+    },
+    {
+     "file": "app/jcl/WRITEJOB.jcl",
+     "line": 4
+    }
+   ]
+  }
+ ],
+ "do_not_port": []
 }

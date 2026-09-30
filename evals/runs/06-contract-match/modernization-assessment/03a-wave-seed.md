@@ -17,7 +17,7 @@ Batch jobs that run application programs and write nothing another entry point u
 
 ## Wave 2. batch-writers
 
-Batch jobs that run application programs and write a dataset another entry point also uses.
+Batch jobs that write a dataset another entry point also uses.
 
 `PGMW`, `job:WRITEJOB`
 

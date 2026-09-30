@@ -1,140 +1,26 @@
 {
- "telemetry": "none",
- "unreachable": [
-  {
-   "id": "cpy:UNUSED1Y",
-   "reason": "No program, copybook or map includes it. Provisional: no telemetry, and a copybook has no run time footprint to measure.",
-   "confidence": "high",
-   "evidence": [
+  "telemetry": "none",
+  "unreachable": [
     {
-     "file": "app/cpy/UNUSED1Y.cpy",
-     "line": 1
+      "id": "cpy:UNUSED1Y",
+      "reason": "No program includes it and no unparsed file names it. Its fields are named UNUSED-*. With no telemetry the claim is provisional, and a program outside this tree could still copy it.",
+      "confidence": "high",
+      "evidence": [{"file": "app/cpy/UNUSED1Y.cpy", "line": 1}]
     }
-   ]
-  }
- ],
- "dormant": [],
- "unknown": [
-  {
-   "id": "CBPAUP0C",
-   "reason": "No call edge, but job CBPAUP0J runs it through a BMP PARM at line 25, which the extractor does not read as a program edge. It very likely runs. All 28 computed calls are CICS XCTL sites. Three take their target from the menu tables (app/cpy/COMEN02Y.cpy, app/cpy/COADM02Y.cpy), which list 17 online programs and no batch program; two, in COCRDLIC, are bounded by literals in that program, and the other 23 take it from the COMMAREA, which source alone cannot bound.",
-   "confidence": "medium",
-   "evidence": [
+  ],
+  "dormant": [],
+  "unknown": [
     {
-     "file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl",
-     "line": 25
-    }
-   ]
-  },
-  {
-   "id": "CBTRN01C",
-   "reason": "No JCL step and no program names it, and none of its six DDs is mapped. It only verifies daily transactions. All 28 computed calls are CICS XCTL sites. Three take their target from the menu tables (app/cpy/COMEN02Y.cpy, app/cpy/COADM02Y.cpy), which list 17 online programs and no batch program; two, in COCRDLIC, are bounded by literals in that program, and the other 23 take it from the COMMAREA, which source alone cannot bound. Retirement candidate once telemetry says it never ran.",
-   "confidence": "low",
-   "evidence": [
+      "id": "CBTRN01C",
+      "reason": "No JCL step, scheduler entry or shell wrapper in the tree runs it, and its six DDs map to no JCL. All 28 computed calls in reachable code are XCTL to program names taken from the COMEN02Y and COADM02Y tables or from literal MOVEs, and none of those names a batch program, so they bound out CBTRN01C. It stays unknown, not unreachable, because a job outside the tree, or a run by hand, could still start it. It reads the daily transaction file, so ask the client whether it is a pre-posting check.",
+      "confidence": "low",
+      "evidence": [{"file": "app/cbl/CBTRN01C.cbl", "line": 29}, {"file": "app/cbl/COMEN01C.cbl", "line": 156}, {"file": "app/cpy/COMEN02Y.cpy", "line": 28}]
+    },
     {
-     "file": "app/cbl/CBTRN01C.cbl",
-     "line": 254
+      "id": "proc:TRANREPT",
+      "reason": "Named only in JCL text inside CORPT00C, which writes it to the JOBS queue at run time. That is the online route to the must-not-break transaction report, so treat it as live. The extractor has no edge for it. It calls proc REPROC at line 21 and CBTRN03C at line 57.",
+      "confidence": "medium",
+      "evidence": [{"file": "app/cbl/CORPT00C.cbl", "line": 94}, {"file": "app/cbl/CORPT00C.cbl", "line": 517}, {"file": "app/proc/TRANREPT.prc", "line": 21}]
     }
-   ]
-  },
-  {
-   "id": "COBTUPDT",
-   "reason": "No call edge, but job MNTTRDB2 runs it with TSO RUN PROGRAM at line 30. It very likely runs. All 28 computed calls are CICS XCTL sites. Three take their target from the menu tables (app/cpy/COMEN02Y.cpy, app/cpy/COADM02Y.cpy), which list 17 online programs and no batch program; two, in COCRDLIC, are bounded by literals in that program, and the other 23 take it from the COMMAREA, which source alone cannot bound.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
-     "line": 30
-    }
-   ]
-  },
-  {
-   "id": "DBUNLDGS",
-   "reason": "No call edge, but job UNLDGSAM names it in a DLI PARM at line 27. All 28 computed calls are CICS XCTL sites. Three take their target from the menu tables (app/cpy/COMEN02Y.cpy, app/cpy/COADM02Y.cpy), which list 17 online programs and no batch program; two, in COCRDLIC, are bounded by literals in that program, and the other 23 take it from the COMMAREA, which source alone cannot bound.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL",
-     "line": 27
-    }
-   ]
-  },
-  {
-   "id": "PAUDBLOD",
-   "reason": "No call edge, but job LOADPADB names it in a BMP PARM at line 27. All 28 computed calls are CICS XCTL sites. Three take their target from the menu tables (app/cpy/COMEN02Y.cpy, app/cpy/COADM02Y.cpy), which list 17 online programs and no batch program; two, in COCRDLIC, are bounded by literals in that program, and the other 23 take it from the COMMAREA, which source alone cannot bound.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL",
-     "line": 27
-    }
-   ]
-  },
-  {
-   "id": "PAUDBUNL",
-   "reason": "No call edge, but job UNLDPADB names it in a DLI PARM at line 39. All 28 computed calls are CICS XCTL sites. Three take their target from the menu tables (app/cpy/COMEN02Y.cpy, app/cpy/COADM02Y.cpy), which list 17 online programs and no batch program; two, in COCRDLIC, are bounded by literals in that program, and the other 23 take it from the COMMAREA, which source alone cannot bound.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL",
-     "line": 39
-    }
-   ]
-  },
-  {
-   "id": "cpy:IMSFUNCS",
-   "reason": "Included only by DBUNLDGS, PAUDBLOD and PAUDBUNL, which are unknown for the reason above. It is live if they are.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
-     "line": 136
-    }
-   ]
-  },
-  {
-   "id": "cpy:PADFLPCB",
-   "reason": "Included only by DBUNLDGS. Live if that program is.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
-     "line": 156
-    }
-   ]
-  },
-  {
-   "id": "cpy:PASFLPCB",
-   "reason": "Included only by DBUNLDGS. Live if that program is.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
-     "line": 155
-    }
-   ]
-  },
-  {
-   "id": "cpy:PAUTBPCB",
-   "reason": "Included by DBUNLDGS, PAUDBLOD and PAUDBUNL. Live if they are.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
-     "line": 154
-    }
-   ]
-  },
-  {
-   "id": "proc:TRANREPT",
-   "reason": "Named in JCL text inside CORPT00C, which writes that text to the JOBS queue. It is the online path of the transaction report, a must-not-break item, and it runs CBTRN03C. Treat as live.",
-   "confidence": "high",
-   "evidence": [
-    {
-     "file": "app/cbl/CORPT00C.cbl",
-     "line": 94
-    }
-   ]
-  }
- ]
+  ]
 }

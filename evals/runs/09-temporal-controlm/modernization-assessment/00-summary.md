@@ -1,47 +1,70 @@
 # 00 Summary
 
+Assessment of the tree in `.` (two JCL jobs and one Control-M file). Generated facts are in `graph.json` and the `01`, `02a`, `03a` and `05a` files. The argument is in `02` to `06`.
+
 ## Scoping answers
 
-| Question | Answer | Source |
+| Question | Answer | Where it came from |
 |---|---|---|
-| Scope | `.` (the work folder: two JCL members and one Control-M file) | command argument |
-| Target state | refactor | `--target refactor` |
-| Must not break | "the nightly batch cycle" | `--must-not-break` |
-| Telemetry | none. Every dead-code claim is provisional | `--telemetry none` |
+| Target state | refactor | flag `--target refactor` |
+| What must not break | "the nightly batch cycle" | flag `--must-not-break` |
+| Runtime telemetry | none | flag `--telemetry none` |
 
-All three answers came as flags: no defaults applied.
+All three came as flags: **no defaults applied**.
+
+The must-not-break item maps to the Control-M folder NIGHTLY and its jobs JOBA and JOBB (`app/scheduler/nightly.xml:3`, `app/scheduler/nightly.xml:4`,
+`app/scheduler/nightly.xml:8`). The match is by name only, so it is inference. The tree does not say these two jobs are the whole cycle.
+
+Telemetry is none, so every dead-code claim is provisional, and the dormant bucket was not measured, because the tree is not a git repository (analysis: `warnings`).
+
+## What the tree holds
+
+| Fact | Value | Evidence |
+|---|---|---|
+| Programs | 0. The only program named is IEFBR14, a system utility outside the tree | `app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2` |
+| JCL jobs | 2, each with one step | `app/jcl/JOBA.jcl:1`, `app/jcl/JOBB.jcl:1` |
+| Scheduler | Control-M, one folder, two jobs | `app/scheduler/nightly.xml:3` |
+| Datasets | 0. Neither job has a DD card | analysis: `data_hubs` is empty |
+| Edges | 7: 4 call, 2 include, 1 temporal | analysis: `edge_counts` |
+| Not parsed | Nothing | analysis: `unparsed` is empty |
 
 ## Result
 
-- **Waves: 1.** One family, batch-utility, holding `job:JOBA`, `job:JOBB`, `sch:NIGHTLY/JOBA` and `sch:NIGHTLY/JOBB`. It cannot be split, because the order between the two jobs exists only as a scheduler condition. `app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9`. Detail is in `03-waves.md`.
-- **Refactor has little to act on here.** There is no application source in the tree. Both steps run IEFBR14, a do-nothing system utility (`app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`). What must be preserved is the scheduling contract, and that is a finding for the plan, not a code change. inference
-- **Estimate:** 8 to 15 person-days for wave 1 plus an elapsed parallel run of one to two months, low confidence. inference. Detail is in `04-estimate.md`.
-- **Dead code:** none found, and dormancy was not measured because the tree has no git history. `05-dead-code.md`
+- **Wave count: 1.** One wave, the nightly batch cycle (JOBA then JOBB), batch-utility family, 4 units, medium blast radius, medium confidence (`modernization-assessment/waves.json:5`). No deviation from the extractor's seed. See `03-waves.md`.
+- **Estimate:** 9 to 22 person-days (inference), driven by three assumptions, the first being that the production members really are one IEFBR14 step each. See `04-estimate.md`.
+- **Dead code:** the register is empty in all three buckets. Not proof of no dead code: nothing could be measured. See `05-dead-code.md`.
+- **Test strategy:** the tree has no data, so the oracle must come from scheduler history and job logs. Parallel run is the first ask. See `06-test-strategy.md`.
 
-## Largest risk
+## The single largest risk
 
-The must-not-break cycle keeps its order only inside the Control-M definition. JOBB waits on the condition JOBA-DONE that JOBA posts, then deletes it (`app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9`, `app/scheduler/nightly.xml:10`). Neither JCL member mentions the other (`app/jcl/JOBA.jcl:1`, `app/jcl/JOBB.jcl:1`). A port that carries the jobs and not the conditions keeps every job and silently loses the cycle. JOBA also waits on EXTERNAL-FEED, which nothing in the tree sets (`app/scheduler/nightly.xml:5`), so the start of the cycle depends on something the team has not shown us. Risk score: both jobs are `low-high` (`modernization-assessment/risks.json:13`, `modernization-assessment/risks.json:42`).
+The nightly cycle exists only as Control-M conditions, and both ends of it point outside the tree. JOBA waits for EXTERNAL-FEED, which nothing in the tree
+sets (`app/scheduler/nightly.xml:5`). JOBB deletes the JOBA-DONE condition it consumed (`app/scheduler/nightly.xml:10`) and sets JOBB-DONE for a consumer we cannot see
+(`app/scheduler/nightly.xml:11`). Both jobs run only IEFBR14, which does nothing (`app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`). A refactor that re-creates the jobs but not the conditions would
+pass every job-level test and still break the cycle: it could start at the wrong time, run out of order, or never tell the downstream consumer it finished. Nobody would see it until the morning (inference).
 
-## Open Questions
-
-Addressed to the client's engineers.
+## Open Questions for the client's engineers
 
 | # | Question | Why it matters | Evidence |
 |---|---|---|---|
-| 1 | What adds the condition EXTERNAL-FEED, and when does it arrive each night? | JOBA cannot start without it, and nothing in the tree sets it. The trigger has to be rebuilt and tested in the target | `app/scheduler/nightly.xml:5` |
-| 2 | Are JOBA and JOBB really just IEFBR14 in production? If not, where do the real programs live? | Both steps run a null utility. If the real work is elsewhere, this wave is only the scheduling layer and the wave count and estimate are too low | `app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2` |
-| 3 | What reads JOBB-DONE? Does anything outside this folder wait on it? | Nothing in the tree consumes it. A hidden consumer would join the wave | `app/scheduler/nightly.xml:11` |
-| 4 | Why does JOBB delete JOBA-DONE, and what is the operators' rerun and restart procedure for each job? | Deleting the condition changes what a rerun does. The target scheduler has to match, and the harness needs a case for each rerun path | `app/scheduler/nightly.xml:10` |
-| 5 | What does the scheduler entry omit: start time, calendar, days, cyclic runs, alerts, return code handling, run-as user? | None of these appear in the two entries, yet the cycle must run on the right nights and alert the right people | `app/scheduler/nightly.xml:4`, `app/scheduler/nightly.xml:8` |
-| 6 | Are there other scheduler folders, other schedulers, or manual submits that also run JOBA or JOBB? | Only Control-M XML and shell wrappers that name JCL files are read (`meta.limits`). A second trigger would be invisible | `analysis` field `unscheduled_jobs` |
-| 7 | Which reports, files, or downstream systems make up "the nightly batch cycle" from the business's side, and what does each night's success look like? | The oracle for the must-not-break item has to come from job output, logs and reports, since the tree has no datasets | `app/jcl/JOBA.jcl:2` |
-| 8 | Do you have 12 months of scheduler history and SMF or job logs for JOBA and JOBB? | It is the telemetry needed to settle dormancy, and the source for the parallel run and replay | inference |
-| 9 | Can the old and new schedulers run in parallel for one full business cycle, including month end? | It is the strongest oracle available. Teams often wrongly assume it is impossible | inference |
+| 1 | What sets the condition EXTERNAL-FEED? A file watcher, another folder, another scheduler, or an operator? | It is the real start of the cycle and it is outside the tree we were given. | `app/scheduler/nightly.xml:5` |
+| 2 | Who or what waits for JOBB-DONE, and what does it do with it? | It is the only output of the cycle. If it is unread today, tell us, so we can call it dead. | `app/scheduler/nightly.xml:11` |
+| 3 | Is IEFBR14 the real content of JOBA and JOBB, or a stand-in for members not supplied? | If real programs exist, the estimate, the risk scores and the wave plan all change. | `app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2` |
+| 4 | Is the folder NIGHTLY the whole "nightly batch cycle"? Are there other folders, other jobs, or another scheduler (for example CA-7) that we were not given? | The extractor reads only Control-M XML and shell wrappers as schedulers (`meta.limits` in `modernization-assessment/graph.json`). Anything else is invisible to it. | `app/scheduler/nightly.xml:3` |
+| 5 | Why does JOBB delete JOBA-DONE, and what do operators do to rerun or restart the pair? Are conditions ever added by hand? | The rerun rule lives in the scheduler, and a port has to reproduce it. | `app/scheduler/nightly.xml:10` |
+| 6 | Do month-end, quarter-end or year-end nights run a different folder, calendar or job set? Which Control-M calendars apply? | No calendar is in the tree, and close nights are where a port fails most often. | inference |
+| 7 | Can you export 12 or more months of Control-M run history and JES job output for JOBA and JOBB? Do both still run every night? | Telemetry is none, so we cannot tell live from dead. The same export is the test oracle. | inference |
+| 8 | Are the ODATE settings on these conditions all "ODAT" in production, and does the cycle ever cross midnight? | Conditions are dated by order date. The extractor does not model it. | `app/scheduler/nightly.xml:5`, `app/scheduler/nightly.xml:9` |
+| 9 | What is the change history of these members? | The tree is not a git repository, so no last-modified date exists and the dormant bucket was not computed. | analysis: `warnings`, third entry |
 
-Limits in `meta.limits` that touch this system: JCL `IF/THEN/ELSE` and `COND=` are not modeled, and both members are two lines with neither (`app/jcl/JOBA.jcl:1`, `app/jcl/JOBB.jcl:1`); only Control-M XML and shell wrappers are read as schedulers; the extractor draws no edge for a deleted condition (`app/scheduler/nightly.xml:10`). Files not parsed: none. Dormancy: not computed, since the tree is not a git repository. `analysis` field `warnings`
+## Limits of the extractor that touch this system
 
-## Files in this folder
+Every entry in `meta.limits` (`modernization-assessment/graph.json`) was checked. These touch this tree:
 
-`graph.json` is the extractor output. `01-inventory.md`, `02a-edge-tables.md`, `03a-wave-seed.md`, `03a-waves-draft.json` and `05a-dead-code-candidates.md` were generated by `render.py`. The others are the assessment: `02-coupling.md`, `03-waves.md`, `04-estimate.md`, `05-dead-code.md`, `06-test-strategy.md`, `waves.json`, `risks.json` and `dead-code.json`.
+- **Only Control-M XML and shell wrappers that name JCL files are read as schedulers.** This tree has Control-M XML, so it was read. Any other scheduler is invisible (question 4).
+- **IF/THEN/ELSE and COND= in JCL are not modeled.** Neither job has either (`app/jcl/JOBA.jcl:1-2`, `app/jcl/JOBB.jcl:1-2`). The production members may.
+- **DCB, LRECL and RECFM are not read.** Neither job has a DD card, so nothing was missed here. Real members may have DDs.
+- **Nested PROC calls and INCLUDE members are not followed.** None appear in this tree.
 
-The `risks.json` scores were written inline by following `agents/migration-risk-assessor.md`. No agent was started. The dependency-cartographer was not needed: there were no open edges.
+The remaining limits concern COBOL, copybooks, CICS and IMS. This tree has none of them (`modernization-assessment/01-inventory.md:14-17`), so they do not apply.
+The extractor's warning that JOBB deletes JOBA-DONE says "that order is not an edge". That is right: the delete is a rerun rule, not an ordering edge.
+The ordering edge is the set and wait pair on lines 6 and 9 (`app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9`).

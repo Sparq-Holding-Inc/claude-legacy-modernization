@@ -1,72 +1,90 @@
 # 02 Coupling
 
-`02a-edge-tables.md` holds every edge the extractor found. This file holds the argument. The tree is
-small: two COBOL programs and one JCL job, three edges in all (`analysis`, field `edge_counts`).
+The tree holds three source files: one JCL job, one program the job runs, and one program nothing
+names. The full edge list is in `02a-edge-tables.md`. There are no datasets, no copybooks, no
+scheduler and no CICS definitions (`modernization-assessment/graph.json:24`, the `files_seen` block
+in `meta`). That leaves one coupling pattern that matters, and it is a gap.
 
-## What constrains the migration sequence
+The open edge was worked by hand, following `agents/dependency-cartographer.md`. There are fewer than
+20 open edges, so the agent was not needed. Everything in the "what the source shows" table below is
+`inference`, kept apart from the extractor's facts.
 
-| # | Coupling pattern | Kind | Confidence | Evidence |
-|---|---|---|---|---|
-| 1 | The job step runs PGMMAIN. This is the only way in. | call | high | `app/jcl/MAINJOB.jcl:2` |
-| 2 | PGMMAIN calls a program named at run time. The name is read by ACCEPT into a field with no VALUE clause, and CALL has no ON EXCEPTION. Any program in the load library can be the target. | call, computed | low | `app/cbl/PGMMAIN.cbl:9` |
-| 3 | No dataset, copybook or scheduler edge exists. The system has no data or contract coupling that the extractor can see. That is a statement about the tree, not about production, because the dispatched program is not known. | data, contract, temporal | low | `analysis`, fields `data_hubs` and `edge_counts` |
+## Pattern 1. A computed CALL whose target is read at run time
 
-Pattern 2 is the constraint that matters. Everything else is trivial. A wave plan for this tree can
-be cut in one line, and it is still not safe to ship until pattern 2 is settled.
+| Finding | Kind | Confidence | Evidence |
+|---|---|---|---|
+| `job:MAINJOB` runs step `S1`, which executes `PGMMAIN` | call (fact) | high | `app/jcl/MAINJOB.jcl:2` |
+| `PGMMAIN` calls the program named in `WS-PGM-NAME`, so the edge goes to `?dynamic:PGMMAIN:9` | call (fact, unresolved) | low | `app/cbl/PGMMAIN.cbl:9` |
+| `WS-PGM-NAME` is declared with no `VALUE` clause | inference | medium | `app/cbl/PGMMAIN.cbl:5` |
+| `WS-PGM-NAME` gets its value from `ACCEPT`, a run-time input, not from a literal or a table | inference | medium | `app/cbl/PGMMAIN.cbl:8` |
+| The job has one step, no `SYSIN` DD, no in-stream data and no `PARM`, so the JCL in the tree does not supply the name | inference | medium | `app/jcl/MAINJOB.jcl:2` |
+| The set of programs the `CALL` can reach cannot be bounded from the source in this tree | inference | low | `app/cbl/PGMMAIN.cbl:9` |
 
-## Open edge worked inline (dependency-cartographer role)
+What this means for the sequence. Every program in the tree that has no static caller is a possible
+target. Only one such program exists, `HIDDEN01` (`app/cbl/HIDDEN01.cbl:2`), and it does nothing but
+return (`app/cbl/HIDDEN01.cbl:4`). But the name is typed in at run time, so the callee could equally
+be a program that is not in the tree. Nothing in the source rules that out. That is why wave 1 cannot
+carry `high` confidence (see `03-waves.md`) and why `HIDDEN01` stays in the unknown dead-code bucket
+(see `05-dead-code.md`).
 
-The extractor left one edge open, far below the 20 that would justify handing this to the agent, so
-the edge was worked by reading the source. What follows is inference.
+Two things the extractor cannot see, and that I did not settle:
 
-| Computed call | What the code shows | Set of programs it can reach | Still open | Evidence |
-|---|---|---|---|---|
-| `?dynamic:PGMMAIN:9` | WS-PGM-NAME is declared with no VALUE clause. It is filled only by ACCEPT. The program has no MOVE and no table of names. | Cannot be bounded from source. The only other program in the tree is HIDDEN01, so it is the one candidate that can be named. | The value of the ACCEPT input. Whether the target is inside this tree at all. Whether the input differs by run date. | `app/cbl/PGMMAIN.cbl:5`, `app/cbl/PGMMAIN.cbl:8`, `app/cbl/PGMMAIN.cbl:9` |
+- what supplies `WS-PGM-NAME` in production (a `SYSIN` DD, a wrapper, a different JCL member): `inference`
+- whether the job abends when no `SYSIN` is present, which would make the program name a required
+  input rather than an optional one: `inference`
 
-Inference, not fact from the graph: an ACCEPT with no FROM clause reads the standard input device.
-On z/OS batch that is the SYSIN DD. The job defines no DD statement at all, so the step as written
-supplies no input. Either this copy of the job is incomplete, or a proc, an override or the
-scheduler supplies the name, or the step would fail at the ACCEPT. The cited lines are
-`app/jcl/MAINJOB.jcl:1` and `app/jcl/MAINJOB.jcl:2`. This is the first question for the client.
+## Pattern 2. No data coupling and no contract coupling
 
-There is no medium confidence contract edge and no `resolved: false` dataset edge in the graph, so
-nothing else needed reading.
+`analysis.data_hubs` is empty, `analysis.edge_counts` has `call: 2` and `include: 1`, and there are
+no `data`, `contract` or `temporal` edges (`analysis`, fields `data_hubs` and `edge_counts` in
+`modernization-assessment/graph.json`). Neither program opens a file and neither has a `SELECT`
+(`app/cbl/PGMMAIN.cbl:1`, `app/cbl/HIDDEN01.cbl:1`). In this tree there is no shared record layout
+that a port could silently break.
 
-Items the extractor does not model, checked by reading all ten lines of PGMMAIN and both lines of
-MAINJOB: no EXEC CICS chain, no submit through the internal reader, no IMS, DB2 or MQ, and no
-IF/THEN/ELSE or COND= in the JCL. Nothing to report under any of those.
+That is a property of the tree, not evidence that the system has no data coupling. A real nightly
+batch cycle reads and writes something. If the datasets exist, they live in code, JCL or copybooks
+that were not supplied. `inference`.
 
-## Clusters
+## Pattern 3. No scheduler, so no order across jobs
+
+One JCL job is in the tree and no scheduler artifact was parsed, so the order jobs run in across jobs
+is unknown (`analysis`, field `warnings`, in `modernization-assessment/graph.json`). The job has one
+step (`app/jcl/MAINJOB.jcl:2`), so the order inside it is trivial. Temporal coupling, which the
+skill says decides whether a plan is a plan, cannot be assessed at all.
+
+## Cluster view
+
+One cluster. The dashed line is the honest boundary.
 
 ```mermaid
 graph LR
-  J[job:MAINJOB] --> P[PGMMAIN]
-  P -.->|computed call, target unknown| U[?dynamic:PGMMAIN:9]
-  H[HIDDEN01, no static caller]
+  subgraph C1["Cluster 1: MAINJOB and its program (one wave)"]
+    J["job:MAINJOB"] --> P["PGMMAIN"]
+  end
+  P -. "computed CALL, PGMMAIN.cbl:9, target unbounded" .-> U["?dynamic:PGMMAIN:9"]
+  U -. "only in-tree candidate (inference)" .-> H["HIDDEN01 (no static caller)"]
 ```
 
-There is one cluster. A node-per-program graph adds nothing here.
+## Structure the extractor computed
 
-## Structure computed from the call graph
+| Fact | Result | Confidence | Evidence |
+|---|---|---|---|
+| Strongly connected components | none, so no unit must move with another | high | `analysis`, field `sccs` |
+| Self recursive programs | none | high | `analysis`, field `self_recursive` |
+| God modules | none. Fan-in and fan-out are empty because no program calls another by name | high | `analysis`, fields `god_modules`, `fan_in`, `fan_out` |
+| Articulation points | none, so this tree offers no natural boundary to cut a wave at | high | `analysis`, field `articulation_points` |
+| Data hubs | none | high | `analysis`, field `data_hubs` |
 
-| Fact | Units | Evidence |
-|---|---|---|
-| Strongly connected components | none | `analysis`, field `sccs` |
-| Self recursive programs | none | `analysis`, field `self_recursive` |
-| Articulation points | none | `analysis`, field `articulation_points` |
-| God modules | none | `analysis`, field `god_modules` |
-| Data hubs | none | `analysis`, field `data_hubs` |
-
-No SCC means nothing forces two units to move together. No articulation point means there is no
-natural place to cut a wave inside the tree. No god module means nothing needs a facade for size
-reasons. The facade that this system needs is different: a registry of the programs PGMMAIN may
-call, so the port can dispatch by name in the target. That registry does not exist yet and cannot be
-built until the names are known. This is inference.
+No strongly connected component exists, so no wave plan for this tree can split one. No god module
+exists, so nothing needs a facade for size reasons. The only unit that would need a facade is
+`PGMMAIN`, because its callee set is open. Whatever it dispatches to would have to be put behind an
+interface before the port can be tested at its edge. `inference`.
 
 ## The honest boundary
 
-The computed call at `app/cbl/PGMMAIN.cbl:9` is the edge of what this analysis knows. Every
-statement in this assessment about what wave 1 reads, writes or depends on is a statement about
-PGMMAIN and MAINJOB only. Whatever PGMMAIN dispatches to is outside it. The unscheduled and
-scheduler questions are in `00-summary.md`, since `analysis` shows a warning that no scheduler
-artifact was parsed.
+| Limit | What it means here | Confidence | Evidence |
+|---|---|---|---|
+| One computed call, unresolved | Any program without a static caller may run. `HIDDEN01` is the only such program in the tree. Programs outside the tree are not ruled out | low | `app/cbl/PGMMAIN.cbl:9` |
+| No scheduler parsed | Whether `job:MAINJOB` is the nightly cycle, part of it, or unrelated is not shown by the tree | low | `analysis`, field `warnings` |
+| `IF/THEN/ELSE` and `COND=` not modeled | The job has one step, so this changes nothing here | high | `modernization-assessment/graph.json:16` (`meta.limits`, item 7) |
+| No last-modified dates | The tree is not a git repository, so dormancy was not measured | high | `analysis`, field `warnings` |

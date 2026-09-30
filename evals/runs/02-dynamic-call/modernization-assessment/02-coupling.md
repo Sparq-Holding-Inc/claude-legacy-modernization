@@ -1,50 +1,66 @@
 # 02 Coupling
 
-`02a-edge-tables.md` holds every edge. This file holds the argument. The graph is one call edge and nothing else (analysis field `edge_counts`). There are 1 computed call and 0 data, contract, include or temporal edges.
+The tree holds two COBOL programs, `PROGA` and `PROGB`, and nothing else. No copybook, no JCL, no
+CSD, no scheduler and no dataset was found (`modernization-assessment/graph.json` `meta.files_seen`).
+The graph has one edge. That edge is a computed call, and it is the only coupling in the system that
+the extractor could see. All edge facts are in `02a-edge-tables.md`. This file is the argument.
 
-There were fewer than 20 open edges, so I worked the one open edge myself, inline, in the way the `dependency-cartographer` agent would. What follows from reading the source is inference and is labeled so.
+I worked the one open edge myself. It is far below the 20 edges that would justify the
+`dependency-cartographer` agent, so nothing here is delegated. What I add beyond the extractor is
+labeled `inference`.
 
-## The computed call
+## The coupling patterns that constrain the sequence
 
-| Caller | Node | What the source shows | Set of programs reachable | Confidence | Evidence |
+| # | Pattern | What it does to the sequence | Confidence | Evidence |
+|---|---|---|---|---|
+| 1 | One computed call. `PROGA` does `CALL WS-PGM-NAME`, and `WS-PGM-NAME` is filled by `ACCEPT` at run time. | The set of programs `PROGA` can start is not knowable from this source. Any program in the tree with no static caller could be the target, which is `PROGA` itself and `PROGB`. A program outside the tree could be a target too. Nothing reachable from `PROGA` can be called dead, and `PROGA` cannot be placed in a wave that hides what it starts. | high that the call is computed, low on where it goes | `app/cbl/PROGA.cbl:8`, `app/cbl/PROGA.cbl:9` |
+| 2 | No entry point. No JCL job, CSD transaction, scheduler job or wrapper names either program. | Nothing can be proven reachable or unreachable, and no order between programs is enforced by anything the extractor read. There is no temporal coupling to respect because there is no scheduler in the tree. That is a gap in what was supplied, not proof that no ordering exists. | high | analysis (`entry_points` is empty, warning "No entry points were found") |
+| 3 | No data coupling. No program in the tree reads or writes a dataset, VSAM file or DB2 table. | There are no contract edges and no data hubs, so no record layout is an undocumented API inside this tree. Whatever `PROGA` starts through the computed call may still share files with programs we cannot see. | medium | analysis (`data_hubs` and `edge_counts` show no data edge); inference for the last sentence |
+
+## The unresolved computed call
+
+| Caller | Node | What the source shows | What is still open | Confidence | Evidence |
 |---|---|---|---|---|---|
-| PROGA | ?dynamic:PROGA:9 | `WS-PGM-NAME` is declared `PIC X(8)` with no VALUE clause. Its only assignment is `ACCEPT WS-PGM-NAME`. The `CALL` uses it as the target with no `ON EXCEPTION` and no check on the value. | Cannot be bounded from source. It is whatever the input names. `PROGB` is the only other program in the tree, and it could be one target, but nothing proves it. | low | `app/cbl/PROGA.cbl:5`, `app/cbl/PROGA.cbl:8`, `app/cbl/PROGA.cbl:9`. Inference on the reachable set. |
+| `PROGA` | `?dynamic:PROGA:9` | `WS-PGM-NAME` is declared `PIC X(8)` with no `VALUE` clause and is set only by `ACCEPT`. No `MOVE` of a literal to it exists in the program. | Where the `ACCEPT` reads from (SYSIN, console, a job parameter) and which names are ever supplied. The target set cannot be bounded from the source. | low | `app/cbl/PROGA.cbl:5`, `app/cbl/PROGA.cbl:8`, `app/cbl/PROGA.cbl:9` |
+| `PROGA` | (no `ON EXCEPTION` on the call) | The `CALL` has no `ON EXCEPTION` or `ON OVERFLOW` phrase. If the name given matches no program, the run ends in a run-time error that depends on the compiler. This is not stated in the source. | Whether the client's runtime abends, sets a return code, or continues. | low | inference: `app/cbl/PROGA.cbl:9` |
 
-Saying "cannot be bounded from the source" is the finding. The value comes from outside the tree (inference: `ACCEPT` reads SYSIN or the console, and the JCL that would feed it is not here).
+## Strongly connected components, god modules, articulation points
 
-## Contract edges
+There are none. `sccs`, `god_modules`, `articulation_points` and `self_recursive` are all empty in the
+`analysis` block. With two programs and one unresolved edge that says nothing about the real system.
+It says only that the fragment supplied has no cycle and no hub.
 
-None. No program in the tree reads or writes a dataset (analysis field `data_hubs` is empty; analysis field `edge_counts` lists only `call`).
+| Structure | Result | Confidence | Evidence |
+|---|---|---|---|
+| Strongly connected components | none | high | analysis (`sccs`) |
+| God modules | none | high | analysis (`god_modules`) |
+| Articulation points | none, so no natural wave boundary is visible | high | analysis (`articulation_points`) |
+| Self recursive programs | none as far as the extractor can see. `PROGA` could name itself in the computed call, and that is not modeled | low | inference: `app/cbl/PROGA.cbl:9` |
 
-## The coupling patterns that will constrain the sequence
+## Top level clusters
 
-1. **Run-time dispatch.** `PROGA` couples to an unknown, input-defined set of programs (`app/cbl/PROGA.cbl:9`). This is the only coupling the tree shows, and it is also the one that matters most: any wave plan for the rest of the system has to treat every program without a static caller as a possible callee of `PROGA`. That is why the extractor put both programs in the unknown bucket.
-2. **Coupling with no visible source.** The must-not-break item is the nightly batch cycle. The tree has no scheduler, JCL or dataset, so the order, the shared files and the contract layouts that a real wave plan needs are all outside what was supplied. Inference, from analysis fields `entry_points`, `unscheduled_jobs` and `data_hubs` all being empty.
-3. **Input-defined behavior.** What `PROGA` does depends on data fed to it (`app/cbl/PROGA.cbl:8`), not on code. A port has to keep that dispatch, and the harness has to replay the same inputs (`06-test-strategy.md`).
-
-## Clusters
+At cluster level there is one cluster, the two programs, and one edge that leaves the known graph.
+A dashed line marks the computed call. The extractor could not resolve it, so it does not point at
+`PROGB`.
 
 ```mermaid
 graph LR
-  IN["Run-time input (SYSIN or console, source unknown)"] -->|ACCEPT| A["Dispatcher: PROGA"]
-  A -.->|"computed CALL, target unresolved"| U["Callee set: unbounded, may include PROGB and programs outside the tree"]
-  N["Nightly batch cycle (must not break): not in the tree"] -.->|"unknown link"| A
+  A["PROGA: reads a program name, calls it"]
+  B["PROGB: does nothing, GOBACK"]
+  D(["?dynamic:PROGA:9: target unknown"])
+  A -.->|"CALL WS-PGM-NAME"| D
+  D -. "might be, unproven" .-> B
 ```
-
-The dotted edges are unresolved. Cluster level only: the tree is too small for anything finer to mean anything.
-
-## Structure computed from the call graph
-
-| Fact | Result | Evidence |
-|---|---|---|
-| Strongly connected components | none | analysis field `sccs` |
-| Self recursive programs | none | analysis field `self_recursive` |
-| Articulation points (natural wave boundaries) | none | analysis field `articulation_points` |
-| God modules | none | analysis field `god_modules` |
-| Structure basis | all programs, because no entry points were found | analysis field `structure_basis` |
-
-With no strongly connected component, no god module and no articulation point, nothing in the graph forces two units into one wave or gives a place to cut a wave. The only reason to keep `PROGA` and `PROGB` together is the computed call.
 
 ## The honest boundary
 
-One computed call is unresolved (analysis field `unresolved_dynamic`, `app/cbl/PROGA.cbl:9`). Because it is unresolved, nothing in the tree can be proven unreachable (`05-dead-code.md`), and every claim in this assessment about what `PROGA` does not touch is provisional.
+This assessment stops at the computed call. Because `PROGA` calls a name it reads at run time:
+
+- `PROGB` is in the unknown dead-code bucket, not unreachable (see `05-dead-code.md`).
+- No wave can be cut, because no unit is reached from an entry point (see `03-waves.md`).
+- The thing the client said must not break, the nightly batch cycle, cannot be tied to either
+  program. Nothing in the tree says either program is part of it, and I have not assumed it.
+
+Resolving the boundary needs three things from the client: the JCL that runs `PROGA` with its SYSIN
+or PARM, a list of the program names that reach the `ACCEPT` over a full business cycle, and the load
+library or source list that says which programs those names can match.

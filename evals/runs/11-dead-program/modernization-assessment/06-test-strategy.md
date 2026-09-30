@@ -1,82 +1,89 @@
 # 06 Test strategy
 
-Built with the `behavioral-equivalence` skill. The bar is that for the inputs the nightly batch cycle sees, the ported job produces the same outputs as the legacy job. Where it does not, someone decided that on purpose and wrote it down.
+This follows the `behavioral-equivalence` skill. The bar is not "it passes the tests". The bar is that for
+the inputs the system actually sees, the ported job gives the same outputs as the legacy one. Where it does
+not, someone decided that on purpose and wrote it down.
 
-## The oracle problem in this tree
+## What the tree gives us to compare
 
-The tree holds no dataset. The step has no DD statement (`app/jcl/MAINJOB.jcl:2`), and the two programs open no file (`app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMLIVE.cbl:4`). No archived output, no report and no job log came with it. Telemetry is `none`. So the oracle cannot come from data on file. It has to come from job output, job logs, return codes and reports that the client supplies. That is inference.
+Nothing but a return code. The tree holds no dataset, no VSAM file and no DB2 table. `job:MAINJOB` has one
+step and no DD statement, so it writes no file and no report (`app/jcl/MAINJOB.jcl:2`). `PGMMAIN` calls
+`PGMLIVE`, and `PGMLIVE` does `GOBACK` (`app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMLIVE.cbl:4`).
+
+So the oracle has to come from job output, logs and reports, not from data files. Whatever the nightly
+batch cycle does that matters to the business, it does outside this tree.
+
+## Anchor: what must not break
+
+| Must-not-break item | Unit in the tree | Status | Confidence | Evidence |
+|---|---|---|---|---|
+| "the nightly batch cycle" | `job:MAINJOB` is the only candidate | Not confirmed. The tree has no scheduler and nothing marks the job as nightly or as a cycle. I did not invent the mapping. | low | `app/jcl/MAINJOB.jcl:1` |
 
 ## Oracle per wave
 
 | Wave | Oracle, strongest first | Provisional? | Confidence | Evidence |
 |---|---|---|---|---|
-| 1. Nightly batch job | 1. Parallel run: run the legacy and the ported `job:MAINJOB` on the same night and diff return code, job log and outputs. 2. Replay of captured input and output across a window that spans month-end and, for financial content, year-end. 3. Golden master from archived job output and reports. 4. Characterization tests from source, only if 1 to 3 fail | Levels 1 to 3 are not provisional. Level 4 is | low | inference |
+| 1 | 1. Parallel run of `job:MAINJOB` on the legacy platform and the ported job, compared on return code, step outcome, log messages and position in the cycle. 2. Replay from archived job logs of at least 12 months, which are golden masters with a date on them. 3. A characterization test written from the source, only if 1 and 2 are unavailable. | Yes, if only option 3 exists. That test proves a call returns and nothing more. | low | `app/jcl/MAINJOB.jcl:2` |
 
-Ask whether a parallel run is possible before settling for less. This job writes no dataset as far as the tree shows, so running both copies side by side costs little. Teams assume it cannot be done and are often wrong.
+Ask whether a parallel run is possible before settling for less. Teams assume it is not and are often
+wrong. If the legacy platform stays up during the port, it is possible for a job this small.
 
 ## What to ask the client to supply
 
-- Job logs for `job:MAINJOB` over at least 12 months: return codes, step condition codes, elapsed times. The same records are the telemetry for the dead-code register (`05-dead-code.md`).
-- The scheduler export that defines the nightly batch cycle, with predecessors and successors of `job:MAINJOB`. The tree has none (analysis: `warnings`).
-- The real DD list of the production job, and any GDG generations it produced.
-- Files and reports the cycle sends to partners or archives.
-- Any CICS journal or transaction log, if online work feeds or reads the cycle.
-
-## The characterization fallback
-
-If levels 1 to 3 are unavailable, write characterization tests from the source. They encode what the code says, not what it does, so label the coverage provisional.
-
-- Running PGMMAIN calls PGMLIVE exactly once and returns (`app/cbl/PGMMAIN.cbl:4`).
-- Running PGMLIVE returns to its caller without any effect (`app/cbl/PGMLIVE.cbl:4`).
-- Running `job:MAINJOB` executes step S1 once and ends with the same condition code as the legacy job (`app/jcl/MAINJOB.jcl:2`).
-
-These tests are trivial because the code is trivial. They do not prove the nightly cycle is right.
+1. Twelve to twenty-four months of job logs or SMF records for `job:MAINJOB`: return codes, run dates, elapsed
+   time. These are also the telemetry the dead-code register needs (`modernization-assessment/05-dead-code.md`).
+2. The scheduler definition for the nightly cycle: predecessors, successors, `COND` checks and return
+   code rules. The tree has none (analysis: `warnings` names the missing scheduler).
+3. Any report, extract or message the cycle sends to another system, and archived copies of it.
+4. The compile and link options and the load library. They decide whether `PGMLIVE` is bound statically
+   or loaded at run time (inference).
+5. Confirmation that the source in the tree is the source behind the production load modules.
 
 ## Normalization spec
 
-Every entry is a claim that a difference does not matter. Keep the list short. A human signs it.
+Every line here asserts that a difference does not matter. Each is a place a real defect can hide. A human
+signs off on the list.
 
-| Field | Rule | Confidence | Evidence |
-|---|---|---|---|
-| JES job number, run id, submit and end timestamps in the job log | Mask | medium | inference |
-| Page numbers and run dates printed on reports | Mask | medium | inference |
-| Condition code of each step | Compare exactly | high | `app/jcl/MAINJOB.jcl:2` |
-| Any monetary field the real job writes | Compare in a decimal type at zero tolerance. Never IEEE floats | medium | inference |
-| Record order in any output file | Do not assume it is incidental. Confirm with downstream readers first | medium | inference |
-| Fixed-width padding, spaces against low values | Decide and record. Not decided yet | low | inference |
+| Item | Rule | Why it is safe | Confidence | Evidence |
+|---|---|---|---|---|
+| Timestamps, JES job numbers, run IDs | Mask before diffing | They differ on every run | high | inference |
+| CPU time and elapsed time | Record and trend. Do not diff. | A different platform changes them | high | inference |
+| Message ordering in the job log | Compare as a sequence, not as a set | The order may be an implicit contract for a successor | medium | inference |
+| Return code | Exact match, no tolerance | It is the only output the tree shows, and a successor may test it | high | `app/jcl/MAINJOB.jcl:2` |
 
-The tree holds no packed decimal, no `REDEFINES` and no KSDS, so none of the mainframe traps apply to what is here. They all apply to the real cycle if it holds them. EBCDIC against ASCII collating order matters for any sorted or keyed output.
+None of the numeric traps apply to what is in the tree. It has no `COMP-3` field, no `REDEFINES`, no
+collating sequence and no fixed-width record. The tree has one copybook and nothing includes it
+(`app/cpy/UNUSED.cpy:1`). These traps go in the spec when the client's fuller tree arrives:
+packed decimal compared in a decimal type with zero tolerance on money, EBCDIC against ASCII sort order,
+record padding, and job order taken from the temporal edges.
 
-## Cover the input space deliberately
+## Input space
 
-- **Boundary dates.** Run the cycle across month-end, quarter-end, fiscal year-end, a leap day and a DST change.
-- **The empty and the enormous.** A night with no input, and a night at the maximum volume the legacy job ever handled.
-- **Bad data already in there.** Legacy data breaks its own rules. The port must reproduce what the legacy job does with it.
-- **Fiscal-close paths.** The single most common source of a failure found six months after cutover. This tree shows no date logic (`app/cbl/PGMMAIN.cbl:4`), so any such path lives in code the tree does not contain. Ask for it.
+The job takes no input in the tree. The variation is in when it runs. Run the parallel window over:
 
-## Job order
-
-The temporal edges in `graph.json` are the list of orders the harness must keep. There are none, and no scheduler was parsed (analysis: `edge_counts`, `warnings`). The order in which the nightly cycle runs `job:MAINJOB` against its neighbours is unknown. It is a gap the harness cannot close alone.
+- month end, quarter end and fiscal year end, because a scheduler may vary what it runs on those dates
+  and the tree cannot show that
+- a run after a failed prior night, and a run with nothing to do
+- any path that only runs at fiscal close (inference: none is visible, and the tree is silent about it)
 
 ## Deviation register
 
-Nothing may differ without a row here. It opens empty.
+Nothing may differ without a row here. It starts empty because none is proposed. If the client wants
+`PGMDEAD` and `cpy:UNUSED` deleted, that removal gets a row.
 
 | ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact | Evidence |
 |---|---|---|---|---|---|---|
-| none yet | Not applicable | Not applicable | Not applicable | Not applicable | Not applicable | inference |
 
 ## Exit bar for wave 1
 
-Wave 1 is done when all of these hold:
+Wave 1 is done when all four hold. It is not done when the port compiles.
 
-- the diff of job output against the legacy job is clean, modulo the normalization spec and the deviation register
-- every boundary case above passes, including a run across a month-end
-- the harness is under version control and runs in CI
-- the deviation register is signed by someone with the authority to sign it
+- The replay diff is clean, modulo the normalization spec and the deviation register.
+- Every boundary case above passes.
+- The harness is under version control and runs in CI.
+- The deviation register is signed by someone with the authority to sign it.
 
-It is not done when the port compiles, or when it passes tests written beside the port. Those encode the porter's understanding, which is the thing under test.
+## After cutover
 
-## Keep the harness after cutover
-
-The comparison harness becomes the regression suite for the modernized system. Budget for maintaining it. It is the only executable specification the nightly cycle will have.
+Keep the harness. It becomes the regression suite for the modernized job. It is the only executable
+specification this job has had.

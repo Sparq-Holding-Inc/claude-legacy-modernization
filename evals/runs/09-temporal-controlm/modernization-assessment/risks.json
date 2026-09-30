@@ -1,67 +1,67 @@
 {
-  "units": [
+ "units": [
+  {
+   "id": "job:JOBA",
+   "port_difficulty": {
+    "score": 1,
+    "why": "One step that runs IEFBR14, a null utility, with no DD cards, no datasets and no application program."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "First job of the NIGHTLY folder, which the client says must not break: it waits on an external feed and its done signal releases JOBB."
+   },
+   "quadrant": "low-high",
+   "wave": 1,
+   "driving_fact": "JOBA starts only when condition EXTERNAL-FEED exists, which nothing in the tree sets, and it sets JOBA-DONE for JOBB.",
+   "confidence": "medium",
+   "evidence": [
     {
-      "id": "job:JOBA",
-      "port_difficulty": {
-        "score": 1,
-        "why": "Two lines of JCL. Its only step runs IEFBR14, the IBM do-nothing utility, with no DD statements, so there is no logic and no arithmetic to port."
-      },
-      "blast_radius": {
-        "score": 4,
-        "why": "Head of the nightly cycle, which the client said must not break. It waits on EXTERNAL-FEED, which nothing in the tree sets, and its JOBA-DONE condition is the only thing that releases JOBB. If the condition is lost in a port, the cycle stalls or runs out of order and the JCL gives no hint."
-      },
-      "quadrant": "low-high",
-      "wave": 1,
-      "driving_fact": "JOBA posts JOBA-DONE (OUTCOND +) and JOBB waits for it (INCOND), so the order lives only in the Control-M definition.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/jcl/JOBA.jcl",
-          "line": 2
-        },
-        {
-          "file": "app/scheduler/nightly.xml",
-          "line": 5
-        },
-        {
-          "file": "app/scheduler/nightly.xml",
-          "line": 6
-        }
-      ]
+     "file": "app/jcl/JOBA.jcl",
+     "line": 2
     },
     {
-      "id": "job:JOBB",
-      "port_difficulty": {
-        "score": 2,
-        "why": "The JCL is as trivial as JOBA's. The one subtle piece is in the scheduler: JOBB deletes JOBA-DONE (SIGN -) and posts JOBB-DONE, so the target scheduler must reproduce consume-and-delete condition semantics."
-      },
-      "blast_radius": {
-        "score": 4,
-        "why": "Second job of the must-not-break nightly cycle. Nothing in the tree consumes JOBB-DONE, so an unseen downstream consumer may depend on it. A missing or early JOBB-DONE would be silent, not an abend."
-      },
-      "quadrant": "low-high",
-      "wave": 1,
-      "driving_fact": "JOBB waits for JOBA-DONE, deletes it when done, and posts JOBB-DONE, which no job in the tree waits on.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/jcl/JOBB.jcl",
-          "line": 2
-        },
-        {
-          "file": "app/scheduler/nightly.xml",
-          "line": 9
-        },
-        {
-          "file": "app/scheduler/nightly.xml",
-          "line": 10
-        },
-        {
-          "file": "app/scheduler/nightly.xml",
-          "line": 11
-        }
-      ]
+     "file": "app/scheduler/nightly.xml",
+     "line": 5
+    },
+    {
+     "file": "app/scheduler/nightly.xml",
+     "line": 6
     }
-  ],
-  "do_not_port": []
+   ]
+  },
+  {
+   "id": "job:JOBB",
+   "port_difficulty": {
+    "score": 1,
+    "why": "One step that runs IEFBR14, a null utility, with no DD cards, no datasets and no application program."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Second job of the NIGHTLY folder: it must run after JOBA, it deletes JOBA-DONE, and it publishes JOBB-DONE to a consumer outside the tree."
+   },
+   "quadrant": "low-high",
+   "wave": 1,
+   "driving_fact": "JOBB waits for JOBA-DONE, then removes that condition and sets JOBB-DONE, so its rerun and restart behavior lives in the scheduler, not in the job.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/JOBB.jcl",
+     "line": 2
+    },
+    {
+     "file": "app/scheduler/nightly.xml",
+     "line": 9
+    },
+    {
+     "file": "app/scheduler/nightly.xml",
+     "line": 10
+    },
+    {
+     "file": "app/scheduler/nightly.xml",
+     "line": 11
+    }
+   ]
+  }
+ ],
+ "do_not_port": []
 }

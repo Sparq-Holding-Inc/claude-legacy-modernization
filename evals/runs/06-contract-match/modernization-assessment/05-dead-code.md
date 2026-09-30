@@ -1,42 +1,35 @@
 # 05 Dead code
 
-Telemetry: `none`. Every claim below is provisional. The machine-readable register is
-`modernization-assessment/dead-code.json:1`.
+Telemetry: none. Every claim in this file is provisional. Machine-readable form:
+`modernization-assessment/dead-code.json`. The extractor's candidate tables are in
+`modernization-assessment/05a-dead-code-candidates.md`.
 
 ## Result
 
-| Bucket | Count | Confidence | Evidence |
+All three buckets are empty. That is not the same as "nothing is dead".
+
+| Bucket | Count | Meaning here | Evidence |
 |---|---|---|---|
-| Unreachable | 0 | low | `analysis` field `dead_code_candidates` |
-| Reachable but dormant | 0. Not measured. | low | `analysis` field `warnings` |
-| Unknown | 0 | low | `analysis` field `unresolved_dynamic` |
+| Unreachable | 0 | Both programs are reached from a JCL job (2 of 2 programs reachable) | analysis, field `dead_code_candidates` |
+| Unknown | 0 | No computed call exists that could reach an unlisted program | analysis, field `unresolved_dynamic` |
+| Dormant | 0, not measured | No last-modified dates exist. The tree is not a git repository, so the dormant rule did not run | analysis, field `warnings` |
 
-The extractor found no candidate in any bucket (`analysis` field `dead_code_candidates`). Every program,
-the copybook and the dataset are reachable from one of the two jobs (`analysis` fields
-`reachable_nodes` and `reachable_programs`: 7 nodes, 2 programs). PGMR is reached from `job:READJOB`
-(`app/jcl/READJOB.jcl:2`). PGMW is reached from `job:WRITEJOB` (`app/jcl/WRITEJOB.jcl:2`). LAYOUTX is
-included by both programs (`app/cbl/PGMR.cbl:11`, `app/cbl/PGMW.cbl:11`).
+## What the empty lists do not tell you
 
-## What an empty list does and does not mean
+- **Dormant was not computed.** An empty dormant list means not measured. It does not mean every unit was
+  changed recently. The nodes carry no last-modified date (`modernization-assessment/01-inventory.md`,
+  table Programs, column Last modified, reads `unknown`).
+- **Both jobs count as entry points.** With no scheduler parsed, a JCL job is an entry point whether or
+  not anything still runs it (`app/jcl/READJOB.jcl:1`, `app/jcl/WRITEJOB.jcl:1`). The field
+  `unscheduled_jobs` is empty, but that is because no scheduler exists to leave a job unnamed. It does not
+  show that the jobs are scheduled. Whether they still run is an Open Question. Inference.
+- **PGMR could be dead in effect.** It reads one record and discards it (`app/cbl/PGMR.cbl:14`). It
+  produces no output, so nothing downstream would notice if it stopped. The extractor cannot see this. It
+  is a candidate for instrumentation, not deletion. Inference.
+- **No telemetry.** Without job history from the last 12 months, no claim here can be firmed up. Ask for
+  job logs or SMF records for both jobs.
 
-- **Dormant was not computed.** The extractor warns that no last-modified dates exist, because the
-  target is not a git repository (`analysis` field `warnings`). An empty dormant list here means
-  not measured. Every node shows `last_modified: null` (`modernization-assessment/graph.json:1`).
-  Ask for the source control history or the file dates.
-- **Both jobs are entry points only by default.** No scheduler artifact was parsed, so a job that no
-  scheduler names still counts as an entry point (`analysis` field `warnings`). That is why the
-  tree shows no dead code. It does not show that either job still runs. `analysis` field
-  `unscheduled_jobs` is empty because there is no scheduler to compare against.
-- **No computed calls.** The unknown bucket is empty because there is nothing that could reach an
-  unlisted program (`analysis` field `unresolved_dynamic`). It is an empty result on a 2 program tree.
-- **No telemetry.** With no run history, "reachable" means reachable on paper. Ask for job logs or SMF
-  records to see whether READJOB and WRITEJOB ran in the last 12 months.
+## Recommendation
 
-## Items to instrument, not delete
-
-| Unit | Why | Confidence | Evidence |
-|---|---|---|---|
-| `job:READJOB` | Nothing shows it runs. Its dataset is named TEST. | low | `app/jcl/READJOB.jcl:3`, inference |
-| `job:WRITEJOB` | Same. DISP=NEW would fail a repeat run, which suggests something removes the dataset first, or the job runs once. | low | `app/jcl/WRITEJOB.jcl:3`, inference |
-
-These are instrumentation requests for the client, not entries in `dead-code.json`.
+Delete nothing. Instrument both jobs. Ask the client for run history for `READJOB` and `WRITEJOB`, and
+for the scheduler export that would show whether either is still triggered.

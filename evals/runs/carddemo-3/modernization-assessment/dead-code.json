@@ -3,161 +3,33 @@
  "unreachable": [
   {
    "id": "cpy:UNUSED1Y",
-   "reason": "No COPY statement in the tree names it, and a copybook cannot be the target of a computed call. Provisional: no telemetry, and the tree may not hold every program that ran on the client's system.",
-   "confidence": "high",
+   "reason": "No program includes it and no reachable computed call could use it. Copybooks have no run time path. The one gap is the assembler macro library (app/maclib), which the extractor does not read. No telemetry exists, so this is provisional.",
+   "confidence": "medium",
    "evidence": [
-    {
-     "file": "app/cpy/UNUSED1Y.cpy",
-     "line": 1
-    }
+    {"file": "app/cpy/UNUSED1Y.cpy", "line": 1}
    ]
   }
  ],
  "dormant": [],
  "unknown": [
   {
-   "id": "CBPAUP0C",
-   "reason": "No static edge reaches it, but job CBPAUP0J runs it through the IMS batch driver PARM, which the extractor does not read, and the CA-7 listing triggers CBPAUP0J after CLOSEFIL. Likely live. It stays in unknown because nothing here proves the job still runs.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl",
-     "line": 25
-    },
-    {
-     "file": "app/scheduler/CardDemo.ca7",
-     "line": 43
-    }
-   ]
-  },
-  {
    "id": "CBTRN01C",
-   "reason": "No job, CICS program definition or caller names it, and its six DDs map to no JCL. The computed calls in the tree resolve to CSD-defined online programs (menu table COMEN02Y, admin table COADM02Y) or to the caller kept in the COMMAREA, and it is a batch program with no CSD entry, so I infer none of them reaches it. Its header says it posts the daily file, like CBTRN02C, so it may be an older version. Kept in unknown by rule. Ask whether it ever ran.",
+   "reason": "No JCL step, CSD entry or program names it, and its DDs map to nothing. It is a batch program with no CICS commands, and the menu tables and literal targets that feed the 28 computed calls list 17 names (COMEN02Y.cpy:28-89, COADM02Y.cpy:29-53) that do not include it. That bounds the calls only as inference, because CDEMO-FROM-PROGRAM comes from the COMMAREA, so it stays unknown. It reads the daily transaction file and verifies each card and account, so someone may run it by hand before posting.",
    "confidence": "low",
    "evidence": [
-    {
-     "file": "app/cbl/CBTRN01C.cbl",
-     "line": 5
-    },
-    {
-     "file": "app/cpy/COMEN02Y.cpy",
-     "line": 21
-    }
-   ]
-  },
-  {
-   "id": "COBTUPDT",
-   "reason": "Not dead. The weekly Control-M job MNTTRDB2 runs it from an in-stream DSN card (RUN PROGRAM(COBTUPDT)), which the extractor does not read.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
-     "line": 30
-    },
-    {
-     "file": "app/scheduler/CardDemo.controlm",
-     "line": 27
-    }
-   ]
-  },
-  {
-   "id": "DBUNLDGS",
-   "reason": "Job UNLDGSAM runs it through the IMS batch driver PARM. No scheduler in the tree names UNLDGSAM, so ask whether it runs.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL",
-     "line": 27
-    }
-   ]
-  },
-  {
-   "id": "PAUDBLOD",
-   "reason": "Job LOADPADB runs it through the IMS batch driver PARM. No scheduler in the tree names LOADPADB, so ask whether it runs.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL",
-     "line": 27
-    }
-   ]
-  },
-  {
-   "id": "PAUDBUNL",
-   "reason": "Job UNLDPADB runs it through the IMS batch driver PARM. No scheduler in the tree names UNLDPADB, so ask whether it runs.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL",
-     "line": 39
-    }
-   ]
-  },
-  {
-   "id": "cpy:IMSFUNCS",
-   "reason": "Included only by PAUDBLOD and DBUNLDGS, which are themselves in unknown. Its status follows theirs. A copybook cannot be a computed call target, so the extractor's reason is beside the point.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL",
-     "line": 142
-    },
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
-     "line": 136
-    }
-   ]
-  },
-  {
-   "id": "cpy:PADFLPCB",
-   "reason": "Included only by DBUNLDGS, which is in unknown. Its status follows the program's.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
-     "line": 156
-    }
-   ]
-  },
-  {
-   "id": "cpy:PASFLPCB",
-   "reason": "Included only by DBUNLDGS, which is in unknown. Its status follows the program's.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
-     "line": 155
-    }
-   ]
-  },
-  {
-   "id": "cpy:PAUTBPCB",
-   "reason": "Included by PAUDBLOD and DBUNLDGS, which are in unknown. Its status follows theirs.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL",
-     "line": 161
-    },
-    {
-     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
-     "line": 154
-    }
+    {"file": "app/cbl/CBTRN01C.cbl", "line": 1},
+    {"file": "app/cbl/CBTRN01C.cbl", "line": 172}
    ]
   },
   {
    "id": "proc:TRANREPT",
-   "reason": "Run at run time: CORPT00C builds a job that executes PROC=TRANREPT and writes it to the JOBS queue. The extractor makes no edge for JCL text inside COBOL. Live if anyone uses the online report screen. It is the online path of the must-not-break transaction report.",
+   "reason": "Named only in JCL text inside CORPT00C, which the online transaction writes to the JOBS transient data queue (an internal reader). A running program can submit it, so it is unknown, never unreachable. It is very likely live: CORPT00C is a menu option (COMEN02Y.cpy:77).",
    "confidence": "medium",
    "evidence": [
-    {
-     "file": "app/cbl/CORPT00C.cbl",
-     "line": 94
-    },
-    {
-     "file": "app/cbl/CORPT00C.cbl",
-     "line": 517
-    }
+    {"file": "app/cbl/CORPT00C.cbl", "line": 94},
+    {"file": "app/cbl/CORPT00C.cbl", "line": 517},
+    {"file": "app/csd/CARDDEMO.CSD", "line": 499},
+    {"file": "app/proc/TRANREPT.prc", "line": 1}
    ]
   }
  ]

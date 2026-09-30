@@ -1,44 +1,50 @@
 # 04 Estimate
 
-Every number below is `inference`. No line count or history in the tree can support one. The tree holds 4 lines of JCL and 14 lines of scheduler XML (`app/jcl/JOBB.jcl:2`, `app/scheduler/nightly.xml:14`). The method is edge based, as the skill asks: count what crosses the wave boundary, then add the work of proving equivalence. Lines of code are not used.
+All figures here are inference. They are judgment ranges from the graph counts, not calibrated on a team's measured velocity. None of the
+numbers below comes from the client. Wave 1 is the only wave, so there is one estimate.
 
-## Wave 1. Nightly batch cycle
+## Wave 1. Nightly batch cycle (JOBA then JOBB)
 
-| Item | Estimate | Basis | Confidence | Evidence |
-|---|---|---|---|---|
-| Re-express the two jobs and the two scheduler entries on the target platform | 2 to 5 person-days | 2 jobs, 2 scheduler entries, 1 temporal edge, 1 external input, 1 consumed condition. No data edge and no program | medium | `app/scheduler/nightly.xml:4`, `app/scheduler/nightly.xml:8`, inference |
-| Build the equivalence harness for the condition chain | 5 to 10 person-days | The oracle has to come from job history and logs, not from a dataset. There are no datasets in the tree | low | `app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`, inference |
-| Run in parallel for a full business cycle including month end | 1 to 2 calendar months elapsed, low effort per day | Needed for the must-not-break item. Length is set by the capture window, not by the work | low | inference |
-| Total for wave 1 | 8 to 15 person-days plus the elapsed parallel run | Sum of the rows above | low | inference |
+**Method.** Weight the things the plugin says move an estimate, in order, and count what this tree shows for each.
 
-The range is wide on the harness and the parallel run and narrow on the port. That matches where the risk is: the port is trivial and the proof is the work.
-
-## Assumptions the range is most sensitive to
-
-Each is a claim that can be checked.
-
-1. **Assumes the two IEFBR14 steps are the whole job.** If either job is a placeholder and the real program is submitted from another library, the port and harness cost grow by the size of that program, and this estimate does not cover it. Check: ask the client whether `IEFBR14` is what runs in production. `app/jcl/JOBA.jcl:2`
-2. **Assumes EXTERNAL-FEED is an ordinary Control-M condition that the target scheduler can receive.** If it is set by a file watcher, another scheduler, or an operator, add 3 to 10 person-days to rebuild that trigger and test it. Check: find what adds EXTERNAL-FEED today. `app/scheduler/nightly.xml:5`
-3. **Assumes the target scheduler can express a condition that is posted, waited on and then deleted.** If the target has no such concept, the deletion needs a hand written state step, and the harness needs a rerun test for each case. Add 2 to 5 person-days. `app/scheduler/nightly.xml:10`
-4. **Assumes nothing outside the tree waits on JOBB-DONE.** If something does, that consumer joins the wave and the range roughly doubles. `app/scheduler/nightly.xml:11`
-
-## Where Claude Code can do the port, and where it cannot
-
-| Part | Claude Code fit | Why | Evidence |
+| Driver | What the tree shows | Effect on the range | Evidence |
 |---|---|---|---|
-| Transliterating the two scheduler entries to the target scheduler's format | Strong | Mechanical, and there is a written definition to read from | `app/scheduler/nightly.xml:4-12` |
-| Writing the harness assertions for order (JOBB not before JOBA-DONE, JOBA-DONE removed, JOBB-DONE posted) | Strong | Every assertion is stated in the XML | `app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9`, `app/scheduler/nightly.xml:10`, `app/scheduler/nightly.xml:11` |
-| Working out what the cycle is for, and what runs behind IEFBR14 | Cannot | The intent is not in the tree. It needs the client's engineers | inference |
-| Deciding how a rerun or restart of JOBB should behave | Cannot | It depends on operator practice that no file records | inference |
+| Coupling edges crossing the wave boundary | Zero program, data or contract edges cross it. One condition enters (EXTERNAL-FEED) and one leaves (JOBB-DONE). | Small, but the two conditions are the whole risk | `app/scheduler/nightly.xml:5`, `app/scheduler/nightly.xml:11` |
+| Behavioral oracle | None in the tree. No dataset, no output, no log | Pushes effort into building an oracle | analysis: `data_hubs` is empty, `node_counts` has no dataset |
+| God modules in the wave | None | No effect | analysis: `god_modules` is empty |
+| Logic held in the database | No DB2 or SQL in the tree | No effect | inference: no file in the tree touches a database |
+| A team that can read the source language | Unknown. The source is two JCL jobs and one scheduler file, which is short to read | Low weight | inference |
 
-## What moves this estimate, in order of weight
+**Range (inference).**
 
-- Edges crossing the wave boundary: 2 (EXTERNAL-FEED in, JOBB-DONE out). `app/scheduler/nightly.xml:5`, `app/scheduler/nightly.xml:11`
-- A behavioral oracle: none in the tree. Job history and logs may supply one, and that is unconfirmed. inference
-- God modules in the wave: none. `analysis` field `god_modules`
-- Business logic in the database: none visible, and no DB2 reference exists in the tree. `analysis`
-- Someone who can read the source language: the JCL is trivial. The Control-M definition is the part that needs a person who knows the scheduler. inference
+| Piece of work | Low | High | Evidence |
+|---|---|---|---|
+| Re-express two jobs and their conditions in the target scheduler | 2 person-days | 5 person-days | `app/scheduler/nightly.xml:4-12` |
+| Pin down where EXTERNAL-FEED and JOBB-DONE come from and go to | 2 person-days | 5 person-days | `app/scheduler/nightly.xml:5`, `app/scheduler/nightly.xml:11` |
+| Build the comparison harness and run it for one full business cycle | 5 person-days | 12 person-days | inference |
+| **Wave 1 total** | **9 person-days** | **22 person-days** | inference |
 
-## What is not estimated
+This is a range with a wide tail on purpose. I would not quote 9 to a steering committee. The number is small because the jobs do nothing in this tree. The spread
+comes almost entirely from the three assumptions below.
 
-Anything that sits outside this tree: the producer of EXTERNAL-FEED, the consumer of JOBB-DONE, the programs the real cycle may run, and the target platform's scheduler build. Those are open questions in `00-summary.md`, not numbers here.
+**The assumptions the range is most sensitive to.**
+
+1. Assumes the production members JOBA and JOBB have one step each and that step runs IEFBR14, as the tree shows
+   (`app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`). If the members in production have more steps, the total above no longer applies, and wave 1 has to be
+   estimated again from graph.json after the client supplies the full JCL. This one assumption could move the range by an order of magnitude.
+2. Assumes EXTERNAL-FEED is set by one process the client can name (`app/scheduler/nightly.xml:5`). If it is set by an operator, or by several feeds, the
+   second row roughly doubles.
+3. Assumes the target scheduler can hold a condition that JOBB clears after it runs (`app/scheduler/nightly.xml:10`). If it cannot, rerun and restart behavior
+   has to be designed and tested, and I would add 3 to 6 person-days to the first row.
+
+**Where Claude Code can do the port and where it cannot.**
+
+- Strong: writing the two job definitions and the condition wiring in the target scheduler's format. It is transliteration of 9 lines of XML
+  (`app/scheduler/nightly.xml:4-12`) with a harness to check it.
+- Strong: generating the comparison harness that checks order, conditions and return codes.
+- Weak: deciding what EXTERNAL-FEED means, who consumes JOBB-DONE, and whether IEFBR14 is a placeholder for a real program. That is undocumented
+  intent, and it needs a person at the client. It is not something Claude can read out of these files.
+
+## Not estimated
+
+There is no second wave. No estimate is given for programs, data migration or online work, because the tree holds none of them (`modernization-assessment/01-inventory.md:14-17`).

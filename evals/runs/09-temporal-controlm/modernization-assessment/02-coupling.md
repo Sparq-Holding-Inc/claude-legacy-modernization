@@ -1,45 +1,70 @@
 # 02 Coupling
 
-Scope: `.` (three files: `app/jcl/JOBA.jcl`, `app/jcl/JOBB.jcl`, `app/scheduler/nightly.xml`). The edge facts are in `02a-edge-tables.md`. This file is the argument. Anything not read straight from `graph.json` is labeled `inference`.
+The full edge list is in `02a-edge-tables.md`. This file is the argument. The tree is small: two JCL
+jobs (`app/jcl/JOBA.jcl`, `app/jcl/JOBB.jcl`) and one Control-M file (`app/scheduler/nightly.xml`). There is no COBOL, no
+copybook, no proc and no CSD. The extractor found 7 nodes and 7 edges: 4 call, 2 include, 1 temporal
+(analysis field `edge_counts` in `modernization-assessment/graph.json`).
 
-## What is coupled to what
+## What kinds of coupling exist here
 
-The extractor found 7 edges: 4 call, 2 include, 1 temporal. It found no data edge, no contract edge and no copybook include, because neither JCL member has a DD statement (`app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`). There are no COBOL programs in the tree (`meta.files_seen`, cobol is 0). So the only coupling that constrains the sequence is temporal coupling.
-
-| Pattern | What it does to the sequence | Confidence | Evidence |
+| Coupling kind | Present | Confidence | Evidence |
 |---|---|---|---|
-| Temporal: JOBA posts condition JOBA-DONE and JOBB waits for it | JOBA and JOBB must move together and keep this order. The two JCL members do not mention each other, so a port that carries only the JCL keeps both jobs and loses the order | high | `app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9` |
-| Consumed condition: JOBB deletes JOBA-DONE when it ends (SIGN `-`) and posts JOBB-DONE | The target scheduler must reproduce a condition that is posted, waited on, and then removed. The extractor deliberately does not draw an edge for the removal. Effect on a rerun of JOBB is `inference`: after the delete, a second run of JOBB would wait until JOBA posts the condition again | high for the fact, low for the effect | `app/scheduler/nightly.xml:10`, `app/scheduler/nightly.xml:11`, inference |
-| External input: JOBA waits on EXTERNAL-FEED, which no job in the file sets | The start of the cycle depends on something outside the tree (another folder, another scheduler, a file watcher or an operator). It cannot be moved or tested from this tree | high for the fact | `app/scheduler/nightly.xml:5` |
-| Unconsumed output: JOBB posts JOBB-DONE and no job in the file waits on it | Something outside the tree may depend on the end of the cycle. Whether anything does is `inference` | low | `app/scheduler/nightly.xml:11`, inference |
+| Call | Scheduler entry to job, and each step to IEFBR14 | high | `app/scheduler/nightly.xml:4`, `app/scheduler/nightly.xml:8`, `app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2` |
+| Include | Each job holds one step | high | `app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2` |
+| Data | None found. Neither job has a DD card | high | `app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2` |
+| Contract | None found, because no dataset is shared | high | analysis: `data_hubs` is empty |
+| Temporal | JOBA before JOBB through condition JOBA-DONE | high | `app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9` |
+
+An absence of data and contract edges is a fact about this tree, not proof about production. Two jobs whose only step
+is IEFBR14 (a program that does nothing) look like stubs or placeholders (inference). If the real members hold more steps, this table is wrong.
+
+## The coupling patterns that constrain the sequence
+
+1. **Temporal coupling through one Control-M condition, JOBA-DONE.** JOBA sets it (`app/scheduler/nightly.xml:6`), JOBB waits for it
+   (`app/scheduler/nightly.xml:9`), and JOBB then deletes it (`app/scheduler/nightly.xml:10`). This is the only order in the system. It is
+   not in the code. It lives in the scheduler, so a plan built from the jobs alone would lose it. Because JOBB
+   clears the condition, a second run of JOBB does not start until JOBA runs again or someone adds the condition by hand. That
+   is a Control-M rule and not something the file states (inference). A port to another scheduler must reproduce it, or state that it changed.
+2. **An input from outside the tree, EXTERNAL-FEED.** JOBA waits for it (`app/scheduler/nightly.xml:5`) and no job in the tree sets it. The extractor
+   raised this as a warning (analysis field `warnings`). Something outside the tree starts the nightly cycle: a file watcher, another
+   scheduler folder, or an operator. That is the real trigger, and it is not in the scope we were given.
+3. **An output nobody in the tree reads, JOBB-DONE.** JOBB sets it (`app/scheduler/nightly.xml:11`) and nothing in the tree waits for it.
+   Either a downstream folder outside the tree uses it or it is dead. We cannot tell which (inference). It is the outward edge of the nightly cycle.
 
 ## Cluster graph
 
-There is one cluster, the `NIGHTLY` folder (`app/scheduler/nightly.xml:3`). Both edges that leave it end outside the tree.
+There is one cluster. A node per program would add nothing here.
 
 ```mermaid
 graph LR
-  EXT["EXTERNAL-FEED (source unknown)"] --> A["NIGHTLY: JOBA"]
-  A -- "JOBA-DONE" --> B["NIGHTLY: JOBB"]
-  B --> OUT["JOBB-DONE (consumer unknown)"]
+  EXT[EXTERNAL-FEED, set outside the tree] --> A
+  subgraph NIGHTLY[Control-M folder NIGHTLY]
+    A[JOBA, one IEFBR14 step] -->|JOBA-DONE| B[JOBB, one IEFBR14 step]
+  end
+  B -->|JOBB-DONE| OUT[consumer outside the tree, unknown]
 ```
 
-## Structure computed by the extractor
+The edge from EXTERNAL-FEED and the edge to the outside consumer are inference from the condition names. The JOBA to JOBB edge is a fact
+(`app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9`).
 
-All of these are empty, from `analysis`: strongly connected components, self recursive programs, articulation points, god modules, data hubs. `analysis.structure_basis` says 0 of 0 programs were reachable, so there is no call graph to measure. This is an absence of application code in the tree, not evidence that the estate is simple. `analysis`
+## Strongly connected components, god modules, articulation points
 
-- Strongly connected components: none. No wave can split one. `analysis` field `sccs`
-- God modules: none. `analysis` field `god_modules`
-- Articulation points: none. The only candidate wave boundary is the condition JOBA-DONE, and cutting there means bridging a condition across two schedulers. That is not recommended. `analysis` field `articulation_points`
+| Structure | Result | Evidence |
+|---|---|---|
+| Strongly connected components | none | analysis: `sccs` is empty |
+| Self recursive programs | none | analysis: `self_recursive` is empty |
+| God modules | none | analysis: `god_modules` is empty |
+| Articulation points | none. There are no programs, so no call graph between programs exists | analysis: `articulation_points` is empty |
+
+With no strongly connected component there is nothing that must move as a cycle. The one pair that must stay together is
+JOBA and JOBB, and that comes from the temporal edge, not from a call cycle.
 
 ## The honest boundary
 
-- Computed calls: 0 (`analysis` field `unresolved_dynamic`). Nothing here is open because of a computed call. There is no COBOL, so none can exist.
-- Not parsed: nothing (`unparsed` is empty). Still, only Control-M XML and shell wrappers are read as schedulers (`meta.limits`). Any other scheduler folder, a calendar, or a run-time trigger for the same jobs would be invisible.
-- The extractor does not model JCL `IF/THEN/ELSE` or `COND=` (`meta.limits`). Both members are two lines and contain neither, so nothing is hidden on that count (`app/jcl/JOBA.jcl:1`, `app/jcl/JOBB.jcl:1`).
-- The scheduler entries carry no run time, calendar, cyclic or return code handling attributes (`app/scheduler/nightly.xml:4`, `app/scheduler/nightly.xml:8`). When the cycle starts, on which days, and what happens when JOBA ends badly are not in the tree. Ending badly means JOBA-DONE is not posted and JOBB keeps waiting. That last effect is `inference` from how Control-M output conditions work.
-- Both steps run IEFBR14, a system program outside the tree (`ext:IEFBR14`, `app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`). IEFBR14 does nothing. Either these are placeholders, or the real work is submitted from somewhere not in this tree. Which one is `inference` and is the first open question.
-
-## Dependency work
-
-The skill says to hand more than about 20 open edges to the dependency-cartographer. There are none: 0 computed calls, no `resolved: false` edge, and no `medium` or `low` confidence edge in `graph.json`. Nothing was handed off. All seven edges are `high` confidence.
+- Computed calls: none. `unresolved_dynamic` is empty (analysis field), and there is no COBOL to hold one.
+- Nothing was skipped: `unparsed` is empty (`modernization-assessment/graph.json`, `unparsed` field).
+- The extractor does not model JCL `IF/THEN/ELSE` or `COND=` (`meta.limits` in `modernization-assessment/graph.json`). Neither job has either (`app/jcl/JOBA.jcl:1-2`, `app/jcl/JOBB.jcl:1-2`), so this limit does not touch this tree.
+- The extractor does not read the Control-M ODATE attribute as a rule. Both conditions use ODATE="ODAT" (`app/scheduler/nightly.xml:5`, `app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9`, `app/scheduler/nightly.xml:10`, `app/scheduler/nightly.xml:11`). Conditions are dated by the scheduler's order date, so a run that crosses midnight
+  or a rerun on a later date could behave differently (inference).
+- No `dependency-cartographer` hand-off was needed. The agent takes over when more than about 20 edges are open. Here the open
+  edge count is 0: no edge has `resolved: false` or a confidence below high (`modernization-assessment/02a-edge-tables.md`).

@@ -1,32 +1,42 @@
 # 03 Waves
 
-Target state: `refactor`. The plan is in `waves.json`. The extractor's seed is in `03a-wave-seed.md`.
+Target state: refactor. The machine readable plan is `modernization-assessment/waves.json`.
 
-## What the seed produced
+## Result: no waves
 
-The seed placed nothing. Every family is empty, because the tree has no entry point (`analysis`, field `wave_seed`). PROGA and PROGB came back as not placed.
+The tree has no entry point: no JCL job, no CSD transaction, no scheduler job and no shell wrapper (`analysis.entry_points` is empty, and `modernization-assessment/03a-wave-seed.md` has an empty wave table). The seed cuts waves from the families of the entry points that use each unit. With no entry point there is no family, so the seed produced no wave. `waves.json` holds `"waves": []`. `unassigned` holds both programs. `deviations` is empty because there was no plan to deviate from.
 
-## The plan
+Nothing can be sequenced until the client supplies JCL, a CSD or a scheduler export.
 
-`schema.py` rejects a plan with no waves. So the plan holds one provisional wave. This is a deviation from the seed. It is recorded in `waves.json` under `deviations`. It is not a finding that these programs belong first.
+I did not invent a wave, and I did not group the two programs by their shared copybook as a stand-in. Grouping by a shared copybook is a coupling argument, not a deployable wave, and it fails the four wave tests below.
 
-| Wave | Name | Units | Blast radius | Confidence | Unblocks | Evidence |
-|---|---|---|---|---|---|---|
-| 1 | Shared copybook pair (provisional) | PROGA, PROGB | low | low | Nothing that can be shown from this tree. This is a chore wave. | `app/cbl/PROGA.cbl:5`, `app/cbl/PROGB.cbl:5` |
+## Units not placed
 
-Why one wave and not two: both programs include SHARED01, so a change to the layout reaches both. They should move together. Both score low-low in `risks.json`, which is the wave one profile (`modernization-assessment/risks.json:1`).
+| Unit | Reason | Confidence | Evidence |
+|---|---|---|---|
+| PROGA | No entry point runs it, so no family applies | high | `app/cbl/PROGA.cbl:1` |
+| PROGB | No entry point runs it, so no family applies | high | `app/cbl/PROGB.cbl:1` |
 
-The wave does not meet the four validity tests. The tree cannot show that it deploys independently, that it rolls back independently, that its boundary is testable, or that a stakeholder can name what it delivers. There is no JCL, no scheduler and no dataset to hang a boundary on. Until the client supplies the nightly batch cycle, the plan is a placeholder.
+`cpy:SHARED01` is not a unit. A copybook moves with its owner. It has two owners, PROGA and PROGB (`app/cbl/PROGA.cbl:5`, `app/cbl/PROGB.cbl:5`), so whichever wave the client's JCL eventually places them in, they should share it. That is an inference from `modernization-assessment/02-coupling.md`, pattern 1.
 
-## Deviations from the seed
+## Why no wave passes the four tests
 
-| Unit | From | To | Reason | Evidence |
-|---|---|---|---|---|
-| PROGA | not placed | wave 1 | The validator needs at least one wave, and the program shares SHARED01 with PROGB. | `app/cbl/PROGA.cbl:5` |
-| PROGB | not placed | wave 1 | The validator needs at least one wave, and the program shares SHARED01 with PROGA. | `app/cbl/PROGB.cbl:5` |
+| Test | State | Confidence | Evidence |
+|---|---|---|---|
+| Deployable independently, behind a flag or facade | Cannot be judged. What triggers the programs is unknown | high | analysis (field `entry_points`) |
+| Rollback independently | Cannot be judged. Neither the job that submits them nor the output they feed is visible | high | analysis (field `entry_points`) |
+| Testable boundary | No boundary exists. The programs open no file and write no output | medium (inference) | `app/cbl/PROGA.cbl:7`, `app/cbl/PROGB.cbl:7` |
+| Delivers something a stakeholder can name | Unknown. "The nightly batch cycle" is the one thing named, and it maps to no unit | high | inference |
 
-## What would change this plan
+## What would change this
 
-- A JCL job or scheduler entry that runs either program would give it a family. The seed would then place it in a real wave.
-- A dataset written by one program and read by the other would add a contract edge. That would tie them more tightly, and it would need its own layout check.
-- If the nightly batch cycle runs either program, the cycle is a must-not-break item. It would force both programs behind the same equivalence harness before any port. See `06-test-strategy.md`.
+Once JCL or a scheduler export arrives, re-run the extractor. If a job runs PROGA or PROGB, the seed places it in a family and produces waves. The risk scores in `modernization-assessment/risks.json` already hold both programs as `low-low`, and they carry `low` confidence because the blast radius depends on where the programs sit in the cycle.
+
+## Risk scores in brief
+
+| Unit | Port difficulty | Blast radius | Quadrant | Confidence | Evidence |
+|---|---|---|---|---|---|
+| PROGA | 1 | 2 | low-low | low | `app/cbl/PROGA.cbl:7` |
+| PROGB | 1 | 2 | low-low | low | `app/cbl/PROGB.cbl:7` |
+
+No unit sits in high-high, so no facade dependency forces a move. Both units are scored on thin evidence and the blast radius could rise sharply if the client says either program is a step in the nightly cycle. The two axes are never combined.

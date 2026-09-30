@@ -4,19 +4,19 @@
  "unassigned": [
   {
    "id": "PROGA",
-   "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
+   "reason": "no entry points in the tree"
   },
   {
    "id": "PROGB",
-   "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
+   "reason": "no entry points in the tree"
   },
   {
    "id": "PROGC",
-   "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
+   "reason": "no entry points in the tree"
   },
   {
    "id": "PROGD",
-   "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
+   "reason": "no entry points in the tree"
   }
  ]
 }

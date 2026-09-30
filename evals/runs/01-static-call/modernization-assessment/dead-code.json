@@ -1,11 +1,24 @@
 {
-  "telemetry": "none",
-  "unreachable": [],
-  "dormant": [],
-  "unknown": [
-    {"id": "PROGA", "reason": "No JCL job, CSD transaction or scheduler entry point exists in the tree, so nothing can be proven unreachable. It is a batch-type program that calls PROGB, so a job outside the tree may run it. Provisional: no telemetry.", "confidence": "low",
-     "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 1}]},
-    {"id": "PROGB", "reason": "No entry point in the tree. Its only caller, PROGA, is itself unplaced. If PROGA runs, PROGB runs, because PROGA calls it unconditionally. Provisional: no telemetry.", "confidence": "low",
-     "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 6}]}
-  ]
+ "telemetry": "none",
+ "unreachable": [],
+ "dormant": [],
+ "unknown": [
+  {
+   "id": "PROGA",
+   "reason": "The tree has no JCL job, CSD transaction, scheduler job or wrapper, so no entry point exists and nothing can be shown unreachable. PROGA ends in STOP RUN, so it looks like a batch main program, and a job outside the tree may run it. No telemetry, so this is provisional.",
+   "confidence": "low",
+   "evidence": [
+    {"file": "app/cbl/PROGA.cbl", "line": 7}
+   ]
+  },
+  {
+   "id": "PROGB",
+   "reason": "No entry point exists in the tree. PROGB is called statically by PROGA, so if PROGA runs, PROGB runs. Its own status follows PROGA's. No telemetry, so this is provisional.",
+   "confidence": "low",
+   "evidence": [
+    {"file": "app/cbl/PROGA.cbl", "line": 6},
+    {"file": "app/cbl/PROGB.cbl", "line": 4}
+   ]
+  }
+ ]
 }

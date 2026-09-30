@@ -1,79 +1,83 @@
 # 06 Test strategy
 
-The bar: for the inputs MAINJOB actually receives, the new dispatcher produces the same outputs and
-return code as the old one, and every difference is written down on purpose. "It passes the tests"
-is not the bar.
+This follows the `behavioral-equivalence` skill. The bar is: for the inputs the nightly batch cycle
+sees in production, the ported job produces the same outputs as the legacy job, and every difference
+is written down and approved.
 
 ## The tree holds no datasets
 
-The extractor found no dataset, VSAM file or DB2 table (`analysis`, field `data_hubs`, and no `ds:`
-node in the graph). So the oracle cannot come from file layouts in the tree. It has to come from job
-output, logs and reports. This is what to ask the client to supply:
+Neither program opens a file, and the job has no DD statement (`app/cbl/PGMMAIN.cbl:1`,
+`app/cbl/HIDDEN01.cbl:1`, `app/jcl/MAINJOB.jcl:2`, and `analysis`, field `data_hubs`, which is empty).
+No dataset can be replayed from this tree. The oracle has to come from job output, logs and reports
+the client holds. `inference`
 
-| Ask | Why | Evidence |
-|---|---|---|
-| The SYSIN or the proc that feeds the ACCEPT, and 12 months of MAINJOB job logs | These are the replay inputs. The job defines no input itself. | `app/jcl/MAINJOB.jcl:2` |
-| Return codes and run times per program name dispatched | Shows which programs ran. Doubles as the telemetry that settles HIDDEN01. | `app/cbl/PGMMAIN.cbl:9` |
-| Archived SYSOUT, reports and GDG generations from the nightly cycle | Free golden masters with dates on them. | inference |
-| The scheduler export for the nightly batch cycle | The order the cycle runs in is the must-not-break item and nothing in the tree records it. | `analysis` |
-| The load library member list | It bounds what a CALL by name can reach. | `app/cbl/PGMMAIN.cbl:9` |
+**What to ask the client to supply**
+
+| Ask | Why | Confidence | Evidence |
+|---|---|---|---|
+| Job logs or SMF records for `MAINJOB`, twelve months, including a month end and a year end | Show return codes, run time and which programs ran. They also settle what `ACCEPT` supplied | low | `app/cbl/PGMMAIN.cbl:8` |
+| The `SYSIN` member, wrapper or scheduler entry that feeds `WS-PGM-NAME` | The JCL in the tree does not supply the name | medium | `app/jcl/MAINJOB.jcl:2` |
+| Every program the run-time name can select, with its source | The callee set is open, so the harness boundary is open | low | `app/cbl/PGMMAIN.cbl:9` |
+| Archived reports, extracts and generations the callee produces, and the files sent to partners | Each is a dated golden master | low | inference |
+| What "the nightly batch cycle" contains, as a list of jobs and their order | The tree has one job and no scheduler | low | `analysis`, field `warnings` |
 
 ## Oracle per wave
 
-| Wave | Preferred oracle | Fallback | Evidence |
+| Wave | Oracle, strongest first | Provisional? | Evidence |
 |---|---|---|---|
-| 1 | Parallel run: the old and the new dispatcher take the same production input on the same night, and the outputs of every dispatched program are diffed. | Replay of captured SYSIN values and archived outputs. Last: characterization tests from source, labeled provisional. | inference |
+| 1 (`job:MAINJOB`, `PGMMAIN`) | 1. Parallel run of the legacy and the ported job on the same nightly input, if the legacy job can stay up. Ask first. 2. Replay of captured run-time inputs against the port. 3. Golden master from archived job output and reports. 4. Characterization tests, only if 1 to 3 are unavailable | Yes until the callee set is bounded and one of 1 to 3 exists. Characterization coverage is provisional | `modernization-assessment/waves.json:8` |
 
-Ask first whether a parallel run is possible for the nightly cycle. Teams assume it is not and are
-often wrong.
+There is only one wave, so there is one oracle decision.
 
-## Normalize before you diff
+## Normalization spec, for wave 1
 
-Agree these in writing and have a human sign them off. Each entry is a claim that a difference does
-not matter.
+Each line asserts that a difference does not matter. A human signs off the list.
 
-- run dates, job numbers and timestamps in SYSOUT and log headers
-- page numbers and run ids in any report the dispatched programs print
-- trailing spaces: the target name is a fixed 8 character field (`app/cbl/PGMMAIN.cbl:5`), so a
-  name shorter than 8 characters is padded, and the port must treat padded and trimmed names as one
-- money fields: compare in a decimal type with zero tolerance. The tree holds no packed decimal or
-  REDEFINES (the whole source is `app/cbl/PGMMAIN.cbl:1` to line 10 and `app/cbl/HIDDEN01.cbl:1` to
-  line 4), but the dispatched programs are unknown, so this cannot be waived.
-- record order and collating sequence: unknown until the dispatched programs and their files are known
+| Item | Rule | Risk if wrong | Evidence |
+|---|---|---|---|
+| Job return code | Compare exactly. It is the one output the tree shows, because `PGMMAIN` ends with `GOBACK` | A silent change of return code changes what the scheduler does next | `app/cbl/PGMMAIN.cbl:10` |
+| Timestamps, run IDs, job numbers, page numbers in job output | Mask before diffing | A real change hidden under a mask | inference |
+| Packed decimal and rounding | Not present in the two programs. Add a zero-tolerance decimal rule when the callee arrives, if it has money fields | Float rounding is a defect, not noise | inference |
+| Record order and collating sequence | Not present here. Confirm for the callee's files | An ASCII sort reorders a key sequence silently | inference |
+| Trailing whitespace and padding | Decide per output once outputs are known | Padding a partner extract breaks the partner | inference |
 
-## Cover the input space deliberately
+## Input space to cover on purpose
 
-- **Dispatch input cases.** A name of a program that exists. A blank name. A name with no member in
-  the load library. CALL has no ON EXCEPTION clause (`app/cbl/PGMMAIN.cbl:9`), so a missing program
-  abends the run. Decide whether the port reproduces the abend, and record the choice in the
-  register.
-- **HIDDEN01 as target.** Run the dispatcher with its name and assert a clean return
-  (`app/cbl/HIDDEN01.cbl:4`).
-- **Boundary dates.** Month end, quarter end, fiscal year end, leap day. The ACCEPT input may
-  differ on those dates, so the capture window must include them. This is inference.
-- **Empty input.** No SYSIN at all, which is what the job as written provides
-  (`app/jcl/MAINJOB.jcl:2`).
-- **The paths that run only at close.** Whatever program name arrives only at fiscal close is the
-  most likely to be missing from a sample.
+| Case | Why | Confidence | Evidence |
+|---|---|---|---|
+| Every program name seen in the run-time input over twelve months | The name selects the whole behavior of the job | low | `app/cbl/PGMMAIN.cbl:9` |
+| A blank name | `WS-PGM-NAME` has no initial value and `ACCEPT` may leave it blank | medium | `app/cbl/PGMMAIN.cbl:5` |
+| A name that does not resolve to a program | The `CALL` has no exception handling, so the legacy run-time decides what happens. The port must reproduce it, and the harness must capture it | medium | `app/cbl/PGMMAIN.cbl:9` |
+| No `SYSIN` present | The JCL has none. Whether the job abends or takes a default is not shown | low | `app/jcl/MAINJOB.jcl:2` |
+| Month end, quarter end, year end and leap day runs | The cycle is nightly, so paths that fire only at close are the main risk. Which callee runs at close is unknown | low | inference |
+| `HIDDEN01` named as the callee | It is in the tree and is the one known candidate. Expected result is a return with no output | medium | `app/cbl/HIDDEN01.cbl:4` |
 
 ## Job order
 
-The graph holds no temporal edge (`analysis`, field `edge_counts`) and no scheduler was parsed. The
-order of the nightly cycle is therefore unknown, and it is the thing the client said must not break.
-The harness has to keep whatever order the scheduler export shows.
+The temporal edges in `graph.json` are the orders the harness must keep. There are none: the tree has
+no scheduler and one step (`analysis`, field `warnings`, and `app/jcl/MAINJOB.jcl:2`). If the nightly
+cycle has more jobs, this section is incomplete. `inference`
 
-## Deviation register
+## Deviation Register
 
-Every intentional difference gets a row. None yet.
+Empty. No intentional difference is proposed. Nothing gets to differ without a row here.
 
 | ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact | Evidence |
 |---|---|---|---|---|---|---|
+| none yet | | | | | | inference |
 
 ## Exit bar for wave 1
 
-- the replay diff is clean, modulo the normalization spec and the register
-- every case above passes, including the missing program case
+Wave 1 is done when all of these hold:
+
+- the replay or parallel-run diff is clean, apart from the normalization spec and the register
+- every case in the input-space table passes
 - the harness is under version control and runs in CI
 - the register is signed by someone with the authority to sign it
+- the callee set has been named by the client, and every callee has an oracle
 
-Keep the harness after cutover. It becomes the regression suite for the new dispatcher.
+Not when the port compiles, and not when it passes tests written alongside it.
+
+## Keep the harness after cutover
+
+The harness becomes the regression suite. Budget to maintain it. `inference`

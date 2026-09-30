@@ -1,31 +1,44 @@
 # 05 Dead code
 
-Telemetry is `none`, so every claim here is provisional. Two warnings from the extractor apply, and both change what an empty bucket means (analysis field `warnings`):
+Telemetry: none. Every claim in this file is provisional.
 
-- No last-modified dates exist. The tree is not a git repository. The dormant bucket was not computed. An empty dormant list means not measured, not "nothing is dormant".
-- No entry points were found. Nothing can be proven unreachable, so every candidate is unknown.
+Two warnings from the extractor shape everything below, and both are gaps, not details.
 
-## Unreachable
+- No entry points were found. The tree has no JCL job, CSD transaction, scheduler job or wrapper. So
+  nothing can be proven unreachable, and every candidate is unknown (analysis `warnings`).
+- No last-modified dates exist. The tree is not a git repository. The dormant bucket was not computed.
+  The empty dormant list below means not measured. It does not mean nothing is dormant (analysis
+  `warnings`).
 
-Empty. Nothing can be proven unreachable, because `PROGA` makes a computed call that could name any program (`app/cbl/PROGA.cbl:9`) and there are no entry points to trace from (analysis field `entry_points`).
+Two facts about the code sit behind the unknown bucket: `PROGA` makes a computed call at
+`app/cbl/PROGA.cbl:9`, and the name it calls is read at run time by `ACCEPT` at
+`app/cbl/PROGA.cbl:8`. So the target set cannot be bounded. Any program with no static caller could be
+the target, and that means both programs in the tree.
 
-## Reachable but dormant
+## The three buckets
 
-Empty, and not measured. No unit has a last-modified date (analysis field `warnings`).
-
-## Unknown
-
-| Unit | Type | Reason | Confidence | Evidence |
+| Bucket | Unit | Reason | Confidence | Evidence |
 |---|---|---|---|---|
-| PROGA | batch | No entry point in the tree names it. It has no LINKAGE SECTION and ends with `STOP RUN`, so it reads as a main program that some job or operator starts, but no such job is in the tree. Do not delete. | low | `app/cbl/PROGA.cbl:10`. Inference on the main-program reading. |
-| PROGB | batch | No static caller. `PROGA` reads a program name from `ACCEPT` and calls it, so `PROGB` could be the target. It holds only `GOBACK`. Do not delete on this evidence. | low | `app/cbl/PROGB.cbl:4`, `app/cbl/PROGA.cbl:9` |
+| Unreachable | none | Not computed as a finding. With no entry point, nothing can be proven unreachable. The validator also forbids moving a program from unknown to unreachable. | high | analysis (`dead_code_candidates.unreachable` is empty) |
+| Reachable but dormant | none, not measured | Needs git dates or telemetry. Neither exists in the tree or was supplied. | high that it was not measured | analysis (`warnings`, "dormant bucket was NOT computed") |
+| Unknown | `PROGA` | No entry point names it, and it has no static caller. Not shown to be dead. Do not delete. | low | `app/cbl/PROGA.cbl:9` |
+| Unknown | `PROGB` | No static caller. `PROGA`'s computed call could name it, and cannot be shown to exclude it. Do not delete. | low | `app/cbl/PROGB.cbl:1`, `app/cbl/PROGA.cbl:9` |
 
-I did not move either program out of unknown, and could not bound the computed call: `WS-PGM-NAME` has no value in the source, so the target set is not something the code states (`app/cbl/PROGA.cbl:5`, `app/cbl/PROGA.cbl:8`).
+## What I did not do
 
-## Jobs no scheduler names
+- I did not call `PROGB` dead because it does nothing. A program that only does `GOBACK`
+  (`app/cbl/PROGB.cbl:4`) may be a deliberate stub that a caller names. Being trivial is not being
+  unreachable. That is inference.
+- I did not call `PROGA` an entry point. It looks like a driver because it reads a name and calls it,
+  but nothing in the tree runs it. That is inference from `app/cbl/PROGA.cbl:8`.
+- I did not propose deletion of anything. Instrumentation is the proposal: log the name PROGA
+  receives on every run for a full business cycle including month-end and fiscal year-end. That log
+  is the telemetry that would turn the unknown bucket into evidence.
 
-There are no jobs of any kind in the tree (analysis field `unscheduled_jobs` is empty). That is not a sign that all jobs are scheduled. It is a sign that no JCL was supplied. Open question for the client: which jobs run `PROGA`, and do they still run?
+## What would change this file
 
-## What would firm this up
-
-Twelve months of job logs or SMF records showing which programs ran, and the values `PROGA` read at its `ACCEPT`. With those, `PROGB` and any other callee can be moved to evidence-based buckets. Without them, all of this stays provisional.
+- JCL naming `PROGA` gives an entry point, and then `PROGB` is either shown reachable through the
+  computed call or stays unknown while the call stays open.
+- Job history or SYSIN capture from production. With the names it holds, the unknown bucket
+  can be firmed up. Even then, a name that appears only at year-end needs a window that includes it.
+- Source control dates for the two files, so the dormant rule can run.

@@ -11,7 +11,8 @@
    "COPY REPLACING is not applied. A copybook is expanded as written.",
    "A variable call target is resolved only from VALUE clauses and literal MOVEs in the same program.",
    "A called subprogram gets no DDs from its caller's JCL step.",
-   "IDCAMS, SORT and other in-stream control cards are not read. Dataset modes on utility steps come from DISP only.",
+   "SORT and most in-stream control cards are not read. IDCAMS DELETE, DEFINE, ALTER, REPRO, BLDINDEX, IMPORT and EXPORT cards are read for the datasets they change, but only as facts. The dataset mode on a utility step's edge still comes from DISP. A card that uses a symbol (&HLQ) is skipped.",
+   "The program a step runs is read from PARM for DFSRRC00 and from a RUN PROGRAM card for IKJEFT01. Other drivers that start a program by name are not read.",
    "IF/THEN/ELSE and COND= in JCL are not modeled. Step order is file order.",
    "Nested PROC calls and INCLUDE members are not followed. JCL text inside a COBOL literal is noticed, but it makes no edge. A proc or program it names is called unknown, never unreachable.",
    "EXEC CICS RETURN TRANSID, START and SEND MAP are not edges.",
@@ -27575,38 +27576,20 @@
    "sch:scripts/run_interest_calc.sh",
    "sch:scripts/run_posting.sh"
   ],
-  "reachable_nodes": 399,
-  "reachable_programs": 38,
+  "reachable_nodes": 409,
+  "reachable_programs": 43,
   "dead_code_candidates": {
    "unreachable": [
     "cpy:UNUSED1Y"
    ],
    "dormant": [],
    "unknown": [
-    "CBPAUP0C",
     "CBTRN01C",
-    "COBTUPDT",
-    "DBUNLDGS",
-    "PAUDBLOD",
-    "PAUDBUNL",
-    "cpy:IMSFUNCS",
-    "cpy:PADFLPCB",
-    "cpy:PASFLPCB",
-    "cpy:PAUTBPCB",
     "proc:TRANREPT"
    ]
   },
   "dead_code_reasons": {
-   "CBPAUP0C": "not reached by any static edge, and 28 reachable computed call(s) could target it, for example at app/cbl/COACTUPC.cbl:956",
    "CBTRN01C": "not reached by any static edge, and 28 reachable computed call(s) could target it, for example at app/cbl/COACTUPC.cbl:956",
-   "COBTUPDT": "not reached by any static edge, and 28 reachable computed call(s) could target it, for example at app/cbl/COACTUPC.cbl:956",
-   "DBUNLDGS": "not reached by any static edge, and 28 reachable computed call(s) could target it, for example at app/cbl/COACTUPC.cbl:956",
-   "PAUDBLOD": "not reached by any static edge, and 28 reachable computed call(s) could target it, for example at app/cbl/COACTUPC.cbl:956",
-   "PAUDBUNL": "not reached by any static edge, and 28 reachable computed call(s) could target it, for example at app/cbl/COACTUPC.cbl:956",
-   "cpy:IMSFUNCS": "not reached by any static edge, and 28 reachable computed call(s) could target it, for example at app/cbl/COACTUPC.cbl:956",
-   "cpy:PADFLPCB": "not reached by any static edge, and 28 reachable computed call(s) could target it, for example at app/cbl/COACTUPC.cbl:956",
-   "cpy:PASFLPCB": "not reached by any static edge, and 28 reachable computed call(s) could target it, for example at app/cbl/COACTUPC.cbl:956",
-   "cpy:PAUTBPCB": "not reached by any static edge, and 28 reachable computed call(s) could target it, for example at app/cbl/COACTUPC.cbl:956",
    "proc:TRANREPT": "named in JCL text inside CORPT00C at app/cbl/CORPT00C.cbl:94, which a running program can submit",
    "cpy:UNUSED1Y": "no static path from any entry point and no reachable computed call in the tree"
   },
@@ -27846,7 +27829,785 @@
     }
    }
   ],
-  "structure_basis": "programs reachable from an entry point (38 of 44)",
+  "runtime_named": [
+   {
+    "src": "step:CBPAUP0J.STEP01",
+    "dst": "CBPAUP0C",
+    "how": "IMS region PARM",
+    "evidence": {
+     "file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl",
+     "line": 24
+    }
+   },
+   {
+    "src": "step:CIDBCMP.CICSCMP.BINDPK",
+    "dst": "ext:DSN",
+    "how": "DB2 command processor",
+    "evidence": {
+     "file": "samples/proc/BLDCIDB2.prc",
+     "line": 143
+    }
+   },
+   {
+    "src": "step:CIDBCMP.CICSCMP.BINDPL",
+    "dst": "ext:DSN",
+    "how": "DB2 command processor",
+    "evidence": {
+     "file": "samples/proc/BLDCIDB2.prc",
+     "line": 167
+    }
+   },
+   {
+    "src": "step:LOADPADB.STEP01",
+    "dst": "PAUDBLOD",
+    "how": "IMS region PARM",
+    "evidence": {
+     "file": "app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL",
+     "line": 26
+    }
+   },
+   {
+    "src": "step:MNTTRDB2.STEP1",
+    "dst": "COBTUPDT",
+    "how": "TSO RUN PROGRAM",
+    "evidence": {
+     "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
+     "line": 30
+    }
+   },
+   {
+    "src": "step:MNTTRDB2.STEP1",
+    "dst": "ext:DSN",
+    "how": "DB2 command processor",
+    "evidence": {
+     "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
+     "line": 29
+    }
+   },
+   {
+    "src": "step:TRANEXTR.STEP40",
+    "dst": "ext:DSN",
+    "how": "DB2 command processor",
+    "evidence": {
+     "file": "app/app-transaction-type-db2/jcl/TRANEXTR.jcl",
+     "line": 87
+    }
+   },
+   {
+    "src": "step:TRANEXTR.STEP40",
+    "dst": "ext:DSNTIAUL",
+    "how": "TSO RUN PROGRAM",
+    "evidence": {
+     "file": "app/app-transaction-type-db2/jcl/TRANEXTR.jcl",
+     "line": 88
+    }
+   },
+   {
+    "src": "step:TRANEXTR.STEP50",
+    "dst": "ext:DSN",
+    "how": "DB2 command processor",
+    "evidence": {
+     "file": "app/app-transaction-type-db2/jcl/TRANEXTR.jcl",
+     "line": 118
+    }
+   },
+   {
+    "src": "step:TRANEXTR.STEP50",
+    "dst": "ext:DSNTIAUL",
+    "how": "TSO RUN PROGRAM",
+    "evidence": {
+     "file": "app/app-transaction-type-db2/jcl/TRANEXTR.jcl",
+     "line": 119
+    }
+   },
+   {
+    "src": "step:UNLDGSAM.STEP01",
+    "dst": "DBUNLDGS",
+    "how": "IMS region PARM",
+    "evidence": {
+     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL",
+     "line": 26
+    }
+   },
+   {
+    "src": "step:UNLDPADB.STEP01",
+    "dst": "PAUDBUNL",
+    "how": "IMS region PARM",
+    "evidence": {
+     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL",
+     "line": 38
+    }
+   }
+  ],
+  "utility_writes": [
+   {
+    "src": "step:ACCTFILE.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 25
+    }
+   },
+   {
+    "src": "step:ACCTFILE.STEP10",
+    "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 36
+    }
+   },
+   {
+    "src": "step:ACCTFILE.STEP15",
+    "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS",
+    "verb": "REPRO",
+    "evidence": {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 61
+    }
+   },
+   {
+    "src": "step:CARDFILE.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.AIX",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 39
+    }
+   },
+   {
+    "src": "step:CARDFILE.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 36
+    }
+   },
+   {
+    "src": "step:CARDFILE.STEP10",
+    "dst": "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 50
+    }
+   },
+   {
+    "src": "step:CARDFILE.STEP15",
+    "dst": "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS",
+    "verb": "REPRO",
+    "evidence": {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 75
+    }
+   },
+   {
+    "src": "step:CARDFILE.STEP40",
+    "dst": "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.AIX",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 83
+    }
+   },
+   {
+    "src": "step:CARDFILE.STEP50",
+    "dst": "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.AIX.PATH",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 100
+    }
+   },
+   {
+    "src": "step:CARDFILE.STEP60",
+    "dst": "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.AIX",
+    "verb": "BLDINDEX",
+    "evidence": {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 110
+    }
+   },
+   {
+    "src": "step:CBEXPORT.STEP01",
+    "dst": "ds:AWS.M2.CARDDEMO.EXPORT.DATA",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/CBEXPORT.jcl",
+     "line": 27
+    }
+   },
+   {
+    "src": "step:CBEXPORT.STEP01",
+    "dst": "ds:AWS.M2.CARDDEMO.EXPORT.DATA",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/CBEXPORT.jcl",
+     "line": 30
+    }
+   },
+   {
+    "src": "step:COMBTRAN.STEP10",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+    "verb": "REPRO",
+    "evidence": {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 48
+    }
+   },
+   {
+    "src": "step:CREASTMT.DELDEF01",
+    "dst": "ds:AWS.M2.CARDDEMO.TRXFL.SEQ",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 25
+    }
+   },
+   {
+    "src": "step:CREASTMT.DELDEF01",
+    "dst": "ds:AWS.M2.CARDDEMO.TRXFL.VSAM.KSDS",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 26
+    }
+   },
+   {
+    "src": "step:CREASTMT.DELDEF01",
+    "dst": "ds:AWS.M2.CARDDEMO.TRXFL.VSAM.KSDS",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 29
+    }
+   },
+   {
+    "src": "step:CREASTMT.STEP020",
+    "dst": "ds:AWS.M2.CARDDEMO.TRXFL.VSAM.KSDS",
+    "verb": "REPRO",
+    "evidence": {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 61
+    }
+   },
+   {
+    "src": "step:CUSTFILE.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.CUSTDATA.VSAM.KSDS",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 35
+    }
+   },
+   {
+    "src": "step:CUSTFILE.STEP10",
+    "dst": "ds:AWS.M2.CARDDEMO.CUSTDATA.VSAM.KSDS",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 46
+    }
+   },
+   {
+    "src": "step:CUSTFILE.STEP15",
+    "dst": "ds:AWS.M2.CARDDEMO.CUSTDATA.VSAM.KSDS",
+    "verb": "REPRO",
+    "evidence": {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 71
+    }
+   },
+   {
+    "src": "step:DALYREJS.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.DALYREJS",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/DALYREJS.jcl",
+     "line": 24
+    }
+   },
+   {
+    "src": "step:DEFCUST.STEP05",
+    "dst": "ds:AWS.CCDA.CUSTDATA.CLUSTER",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/DEFCUST.jcl",
+     "line": 25
+    }
+   },
+   {
+    "src": "step:DEFCUST.STEP05#2",
+    "dst": "ds:AWS.CUSTDATA.CLUSTER",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/DEFCUST.jcl",
+     "line": 35
+    }
+   },
+   {
+    "src": "step:DEFGDGB.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.SYSTRAN",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/DEFGDGB.jcl",
+     "line": 48
+    }
+   },
+   {
+    "src": "step:DEFGDGB.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.TCATBALF.BKUP",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/DEFGDGB.jcl",
+     "line": 42
+    }
+   },
+   {
+    "src": "step:DEFGDGB.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANREPT",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/DEFGDGB.jcl",
+     "line": 36
+    }
+   },
+   {
+    "src": "step:DEFGDGB.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.BKUP",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/DEFGDGB.jcl",
+     "line": 24
+    }
+   },
+   {
+    "src": "step:DEFGDGB.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.COMBINED",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/DEFGDGB.jcl",
+     "line": 54
+    }
+   },
+   {
+    "src": "step:DEFGDGB.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.DALY",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/DEFGDGB.jcl",
+     "line": 30
+    }
+   },
+   {
+    "src": "step:DEFGDGD.STEP10",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANTYPE.BKUP",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 27
+    }
+   },
+   {
+    "src": "step:DEFGDGD.STEP30",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANCATG.PS.BKUP",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 50
+    }
+   },
+   {
+    "src": "step:DEFGDGD.STEP50",
+    "dst": "ds:AWS.M2.CARDDEMO.DISCGRP.BKUP",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 73
+    }
+   },
+   {
+    "src": "step:DISCGRP.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.DISCGRP.VSAM.KSDS",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 25
+    }
+   },
+   {
+    "src": "step:DISCGRP.STEP10",
+    "dst": "ds:AWS.M2.CARDDEMO.DISCGRP.VSAM.KSDS",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 36
+    }
+   },
+   {
+    "src": "step:DISCGRP.STEP15",
+    "dst": "ds:AWS.M2.CARDDEMO.DISCGRP.VSAM.KSDS",
+    "verb": "REPRO",
+    "evidence": {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 61
+    }
+   },
+   {
+    "src": "step:DUSRSECJ.STEP02",
+    "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.KSDS",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 62
+    }
+   },
+   {
+    "src": "step:DUSRSECJ.STEP02",
+    "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.KSDS",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 64
+    }
+   },
+   {
+    "src": "step:DUSRSECJ.STEP03",
+    "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.KSDS",
+    "verb": "REPRO",
+    "evidence": {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 87
+    }
+   },
+   {
+    "src": "step:ESDSRRDS.STEP02",
+    "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.ESDS",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 63
+    }
+   },
+   {
+    "src": "step:ESDSRRDS.STEP02",
+    "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.ESDS",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 65
+    }
+   },
+   {
+    "src": "step:ESDSRRDS.STEP03",
+    "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.ESDS",
+    "verb": "REPRO",
+    "evidence": {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 86
+    }
+   },
+   {
+    "src": "step:ESDSRRDS.STEP04",
+    "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.RRDS",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 97
+    }
+   },
+   {
+    "src": "step:ESDSRRDS.STEP04",
+    "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.RRDS",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 99
+    }
+   },
+   {
+    "src": "step:ESDSRRDS.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.RRDS",
+    "verb": "REPRO",
+    "evidence": {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 120
+    }
+   },
+   {
+    "src": "step:REPTFILE.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANREPT",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/REPTFILE.jcl",
+     "line": 25
+    }
+   },
+   {
+    "src": "step:TCATBALF.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.TCATBALF.VSAM.KSDS",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 25
+    }
+   },
+   {
+    "src": "step:TCATBALF.STEP10",
+    "dst": "ds:AWS.M2.CARDDEMO.TCATBALF.VSAM.KSDS",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 36
+    }
+   },
+   {
+    "src": "step:TCATBALF.STEP15",
+    "dst": "ds:AWS.M2.CARDDEMO.TCATBALF.VSAM.KSDS",
+    "verb": "REPRO",
+    "evidence": {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 61
+    }
+   },
+   {
+    "src": "step:TRANBKP.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.AIX",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 43
+    }
+   },
+   {
+    "src": "step:TRANBKP.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 40
+    }
+   },
+   {
+    "src": "step:TRANBKP.STEP10",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 54
+    }
+   },
+   {
+    "src": "step:TRANCATG.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANCATG.VSAM.KSDS",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 25
+    }
+   },
+   {
+    "src": "step:TRANCATG.STEP10",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANCATG.VSAM.KSDS",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 36
+    }
+   },
+   {
+    "src": "step:TRANCATG.STEP15",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANCATG.VSAM.KSDS",
+    "verb": "REPRO",
+    "evidence": {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 61
+    }
+   },
+   {
+    "src": "step:TRANFILE.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.AIX",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 38
+    }
+   },
+   {
+    "src": "step:TRANFILE.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 35
+    }
+   },
+   {
+    "src": "step:TRANFILE.STEP10",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 49
+    }
+   },
+   {
+    "src": "step:TRANFILE.STEP15",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+    "verb": "REPRO",
+    "evidence": {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 74
+    }
+   },
+   {
+    "src": "step:TRANFILE.STEP20",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.AIX",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 82
+    }
+   },
+   {
+    "src": "step:TRANFILE.STEP25",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.AIX.PATH",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 99
+    }
+   },
+   {
+    "src": "step:TRANFILE.STEP30",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.AIX",
+    "verb": "BLDINDEX",
+    "evidence": {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 109
+    }
+   },
+   {
+    "src": "step:TRANIDX.STEP20",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.AIX",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 25
+    }
+   },
+   {
+    "src": "step:TRANIDX.STEP25",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.AIX.PATH",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 42
+    }
+   },
+   {
+    "src": "step:TRANIDX.STEP30",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.AIX",
+    "verb": "BLDINDEX",
+    "evidence": {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 52
+    }
+   },
+   {
+    "src": "step:TRANTYPE.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANTYPE.VSAM.KSDS",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 25
+    }
+   },
+   {
+    "src": "step:TRANTYPE.STEP10",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANTYPE.VSAM.KSDS",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 36
+    }
+   },
+   {
+    "src": "step:TRANTYPE.STEP15",
+    "dst": "ds:AWS.M2.CARDDEMO.TRANTYPE.VSAM.KSDS",
+    "verb": "REPRO",
+    "evidence": {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 61
+    }
+   },
+   {
+    "src": "step:XREFFILE.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.AIX",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 28
+    }
+   },
+   {
+    "src": "step:XREFFILE.STEP05",
+    "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS",
+    "verb": "DELETE",
+    "evidence": {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 25
+    }
+   },
+   {
+    "src": "step:XREFFILE.STEP10",
+    "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 39
+    }
+   },
+   {
+    "src": "step:XREFFILE.STEP15",
+    "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS",
+    "verb": "REPRO",
+    "evidence": {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 64
+    }
+   },
+   {
+    "src": "step:XREFFILE.STEP20",
+    "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.AIX",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 72
+    }
+   },
+   {
+    "src": "step:XREFFILE.STEP25",
+    "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.AIX.PATH",
+    "verb": "DEFINE",
+    "evidence": {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 90
+    }
+   },
+   {
+    "src": "step:XREFFILE.STEP30",
+    "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.AIX",
+    "verb": "BLDINDEX",
+    "evidence": {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 100
+    }
+   }
+  ],
+  "structure_basis": "programs reachable from an entry point (43 of 44)",
   "fan_in": {
    "CBSTM03B": 1,
    "COADM01C": 7,
@@ -27888,7 +28649,11 @@
    "COUSR02C": 2,
    "COUSR03C": 2
   },
-  "god_modules": [],
+  "god_modules": [
+   "COPAUS0C",
+   "COTRN00C",
+   "COTRN01C"
+  ],
   "sccs": [
    [
     "COADM01C",
@@ -27926,7 +28691,8 @@
    "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS",
    "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS",
    "ds:AWS.M2.CARDDEMO.CUSTDATA.VSAM.KSDS",
-   "ds:AWS.M2.CARDDEMO.EXPORT.DATA"
+   "ds:AWS.M2.CARDDEMO.EXPORT.DATA",
+   "ds:db2:CARDDEMO.TRANSACTION_TYPE"
   ],
   "articulation_basis": "call edges between programs plus data edges from programs to datasets",
   "data_hubs": [
@@ -27976,6 +28742,11 @@
     "readers": 4
    },
    {
+    "id": "ds:db2:CARDDEMO.TRANSACTION_TYPE",
+    "writers": 3,
+    "readers": 2
+   },
+   {
     "id": "ds:AWS.M2.CARDDEMO.CNTL",
     "writers": 0,
     "readers": 4
@@ -27997,11 +28768,6 @@
    },
    {
     "id": "ds:OEM.IMS.IMSP.PSBLIB",
-    "writers": 0,
-    "readers": 4
-   },
-   {
-    "id": "ds:OEMA.IMS.IMSP.SDFSRESL",
     "writers": 0,
     "readers": 4
    }
@@ -28074,55 +28840,42 @@
       "job:CBADMCDJ",
       "job:CLOSEFIL",
       "job:CREADB2",
-      "job:DALYREJS",
       "job:DEFCUST",
-      "job:DEFGDGB",
       "job:ESDSRRDS",
       "job:FTPJCLS",
       "job:LISTFILS",
-      "job:MNTTRDB2",
       "job:OPENFIL",
       "job:RACFCMDS",
-      "job:REPTFILE",
-      "job:TRANEXTR",
-      "job:TRANIDX",
       "sch:DAILY-TransactionBackup/CLOSEFIL",
       "sch:DAILY-TransactionBackup/OPENFIL",
       "sch:MONTHLY-InterestCalculation/CLOSEFIL",
       "sch:MONTHLY-InterestCalculation/OPENFIL",
       "sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL",
-      "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL",
-      "sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2",
-      "sch:WEEKLY-TransactionTypesDBRefresh/TRANEXTR"
+      "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL"
      ],
      "entry_points": [
       "job:CBADMCDJ",
       "job:CLOSEFIL",
       "job:CREADB2",
-      "job:DALYREJS",
       "job:DEFCUST",
-      "job:DEFGDGB",
       "job:ESDSRRDS",
       "job:FTPJCLS",
       "job:LISTFILS",
-      "job:MNTTRDB2",
       "job:OPENFIL",
-      "job:RACFCMDS",
-      "job:REPTFILE",
-      "job:TRANEXTR",
-      "job:TRANIDX"
+      "job:RACFCMDS"
      ],
+     "computed_calls": [],
      "evidence": [
       {
        "file": "app/app-transaction-type-db2/jcl/CREADB21.jcl",
        "line": 1
       },
       {
-       "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
+       "file": "app/jcl/CBADMCDJ.jcl",
        "line": 1
       },
       {
-       "file": "app/app-transaction-type-db2/jcl/TRANEXTR.jcl",
+       "file": "app/jcl/CLOSEFIL.jcl",
        "line": 1
       }
      ]
@@ -28156,6 +28909,7 @@
       "job:READXREF",
       "job:WAITSTEP"
      ],
+     "computed_calls": [],
      "evidence": [
       {
        "file": "app/jcl/CBIMPORT.jcl",
@@ -28196,6 +28950,15 @@
       "COTRN00C",
       "COTRN01C"
      ],
+     "computed_calls": [
+      "COACTVWC",
+      "COADM01C",
+      "COCRDSLC",
+      "COMEN01C",
+      "CORPT00C",
+      "COTRN00C",
+      "COTRN01C"
+     ],
      "evidence": [
       {
        "file": "app/csd/CARDDEMO.CSD",
@@ -28214,87 +28977,50 @@
     {
      "wave": 4,
      "family": "batch-data-jobs",
-     "description": "Batch jobs that run no application program but touch a dataset another entry point uses. The mode is inferred from DISP, so they may write it",
+     "description": "Batch jobs that read a dataset another entry point uses through a utility. The mode comes from DISP alone, so they may write it",
      "units": [
-      "job:ACCTFILE",
-      "job:CARDFILE",
       "job:CBLDBMS",
       "job:CICCMP",
-      "job:CIDBCMP",
       "job:CNJBATMP",
-      "job:COMBTRAN",
-      "job:CUSTFILE",
       "job:DEFGDGD",
-      "job:DISCGRP",
-      "job:DUSRSECJ",
       "job:IMSMQCMP",
       "job:INTRDRJ1",
       "job:INTRDRJ2",
-      "job:PRTCATBL",
-      "job:REPRTEST",
-      "job:SORTTEST",
-      "job:TCATBALF",
-      "job:TRANBKP",
-      "job:TRANCATG",
-      "job:TRANFILE",
-      "job:TRANTYPE",
       "job:TXT2PDF1",
-      "job:XREFFILE",
-      "proc:BLDCIDB2",
       "proc:BUILDBAT",
       "proc:BUILDBMS",
-      "proc:BUILDONL",
-      "proc:REPROC",
-      "sch:DAILY-TransactionBackup/TRANBKP",
-      "sch:MONTHLY-InterestCalculation/COMBTRAN",
-      "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP",
-      "sch:scripts/remote_refresh.sh"
+      "proc:BUILDONL"
      ],
      "entry_points": [
-      "job:ACCTFILE",
-      "job:CARDFILE",
       "job:CBLDBMS",
       "job:CICCMP",
-      "job:CIDBCMP",
       "job:CNJBATMP",
-      "job:COMBTRAN",
-      "job:CUSTFILE",
       "job:DEFGDGD",
-      "job:DISCGRP",
-      "job:DUSRSECJ",
       "job:IMSMQCMP",
       "job:INTRDRJ1",
       "job:INTRDRJ2",
-      "job:PRTCATBL",
-      "job:REPRTEST",
-      "job:SORTTEST",
-      "job:TCATBALF",
-      "job:TRANBKP",
-      "job:TRANCATG",
-      "job:TRANFILE",
-      "job:TRANTYPE",
-      "job:TXT2PDF1",
-      "job:XREFFILE"
+      "job:TXT2PDF1"
      ],
+     "computed_calls": [],
      "evidence": [
       {
-       "file": "app/jcl/ACCTFILE.jcl",
-       "line": 58
+       "file": "app/jcl/DEFGDGD.jcl",
+       "line": 39
       },
       {
-       "file": "app/jcl/CARDFILE.jcl",
-       "line": 72
+       "file": "app/jcl/INTRDRJ1.JCL",
+       "line": 9
       },
       {
-       "file": "app/jcl/COMBTRAN.jcl",
-       "line": 25
+       "file": "app/jcl/INTRDRJ2.JCL",
+       "line": 9
       }
      ]
     },
     {
      "wave": 5,
      "family": "batch-writers",
-     "description": "Batch jobs that run application programs and write a dataset another entry point also uses",
+     "description": "Batch jobs that write a dataset another entry point also uses",
      "units": [
       "CBACT04C",
       "CBEXPORT",
@@ -28302,23 +29028,67 @@
       "CBSTM03B",
       "CBTRN02C",
       "CBTRN03C",
+      "job:ACCTFILE",
+      "job:CARDFILE",
       "job:CBEXPORT",
+      "job:COMBTRAN",
       "job:CREASTMT",
+      "job:CUSTFILE",
+      "job:DALYREJS",
+      "job:DEFGDGB",
+      "job:DISCGRP",
+      "job:DUSRSECJ",
       "job:INTCALC",
       "job:POSTTRAN",
+      "job:PRTCATBL",
+      "job:REPRTEST",
+      "job:REPTFILE",
+      "job:SORTTEST",
+      "job:TCATBALF",
+      "job:TRANBKP",
+      "job:TRANCATG",
+      "job:TRANFILE",
+      "job:TRANIDX",
       "job:TRANREPT",
+      "job:TRANTYPE",
+      "job:XREFFILE",
+      "proc:REPROC",
+      "sch:DAILY-TransactionBackup/TRANBKP",
+      "sch:MONTHLY-InterestCalculation/COMBTRAN",
       "sch:MONTHLY-InterestCalculation/INTCALC",
+      "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP",
+      "sch:scripts/remote_refresh.sh",
       "sch:scripts/run_full_batch.sh",
       "sch:scripts/run_interest_calc.sh",
       "sch:scripts/run_posting.sh"
      ],
      "entry_points": [
+      "job:ACCTFILE",
+      "job:CARDFILE",
       "job:CBEXPORT",
+      "job:COMBTRAN",
       "job:CREASTMT",
+      "job:CUSTFILE",
+      "job:DALYREJS",
+      "job:DEFGDGB",
+      "job:DISCGRP",
+      "job:DUSRSECJ",
       "job:INTCALC",
       "job:POSTTRAN",
-      "job:TRANREPT"
+      "job:PRTCATBL",
+      "job:REPRTEST",
+      "job:REPTFILE",
+      "job:SORTTEST",
+      "job:TCATBALF",
+      "job:TRANBKP",
+      "job:TRANCATG",
+      "job:TRANFILE",
+      "job:TRANIDX",
+      "job:TRANREPT",
+      "job:TRANTYPE",
+      "job:XREFFILE"
      ],
+     "computed_calls": [],
      "evidence": [
       {
        "file": "app/cbl/CBACT04C.cbl",
@@ -28360,6 +29130,17 @@
       "COUSR02C",
       "COUSR03C"
      ],
+     "computed_calls": [
+      "COACTUPC",
+      "COBIL00C",
+      "COCRDLIC",
+      "COCRDUPC",
+      "COTRN02C",
+      "COUSR00C",
+      "COUSR01C",
+      "COUSR02C",
+      "COUSR03C"
+     ],
      "evidence": [
       {
        "file": "app/cbl/COACTUPC.cbl",
@@ -28380,7 +29161,9 @@
      "family": "subsystem",
      "description": "Entry points that touch DB2, IMS or MQ",
      "units": [
+      "CBPAUP0C",
       "COACCT01",
+      "COBTUPDT",
       "CODATE01",
       "COPAUA0C",
       "COPAUS0C",
@@ -28388,11 +29171,20 @@
       "COPAUS2C",
       "COTRTLIC",
       "COTRTUPC",
+      "DBUNLDGS",
+      "PAUDBLOD",
+      "PAUDBUNL",
       "job:CBPAUP0J",
+      "job:CIDBCMP",
       "job:DBPAUTP0",
       "job:LOADPADB",
+      "job:MNTTRDB2",
+      "job:TRANEXTR",
       "job:UNLDGSAM",
-      "job:UNLDPADB"
+      "job:UNLDPADB",
+      "proc:BLDCIDB2",
+      "sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2",
+      "sch:WEEKLY-TransactionTypesDBRefresh/TRANEXTR"
      ],
      "entry_points": [
       "COACCT01",
@@ -28403,10 +29195,19 @@
       "COTRTLIC",
       "COTRTUPC",
       "job:CBPAUP0J",
+      "job:CIDBCMP",
       "job:DBPAUTP0",
       "job:LOADPADB",
+      "job:MNTTRDB2",
+      "job:TRANEXTR",
       "job:UNLDGSAM",
       "job:UNLDPADB"
+     ],
+     "computed_calls": [
+      "COPAUS0C",
+      "COPAUS1C",
+      "COTRTLIC",
+      "COTRTUPC"
      ],
      "evidence": [
       {
@@ -28418,40 +29219,20 @@
        "line": 141
       },
       {
-       "file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl",
-       "line": 24
+       "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
+       "line": 222
       }
      ]
     }
    ],
    "unassigned": [
     {
-     "id": "CBPAUP0C",
-     "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
-    },
-    {
      "id": "CBTRN01C",
-     "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
-    },
-    {
-     "id": "COBTUPDT",
-     "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
-    },
-    {
-     "id": "DBUNLDGS",
-     "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
-    },
-    {
-     "id": "PAUDBLOD",
-     "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
-    },
-    {
-     "id": "PAUDBUNL",
-     "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
+     "reason": "not reached by any static edge, and 28 reachable computed call(s) could target it, for example at app/cbl/COACTUPC.cbl:956"
     },
     {
      "id": "proc:TRANREPT",
-     "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
+     "reason": "named in JCL text inside CORPT00C at app/cbl/CORPT00C.cbl:94, which a running program can submit"
     }
    ]
   },

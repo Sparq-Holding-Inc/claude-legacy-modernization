@@ -1,52 +1,40 @@
 # 04 Estimate
 
-Every number here is inference. The tree is 38 lines of COBOL in four files and holds no data, no
-JCL and no oracle. The method is stated so the client can replace my assumptions with facts. I give
-ranges in person-days for one engineer who can read COBOL and CICS. There is no single number.
+## Method and its limit
 
-## Wave 1: PROGA call tree
+The skill asks for an estimate per wave. There are no waves (`03-waves.md`), so there is no wave estimate. Any number for the whole system would be invented, because the tree holds 38 lines of COBOL in four programs (`01-inventory.md`) and no JCL, CSD, scheduler, dataset or copybook. Line count is not what drives the cost anyway. The drivers, in the skill's order, are set out below.
 
-| Component | Range | Method | Confidence | Evidence |
+I give one range, for the four programs as found, and I label it inference. It says nothing about the nightly batch cycle, which is not in the tree.
+
+| Driver | What the tree shows | Effect on the estimate | Confidence | Evidence |
 |---|---|---|---|---|
-| Port the four programs, with a facade for the COMMAREA program-name contract | 1 to 3 person-days | Line count (38 lines) and no logic or arithmetic in PROGB, PROGC or PROGD. The cost is the PROGA facade and the LINK and XCTL semantics, not the code volume. | medium | `app/cbl/PROGA.cbl:12-25`, `app/cbl/PROGB.cbl:4`, `app/cbl/PROGC.cbl:4`, `app/cbl/PROGD.cbl:4` |
-| Bound the LINK at line 16: find the callers and the COMMAREA values they pass | 5 to 15 person-days | Depends on evidence the client must supply. Not derivable from this tree. | low | `app/cbl/PROGA.cbl:15`, `app/cbl/PROGA.cbl:16` |
-| Build the equivalence harness for the routing behavior | 3 to 10 person-days | Depends on the oracle (see `06-test-strategy.md`): cheapest with CICS journals to replay, dearest with characterization tests from source. | low | inference |
-| Total for wave 1 | about 9 to 28 person-days | Sum of the three ranges above. | low | inference |
+| Coupling edges crossing a wave boundary | Three static calls and two computed calls, all out of PROGA. No data, contract or temporal edge. | Small, except that the computed LINK has no bounded target set. | medium | `app/cbl/PROGA.cbl:12`, `app/cbl/PROGA.cbl:16`, `app/cbl/PROGA.cbl:20` |
+| Behavioral oracle | None in the tree. No datasets, no archived output, no captured traffic. | Dominant. Most of the range comes from here. | low | inference |
+| God modules | None. | None. | medium | analysis: `god_modules` |
+| Logic in the database | No SQL, no dataset access in any program. | None seen. | medium | inference |
+| Someone who can read the source language | Not known. | Unknown, not assumed. | low | inference |
 
-The nightly batch cycle is outside this estimate. No artifact for it is in the tree, so I cannot size
-it, and I will not guess (analysis: `meta.files_seen`).
+## Range for the four programs as found
+
+| Piece of work | Range (engineer-days) | Confidence | Evidence |
+|---|---|---|---|
+| Port PROGB, PROGC, PROGD (each a bare RETURN) | 0.5 to 1 in total | medium | `app/cbl/PROGB.cbl:4`, `app/cbl/PROGC.cbl:4`, `app/cbl/PROGD.cbl:4` |
+| Port PROGA, keeping LINK, XCTL and the computed LINK semantics | 1 to 3 | low | `app/cbl/PROGA.cbl:12-25` |
+| Capture the COMMAREA values that reach PROGA and turn them into replay cases | 3 to 10 | low | inference |
+| Comparison harness, normalization spec and Deviation Register | 2 to 5 | low | inference |
+| **Total for these four programs** | **6.5 to 19** | low | inference |
+
+The range is wide because the third row is unknown until someone says whether CICS traffic, journals or monitoring records exist for PROGA.
 
 ## The assumptions the range is most sensitive to
 
-Stated so they can be shown false.
-
-1. **"The callers of PROGA pass a small, fixed set of program names in the COMMAREA."** If instead the
-   COMMAREA carries a name typed or built at run time, the facade needs an allow-list, the dependency
-   discovery grows, and the second row roughly doubles or more.
-2. **"PROGB, PROGC and PROGD in production are the same bare RETURN programs as in this tree."** If any
-   holds real logic in production, the first row no longer holds and the wave has to be re-cut. The
-   source I have shows 4 lines each (`app/cbl/PROGB.cbl:4`, `app/cbl/PROGC.cbl:4`, `app/cbl/PROGD.cbl:4`).
-3. **"A CICS journal or transaction log covers the COMMAREA values in use."** If it does, the harness
-   row sits near 3 days. If the only oracle is the source, it sits near 10 and every result stays
-   provisional.
-
-## What moves the estimate, in this tree
-
-- Coupling edges crossing the wave boundary: none can be counted. The boundary is the COMMAREA in, and
-  its inputs are unseen.
-- Oracle: none in the tree.
-- God modules in the wave: none (analysis: `god_modules`).
-- Logic in the database: none visible, since the tree holds no dataset and no SQL (analysis:
-  `data_hubs`, `edge_counts`).
-- Someone who can read the source language: the client's engineers must be asked. This is a hard
-  dependency, because the semantics of XCTL are what the port must keep.
+1. **Assumes the values that reach PROGA's COMMAREA form a short, closed list of program names.** If a caller can pass any name, the port needs a router that keeps the dynamic lookup, and the third and fourth rows roughly double. If a list of at most a handful of names exists, the third row falls to the low end.
+2. **Assumes PROGB, PROGC and PROGD really are empty.** Each is a bare RETURN. If the real bodies live in another library and these are stubs, the first row is wrong by an order of magnitude, and the tree is not the system.
+3. **Assumes no JCL, CSD or scheduler content matters to these programs.** If a CSD names PROGA as the initial program of a transaction with a terminal map, or a batch job drives any of them, the boundary changes and this estimate does not apply.
 
 ## Where Claude Code can do the port and where it cannot
 
-- **Can, with the harness in place:** transliterate the four programs, and write the tests that pin
-  the call order (LINK PROGB, then the COMMAREA target, then XCTL PROGC, and never the rest). The code is
-  short and has no arithmetic (`app/cbl/PROGA.cbl:12-25`).
-- **Cannot:** say what a caller puts in the COMMAREA, what PROGB, PROGC and PROGD are for, or whether
-  the unreachable lines 23 to 26 are meant to be there. That is intent, and no source here records it.
-  It also cannot judge whether the facade should keep the caller's free choice of target or narrow it to
-  an allow-list. That is a business decision for the client.
+- **Strong.** Transliterating PROGB, PROGC and PROGD. Mapping the static LINK at line 12 to a call. Mapping the literal-fed XCTL at line 20 to a transfer to PROGC.
+- **Strong with a harness.** Reproducing the LINK-returns and XCTL-never-returns difference, and the fact that the XCTL to PROGD at line 23 does not run.
+- **Weak.** Deciding which program names production actually passes in the COMMAREA. The source does not say, and the answer has to come from the client's traffic. Also weak: deciding what a caller with no COMMAREA should do, and whether the bare-RETURN programs are stubs.
+- **Cannot do at all from this tree.** Anything about the nightly batch cycle.

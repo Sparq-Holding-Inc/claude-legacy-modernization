@@ -1,29 +1,39 @@
 # 05 Dead code
 
-Telemetry: none. Every dead-code claim here is provisional. The candidates are in
-`modernization-assessment/05a-dead-code-candidates.md`. The register is `modernization-assessment/dead-code.json`.
+Telemetry: none, from the `--telemetry` flag. Every claim here is provisional. The register is in
+`modernization-assessment/dead-code.json`, and the extractor's candidates are in
+`05a-dead-code-candidates.md`.
+
+## The three buckets
 
 | Bucket | Units | Confidence | Evidence |
 |---|---|---|---|
-| Unreachable | none | high | `analysis` field `dead_code_candidates` |
-| Reachable but dormant | none. **Not measured.** | low | `analysis` field `warnings` |
-| Unknown | none | high | `analysis` field `unresolved_dynamic` is empty |
+| Unreachable | none | medium | `analysis` field `dead_code_candidates` |
+| Reachable but dormant | none. The bucket was not measured. | low | `analysis` field `warnings` (dormancy not computed) |
+| Unknown | none. There is no computed call that could reach an unplaced unit. | medium | `analysis` field `unresolved_dynamic` |
 
-## Dormant is not measured
+The register is empty in all three buckets. I did not move any unit between buckets. I found no evidence
+that an extractor bucket is wrong, so nothing moved toward unknown.
 
-The target is not a git repository, so no unit has a last-modified date. The dormant bucket was NOT
-computed (`analysis` field `warnings`). An empty dormant list therefore means not measured. It does not
-mean nothing is dormant. The same reading applies to the unreachable bucket only in one direction: an
-empty unreachable list is a real result, because all three programs are reached from `job:SEQJOB`
-(`app/jcl/SEQJOB.jcl:2`, `app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:4`).
+## What the empty lists do and do not say
 
-## Jobs that no scheduler names
+- **Unreachable is empty.** All three programs are reached from `job:SEQJOB` (`app/jcl/SEQJOB.jcl:2`,
+  `app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:4`). There is no copybook and no proc, so nothing else could be
+  unreferenced. That is the extractor's arithmetic, not a finding.
+- **Dormant is not measured.** The tree is not a git repository, so no unit has a last-modified date
+  (`analysis` field `warnings`). An empty dormant list means not measured. It does not mean nothing is old.
+  To fill it, the client must supply change dates from the source library.
+- **Unknown is empty** because the tree has no computed call (`analysis` field `unresolved_dynamic`).
+- **Reachable on paper only.** Everything is reachable only because the extractor treats SEQJOB as an entry
+  point. The extractor also counts any job that no parsed scheduler names as an entry point. It parsed no
+  scheduler, so `unscheduled_jobs` is empty because it was not measured (`analysis` field `warnings`). If
+  SEQJOB no longer runs, all four units are dead. With no telemetry, there is no way to tell. That is
+  inference.
+- **The repeated step name.** If SEQJOB cannot run as written because STEP2 appears twice
+  (`app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:5`), the three programs may not run at all. That is an open
+  question for the client's engineers. It is not evidence for a bucket, so I moved nothing. Inference.
 
-`job:SEQJOB` counts as an entry point, so it never shows in a bucket. No scheduler artifact was
-parsed (`analysis` field `warnings`), so nothing says whether SEQJOB still runs. Ask.
+## What to ask for
 
-## External program
-
-`ext:IEFBR14` is a system utility that does nothing. It is not in the tree, and it is called at
-`app/jcl/SEQJOB.jcl:5`. It is not a candidate for deletion. The step that calls it is a candidate
-for review (inference): a step that runs a null program after the last real step adds nothing.
+Job logs or run history for SEQJOB for the last 12 months would settle both the dormant and the unknown
+questions and would say whether the job runs. This is the same request as the oracle in `06-test-strategy.md`.

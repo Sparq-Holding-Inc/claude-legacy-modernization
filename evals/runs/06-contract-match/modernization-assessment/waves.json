@@ -1,45 +1,45 @@
 {
-  "target_state": "refactor",
-  "waves": [
+ "target_state": "refactor",
+ "waves": [
+  {
+   "wave": 1,
+   "family": "batch-readonly",
+   "name": "Reader job: consume the master file",
+   "units": [
+    "PGMR",
+    "job:READJOB"
+   ],
+   "rationale": "READJOB runs PGMR, which opens SPARQ.TEST.MASTER for input with DISP=SHR, reads one record and closes it. It writes nothing another job uses, so it is the safe first wave and proves the toolchain and the packed decimal read of LAYOUTX. The family is sound, but the wave is weak. PGMR produces no output, so the boundary that can be tested is the return code and the file status, and nothing a stakeholder can name changes. Treat it as a chore wave. The wave cut sits at the dataset, which is the one articulation point in the graph.",
+   "unblocks": "Nothing a business stakeholder can name. It proves the toolchain and a target-side decoder for LAYOUTX that the wave 2 harness reuses. This is a chore wave.",
+   "blast_radius": "low",
+   "confidence": "low",
+   "evidence": [
     {
-      "wave": 1,
-      "family": "batch-readonly",
-      "name": "Reader side of the master file",
-      "units": [
-        "PGMR",
-        "job:READJOB"
-      ],
-      "rationale": "PGMR and READJOB read SPARQ.TEST.MASTER and write nothing another entry point uses, so this is the batch-readonly family and a sound first wave: the port is one OPEN, one READ, one CLOSE, and the legacy writer keeps feeding it during coexistence. The weakness is that PGMR produces no output. Its testable boundary is the dataset it reads and its return code, and the business value is close to nil, so this wave is mainly a toolchain and harness proof.",
-      "unblocks": "The LAYOUTX copybook conversion (wave 2 includes it too) and a harness that can decode SPARQ.TEST.MASTER on the target platform, including the packed decimal field, before the writer is touched.",
-      "blast_radius": "low",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/jcl/READJOB.jcl",
-          "line": 1
-        }
-      ]
-    },
-    {
-      "wave": 2,
-      "family": "batch-writers",
-      "name": "Writer of the master file",
-      "units": [
-        "PGMW",
-        "job:WRITEJOB"
-      ],
-      "rationale": "PGMW and WRITEJOB write the one dataset another entry point reads, so this is the batch-writers family and it belongs after the reader: the consumer is proven against the legacy format first, then the producer is replaced and its bytes compared. It cannot be cut earlier because it is the only writer and READJOB has no other source. Do not read this as low risk: the port is easy and the verification is the work.",
-      "unblocks": "Retirement of the legacy writer and, if the dataset is later replaced by a table or a service, the one place where that change can be made.",
-      "blast_radius": "high",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/cbl/PGMW.cbl",
-          "line": 6
-        }
-      ]
+     "file": "app/jcl/READJOB.jcl",
+     "line": 1
     }
-  ],
-  "unassigned": [],
-  "deviations": []
+   ]
+  },
+  {
+   "wave": 2,
+   "family": "batch-writers",
+   "name": "Writer job: produce the master file",
+   "units": [
+    "PGMW",
+    "job:WRITEJOB"
+   ],
+   "rationale": "WRITEJOB runs PGMW, which creates SPARQ.TEST.MASTER and writes one record through LAYOUTX. The dataset is read by PGMR in wave 1, so this wave moves the writer side of the only contract in the tree. The output file is the testable boundary and can be compared byte for byte with a golden master. Confidence is medium and not higher because no scheduler was parsed, the DD says LRECL=80 against a 15 byte layout, and PGMW writes a record it never fills. Wave 1 ports the reader first, so the new reader must accept bytes the legacy writer still produces. That keeps the legacy format fixed until the writer moves.",
+   "unblocks": "Retiring the legacy writer, the last program on the SPARQ.TEST.MASTER contract. After this wave the layout is owned by the new code and can be documented and versioned.",
+   "blast_radius": "medium",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/PGMW.cbl",
+     "line": 6
+    }
+   ]
+  }
+ ],
+ "unassigned": [],
+ "deviations": []
 }

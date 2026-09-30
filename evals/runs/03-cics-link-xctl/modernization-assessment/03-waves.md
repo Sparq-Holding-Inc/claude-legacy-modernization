@@ -1,70 +1,30 @@
 # 03 Waves
 
-Target state: refactor. Machine form: `modernization-assessment/waves.json`.
+## Result: no waves
 
-## What the seed gave
+`modernization-assessment/waves.json` has `"target_state": "refactor"` (line 2) and an empty `waves` list (line 3). All four programs are in `unassigned`. This is deliberate, and it follows the rule for a tree with no entry point.
 
-The extractor placed no unit in any wave. It found no entry point: no CSD transaction, no JCL job, no
-scheduler job and no shell wrapper (analysis: `entry_points`, `wave_seed`; `03a-wave-seed.md`). The seed
-groups units by the family of the entry points that use them, so with no entry point it has nothing to
-group. All four programs came back "not placed".
+The extractor found no entry point: no CSD transaction, no JCL job, no scheduler job, no wrapper (analysis: `entry_points`, empty; warning printed by `extract.py`). The wave seed puts every unit in a family by the entry points that use it. With none, it places nothing (`03a-wave-seed.md`). I did not invent a wave, and I made no deviation from the seed (`deviations` is empty, `modernization-assessment/waves.json:10`).
 
-## The plan
+## Units not placed
 
-One wave. It is a placeholder, and I say so plainly. The validator rejects a plan with no wave, and the
-four programs cannot honestly be left out of the plan, so they are placed together by deviation. The plan
-is not an argument that this is the right sequence. It is the smallest claim the evidence supports: these
-four programs move as one call tree.
-
-| Wave | Family | Units | Blast radius | Confidence | Evidence |
-|---|---|---|---|---|---|
-| 1 | none, no entry point found | PROGA, PROGB, PROGC, PROGD | medium | low | `app/cbl/PROGA.cbl:12`, `app/cbl/PROGA.cbl:16`, `app/cbl/PROGA.cbl:20`, `app/cbl/PROGA.cbl:23` |
-
-**Port order inside the wave.** PROGB, PROGC and PROGD first: each is a bare RETURN and scores low-low
-(`app/cbl/PROGB.cbl:4`, `app/cbl/PROGC.cbl:4`, `app/cbl/PROGD.cbl:4`). PROGA last: it scores high-high, so it
-goes last and behind a facade that keeps the COMMAREA program-name contract
-(`app/cbl/PROGA.cbl:15-16`). A high-high unit is a candidate for strangling, not for a straight port.
-
-**Why it is one wave.** PROGA is the only articulation point and the only program with callees
-(analysis: `articulation_points`, `fan_out`). The leaves have no caller other than PROGA in the tree, but
-the LINK at line 16 can reach any program, so they may have other callers I cannot see. There is no
-call cycle to keep whole (analysis: `sccs`).
-
-**Does it meet the four tests?**
-
-| Test | Result | Confidence | Evidence |
+| Unit | Confidence | Reason | Evidence |
 |---|---|---|---|
-| Deployable independently behind a flag or facade | Yes for the four programs together. The unseen callers of PROGA are the open part. | low | inference |
-| Rollbackable independently | Yes in principle: the programs hold no data and write nothing. | medium | `app/cbl/PROGA.cbl:12`, `app/cbl/PROGB.cbl:4` |
-| Testable boundary | The boundary is the COMMAREA in and the program sequence out. No oracle is in the tree. See `06-test-strategy.md`. | low | inference |
-| Delivers something a stakeholder can name | No. No transaction, map, dataset or business function is visible. | high | analysis: `entry_points`, `node_counts` |
+| PROGA | low | No entry point in the tree. Nothing calls it, and no CSD was supplied to show whether a transaction starts it. It is the hub for the other three. | `app/cbl/PROGA.cbl:1` |
+| PROGB | low | No entry point in the tree. Its only caller is PROGA, by a static LINK. | `app/cbl/PROGA.cbl:12` |
+| PROGC | low | No entry point in the tree. Its only caller is PROGA, by XCTL. | `app/cbl/PROGA.cbl:20` |
+| PROGD | low | No entry point in the tree. Its only caller is PROGA, by an XCTL that follows another XCTL (inference: probably never executed). | `app/cbl/PROGA.cbl:23` |
 
-It fails the fourth test. It unblocks nothing that can be named. It is a chore until the client supplies
-the CSD, the callers of PROGA and the nightly batch cycle.
+## What would have to be true to cut waves
 
-## The must-not-break item
+Nothing can be sequenced until the client supplies at least one of: a CSD or RDO listing that names the transactions and their initial programs, JCL for the batch jobs, or a scheduler export. Only then does the extractor have entry points to start from.
 
-The client named "the nightly batch cycle". The tree has no batch program, no JCL and no scheduler
-definition (analysis: `node_counts`, `meta.files_seen`). All four programs use EXEC CICS, so they are
-online programs (`app/cbl/PROGA.cbl:12`). Nothing here ties them to the batch cycle. The item is not in
-the tree at all, so it cannot anchor a wave. If a batch job drives any of these programs (through an
-external CICS interface, for example), it would have to be found outside this tree (inference).
+Once entry points exist, this is what the code already says about how the four units would move:
 
-## Deviations from the seed
+- PROGA moves with the earliest family that uses it. PROGB, PROGC and PROGD have only PROGA as a caller (analysis: `fan_in`), so they move with it, or before it if PROGA is kept behind a facade that still reaches the old versions.
+- PROGA is scored high-high in `risks.json` because of the computed LINK at `app/cbl/PROGA.cbl:16`. High-high units go late and go behind a facade. The facade would have to accept any program name in the COMMAREA and route it to either the old or the new program. That is inference.
+- The wave would have to be one that can be rolled back on its own. The four programs write no dataset (no SELECT, OPEN, READ or WRITE appears in `app/cbl/PROGA.cbl:1-26`), so rollback is a routing change, not a data restore. That is inference from a tree that may be a fragment.
 
-All four are placements of units the seed left unplaced. Each is recorded in `waves.json`.
+## Must-not-break: the nightly batch cycle
 
-| Unit | From | To | Reason | Confidence | Evidence |
-|---|---|---|---|---|---|
-| PROGA | not placed | 1 | No entry point exists. A computed LINK from its COMMAREA means it cannot be shown to sit outside any flow. | low | `app/cbl/PROGA.cbl:16` |
-| PROGB | not placed | 1 | Linked from PROGA at its first statement. | medium | `app/cbl/PROGA.cbl:12` |
-| PROGC | not placed | 1 | Reached from PROGA through WS-NEXT-PGM, which holds only PROGC. | medium | `app/cbl/PROGA.cbl:19`, `app/cbl/PROGA.cbl:20` |
-| PROGD | not placed | 1 | Reached from PROGA by constant, but after an XCTL that never returns, so probably never from there. Kept because the COMMAREA-driven LINK could reach it. | low | inference: `app/cbl/PROGA.cbl:23` |
-
-## What would change the plan
-
-- A CSD or transaction list. It would give PROGA an entry point, and the seed would then place it in a
-  family (an online transaction that writes nothing another entry point uses falls in the
-  `online-readonly` family).
-- The callers of PROGA and the values they put in the COMMAREA. They would bound the LINK at line 16.
-- The nightly batch cycle. It would add the temporal edges this plan has none of.
+The user named the nightly batch cycle as a thing that must not break. It maps to no unit in this tree. There is no JCL, no scheduler definition, no batch program and no dataset. All four programs use EXEC CICS (`app/cbl/PROGA.cbl:12`). I have not mapped it to any of them. It is the first item in Open Questions in `00-summary.md`.

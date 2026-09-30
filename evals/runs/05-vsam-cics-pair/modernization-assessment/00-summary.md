@@ -1,50 +1,53 @@
 # 00 Summary
 
-Assessment of the tree in `.` (the work folder). It holds two CICS COBOL programs (PROGR, PROGW), one copybook (ACCTREC), and one CSD file (DEMO.CSD). It has no JCL, no procs, no scheduler definitions, and no batch programs.
-
 ## Scoping answers
 
-| Question | Answer | Source | Evidence |
-|---|---|---|---|
-| Target state | refactor | flag `--target refactor` | inference (from the command arguments) |
-| Must not break | "the nightly batch cycle" | flag `--must-not-break` | inference (from the command arguments) |
-| Runtime telemetry | none | flag `--telemetry none` | inference (from the command arguments) |
+| Question | Answer | Source |
+|---|---|---|
+| Scope | `.` (the work folder) | argument default |
+| Target state | refactor | `--target refactor` |
+| Must not break | "the nightly batch cycle" | `--must-not-break` |
+| Telemetry | none, so every dead-code claim is provisional | `--telemetry none` |
 
-All three came as flags: no defaults applied.
+All three answers came as flags, so **no defaults applied**. This was a non-interactive run and no question was asked.
 
-Telemetry is `none`, so every dead-code claim is provisional.
+## What was found
 
-## Result
+The tree is two CICS programs, one copybook and one CSD file. The extractor read 4 nodes and 5 edges and skipped nothing (`modernization-assessment/graph.json:169`). PROGW writes the account balance file and PROGR reads it, and both use the layout copybook ACCTREC (`app/cbl/PROGW.cbl:7`, `app/cbl/PROGR.cbl:7`, `app/cbl/PROGR.cbl:5`). The CSD maps the file to SPARQ.TEST.ACCTDAT.KSDS (`app/csd/DEMO.CSD:2`). The record is an 11 digit key and a packed decimal balance (`app/cpy/ACCTREC.cpy:2-3`).
 
-| Item | Finding | Confidence | Evidence |
-|---|---|---|---|
-| Waves | 2. Wave 1 is PROGR (read only). Wave 2 is PROGW (writes the shared file). No deviations from the seed. | medium | `modernization-assessment/waves.json:2` |
-| Coupling | One KSDS, one writer, one reader, one shared layout copybook. No calls, no cycles, no god modules. | high | `app/cbl/PROGW.cbl:7`, `app/cbl/PROGR.cbl:7`, `app/cpy/ACCTREC.cpy:3` |
-| Dead code | None found. Dormancy was not measured, because the tree has no git dates. | low | analysis field `warnings` |
-| Estimate | 13 to 34 person-days for both waves, without the nightly batch cycle. | low | inference |
-| Oracle | No files in the tree. Parallel run for wave 1, replay against a file copy for wave 2. | medium | inference |
+- **Waves: 2.** Wave 1 is the read transaction TRNR (PROGR). Wave 2 is the write transaction TRNW (PROGW). No deviations from the seed (`modernization-assessment/waves.json:2`). See `03-waves.md`.
+- **Estimate.** 13 to 30 person-days for the two waves, not counting the batch cycle, the data move or the target runtime. Inference, see `04-estimate.md`.
+- **Dead code.** None found in any bucket. The dormant bucket was not measured because the tree has no dates, and with no telemetry all of it is provisional (`modernization-assessment/graph.json:260`). See `05-dead-code.md`.
+- **Test strategy.** See `06-test-strategy.md`.
 
 ## The single largest risk
 
-The nightly batch cycle, the one thing the client says must not break, is not in the tree, and the only shared state that is in the tree is an account file (ACCTDAT KSDS) whose balance is a packed decimal field. A nightly cycle is exactly the kind of process that reads or updates an account master. If it does, then a port of PROGW that changes one byte of the record layout, the sign nibble, or the key order breaks the batch cycle silently, and nothing in the tree lets us test that. The assessment cannot rule this out and cannot measure it. Evidence: `app/cpy/ACCTREC.cpy:2-3`, `app/cbl/PROGW.cbl:7`, analysis field `meta.files_seen`, inference.
+The item that must not break, the nightly batch cycle, maps to no unit in the tree. No JCL, scheduler or batch program was seen (`modernization-assessment/graph.json:30`). Meanwhile PROGW writes the account balance file, a system of record, and a write cannot be undone by rerouting the transaction (`app/cbl/PROGW.cbl:7`). If the batch reads or writes that file through a layout other than ACCTREC, a port breaks it silently. This is inference, and it is why wave 2 has low confidence. No unit is mapped to the must-not-break item and none was invented.
+
+## Extractor limits that touch this system
+
+- A `high` contract edge means shared layout, not proven equal (`modernization-assessment/graph.json:21`).
+- Record length is not compared with the copybook, and no file definition is in the tree (`modernization-assessment/graph.json:20`).
+- Only Control-M XML and shell wrappers are read as schedulers. A scheduler in another product would not be read (`modernization-assessment/graph.json:19`).
+- RETURN TRANSID, START and SEND MAP are not edges, so a transaction chain from a program outside the tree would not show (`modernization-assessment/graph.json:18`).
+- Dormancy was not computed (`modernization-assessment/graph.json:260`).
 
 ## Open Questions
 
-Addressed to the client's own engineers.
+For the client's engineers. Nothing was in the tree for the first, so we did not guess.
 
-1. **Where is the nightly batch cycle?** We need its JCL, procs, batch programs and scheduler definitions. Does any of it read or write `SPARQ.TEST.ACCTDAT.KSDS`, or a copy of it? The tree has none of these, so the data hub count of one writer and one reader is a lower bound. Evidence: analysis field `meta.files_seen`, `app/csd/DEMO.CSD:2`.
-2. **Is this the production file?** The dataset name contains TEST. What is the production name, and does production use this CSD group (there is no `DEFINE LIST` here, so we cannot see whether group DEMO is installed)? Evidence: `app/csd/DEMO.CSD:1-9`.
-3. **Where does the key come from?** Neither program sets `ACCT-ID`, and neither has a COMMAREA, a LINKAGE SECTION or a RECEIVE. Is the source shown complete, and is it the deployed version? Evidence: `app/cbl/PROGR.cbl:4-9`, `app/cbl/PROGW.cbl:4-9`.
-4. **What should a missing or duplicate key do?** Neither EXEC CICS call has a RESP option or a HANDLE CONDITION. Does a region-level handler (a program error program, or a global exit) catch these, or does the task abend, and does any caller depend on that? Evidence: `app/cbl/PROGR.cbl:7-10`, `app/cbl/PROGW.cbl:7-10`.
-5. **What does the VSAM cluster define, and what do the installed FILE attributes allow?** We need the key offset and length, the record size, share options and recovery attributes. The FILE definition sets no ADD, READ or UPDATE attribute, and PROGW uses WRITE. The extractor does not read DCB, LRECL or RECFM, so a record length is never compared with the copybook, which comes to 17 bytes by hand count. Evidence: `app/csd/DEMO.CSD:1-3`, `app/cpy/ACCTREC.cpy:1-3`, meta limit "DCB, LRECL and RECFM are not read".
-6. **Which other transactions, programs or regions touch ACCTDAT?** Other CSD groups, other CICS regions, DB2 or MQ users would all be edges the extractor could not see. Evidence: `app/csd/DEMO.CSD:1`, inference.
-7. **Do all existing balances hold valid packed decimal?** Records with a bad sign nibble or non-digit key byte behave in ways nobody planned, and a port has to reproduce them. Evidence: `app/cpy/ACCTREC.cpy:2-3`, inference.
-8. **How many times did TRNR and TRNW run in the last 12 months?** Without it the dead-code register is provisional, and dormancy is not measured because the tree is not in git. Evidence: analysis field `warnings`.
-9. **Which scheduler runs the nightly cycle?** The extractor reads only Control-M XML and shell wrappers that name JCL files. If the client uses CA-7, TWS or another scheduler, its definitions are outside anything this tool parses. Evidence: meta limit "Only Control-M XML and shell wrappers that name JCL files are read as schedulers".
-10. **Is a shared layout a proven layout?** The contract edge from PROGW to PROGR is `high`, which means both COPY ACCTREC. It does not prove either program reads the record through a private layout. Confirm with the file's real users. Evidence: meta limit "A contract edge is high when both sides COPY the same layout", `app/cbl/PROGR.cbl:5`, `app/cbl/PROGW.cbl:5`.
+1. **Where is the nightly batch cycle?** Send its JCL, PROCs, scheduler export and programs. Does it read or write the ACCTDAT file, and through which layout? The tree has none of it (`modernization-assessment/graph.json:30`). Nothing about batch can be sequenced until it arrives.
+2. **Is this the production definition?** The file's dataset name contains TEST and the group is DEMO (`app/csd/DEMO.CSD:1-2`). What is the production dataset, and is this group installed there?
+3. **Where do the key and the record come from?** Neither program moves a value into ACCT-ID or ACCT-REC before its file call (`app/cbl/PROGR.cbl:6-11`, `app/cbl/PROGW.cbl:6-11`). Is the source a stub, or is a front-end program, map or COMMAREA missing? No BMS map was seen (`modernization-assessment/graph.json:25`).
+4. **What are the key and record length of the file?** Send the IDCAMS DEFINE CLUSTER or the catalog entry. We computed 17 bytes from the layout, which is inference (`app/cpy/ACCTREC.cpy:2-3`).
+5. **Does the file definition allow adds?** The FILE entry sets no attributes (`app/csd/DEMO.CSD:1-3`). Inference says the CICS default for adds is off, which would make PROGW's write fail. Check the installed definition.
+6. **Which of TRNR and TRNW ran in the last 12 months?** Send SMF or CICS statistics. Without them nothing here can leave provisional (`05-dead-code.md`).
+7. **What happens on a missing key or a duplicate key?** Neither program tests a response (`app/cbl/PROGR.cbl:7-10`, `app/cbl/PROGW.cbl:7-10`). What does the old system do in production?
+8. **What oracle exists?** Journals, unloads of the file, and archived batch outputs, per `06-test-strategy.md`. Can the old system stay up for a parallel run?
+9. **Who on the team reads COBOL and CICS, and what is the target runtime for the refactor?** Neither is in the tree or the arguments.
 
-Not parsed: the extractor listed nothing as not parsed. The tree holds no free format COBOL, no COPY REPLACING, no called subprograms and no JCL, so the extractor limits on those do not touch this system. Evidence: analysis field `unparsed`.
+Files the extractor listed as not parsed: none (`modernization-assessment/graph.json:169`).
 
-## Other artifacts
+## Files written
 
-`01-inventory.md`, `02a-edge-tables.md`, `03a-wave-seed.md`, `03a-waves-draft.json` and `05a-dead-code-candidates.md` are generated by the scripts. `02-coupling.md`, `03-waves.md`, `04-estimate.md`, `05-dead-code.md` and `06-test-strategy.md` are written by hand. The JSON outputs are `graph.json`, `waves.json`, `dead-code.json` and `risks.json`. The `dependency-cartographer` work was not needed, because the graph has no unresolved or medium or low confidence edge. The `migration-risk-assessor` work was done inline and wrote `risks.json`.
+`graph.json`, `01-inventory.md`, `02a-edge-tables.md`, `02-coupling.md`, `03a-wave-seed.md`, `03a-waves-draft.json`, `03-waves.md`, `waves.json`, `04-estimate.md`, `05a-dead-code-candidates.md`, `05-dead-code.md`, `dead-code.json`, `risks.json`, `06-test-strategy.md`.

@@ -25,7 +25,7 @@
  "unassigned": [
   {
    "id": "PGMDEAD",
-   "reason": "dead code candidate, unreachable. See dead-code.json."
+   "reason": "no static path from any entry point and no reachable computed call in the tree"
   }
  ]
 }

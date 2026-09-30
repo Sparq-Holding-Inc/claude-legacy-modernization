@@ -1,100 +1,139 @@
-# 06 Test strategy
+# 06 Test strategy: what "correct" means
 
-Applied from the behavioral-equivalence skill. "It passes the tests" is not the bar. The legacy system has no tests. The bar is that for the inputs this system really sees, the port produces the same outputs, and where it does not, someone decided that on purpose and wrote it down.
+The bar is not "the port compiles" or "it passes tests written with the port". For the inputs this system actually sees, the new implementation must produce the same outputs as the old one, and any difference must be a decision written in the Deviation Register.
 
-## What the tree gives us as an oracle, and what it does not
+The three must-not-break items are the anchors. Each has an oracle, a normalization spec and boundary cases below. Where they land in the wave plan is in `modernization-assessment/03-waves.md`.
 
-The tree holds input data and no expected outputs. It has sample masters and a 300 record daily transaction file in EBCDIC and in ASCII (`app/data/ASCII/dailytran.txt:1`, `app/data/EBCDIC/AWS.M2.CARDDEMO.DALYTRAN.PS`), compiled runtime bundles that let the legacy programs run off the mainframe (`samples/m2/mf/CardDemo_runtime.zip`, `samples/m2/unikix/UniKix_CardDemo_runtime_v1.zip`), and a catalog listing of the datasets from a 2022 run (`app/catlg/LISTCAT.txt:1`). The catalog shows that the reject, interest, backup and report GDGs each retain five generations (`app/catlg/LISTCAT.txt:696`, `app/catlg/LISTCAT.txt:1112`, `app/catlg/LISTCAT.txt:1541`, `app/catlg/LISTCAT.txt:1643`), but the listing is the catalog entry, not the data. So the outputs have to come from one of two places.
+## What the tree gives us as an oracle
 
-- Run the legacy on the runtime bundle with the sample inputs, and treat what it writes as a golden master. That is weak evidence because it was not produced by the client's system on the client's data.
-- Ask the client to supply, in this order: (1) the retained GDG generations of DALYREJS, SYSTRAN, TRANSACT.BKUP, TRANSACT.COMBINED and TRANREPT; (2) 12 months of daily transaction files and the job logs for the posting cycle; (3) the printed and archived reports and statements, including the month-end and year-end ones; (4) SMF or job accounting records for the last 12 months, which are also the telemetry the dead-code register lacks; (5) CICS journals or terminal scripts for the online screens; (6) the extract files sent to partners, if any leave the building. I found no partner extract in the tree. The one FTP job is a test file put on a fixed host (`app/jcl/FTPJCL.JCL:40`).
+The tree holds vendor sample data and a catalog listing. It holds no production input, no production output, no job log, no SMF record and no CICS journal.
+
+| Source | What it is | Use | Confidence | Evidence |
+|---|---|---|---|---|
+| Sample daily transactions, 300 records, also as EBCDIC fixed 350 byte records | Vendor seed data with sign overpunch characters in the amount field. | Smoke tests and unit level cases for posting. Not a production oracle. | high | `app/data/ASCII/dailytran.txt:1`, `app/cpy/CVTRA05Y.cpy:10` |
+| Sample masters: 50 accounts, cards, cross references and customers, 7 transaction types, 18 categories | Vendor seed data. | Seed state for parallel runs on a copy. | high | `app/data/ASCII/acctdata.txt:1`, `app/data/ASCII/carddata.txt:1` |
+| Catalog listing dated 09/01/22 | Shows five generations of the report, the transaction backup and the reject file. Only the names, not the contents. | Proves generations existed. Says how many can still exist. | high | `app/catlg/LISTCAT.txt:1528`, `app/catlg/LISTCAT.txt:1537`, `app/catlg/LISTCAT.txt:1639`, `app/catlg/LISTCAT.txt:692` |
+| GDG limits | The report, backup, reject and combined files keep 5 generations, and most scratch the oldest. Only the last five runs of each survive on disk. | The archive on disk is a week of dailies at most. Ask for tape or HSM archives for the fiscal cycle. | high | `app/catlg/LISTCAT.txt:1535`, `app/catlg/LISTCAT.txt:1637`, `app/jcl/DEFGDGB.jcl:25` |
+| The unload jobs for IMS and DB2 | UNLDPADB, UNLDGSAM and TRANEXTR write flat files of the authorization and transaction type data. | Free comparison files for wave 7. | medium | `app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL:38`, `app/app-transaction-type-db2/jcl/TRANEXTR.jcl:72` |
+
+## What to ask the client for
+
+1. One full business cycle of the real DALYTRAN.PS files, plus the account, card, cross reference and category balance masters before and after each posting run. The tree has no producer for DALYTRAN.PS (`app/jcl/POSTTRAN.jcl:30`).
+2. The archive of the report, reject and transaction backup generations beyond the last five, including a month end and, for anything financial, a fiscal year end.
+3. CICS journals or transaction logs and SMF job records for the last 12 months. These are the telemetry for `modernization-assessment/05-dead-code.md` and the captured inputs for replay.
+4. Statements, partner extracts and regulatory reports that left the building, with dates.
+5. The real schedule. The CA-7 listing is not parsed and the wrapper scripts disagree with each other (`app/scheduler/CardDemo.ca7:70`, `scripts/run_posting.sh:13`).
 
 ## Oracle per wave
 
-Different waves legitimately use different oracles. The strongest one available is listed first.
-
-| Wave | Oracle | Why this one | Confidence | Evidence |
+| Wave | Oracle | Why | Provisional | Evidence |
 |---|---|---|---|---|
-| 1 Utilities | Characterization. Return codes and the resulting catalog entries after each job. | No data flows through these jobs. The catalog is the only observable. | medium | `app/jcl/DEFGDGB.jcl:25`, `app/catlg/LISTCAT.txt:1527` |
-| 2 Read-only readers | Parallel run of legacy and port on the same master snapshot, and a golden master from the retained outputs if the client has them | Read-only, so there is no risk in running both. The sample masters are 50 records each. | high | `app/data/ASCII/acctdata.txt:1`, `app/cbl/CBACT01C.cbl:29` |
-| 3 Sign-on, menus, screens | Scripted screen sessions on the legacy region, replayed on the port, with the screen text compared. CICS journals if the client has them. | The screens read only. The sign-on and menu route through a table, so every table row is a test. | medium | `app/cpy/COMEN02Y.cpy:28`, `app/cbl/COSGN00C.cbl:223` |
-| 4 Data load utilities | Golden master. The file content after each reload, key by key, and the alternate index contents. | The jobs are deterministic given their inputs. | medium | `app/jcl/ACCTFILE.jcl:61`, `app/jcl/TRANIDX.jcl:52` |
-| 5 Posting, interest, statements, report | Parallel run on the daily transaction file, with the whole TRANSACT rebuild cycle inside the harness. Replay of 12 months of daily files including month-end and year-end. Golden master from the retained GDG generations. | The strongest option, and it is available because the old system stays up. The posting writes the account master, so the parallel run has to start from a copy of it. | medium | `app/jcl/POSTTRAN.jcl:23`, `app/cbl/CBTRN02C.cbl:256`, `scripts/run_full_batch.sh:47` |
-| 6 Online maintenance | Shadow replay. The same recorded transactions run against a copy of the masters on each side, then the master state is compared, not the screens. | Online writes cannot be run twice on one master, so each side gets its own copy. | medium | `app/cbl/COACTUPC.cbl:573`, `app/cbl/COBIL00C.cbl:212` |
-| 7 Authorization, DB2, IMS | Golden master from the unload jobs. UNLDPADB and TRANEXTR output is an executable description of the data. MQ messages replayed for COPAUA0C. | The DBD, PSB and DDL are not read, so characterization from source is not enough. | low | `app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL:39`, `app/app-transaction-type-db2/jcl/TRANEXTR.jcl:88` |
+| 1. Environment and utility jobs | Characterization: return codes and resulting catalog entries. | Nothing produces business data. | yes | `samples/jcl/LISTCAT.jcl:1`, inference |
+| 2. Read-only batch extracts | Golden master from archived READACCT, READCARD, READCUST and READXREF output if the client has it. Else characterization on the sample masters. | The programs only display or extract. | yes until archives are supplied | `app/jcl/READACCT.jcl:1`, `app/cbl/CBACT01C.cbl:231` |
+| 3. Sign-on, menu and read-only screens | Shadow traffic: replay the same terminal input to legacy and new and diff the screens. It is safe because nothing writes. Sign-on uses test users only. | Best oracle in the plan and the cheapest. | no, once a journal capture exists | `app/cbl/COSGN00C.cbl:223`, `app/cbl/COMEN01C.cbl:184` |
+| 4. Build and reference-data backup jobs | None needed for the build jobs. DEFGDGD copies compare byte for byte. | Utility copies. | yes | `app/jcl/DEFGDGD.jcl:28` |
+| 5. Batch window | Parallel run. Legacy and new posting process the same DALYTRAN.PS against copies of the same masters, and the results are diffed. For the report, golden master from the last five archived generations of TRANREPT, then a parallel run over a cycle. | Posting writes the system of record, so a replay against a copy is the only way to see a silent balance error. | no for posting once inputs exist, yes for the report until archives are supplied | `app/jcl/POSTTRAN.jcl:23`, `app/jcl/TRANREPT.jcl:80` |
+| 6. Online updates | Captured production traffic replay against copies of the masters, diffing the master images afterward. | Online updates cannot be shadowed, because shadow writes would double-post. | yes until a journal is supplied | `app/cbl/COACTUPC.cbl:4066`, `app/cbl/COBIL00C.cbl:233` |
+| 7. Authorization and transaction-type subsystems | Parallel run of the MQ traffic in shadow mode, and the IMS and DB2 unload files. | Authorization is real time and customer visible. | yes | `app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl:35` |
 
-Characterization tests generated from the source encode what the code says and not what it does. Where a wave falls back to them, say that in the wave's exit note and label the coverage provisional.
+## The three anchors
 
-## Normalization spec (for a human to sign off)
+### Daily transaction posting (job POSTTRAN, program CBTRN02C)
 
-Every entry is an assertion that a difference does not matter, and each is a place a bug can hide. Keep this list short.
+Compare after a posting run, for the same input:
 
-| Entry | What is ignored | Why it is safe, and the limit | Confidence | Evidence |
-|---|---|---|---|---|
-| N1 | Processing timestamps on posted and interest records | They come from the clock at run time. Compare every other field. Keep the original timestamp field, which comes from the input. | high | `app/cbl/CBTRN02C.cbl:692`, `app/cbl/CBTRN02C.cbl:693` |
-| N2 | The timestamp on online payments and transactions | Taken from the region clock. | high | `app/cbl/COBIL00C.cbl:251` |
-| N3 | GDG generation numbers and job numbers | Assigned by the system. Compare by position in the generation list. | high | `app/jcl/POSTTRAN.jcl:38` |
-| N4 | Physical VSAM layout: control interval free space, record order inside a control interval | Not visible to programs. Key order is visible and is not ignored. | medium | `app/jcl/TRANBKP.jcl:54` |
-| N5 | Trailing spaces and low values in fixed width padding | Decide once whether spaces and binary zeros count as equal. The filler is large (178 bytes in the account record), so this matters. | medium | `app/cpy/CVACT01Y.cpy:1` |
-| N6 | Page, date and run headers in the printed report | Only if the report prints the run date. The record and total lines are not ignored. | medium | `app/cbl/CBTRN03C.cbl:173` |
-| N7 | The order of records with equal sort keys | The report sorts by card number only, so the order within one card is whatever the sort utility produced, because equal-key order is not guaranteed and the control cards set no EQUALS option. Confirm that order was incidental. Downstream consumers may depend on it. | low | `app/jcl/TRANREPT.jcl:47`, `app/jcl/TRANREPT.jcl:41` |
+| What to compare | How | Evidence |
+|---|---|---|
+| Transaction master after the run | Every record, key by key. Ignore only the processed timestamp, which the program sets from the clock. | `app/cbl/CBTRN02C.cbl:437`, `app/cbl/CBTRN02C.cbl:438` |
+| Account master after the run | Current balance, cycle credit and cycle debit for every account, as decimal values with zero tolerance. | `app/cbl/CBTRN02C.cbl:547`, `app/cbl/CBTRN02C.cbl:549` |
+| Category balance file after the run | Every record, including records created by the run. | `app/cbl/CBTRN02C.cbl:503`, `app/cbl/CBTRN02C.cbl:527` |
+| Reject file | Record content and the 80 byte trailer with reason code and text. | `app/cbl/CBTRN02C.cbl:447`, `app/jcl/POSTTRAN.jcl:36` |
+| Counts and return code | Transactions processed, rejected, and return code 4 when any are rejected. | `app/cbl/CBTRN02C.cbl:227`, `app/cbl/CBTRN02C.cbl:229` |
+| Order of the surrounding jobs | TRANBKP before POSTTRAN before TRANIDX, with CLOSEFIL first and OPENFIL last. | `scripts/run_posting.sh:13`, `scripts/run_posting.sh:23`, `scripts/run_posting.sh:26`, `scripts/run_posting.sh:30`, `scripts/run_posting.sh:34` |
 
-Not ignored, on purpose. Money. Every amount field in the masters and the daily file is signed DISPLAY numeric with two implied decimals (`app/cpy/CVACT01Y.cpy:1`, `app/cpy/CVTRA05Y.cpy:1`). Compare in a decimal type with zero tolerance. Interest is `balance * rate / 1200` with no ROUNDED, so it truncates, and a port that rounds is wrong (`app/cbl/CBACT04C.cbl:464`). Collating sequence. A KSDS returns records in EBCDIC key order, and the programs may depend on it, so compare after sorting in EBCDIC order or load the target in the same order. The tree carries both encodings of the sample data, which makes this a direct test (`app/data/ASCII/acctdata.txt:1`). REDEFINES. COACTUPC has 43 and CBTRN02C and CBACT04C have two each, so every branch that reads an overlaid layout needs a case (`app/cbl/COACTUPC.cbl:573`, `app/cbl/CBTRN02C.cbl:256`).
+### Account and card master refresh (jobs ACCTFILE and CARDFILE)
 
-## Cases to add beyond replay
+The result is a function of the flat file, so the oracle is the loaded file plus its definition.
 
-Replay covers the common path. These are the dangerous ones.
+| What to compare | How | Evidence |
+|---|---|---|
+| Record content after the load | Every record of the account and card masters against the flat files. | `app/jcl/ACCTFILE.jcl:61`, `app/jcl/CARDFILE.jcl:75` |
+| Key and record definition | Account key of 11 bytes and record size 300, card key of 16 bytes and record size 150, card alternate index on bytes 11 to 26 with non-unique keys. | `app/jcl/ACCTFILE.jcl:40`, `app/jcl/CARDFILE.jcl:54`, `app/jcl/CARDFILE.jcl:85` |
+| CICS file state | Files closed and reopened around the load. ACCTFILE has no close or open step of its own, so its state depends on the wrapper. | `app/jcl/CARDFILE.jcl:26`, `app/jcl/ACCTFILE.jcl:22` |
+| What survives a refresh | Balances written by posting since the last load are replaced. The harness must show whether the flat file is regenerated in production. | `scripts/run_posting.sh:16`, `app/jcl/ACCTFILE.jcl:57` |
 
-| Case | Why | Confidence | Evidence |
+### The transaction report (job TRANREPT, program CBTRN03C, started online by CORPT00C)
+
+| What to compare | How | Evidence |
+|---|---|---|
+| The 133 byte report lines | Every line, in order, after normalization. | `app/jcl/TRANREPT.jcl:78`, `app/cbl/CBTRN03C.cbl:85` |
+| The two date windows | The SORT window (hardcoded 2022-01-01 to 2022-07-06 in the batch job) and the DATEPARM window (CBTRN03C). CORPT00C passes the user's dates to both. Test with a window that differs between the two. | `app/jcl/TRANREPT.jcl:42`, `app/jcl/TRANREPT.jcl:43`, `app/cbl/CBTRN03C.cbl:173`, `app/cbl/CORPT00C.cbl:220` |
+| Totals | Page, account and grand totals. See DR-001 to DR-003. | `app/cbl/CBTRN03C.cbl:287`, `app/cbl/CBTRN03C.cbl:297` |
+| Descriptions | Type and category descriptions come from files loaded from a DB2 table. Test with a changed description. | `app/jcl/TRANREPT.jcl:69`, `app/jcl/TRANREPT.jcl:71`, `app/jcl/TRANTYPE.jcl:54` |
+| Side effect on the backup generation | The report chain cuts a new TRANSACT.BKUP generation. A run between TRANBKP and COMBTRAN changes what COMBTRAN reads. | `app/jcl/TRANREPT.jcl:33`, `app/jcl/COMBTRAN.jcl:24` |
+| Online submit path | CORPT00C builds the job stream and writes it to a queue. Test that the generated job stream is identical for a given date pair. | `app/cbl/CORPT00C.cbl:94`, `app/cbl/CORPT00C.cbl:517` |
+
+## Normalization spec
+
+Every row asserts that a difference does not matter. Each is a place a real bug can hide. A person with authority signs the list.
+
+| Item | Rule | Why it may hide a bug | Evidence |
 |---|---|---|---|
-| Card number missing from the cross reference (reject 100) | The reject file is the only output of the failure. | high | `app/cbl/CBTRN02C.cbl:40` |
-| Account not found (reject 101), over the limit (102), card expired (103), and a record that is both 102 and 103 | When both apply, 103 overwrites 102. Decide if that is kept. | high | `app/cbl/CBTRN02C.cbl:410`, `app/cbl/CBTRN02C.cbl:417` |
-| First transaction for an account and category, when the category balance record is missing | The program creates it. | high | `app/cbl/CBTRN02C.cbl:503` |
-| Reject count above zero | The job ends with return code 4, which an operator or scheduler may act on. | medium | `app/cbl/CBTRN02C.cbl:230` |
-| An empty daily transaction file | Posting must end clean and TRANSACT stays empty. | medium | `app/cbl/CBTRN02C.cbl:256` |
-| Account with no disclosure group | Interest falls back to the DEFAULT group. | high | `app/cbl/CBACT04C.cbl:437` |
-| Month end, December roll over, leap day | The monthly report end date is computed with INTEGER-OF-DATE, and the yearly report is fixed at 12/31. | high | `app/cbl/CORPT00C.cbl:225`, `app/cbl/CORPT00C.cbl:230`, `app/cbl/CORPT00C.cbl:250` |
-| Report date that the LE date service flags with message 2513 | The report screen accepts it as valid. | high | `app/cbl/CORPT00C.cbl:399`, `app/cbl/CORPT00C.cbl:419` |
-| Report through the online path and through the batch job, with the same window | Two copies of the steps exist and one has a fixed 2022 window. | high | `app/jcl/TRANREPT.jcl:43`, `app/proc/TRANREPT.prc:41` |
-| Two bill payments at once | The next transaction id is the highest key plus one. | medium | `app/cbl/COBIL00C.cbl:212`, `app/cbl/COBIL00C.cbl:217` |
-| The full posting cycle run twice in a row | TRANBKP resets the file and the backup GDG keeps five generations. The second run must not lose the first. | medium | `app/jcl/TRANBKP.jcl:40`, `app/jcl/DEFGDGB.jcl:25` |
-| A failed backup step before the delete | The delete step has no COND. Decide whether the port keeps that. | medium | `app/jcl/TRANBKP.jcl:37`, `app/jcl/TRANBKP.jcl:51` |
-| The paths that only run at fiscal close | Monthly interest and the combine step, the yearly report, and the statement run. | high | `app/jcl/INTCALC.jcl:22`, `app/jcl/COMBTRAN.jcl:48`, `app/jcl/CREASTMT.JCL:79` |
+| Processed timestamp in a transaction | Mask TRAN-PROC-TS. Compare TRAN-ORIG-TS exactly. | The program sets it from the run clock. A port that sets it from the original timestamp would look equal after the mask. | `app/cbl/CBTRN02C.cbl:437`, `app/cpy/CVTRA05Y.cpy:16` |
+| Generation numbers, job names and run ids | Mask. | A wrong generation read looks like a name difference. | `app/jcl/COMBTRAN.jcl:24`, `app/catlg/LISTCAT.txt:1537` |
+| Money fields | Compare as decimal values with zero tolerance. Never use a binary float. Account amounts are S9(10)V99 and transaction amounts S9(9)V99. They are zoned decimal with a sign overpunch, not packed. | Rounding differences are real defects. A port that reads the overpunch wrongly flips the sign. | `app/cpy/CVACT01Y.cpy:7`, `app/cpy/CVTRA05Y.cpy:10`, `app/data/ASCII/dailytran.txt:1` |
+| Working balance width | The posting program computes the overlimit test in a S9(9)V99 field while the account fields are S9(10)V99. Test a balance at 1,000,000,000.00 and above. | High order digits can be lost without an error, and the overlimit check then passes. | `app/cbl/CBTRN02C.cbl:187`, `app/cpy/CVACT01Y.cpy:8` |
+| Record padding | Decide spaces or low values, then fix it. The reject record is 350 data bytes and an 80 byte trailer. | A padding difference in a fixed width interface is a real break for a reader that uses offsets. | `app/cbl/CBTRN02C.cbl:83`, `app/cbl/CBTRN02C.cbl:84` |
+| Key order of the masters | Compare in key order and record which order the legacy files return. Do not assume ASCII order. Alphanumeric keys such as user ids sort differently in EBCDIC and ASCII. | Browse screens and SORT input depend on the order. | `app/jcl/ACCTFILE.jcl:40`, `app/cbl/COUSR00C.cbl:284` |
+| Order of equal sort keys | Do not normalize away. The report SORT keys on card number only, so the order within a card is whatever the sort utility does. | Order inside a card may be depended on and is not specified. | `app/jcl/TRANREPT.jcl:46` |
+| Trailing whitespace | Trim only in the report, and only trailing. | A shifted column is a real defect. | `app/jcl/TRANREPT.jcl:78` |
 
-## Job order the harness must keep
+## Boundary and input cases to add on top of replay
 
-The temporal edges in `modernization-assessment/graph.json` are the orders the harness must keep. The ones that carry the must-not-break items are below. Two schedulers disagree about what comes before POSTTRAN, so the harness should run both orders until the client says which is production.
+| Case | Why | Evidence |
+|---|---|---|
+| Transaction for an unknown card (reason 100) and for a card whose account is missing (reason 101). | Two reject paths. | `app/cbl/CBTRN02C.cbl:385`, `app/cbl/CBTRN02C.cbl:397` |
+| Overlimit only, expired only, and both. | Reason 103 overwrites 102 when both apply. | `app/cbl/CBTRN02C.cbl:410`, `app/cbl/CBTRN02C.cbl:417` |
+| A transaction dated exactly on the account expiration date. | The comparison is on ten character date strings and uses `>=`. | `app/cbl/CBTRN02C.cbl:414` |
+| Negative and positive amounts. | The sign decides cycle credit or cycle debit. | `app/cbl/CBTRN02C.cbl:548`, `app/cbl/CBTRN02C.cbl:551` |
+| A category balance that does not exist yet, and one that does. | Two paths: create and rewrite. | `app/cbl/CBTRN02C.cbl:495`, `app/cbl/CBTRN02C.cbl:498` |
+| A zero record daily file, and an empty transaction master for the report. | Empty input paths. The report's end of file branch runs on the first read. | `app/cbl/CBTRN03C.cbl:197`, `app/cbl/CBTRN02C.cbl:202` |
+| A duplicate transaction id. | The write to the keyed master can fail, and the program abends. | `app/cbl/CBTRN02C.cbl:564`, `app/cbl/CBTRN02C.cbl:577` |
+| A failed account rewrite. | The transaction is still written and the reason is not reported. | `app/cbl/CBTRN02C.cbl:554`, `app/cbl/CBTRN02C.cbl:559` |
+| Month end: INTCALC with a real run date, then TRANBKP, COMBTRAN and TRANIDX. | The job carries a hardcoded date. This is the path that only runs at close. | `app/jcl/INTCALC.jcl:22`, `scripts/run_interest_calc.sh:19`, `scripts/run_interest_calc.sh:23`, `scripts/run_interest_calc.sh:26` |
+| Fiscal year end, leap day and a daylight saving change in the report window. | Date handling calls the language runtime date service and compares strings. | `app/cbl/CSUTLDTC.cbl:116`, `app/cbl/CORPT00C.cbl:392` |
+| An account with no matching disclosure group. | The interest run falls back to a group named DEFAULT. | `app/cbl/CBACT04C.cbl:437` |
+| Bad data already in the masters. | Legacy files hold records that break their own rules. Take them from the real archives, not the vendor sample. | inference |
 
-| Order | Source | Confidence | Evidence |
-|---|---|---|---|
-| CLOSEFIL, then the refresh jobs, then TRANBKP, then POSTTRAN, then INTCALC, then TRANBKP, then COMBTRAN, then TRANIDX, then OPENFIL | Full batch wrapper | high | `scripts/run_full_batch.sh:13`, `scripts/run_full_batch.sh:47`, `scripts/run_full_batch.sh:51`, `scripts/run_full_batch.sh:55`, `scripts/run_full_batch.sh:58`, `scripts/run_full_batch.sh:62`, `scripts/run_full_batch.sh:66` |
-| CLOSEFIL, ACCTFILE, TCATBALF, TRANBKP, POSTTRAN, TRANIDX, OPENFIL | Posting wrapper | high | `scripts/run_posting.sh:13`, `scripts/run_posting.sh:17`, `scripts/run_posting.sh:20`, `scripts/run_posting.sh:23`, `scripts/run_posting.sh:26`, `scripts/run_posting.sh:30`, `scripts/run_posting.sh:34` |
-| CLOSEFIL, then CBPAUP0J, then POSTTRAN, then WAITSTEP, then OPENFIL | CA-7 listing, not parsed by the extractor (inference) | medium | `app/scheduler/CardDemo.ca7:43`, `app/scheduler/CardDemo.ca7:70`, `app/scheduler/CardDemo.ca7:97`, `app/scheduler/CardDemo.ca7:124` |
-| CLOSEFIL, TRANBKP, WAITSTEP, OPENFIL | Control-M daily folder | high | `app/scheduler/CardDemo.controlm:5`, `app/scheduler/CardDemo.controlm:9`, `app/scheduler/CardDemo.controlm:15`, `app/scheduler/CardDemo.controlm:21` |
-| CLOSEFIL, INTCALC, COMBTRAN, WAITSTEP, OPENFIL | Control-M monthly folder | high | `app/scheduler/CardDemo.controlm:66`, `app/scheduler/CardDemo.controlm:70`, `app/scheduler/CardDemo.controlm:76`, `app/scheduler/CardDemo.controlm:82` |
-| The report needs the transaction file POSTTRAN wrote. No scheduler or wrapper orders it. | Data dependency only (inference) | medium | `app/jcl/TRANREPT.jcl:26`, `app/cbl/CBTRN02C.cbl:34` |
+## Deviation Register
 
-## Deviation register (seeded)
-
-Nothing gets to differ from legacy without a row here. These are the legacy behaviors I found that a client may not want reproduced. Every row is proposed. None is approved.
+Nothing differs without a row here. These are the candidates found while reading. None is approved. Until a person with authority signs, the new implementation reproduces the legacy behavior.
 
 | ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact | Evidence |
 |---|---|---|---|---|---|---|
-| DR-01 | When a transaction is both over the limit and after expiry, the reject reason is 103 and 102 is lost | Undecided. Either keep, or record both | Reason precedence is not documented | Pending, client | Reject file consumers and reconciliation by reason | `app/cbl/CBTRN02C.cbl:410`, `app/cbl/CBTRN02C.cbl:417` |
-| DR-02 | If the account rewrite fails after the category balance was updated, a 109 flag is set but the transaction is still written | Undecided | A partial posting is not visible to the caller | Pending, client | Balance and history can disagree | `app/cbl/CBTRN02C.cbl:556`, `app/cbl/CBTRN02C.cbl:442` |
-| DR-03 | Interest truncates and is never rounded | Undecided. Keep for equivalence, then decide | A change moves every interest transaction | Pending, client | Statements, ledger, regulatory reports | `app/cbl/CBACT04C.cbl:464` |
-| DR-04 | The interest run date is a JCL constant (2022-07-18) that becomes the transaction id prefix | Pass the run date in | A constant date is a defect if not changed each run | Pending, client | Transaction ids, sort order in the combine step | `app/jcl/INTCALC.jcl:22`, `app/cbl/CBACT04C.cbl:476` |
-| DR-05 | The next transaction id is the highest key plus one, for payments and added transactions | Use a generated key | Two users can take the same id | Pending, client | Ids seen by users and downstream sorts | `app/cbl/COBIL00C.cbl:217`, `app/cbl/COTRN02C.cbl:444` |
-| DR-06 | The sign-on compares an 8 byte password in clear | Hashed credentials | Security. The client is unlikely to want this reproduced. | Pending, client | Every user record and the user admin screens | `app/cbl/COSGN00C.cbl:223`, `app/cpy/CSUSR01Y.cpy:21` |
-| DR-07 | The report screen treats LE message 2513 as a valid date | Undecided | Not documented | Pending, client | Which report windows are accepted | `app/cbl/CORPT00C.cbl:399` |
-| DR-08 | The batch report job has a fixed 2022 date window, and it also writes a TRANSACT.BKUP generation | Parameterize the window, and stop writing a backup generation | The window is a leftover, and the extra generation pushes real backups off a five deep GDG | Pending, client | Backup retention and the archived report set | `app/jcl/TRANREPT.jcl:43`, `app/jcl/TRANREPT.jcl:33`, `app/jcl/DEFGDGB.jcl:25` |
-| DR-09 | The TRANREPT GDG is defined with limit 5 in one job and limit 10 in another | One limit | Retention depends on which job ran | Pending, client | How many report generations are kept | `app/jcl/DEFGDGB.jcl:37`, `app/jcl/REPTFILE.jcl:27` |
-| DR-10 | The delete of the transaction file runs even if the backup step failed | Stop the delete if the backup fails | Data loss on a failed backup | Pending, client | The transaction history | `app/jcl/TRANBKP.jcl:37`, `app/jcl/TRANBKP.jcl:51` |
+| DR-001 | At end of file the report adds the last transaction amount again to the page total and writes page and grand totals, so the last transaction is counted twice in the grand total. | Reproduce until signed. Proposed: count once. | Looks like a defect. Reading of the code, so inference until a real report confirms it. | not yet | Anyone who reconciles the report grand total. | `app/cbl/CBTRN03C.cbl:198` |
+| DR-002 | The last account total is written only when the card number changes, so the final account has no total line. | Reproduce until signed. | Looks like a defect. | not yet | Report readers. | `app/cbl/CBTRN03C.cbl:181` |
+| DR-003 | A record outside the DATEPARM window executes NEXT SENTENCE, which leaves the loop rather than skipping the record. | Reproduce until signed. Proposed: skip and continue. | Only matters when the DATEPARM window is narrower than the SORT window. | not yet | The online report, which passes the same dates to both. | `app/cbl/CBTRN03C.cbl:173` |
+| DR-004 | A transaction that is both overlimit and expired is rejected with reason 103 only. | Reproduce until signed. | Second test overwrites the first. | not yet | Anyone reading reject reasons. | `app/cbl/CBTRN02C.cbl:407` |
+| DR-005 | A failed account rewrite sets reason 109 but the transaction is still written to the master and nothing is rejected. | Reproduce until signed. Proposed: reject and roll back. | Silent divergence between master and account balance. | not yet | Reconciliation of account balances. | `app/cbl/CBTRN02C.cbl:554` |
+| DR-006 | The balance test uses a S9(9)V99 working field against S9(10)V99 account fields. | Reproduce until signed. Proposed: widen. | Truncation without error above 999,999,999.99. | not yet | Overlimit decisions on very large balances. | `app/cbl/CBTRN02C.cbl:187` |
+| DR-007 | The batch report job has a hardcoded date window of 2022-01-01 to 2022-07-06. | Take the window as a parameter. | A fixed 2022 window returns nothing for current data. | not yet | The scheduled report. | `app/jcl/TRANREPT.jcl:42` |
+| DR-008 | The interest job runs with a hardcoded date of 2022-07-18 in its PARM. | Take the run date as a parameter. | Interest transactions carry that date. | not yet | Month end. | `app/jcl/INTCALC.jcl:22` |
+| DR-009 | Online bill payment and add transaction build ids by reading the last key and adding 1. | Use a sequence that cannot collide with batch ids. | Race and collision with batch posting. | not yet | Transaction keys. | `app/cbl/COBIL00C.cbl:212` |
+| DR-010 | Sign-on compares the stored password field directly. | Replace with the target identity service. | Security. | not yet | All users. | `app/cbl/COSGN00C.cbl:223` |
 
-## The exit bar per wave
+## Exit bar per wave
 
-A wave is done when the replay diff is clean modulo the normalization spec and the deviation register, every case above that applies passes, the harness is under version control and runs in CI, and someone with the authority signs the deviation register. Not when the port compiles. Not when it passes tests written beside the port, because those encode the porter's understanding, which is the thing under test.
+A wave is done when all of these hold:
+
+- The replay or parallel run diff is clean, modulo the normalization spec and the Deviation Register.
+- Every boundary case above that applies to the wave passes.
+- The harness is under version control and runs in CI.
+- The Deviation Register rows for the wave are signed by someone with the authority to sign.
+- The order of the jobs in the wave matches the order in the wrapper or scheduler.
+
+Not when the port compiles, and not when it passes tests someone wrote alongside the port.
 
 ## Keep the harness after cutover
 
-The comparison harness becomes the regression suite for the modernized system. Budget for it. The temporal rows above and the deviation register go with it. Teams routinely throw the harness away at cutover and lose the only executable specification the system had.
+The comparison harness becomes the regression suite for the modernized system. Budget for maintaining it. It is the only executable specification this system has ever had.

@@ -1,106 +1,105 @@
 {
-  "units": [
+ "units": [
+  {
+   "id": "PGMA",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Four lines, the procedure division holds only GOBACK, so there is no logic, no arithmetic and no file access to port."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Writes and reads nothing in the tree and has no callers besides STEP1, but it runs first in the one job that may be the must-not-break nightly cycle."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "STEP1 of SEQJOB runs PGMA, and the source is a single GOBACK.",
+   "confidence": "medium",
+   "evidence": [
     {
-      "id": "PGMA",
-      "port_difficulty": {
-        "score": 1,
-        "why": "The program body is a single GOBACK. There is no logic, no arithmetic and no file I/O to port."
-      },
-      "blast_radius": {
-        "score": 2,
-        "why": "Runs first in the only job. It touches no dataset, so no reader can see a wrong value. If the job is the nightly cycle, a wrong step order is the risk, not this program."
-      },
-      "quadrant": "low-low",
-      "wave": 1,
-      "driving_fact": "STEP1 runs PGMA first in SEQJOB, and PGMA is an empty program that returns at once.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/cbl/PGMA.cbl",
-          "line": 4
-        },
-        {
-          "file": "app/jcl/SEQJOB.jcl",
-          "line": 2
-        }
-      ]
+     "file": "app/cbl/PGMA.cbl",
+     "line": 4
     },
     {
-      "id": "PGMB",
-      "port_difficulty": {
-        "score": 1,
-        "why": "The program body is a single GOBACK. There is nothing to port."
-      },
-      "blast_radius": {
-        "score": 2,
-        "why": "Runs second, under a step name (STEP2) that the job uses twice. It touches no dataset. The order among the steps is the only constraint on it."
-      },
-      "quadrant": "low-low",
-      "wave": 1,
-      "driving_fact": "STEP2 runs PGMB, and the job repeats the step name STEP2 on line 5, so which step a reference to STEP2 means is not clear.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/cbl/PGMB.cbl",
-          "line": 4
-        },
-        {
-          "file": "app/jcl/SEQJOB.jcl",
-          "line": 3
-        }
-      ]
-    },
-    {
-      "id": "PGMC",
-      "port_difficulty": {
-        "score": 1,
-        "why": "The program body is a single GOBACK. There is nothing to port."
-      },
-      "blast_radius": {
-        "score": 2,
-        "why": "Runs third and touches no dataset. Like the others, it is exposed only through step order."
-      },
-      "quadrant": "low-low",
-      "wave": 1,
-      "driving_fact": "STEP3 runs PGMC after PGMB, in file order. No scheduler artifact was parsed to confirm the order.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/cbl/PGMC.cbl",
-          "line": 4
-        },
-        {
-          "file": "app/jcl/SEQJOB.jcl",
-          "line": 4
-        }
-      ]
-    },
-    {
-      "id": "job:SEQJOB",
-      "port_difficulty": {
-        "score": 2,
-        "why": "Three program steps and one IEFBR14 step, with no DD statements and no COND or IF. The one difficulty is the duplicate step name STEP2 on lines 3 and 5, which a port must resolve on purpose."
-      },
-      "blast_radius": {
-        "score": 3,
-        "why": "It is the only job and the only entry point. If it is the nightly batch cycle (nothing in the tree says so, inference), the step order is what must not break. A duplicate step name is a JCL error on z/OS, so the job may not run as written."
-      },
-      "quadrant": "low-high",
-      "wave": 1,
-      "driving_fact": "SEQJOB orders PGMA, PGMB, PGMC and IEFBR14 by file order alone, and no scheduler was parsed.",
-      "confidence": "low",
-      "inference": true,
-      "evidence": [
-        {
-          "file": "app/jcl/SEQJOB.jcl",
-          "line": 1
-        },
-        {
-          "file": "app/jcl/SEQJOB.jcl",
-          "line": 5
-        }
-      ]
+     "file": "app/jcl/SEQJOB.jcl",
+     "line": 2
     }
-  ],
-  "do_not_port": []
+   ]
+  },
+  {
+   "id": "PGMB",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Four lines, the procedure division holds only GOBACK, so there is no logic, no arithmetic and no file access to port."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Writes and reads nothing in the tree and has no callers besides STEP2, but its step name is repeated in the job so its position is ambiguous."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "PGMB runs under the first of two steps named STEP2, and the source is a single GOBACK.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/PGMB.cbl",
+     "line": 4
+    },
+    {
+     "file": "app/jcl/SEQJOB.jcl",
+     "line": 3
+    }
+   ]
+  },
+  {
+   "id": "PGMC",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Four lines, the procedure division holds only GOBACK, so there is no logic, no arithmetic and no file access to port."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Writes and reads nothing in the tree and has no callers besides STEP3, but it sits in the one job that may be the must-not-break nightly cycle."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "STEP3 of SEQJOB runs PGMC, and the source is a single GOBACK.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/PGMC.cbl",
+     "line": 4
+    },
+    {
+     "file": "app/jcl/SEQJOB.jcl",
+     "line": 4
+    }
+   ]
+  },
+  {
+   "id": "job:SEQJOB",
+   "port_difficulty": {
+    "score": 2,
+    "why": "Four EXEC cards with no DD, COND or IF, so the port is small, but the repeated step name STEP2 forces a rule for step identity and restart."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "The only job in the tree and so the only candidate for the must-not-break nightly batch cycle, which nothing in the tree confirms; its step order is its only defined behavior and no scheduler, oracle or restart procedure is present."
+   },
+   "quadrant": "low-high",
+   "wave": 1,
+   "driving_fact": "The step name STEP2 appears on line 3 (PGMB) and again on line 5 (IEFBR14, after STEP3), so the real run order and any restart point are ambiguous.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/SEQJOB.jcl",
+     "line": 3
+    },
+    {
+     "file": "app/jcl/SEQJOB.jcl",
+     "line": 5
+    }
+   ]
+  }
+ ],
+ "do_not_port": []
 }

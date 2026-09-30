@@ -1,27 +1,35 @@
 # 04 Estimate
 
-Method: per wave, as a range, with the assumptions it is most sensitive to. The count of edges crossing the wave boundary drives it, not lines of code. Here the boundary edges are: none call, none data, none temporal (`analysis`, field `edge_counts` holds only `include`). The estimate is judgment. It is labeled inference.
+## Method
 
-## Wave 1: PROGA and PROGB (provisional)
+The plugin estimates per wave and never gives a single number. There are no waves (`modernization-assessment/03-waves.md`), so no per-wave estimate can be made. What follows is a range for the only thing the tree contains, the two programs and the copybook, labeled inference. It says nothing about "the nightly batch cycle", which is not in the tree.
 
-| Part | Range | Confidence | Evidence |
+| Scope | Range | Confidence | Evidence |
 |---|---|---|---|
-| Port both programs and the copybook to the target, with a decimal type for the balance | 1 to 3 engineer-days | low | inference |
-| Build the equivalence harness for the wave | not estimable until the client supplies the batch cycle output | low | inference |
+| Port PROGA, PROGB and SHARED01 to the refactor target, including a decimal type for the balance field | 1 to 3 engineer days | low | inference |
+| Stand up an equivalence harness for those units (see `modernization-assessment/06-test-strategy.md`) | 2 to 10 engineer days, and the range is wide because no oracle is yet known | low | inference |
+| Estimate for the nightly batch cycle | cannot be estimated. No JCL, scheduler, dataset or other program of the cycle is in the tree | high | analysis (field `entry_points`) |
 
-The programs hold 8 lines each and one MOVE each (`app/cbl/PROGA.cbl:7`, `app/cbl/PROGB.cbl:7`). The port is close to nothing. The real cost sits in the harness and in whatever the missing JCL adds. A number for the whole wave would suggest rigor the tree cannot support.
+The port is small (8 lines per program, 3 lines in the copybook: `app/cbl/PROGA.cbl:8`, `app/cbl/PROGB.cbl:8`, `app/cpy/SHARED01.cpy:3`). The harness is the work, as it is for any low-high or low-low unit whose real behavior is unobserved.
 
-### Assumptions the range is most sensitive to
+## What the range is most sensitive to
 
-1. Assumes this tree is the whole of what PROGA and PROGB do. If the missing JCL runs them against files that use the SHARED01 layout, the wave gains a contract edge and a harness on that file. The range roughly doubles or more.
-2. Assumes nobody reads SH-BALANCE outside the tree. If a report or partner extract reads it by offset, the packed decimal layout must be reproduced byte for byte, and the wave needs a decimal type with zero tolerance.
-3. Assumes the two programs are live. If no job runs them, the right cost is a deletion review, not a port. See `05-dead-code.md`.
+1. **The tree is the whole nightly cycle.** If the tree is an excerpt, as two 8-line programs with no file access suggest, the estimate for the cycle is not "small". It is unknown. If the cycle holds more programs and jobs than these two, this file's numbers do not apply to it.
+2. **A production oracle exists.** If archived outputs or job logs for the cycle can be had, the harness is at the low end of its range. If the only oracle is characterization tests generated from source, the harness is weak and the coverage is provisional, since these programs produce no output to characterize (`app/cbl/PROGA.cbl:7`).
+3. **No program outside the tree writes or reads a record laid out by SHARED01.** If one does, the layout is an undocumented API to that dataset, the packed decimal field at `app/cpy/SHARED01.cpy:3` becomes a live risk, and the port range roughly doubles, because every writer and reader of the record must move or be checked.
 
-## Where Claude Code can do the port, and where it cannot
+## Where Claude Code can do the port and where it cannot
 
-- Strong: the transliteration of both programs and the copybook. It is mechanical, given a test harness.
-- Weak: intent. Nothing says why PROGA moves 1 and PROGB moves 2 into SH-CUST-ID. The source has no comment and no calling context. A person who knows the nightly cycle must say whether these values are real.
+| Part | Claude Code | Confidence | Evidence |
+|---|---|---|---|
+| Transliterate the two programs and the copybook | Strong. The programs move a literal and return, and the copybook has two fields | high | `app/cbl/PROGA.cbl:7`, `app/cpy/SHARED01.cpy:2` |
+| Choose the target type for `SH-BALANCE` | Can propose a decimal type. A human must sign it off | medium | `app/cpy/SHARED01.cpy:3` |
+| Say what the literals `1` and `2` mean | Cannot. They look like hard coded customer ids and nothing in the source explains them | high | `app/cbl/PROGA.cbl:7`, `app/cbl/PROGB.cbl:7` |
+| Say how the programs sit in the nightly cycle | Cannot. It needs the client's JCL and scheduler | high | inference |
 
-## What was not estimated
+## Other estimate drivers, checked against this tree
 
-The nightly batch cycle. It is not in the tree, so nothing about it can be sized.
+- Coupling edges crossing a wave boundary: no wave, and only 2 include edges (`analysis` field `edge_counts`).
+- God modules: none (`analysis` field `god_modules`).
+- Business logic in the database: not visible. No SQL in either program.
+- Anyone who can read COBOL on the client's team: not known. Ask.

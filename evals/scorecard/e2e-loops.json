@@ -50,6 +50,36 @@
    "graph_unmodified": "16 of 16",
    "unreachable_on_dynamic": 0,
    "diagnosis": "Wave count now identical and every run placed the same units. The three runs made 18 to 23 changes each to the seed, and mostly the same ones: three DB2 or IMS jobs the extractor could not see into (the program is named in PARM or in a TSO RUN PROGRAM card), and refresh jobs whose IDCAMS control cards prove they write the masters. Those are facts the extractor does not read. The runs also shared one scratch folder, and two of them reported that a sibling overwrote a helper script, so the agreement figure may be a little high. Fixture runs 01 to 04 showed a defect: the seed has no waves when the tree has no entry point, but the validator demanded at least one."
+  },
+  {
+   "loop": 2,
+   "plugin_commit": "319ddc0",
+   "what_changed": "Facts inside utility steps (IDCAMS cards, IMS PARM, TSO RUN PROGRAM) go into the seed. An empty wave plan is allowed. `apply-waves` fills risks.json. Runs used private scratch folders.",
+   "carddemo_runs": 3,
+   "wave_counts": [
+    7,
+    7,
+    7
+   ],
+   "wave_count_identical": true,
+   "jaccard": 0.616,
+   "rand_index": 0.928,
+   "unit_overlap": 1.0,
+   "deviations": [
+    4,
+    17,
+    13
+   ],
+   "seed_jaccard": [
+    0.886,
+    0.587,
+    0.656
+   ],
+   "citations_resolve": "11441 of 11441 (16 runs)",
+   "json_valid": "16 of 16",
+   "graph_unmodified": "16 of 16",
+   "unreachable_on_dynamic": 0,
+   "diagnosis": "The pair score fell from 76.7% to 61.6% although the seed got better. One run kept the seed almost whole (4 changes). The other two changed it 17 and 13 times. Every run made the same three changes to the seed (the online report screen that submits JCL, the proc it submits, and the shared date routine). Two runs also moved whole scheduler chains (the jobs that open and close files around the posting cycle, and their Control-M entries) into the batch writers wave, and the third left them where the seed put them. That one disagreement is about 10 to 15 units, which is what the pair score measures. The seed did not know that jobs a scheduler chains together move together."
   }
  ]
 }

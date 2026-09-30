@@ -1,105 +1,101 @@
 {
-  "units": [
+ "units": [
+  {
+   "id": "PGMR",
+   "port_difficulty": {
+    "score": 2,
+    "why": "Sixteen lines. It opens, reads one record and closes. The record is never used, and there is no AT END and no FILE STATUS. The only care is decoding a COMP-3 field it never touches, and there is no output to compare against."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Read-only and reversible, but it sits on the medium confidence contract edge with PGMW, and it produces no output. A wrong decode would be silent. A wrong file attribute would abend the read."
+   },
+   "quadrant": "low-high",
+   "wave": 1,
+   "driving_fact": "Reads SPARQ.TEST.MASTER through LAYOUTY while the writer uses LAYOUTX. The two copybooks are separate files with different field names.",
+   "confidence": "medium",
+   "evidence": [
     {
-      "id": "PGMW",
-      "port_difficulty": {
-        "score": 2,
-        "why": "No logic at all: opens, writes one record, closes. The only care is the COMP-3 amount field, and the record is written without ever being filled in."
-      },
-      "blast_radius": {
-        "score": 4,
-        "why": "Writes SPARQ.TEST.MASTER, the only shared dataset, on the must-not-break nightly path. Its output layout is a private copybook the reader does not share, so a break is silent."
-      },
-      "quadrant": "low-high",
-      "wave": 2,
-      "driving_fact": "Writes SPARQ.TEST.MASTER through LAYOUTX while the only reader, PGMR, describes the same bytes through LAYOUTY. The extractor rates that contract edge medium.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/cbl/PGMW.cbl",
-          "line": 11
-        },
-        {
-          "file": "app/cbl/PGMW.cbl",
-          "line": 14
-        }
-      ]
+     "file": "app/cbl/PGMR.cbl",
+     "line": 11
     },
     {
-      "id": "PGMR",
-      "port_difficulty": {
-        "score": 1,
-        "why": "Opens, reads one record, closes. It never uses a field of the record."
-      },
-      "blast_radius": {
-        "score": 3,
-        "why": "Writes nothing. It is on the must-not-break nightly path and reads a dataset whose layout it holds a private copy of. A layout drift would not fail it, because it never looks at the fields."
-      },
-      "quadrant": "low-high",
-      "wave": 1,
-      "driving_fact": "Reads SPARQ.TEST.MASTER through LAYOUTY, a copybook that differs by name from the writer's LAYOUTX. A medium contract edge crosses from PGMW to PGMR.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/cbl/PGMR.cbl",
-          "line": 11
-        },
-        {
-          "file": "app/cbl/PGMR.cbl",
-          "line": 14
-        }
-      ]
-    },
-    {
-      "id": "job:WRITEJOB",
-      "port_difficulty": {
-        "score": 2,
-        "why": "One step. The work is in the DD: a new catalogued dataset with DISP=(NEW,CATLG,DELETE), a one track allocation and an LRECL of 80 that neither copybook matches."
-      },
-      "blast_radius": {
-        "score": 4,
-        "why": "Creates the shared dataset. It is deleted on abend, so a failed run removes what the reader needs. A rerun without a delete step would fail on a duplicate name."
-      },
-      "quadrant": "low-high",
-      "wave": 2,
-      "driving_fact": "The OUTFILE DD carries RECFM=FB,LRECL=80. The record layout it feeds is 15 bytes by its PIC clauses. The extractor does not compare the two.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/jcl/WRITEJOB.jcl",
-          "line": 3
-        },
-        {
-          "file": "app/jcl/WRITEJOB.jcl",
-          "line": 4
-        }
-      ]
-    },
-    {
-      "id": "job:READJOB",
-      "port_difficulty": {
-        "score": 1,
-        "why": "One step, one DD with DISP=SHR, no DCB. It has nothing to convert."
-      },
-      "blast_radius": {
-        "score": 3,
-        "why": "It fails loudly if the dataset is missing. The order against WRITEJOB is not defined anywhere in the tree, because no scheduler was found."
-      },
-      "quadrant": "low-high",
-      "wave": 1,
-      "driving_fact": "Reads SPARQ.TEST.MASTER and depends on WRITEJOB having created it first. No scheduler artifact states that order.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/jcl/READJOB.jcl",
-          "line": 2
-        },
-        {
-          "file": "app/jcl/READJOB.jcl",
-          "line": 3
-        }
-      ]
+     "file": "app/cbl/PGMR.cbl",
+     "line": 14
     }
-  ],
-  "do_not_port": []
+   ]
+  },
+  {
+   "id": "PGMW",
+   "port_difficulty": {
+    "score": 3,
+    "why": "Tiny code, but it writes LAYOUT-REC with no MOVE or INITIALIZE, so the bytes it writes are undefined. The record has a COMP-3 field. The intended content and file length live in the JCL and the copybook, and there is no oracle."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Sole writer of the shared master. The reader uses a different copybook. A layout drift is silent, and the file is created and cataloged by the job."
+   },
+   "quadrant": "high-high",
+   "wave": 2,
+   "driving_fact": "Writes SPARQ.TEST.MASTER through LAYOUTX. The only reader, PGMR, reads it through LAYOUTY, so the contract edge is medium confidence.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/PGMW.cbl",
+     "line": 11
+    },
+    {
+     "file": "app/cbl/PGMW.cbl",
+     "line": 14
+    }
+   ]
+  },
+  {
+   "id": "job:READJOB",
+   "port_difficulty": {
+    "score": 1,
+    "why": "One step, one DD with DISP=SHR and a SYSOUT. No parameters, no utilities."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Read-only and reversible. If it runs before the writer has created the dataset it fails at allocation, which is loud. Its place in the nightly cycle is unknown because no scheduler was given."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "Reads SPARQ.TEST.MASTER with DISP=SHR and no DCB, so the file attributes come from the catalog entry the writer job created.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/READJOB.jcl",
+     "line": 3
+    }
+   ]
+  },
+  {
+   "id": "job:WRITEJOB",
+   "port_difficulty": {
+    "score": 2,
+    "why": "One step and one DD. The care is in the DD: a NEW,CATLG allocation with SPACE and a DCB that has to be reproduced or deliberately changed in the target."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Creates and catalogs the shared master. A rerun with the same name and DISP=NEW would fail at allocation, which is loud. The LRECL it sets decides the record length every reader sees, and a mismatch would be silent."
+   },
+   "quadrant": "low-high",
+   "wave": 2,
+   "driving_fact": "Allocates SPARQ.TEST.MASTER as NEW,CATLG,DELETE with RECFM=FB and LRECL=80, while the layout copybook describes a 15 byte record. The extractor does not read DCB.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/WRITEJOB.jcl",
+     "line": 3
+    },
+    {
+     "file": "app/jcl/WRITEJOB.jcl",
+     "line": 4
+    }
+   ]
+  }
+ ],
+ "do_not_port": []
 }

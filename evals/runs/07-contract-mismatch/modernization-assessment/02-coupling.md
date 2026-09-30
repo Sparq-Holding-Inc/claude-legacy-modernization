@@ -1,81 +1,91 @@
 # 02 Coupling
 
-This file holds the argument. The edge lists are in `02a-edge-tables.md`. The system is small: two batch programs, two copybooks, two jobs and one dataset. Every edge was resolved. The extractor listed no computed calls and no unparsed files.
+The full edge list is in `02a-edge-tables.md`. This file is the argument. The tree is small: two batch
+programs, two copybooks, two JCL jobs and one shared dataset. Almost all of the coupling sits in one
+place, the file `SPARQ.TEST.MASTER`.
 
-Facts come from `graph.json`. Where I read source to settle an edge the extractor rated medium, the finding is labeled `inference`, as the plugin asks, and it cites the lines I read.
+## The patterns that constrain the sequence
 
-## The three patterns that constrain the sequence
-
-### 1. One contract edge, medium confidence: PGMW to PGMR through SPARQ.TEST.MASTER
-
-PGMW writes the dataset (`app/cbl/PGMW.cbl:6`, `app/cbl/PGMW.cbl:14`, `app/jcl/WRITEJOB.jcl:3`). PGMR reads it (`app/cbl/PGMR.cbl:6`, `app/cbl/PGMR.cbl:14`, `app/jcl/READJOB.jcl:3`). The writer describes the record with `LAYOUTX` (`app/cbl/PGMW.cbl:11`). The reader describes it with `LAYOUTY` (`app/cbl/PGMR.cbl:11`). They are two copybooks, so the extractor rated the edge medium, and asks for a hand check.
-
-I made the hand check, field by field:
-
-| Field | LAYOUTX (writer) | LAYOUTY (reader) | Same? | Evidence |
+| # | Pattern | What it does to the plan | Confidence | Evidence |
 |---|---|---|---|---|
-| Key or id | `LR-KEY PIC X(10)` | `LY-ID PIC X(10)` | Same type and length, different name | `app/cpy/LAYOUTX.cpy:2`, `app/cpy/LAYOUTY.cpy:2` |
-| Amount or value | `LR-AMT PIC S9(7)V99 COMP-3` | `LY-VALUE PIC S9(7)V99 COMP-3` | Same picture and usage, different name | `app/cpy/LAYOUTX.cpy:3`, `app/cpy/LAYOUTY.cpy:3` |
-| Record name | `LAYOUT-REC` | `LAYOUT-REC` | Same | `app/cpy/LAYOUTX.cpy:1`, `app/cpy/LAYOUTY.cpy:1` |
+| 1 | Contract coupling. PGMW writes `SPARQ.TEST.MASTER` and PGMR reads it. They describe the record with two different copybooks, LAYOUTX and LAYOUTY. | The extractor scored the contract edge medium, not high. The layouts are byte compatible today (see the comparison below), but nothing keeps them so. Any port that changes one side and not the other breaks the file silently. The two waves have to meet at this file. | medium | `app/cbl/PGMW.cbl:11`, `app/cbl/PGMR.cbl:11`, `app/cpy/LAYOUTX.cpy:1`, `app/cpy/LAYOUTY.cpy:1` |
+| 2 | Data and order coupling. The writer job creates the dataset, the reader job reads it, so the writer has to run first. No scheduler was supplied, so the real order is not known. | The wave boundary is the dataset, which `analysis.articulation_points` lists. The nightly cycle order cannot be checked. | medium | `app/jcl/WRITEJOB.jcl:3`, `app/jcl/READJOB.jcl:3`, analysis: `articulation_points` and `warnings` in `modernization-assessment/graph.json` |
+| 3 | File attributes live in the JCL, not in the code. WRITEJOB sets RECFM=FB and LRECL=80. The copybook describes 15 bytes. Neither COBOL file description states a record length. | A port has to decide the record length on purpose. The extractor does not read DCB, so this is not an edge in `graph.json`. | inference | `app/jcl/WRITEJOB.jcl:4`, `app/cbl/PGMW.cbl:10`, `app/cbl/PGMR.cbl:10` |
 
-Result (inference, from the PIC clauses): the two layouts are compatible. Both are 10 bytes of text followed by a 9 digit signed packed decimal, which is 5 bytes, so 15 bytes in all. There is no `REDEFINES`, no offset difference and no length difference. The medium rating is a real hazard, and it is not a present defect. The hazard is that two hand maintained copies of one record layout exist, with different field names, and nothing links them. A change to one copybook will not reach the other, and no program or job would fail to compile or run when they drift.
+### Work on the one medium contract edge (dependency-cartographer method)
 
-Two things I could not settle from the source:
+There are fewer than 20 open edges (one medium contract edge, no computed calls), so this was worked by
+hand and not handed to an agent. It compares the two layouts field by field. This is inference from
+reading the source, not a fact from the extractor.
 
-- **Record length on the DD.** The output DD says `RECFM=FB,LRECL=80` (`app/jcl/WRITEJOB.jcl:4`). Both copybooks describe 15 bytes. The extractor does not read DCB values (see `meta.limits`), so this was never compared. The source cannot say whether the file is 15 byte records, or 80 byte records with padding, or an open error at run time. Whoever reads the file outside this tree, if anyone does, would see the difference. This is an open question for the client's engineers.
-- **What PGMW writes.** PGMW writes `LAYOUT-REC` and never moves a value into it (`app/cbl/PGMW.cbl:13`, `app/cbl/PGMW.cbl:14`). So the bytes in the dataset are whatever the record area holds. The packed field may not be a valid packed number. This is inference. A port that validates packed decimal would reject a file the legacy programs are happy with.
+| Field | Offset | Length | Writer layout LAYOUTX | Reader layout LAYOUTY | Verdict | Evidence |
+|---|---|---|---|---|---|---|
+| 01 record name | n/a | n/a | `LAYOUT-REC` | `LAYOUT-REC` | Same name, so a source scan does not tell the two copybooks apart | `app/cpy/LAYOUTX.cpy:1`, `app/cpy/LAYOUTY.cpy:1` |
+| key | 0 | 10 | `LR-KEY PIC X(10)` | `LY-ID PIC X(10)` | Same bytes, different name | `app/cpy/LAYOUTX.cpy:2`, `app/cpy/LAYOUTY.cpy:2` |
+| amount | 10 | 5 | `LR-AMT PIC S9(7)V99 COMP-3` | `LY-VALUE PIC S9(7)V99 COMP-3` | Same bytes: nine digits and a sign in packed decimal is 5 bytes. Different name | `app/cpy/LAYOUTX.cpy:3`, `app/cpy/LAYOUTY.cpy:3` |
+| total record | n/a | 15 | 15 bytes | 15 bytes | Compatible today. There is no `REDEFINES` in either copybook | `app/cpy/LAYOUTX.cpy:1`, `app/cpy/LAYOUTY.cpy:1` |
 
-PGMR reads one record and looks at no field of it (`app/cbl/PGMR.cbl:13`, `app/cbl/PGMR.cbl:14`, `app/cbl/PGMR.cbl:15`). So the layout contract is declared and never exercised in this tree. Any real consumer of this dataset is outside the tree.
+What this shows, and what it does not:
 
-### 2. Data coupling: one dataset, one writer, one reader
+- The two layouts are compatible byte for byte. The extractor's medium score is right for the reason it
+  gives (two copybooks), not because the layouts differ. Evidence: the table above.
+- The names differ (`LR-KEY` and `LY-ID`, `LR-AMT` and `LY-VALUE`). Whether `LR-AMT` and `LY-VALUE`
+  mean the same thing to the business is not something the source can show. Inference.
+- The layout is 15 bytes but WRITEJOB asks for LRECL=80. Neither program has a `RECORD CONTAINS` clause,
+  so what happens at open, and what the other 65 bytes hold, cannot be settled from the source. Inference.
+  Evidence: `app/jcl/WRITEJOB.jcl:4`, `app/cbl/PGMW.cbl:10`. It is the first thing to check against a real
+  job log.
+- PGMW writes `LAYOUT-REC` without moving anything into it, so the content it writes is undefined. Inference.
+  Evidence: `app/cbl/PGMW.cbl:14`. The output of the legacy job may not be repeatable byte for byte.
+- PGMR reads one record and never uses it. Nothing in the tree consumes the value. Evidence:
+  `app/cbl/PGMR.cbl:14`.
+- Neither file has a `FILE STATUS`, so a failed open or read ends the job. Evidence:
+  `app/cbl/PGMR.cbl:6`, `app/cbl/PGMW.cbl:6`.
 
-`analysis.data_hubs` lists SPARQ.TEST.MASTER with 1 writer and 1 reader. The hub is small, and it is the only thing that joins the two halves of the system. The data edges are at `app/cbl/PGMW.cbl:6` and `app/cbl/PGMR.cbl:6`.
+### Other things the extractor does not model
 
-The name has a `TEST` qualifier (`app/jcl/WRITEJOB.jcl:3`). Nothing in the tree says whether this is a test fixture or a real production master. That changes the whole meaning of the assessment, so it is the first question in `00-summary.md`.
+- WRITEJOB allocates the dataset as `NEW,CATLG,DELETE` under a fixed name. A second run would very likely
+  fail at allocation unless something outside this tree deletes the dataset first. Inference. Evidence:
+  `app/jcl/WRITEJOB.jcl:3`. This matters for any claim that WRITEJOB is a nightly job.
+- The dataset name contains `TEST`. Whether this is a test copy or the production master is not shown by the
+  tree. Inference. Evidence: `app/jcl/WRITEJOB.jcl:3`.
 
-### 3. Temporal coupling: required by the data, defined nowhere
-
-The reader can only run after the writer has created the dataset. That order is required by the data edge, and no artifact enforces it. The extractor found no scheduler and warned about it (`analysis.warnings`). Both jobs are entry points, and `unscheduled_jobs` is empty, which here means only that there is no scheduler to compare against. The two jobs are separate JCL members with no job to job dependency (`app/jcl/WRITEJOB.jcl:1`, `app/jcl/READJOB.jcl:1`).
-
-The writer's DD makes the order more fragile:
-
-- `DISP=(NEW,CATLG,DELETE)` (`app/jcl/WRITEJOB.jcl:3`) creates the dataset new each run. Inference: a second run with the dataset still cataloged fails on the duplicate name, so something must delete it between runs, and no job in the tree does.
-- The third DISP subparameter deletes the dataset when the step abends. Inference: a failed WRITEJOB leaves nothing for READJOB, and READJOB then fails when it looks for the dataset.
-
-The reader uses `DISP=SHR` (`app/jcl/READJOB.jcl:3`).
-
-The user named "the nightly batch cycle" as the thing that must not break. The word nightly appears nowhere in the tree, and neither does a schedule. I read the cycle as WRITEJOB followed by READJOB. That reading is inference.
-
-## Cluster view
+## Cluster graph
 
 ```mermaid
 graph LR
-  W["WRITEJOB cluster: job:WRITEJOB, PGMW, cpy:LAYOUTX"] -->|writes, layout LAYOUTX| D[("ds:SPARQ.TEST.MASTER")]
-  D -->|reads, layout LAYOUTY| R["READJOB cluster: job:READJOB, PGMR, cpy:LAYOUTY"]
-  W -. "medium contract edge" .-> R
+  subgraph W["Writer chain"]
+    WJ["job:WRITEJOB"] --> PW["PGMW"]
+    PW --> CX["cpy:LAYOUTX"]
+  end
+  subgraph R["Reader chain"]
+    RJ["job:READJOB"] --> PR["PGMR"]
+    PR --> CY["cpy:LAYOUTY"]
+  end
+  PW -- "writes (contract, medium)" --> DS[("ds:SPARQ.TEST.MASTER")]
+  DS -- "read by" --> PR
 ```
 
-## Structure computed from the graph
+Evidence for the graph: `app/jcl/WRITEJOB.jcl:2`, `app/jcl/READJOB.jcl:2`, `app/cbl/PGMW.cbl:11`,
+`app/cbl/PGMR.cbl:11`, `app/jcl/WRITEJOB.jcl:3`, `app/jcl/READJOB.jcl:3`.
 
-| Item | Result | Evidence |
-|---|---|---|
-| Strongly connected components | None. No wave here can split one. | analysis (field `sccs`) |
-| God modules | None. There is no call between the two programs at all, so fan-in and fan-out are empty. | analysis (fields `god_modules`, `fan_in`, `fan_out`) |
-| Articulation points | `ds:SPARQ.TEST.MASTER`. It is the only link between the two clusters, so it is the natural wave boundary. The two waves are cut there. | analysis (field `articulation_points`) |
-| Computed calls | None. The extractor found no computed call, so nothing here keeps the unknown dead-code bucket open. | analysis (field `unresolved_dynamic`) |
+## Structure
+
+| Fact | Units | Confidence | Evidence |
+|---|---|---|---|
+| Strongly connected components | none, so no cycle constrains the cut | high | analysis: `sccs` in `modernization-assessment/graph.json` |
+| God modules | none. There are no program to program calls, so fan-in is empty | high | analysis: `god_modules` and `fan_in` in `modernization-assessment/graph.json` |
+| Articulation points | `ds:SPARQ.TEST.MASTER`. This is the natural wave boundary and the plan cuts there | high | analysis: `articulation_points` in `modernization-assessment/graph.json` |
+| Data hubs | `ds:SPARQ.TEST.MASTER`, one writer and one reader | high | `app/cbl/PGMW.cbl:6`, `app/cbl/PGMR.cbl:6` |
+| Computed calls | none. `unresolved_dynamic` is empty, so no program can be reached by a call the extractor could not see | high | analysis: `unresolved_dynamic` in `modernization-assessment/graph.json` |
 
 ## The honest boundary
 
-- No computed calls and no unparsed files, so the call graph is complete for what is in the tree.
-- What the tree does not hold: any scheduler, any consumer of SPARQ.TEST.MASTER other than PGMR, any DB2, IMS or MQ use, and any other job. Anything outside the tree is unseen. That is an open question, not a finding.
-- The extractor does not compare DCB values with copybook lengths, does not model `COND=` or `IF/THEN/ELSE`, and reads no in-stream control cards (`meta.limits`). None of those appear in this small tree, apart from the LRECL question above.
+The extractor found no computed calls, so the call graph is complete for what it parses. The boundary of
+this assessment is what is not in the tree, not what could not be resolved:
 
-## Edges settled by hand (dependency-cartographer work, done inline)
-
-There was one open edge, far below the 20 that call for a hand off. The report is labeled inference.
-
-| Edge | Finding | Confidence | Evidence |
-|---|---|---|---|
-| PGMW to PGMR, contract, medium | Layouts compatible by PIC clause: 15 bytes each, differing only in field names. Drift hazard, no present mismatch. | medium | `app/cpy/LAYOUTX.cpy:2`, `app/cpy/LAYOUTY.cpy:2`, inference |
-| PGMW output DD, LRECL 80 | Cannot be reconciled with a 15 byte layout from the source. Unsettled. | low | `app/jcl/WRITEJOB.jcl:4`, inference |
-| PGMW record content | Record written without being filled in. Content undefined. | medium | `app/cbl/PGMW.cbl:14`, inference |
+- No scheduler was supplied, so the order of the two jobs, and whether either is part of the nightly cycle,
+  is unknown. Evidence: analysis: `warnings` in `modernization-assessment/graph.json`.
+- DCB, LRECL and RECFM are not compared with the copybooks. Evidence: `meta.limits` in
+  `modernization-assessment/graph.json`. The one place it matters is `app/jcl/WRITEJOB.jcl:4`.
+- Any consumer of `SPARQ.TEST.MASTER` outside this tree is invisible. Inference.

@@ -1,44 +1,68 @@
 {
-  "units": [
+ "units": [
+  {
+   "id": "PGMMAIN",
+   "port_difficulty": {
+    "score": 3,
+    "why": "Ten lines and no arithmetic, but it CALLs a program named at run time by ACCEPT, so the port has to reproduce a dispatch whose set of targets is not known."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "It is the only program the only job runs, and the job is the only candidate for the nightly batch cycle. Its callee is unbounded and there is no output or oracle in the source, so a wrong dispatch could be silent."
+   },
+   "quadrant": "high-high",
+   "wave": 1,
+   "driving_fact": "The CALL at PGMMAIN.cbl:9 takes its target from WS-PGM-NAME, which ACCEPT fills at run time, so the callee set cannot be bounded from this tree.",
+   "confidence": "low",
+   "evidence": [
     {
-      "id": "PGMMAIN",
-      "port_difficulty": {"score": 3, "why": "Ten lines, but it CALLs a program whose name comes from ACCEPT, so the set of callees the port must reproduce is unknown."},
-      "blast_radius": {"score": 4, "why": "It is the only application program the only JCL job runs, and it can hand control to any program, so a wrong dispatch fails silently or abends the run."},
-      "quadrant": "high-high",
-      "wave": 1,
-      "driving_fact": "CALL WS-PGM-NAME at line 9 takes its target from ACCEPT at line 8, and WS-PGM-NAME has no VALUE clause, so the target cannot be bounded from source.",
-      "confidence": "medium",
-      "evidence": [
-        {"file": "app/cbl/PGMMAIN.cbl", "line": 8},
-        {"file": "app/cbl/PGMMAIN.cbl", "line": 9}
-      ]
-    },
-    {
-      "id": "job:MAINJOB",
-      "port_difficulty": {"score": 1, "why": "One step, no DD statements, no parameters to translate."},
-      "blast_radius": {"score": 3, "why": "It is the only job in the tree and no scheduler was parsed, so whether it is part of the nightly batch cycle is unproven, and it has no SYSIN DD for the ACCEPT."},
-      "quadrant": "low-high",
-      "wave": 1,
-      "driving_fact": "Its single step runs PGMMAIN and defines no SYSIN, so the program name PGMMAIN needs must come from somewhere this tree does not show.",
-      "confidence": "medium",
-      "evidence": [
-        {"file": "app/jcl/MAINJOB.jcl", "line": 1},
-        {"file": "app/jcl/MAINJOB.jcl", "line": 2}
-      ]
-    },
-    {
-      "id": "HIDDEN01",
-      "port_difficulty": {"score": 1, "why": "Four lines and a GOBACK. There is no logic to port."},
-      "blast_radius": {"score": 2, "why": "It does nothing today, but if PGMMAIN calls it, deleting it turns a working dispatch into a run-time failure."},
-      "quadrant": "low-low",
-      "wave": null,
-      "driving_fact": "No static edge reaches it, and the computed CALL at PGMMAIN.cbl line 9 could.",
-      "confidence": "medium",
-      "evidence": [
-        {"file": "app/cbl/HIDDEN01.cbl", "line": 1},
-        {"file": "app/cbl/PGMMAIN.cbl", "line": 9}
-      ]
+     "file": "app/cbl/PGMMAIN.cbl",
+     "line": 9
     }
-  ],
-  "do_not_port": []
+   ]
+  },
+  {
+   "id": "job:MAINJOB",
+   "port_difficulty": {
+    "score": 1,
+    "why": "One EXEC PGM step with no DD, no PARM and no conditions."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "It is the only entry point in the tree and the only candidate for the nightly batch cycle that must not break. Whether it is that cycle is not shown by the tree, so this score rests on inference."
+   },
+   "quadrant": "low-high",
+   "wave": 1,
+   "driving_fact": "It is the single entry point, and it runs PGMMAIN, which makes a computed call.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/MAINJOB.jcl",
+     "line": 2
+    }
+   ]
+  },
+  {
+   "id": "HIDDEN01",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Four lines. The procedure division is GOBACK and nothing else."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "It does nothing and owns no data. It matters only if the run-time input names it, and then a port that dropped it would fail the CALL loudly."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "No static edge reaches it, and the computed call at PGMMAIN.cbl:9 could target it.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/HIDDEN01.cbl",
+     "line": 4
+    }
+   ]
+  }
+ ],
+ "do_not_port": []
 }

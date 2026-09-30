@@ -1,18 +1,28 @@
 {
-  "target_state": "refactor",
-  "waves": [
+ "target_state": "refactor",
+ "waves": [
+  {
+   "wave": 1,
+   "family": "batch-readonly",
+   "name": "The whole tree: MAINJOB and its three programs",
+   "units": [
+    "NEWPGM",
+    "OLDPGM",
+    "PGMMAIN",
+    "job:MAINJOB"
+   ],
+   "rationale": "The tree has one entry point, so it has one family and one wave. MAINJOB runs PGMMAIN, and PGMMAIN calls OLDPGM and NEWPGM unconditionally, so the four units are one call chain and move together. The family label batch-readonly means the extractor found no dataset edge. It does not prove the job writes nothing, because the tree holds no DD statements. The wave passes the four validity tests only in a thin sense. It can be deployed and rolled back as a unit, because a single job step is the whole surface. Its only testable boundary in the tree is the job's return code and step execution, since no dataset is named. The tree is likely a fragment of the real nightly cycle, so this is a wave for the code we were given, not for the system.",
+   "unblocks": "Nothing else in this tree. It is the only wave, so it is a chore unless MAINJOB is the nightly batch cycle. Then it proves the toolchain and the harness on that cycle.",
+   "blast_radius": "medium",
+   "confidence": "medium",
+   "evidence": [
     {
-      "wave": 1,
-      "family": "batch-readonly",
-      "name": "Nightly batch cycle, whole system",
-      "units": ["NEWPGM", "OLDPGM", "PGMMAIN", "job:MAINJOB"],
-      "rationale": "The tree holds one job, one driver program and two subprograms, and no dataset, so nothing in it is shared with another entry point. The seed puts all four units in the batch-readonly family and there is no fact that would cut them apart. The wave is deployable and rollable back as one unit, by switching the JCL step back to the legacy PGMMAIN. Its boundary is testable only at job level (return code, job log, and any output the client holds), because the extractor sees no files. This is the whole system in one wave, so a single wave is a big-bang for these four units. Its name is an inference: the job is the only entry point, and it is taken to be the nightly batch cycle the client said must not break.",
-      "unblocks": "Nothing else in this tree. It is the only wave, so it is the whole nightly batch cycle. Per the skill this is a chore with no dependent wave, unless the client's full system holds more than this fragment.",
-      "blast_radius": "medium",
-      "confidence": "low",
-      "evidence": [{"file": "app/jcl/MAINJOB.jcl", "line": 1}, {"file": "app/jcl/MAINJOB.jcl", "line": 2}, {"file": "app/cbl/PGMMAIN.cbl", "line": 4}, {"file": "app/cbl/PGMMAIN.cbl", "line": 5}]
+     "file": "app/jcl/MAINJOB.jcl",
+     "line": 1
     }
-  ],
-  "unassigned": [],
-  "deviations": []
+   ]
+  }
+ ],
+ "unassigned": [],
+ "deviations": []
 }

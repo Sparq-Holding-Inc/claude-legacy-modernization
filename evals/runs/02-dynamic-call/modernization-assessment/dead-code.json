@@ -1,33 +1,22 @@
 {
-  "telemetry": "none",
-  "unreachable": [],
-  "dormant": [],
-  "unknown": [
-    {
-      "id": "PROGA",
-      "reason": "No entry point in the tree names it, and no JCL, CSD or scheduler file exists to run it. It has no LINKAGE SECTION and ends with STOP RUN, so it reads as a main program (inference), but that is not an extractor entry point. Dormancy was not measured: the tree has no git dates.",
-      "confidence": "low",
-      "evidence": [
-        {
-          "file": "app/cbl/PROGA.cbl",
-          "line": 10
-        }
-      ]
-    },
-    {
-      "id": "PROGB",
-      "reason": "No static caller and no entry point in the tree. PROGA's computed call at line 9 takes its target from ACCEPT and could name PROGB, so it stays unknown and is not proposed for deletion. It holds only GOBACK.",
-      "confidence": "low",
-      "evidence": [
-        {
-          "file": "app/cbl/PROGB.cbl",
-          "line": 4
-        },
-        {
-          "file": "app/cbl/PROGA.cbl",
-          "line": 9
-        }
-      ]
-    }
-  ]
+ "telemetry": "none",
+ "unreachable": [],
+ "dormant": [],
+ "unknown": [
+  {
+   "id": "PROGA",
+   "reason": "No entry point in the tree, so nothing is provably unreachable. It makes a computed call itself, and it has no static caller. Not measured for dormancy: the tree has no git dates. Do not delete.",
+   "confidence": "low",
+   "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 9}]
+  },
+  {
+   "id": "PROGB",
+   "reason": "No static caller and no entry point. The computed CALL WS-PGM-NAME in PROGA could name it, and the name comes from ACCEPT at run time, so the target set cannot be bounded. Unknown, not unreachable. Not measured for dormancy: the tree has no git dates. Do not delete.",
+   "confidence": "low",
+   "evidence": [
+    {"file": "app/cbl/PROGB.cbl", "line": 1},
+    {"file": "app/cbl/PROGA.cbl", "line": 9}
+   ]
+  }
+ ]
 }

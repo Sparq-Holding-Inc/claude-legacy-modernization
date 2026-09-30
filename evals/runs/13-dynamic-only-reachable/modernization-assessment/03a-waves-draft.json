@@ -24,7 +24,7 @@
  "unassigned": [
   {
    "id": "HIDDEN01",
-   "reason": "no static path, but a computed call or a submit inside COBOL could reach it. See dead-code.json."
+   "reason": "not reached by any static edge, and 1 reachable computed call(s) could target it, for example at app/cbl/PGMMAIN.cbl:9"
   }
  ]
 }

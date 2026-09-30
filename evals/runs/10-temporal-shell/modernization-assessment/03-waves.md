@@ -1,59 +1,71 @@
 # 03 Waves
 
-Target state: `refactor`. It was given as a flag. The seed is in `03a-wave-seed.md` and the plan is in
-`modernization-assessment/waves.json`.
+Target state: refactor. The plan is one wave. It is the extractor's seed with no deviation
+(`03a-wave-seed.md`, `modernization-assessment/waves.json:1`). The scores that fed it are in
+`modernization-assessment/risks.json:1`.
 
-## The plan
+| Wave | Family | Units | Blast radius | Confidence | Evidence |
+|---|---|---|---|---|---|
+| 1 | batch-utility | job:JOBA, job:JOBB, job:JOBC, sch:scripts/nightly.sh | high | low | `jcl/JOBA.jcl:1`, `jcl/JOBB.jcl:1`, `jcl/JOBC.jcl:1` |
 
-| Wave | Family | Name | Units | Blast radius | Confidence | Evidence |
-|---|---|---|---|---|---|---|
-| 1 | batch-utility | Nightly batch cycle and its wrapper | job:JOBA, job:JOBB, job:JOBC, sch:scripts/nightly.sh | medium | low | `jcl/JOBA.jcl:1`, `jcl/JOBB.jcl:1`, `jcl/JOBC.jcl:1` |
+## Wave 1. Nightly batch cycle
 
-One wave. The seed put every entry point in the first family, batch jobs that run no application
-program and touch no shared data. Families 2 to 7 are empty. Every unit is placed. There are no
-deviations, and that is a fine answer here: no unit had a reason the skill counts as one.
+**What it holds.** The wrapper `sch:scripts/nightly.sh` and the three jobs. Two jobs are submitted by
+the wrapper, JOBA and then JOBB (`scripts/nightly.sh:4`, `scripts/nightly.sh:5`). The third, JOBC, is not.
 
-## The four tests
+**Why one wave is the right cut.**
 
-| Test | Result | Evidence |
-|---|---|---|
-| Deployed independently, behind a flag or facade | Yes. No shared dataset or program ties the wave to anything outside it, because it is the whole tree. The flag is the wrapper: point the nightly trigger at the old or the new chain. | `scripts/nightly.sh:4` |
-| Rolled back independently | Yes, by pointing the trigger back at the old wrapper. Inference: it depends on how the client's scheduler starts the wrapper, which is not in the tree. | inference |
-| Testable boundary | Yes. Assert job order and return codes at the wrapper edge. See `06-test-strategy.md`. | `scripts/nightly.sh:5` |
-| Delivers something a stakeholder can name | Yes: "the nightly batch cycle runs on the target platform in the same order". | `scripts/nightly.sh:2` |
+- There is no shared dataset, no contract edge, no call cycle and no articulation point, so no
+  structure offers a place to cut (`analysis` fields `sccs`, `data_hubs`, `articulation_points`).
+- The wave has four units, far below the 25 that would need a cut.
+- Splitting JOBA from JOBB would put the one temporal edge across a wave boundary
+  (`scripts/nightly.sh:4`, `scripts/nightly.sh:5`), which is the failure the plan is meant to avoid.
+- The nightly cycle is the must-not-break item. It maps to this wave and to nothing else. The mapping
+  rests on the wrapper's own comment, "Nightly chain" (`scripts/nightly.sh:2`). It is a match on
+  a name, and nothing in the tree confirms that the client means this script (inference).
 
-## What the wave unblocks
+**The four tests for a valid wave.**
 
-Nothing else in this tree. It is the whole tree, so this wave is a chore that carries the
-must-not-break item. What it proves is that the target scheduler can hold the JOBA-then-JOBB order.
-It cannot prove the toolchain on real logic, because the tree holds none.
+| Test | Result | Confidence | Evidence |
+|---|---|---|---|
+| Deploys independently, behind a flag or facade | Yes. The new orchestration can run beside the old wrapper, and the old wrapper stays as the fallback. | medium | inference |
+| Rolls back independently | Yes. Rollback means running the old wrapper again. This holds only if the jobs have no side effect the old wrapper does not undo, and the tree shows none. | medium | `jcl/JOBA.jcl:2`, `jcl/JOBB.jcl:2` |
+| Has a testable boundary | Weak. The tree shows no output. The boundary is job order, return codes and whatever the client says the jobs produce. | low | `jcl/JOBA.jcl:2`, `jcl/JOBB.jcl:2` |
+| Delivers something a stakeholder can name | Yes. The nightly cycle runs on the new platform and the shell wrapper is retired. | medium | inference |
 
-## Why this family is sound, and where it is not
+**What it unblocks.** Nothing in this tree. No data, contract or call edge reaches these jobs from
+another unit (`analysis.fan_in` is empty, analysis). It is a chore in sequencing terms. Its value is the
+retirement of the wrapper and an order and return code harness that later additions to the tree can
+reuse.
 
-Sound: the three jobs share no dataset, no copybook and no program, so no call, data or contract edge
-crosses the wave boundary. The seed's tests all agree.
+**Order of work inside the wave.** These are steps, not waves.
 
-Not proven: the tree shows three no-op jobs. If production JCL is richer than the tree, the seed
-would put those jobs in later families, and the wave count would change. Inference.
+1. Build the order and return code harness and run it against the legacy wrapper first. Prove it on the old
+   system before it judges the new one. This is the low-high rule: the port is easy and the verification
+   is the work (`modernization-assessment/risks.json:4`).
+2. Port the wrapper's order and stop-on-failure rule (`scripts/nightly.sh:3` through `scripts/nightly.sh:5`)
+   into the target orchestration.
+3. Move JOBA, then JOBB, behind the harness (`jcl/JOBA.jcl:2`, `jcl/JOBB.jcl:2`).
+4. JOBC gets no port work until the client confirms whether it still runs (`scripts/nightly.sh:2`,
+   `scripts/nightly.sh:6`).
 
-## Must-not-break: the nightly batch cycle
-
-The cycle is the wrapper and the two jobs it submits: `scripts/nightly.sh:4` and `scripts/nightly.sh:5`.
-They are the equivalence anchors. The one ordering fact the harness must keep is JOBA before JOBB.
-
-## JOBC
-
-JOBC stays in wave 1 as the seed placed it. The extractor counts every job as an entry point and finds
-no scheduler that names it. The wrapper calls it retired at `scripts/nightly.sh:2` and does not submit it at
-`scripts/nightly.sh:6`. That is a comment. Telemetry is `none` and only one scheduler was parsed, so I did
-not drop JOBC from the plan or call it dead. It is in `do_not_port` in `risks.json` as a provisional
-entry: confirm, then retire it. Porting it would cost almost nothing, which makes leaving it in the
-safe error.
-
-## Units not placed
-
-None.
+**Confidence.** `low`. The membership of the wave is certain, because it comes from facts. What the wave
+protects is not. Three things are not in the tree: what `submit` does, what JOBA and JOBB do in production
+(they run only IEFBR14 here), and whether JOBC is retired. If any of them differs from what the tree
+shows, the wave's blast radius and estimate change.
 
 ## Deviations from the seed
 
-None.
+None. I tested each reason the skill counts as valid.
+
+| Reason | Applies | Confidence | Evidence |
+|---|---|---|---|
+| Must-not-break item, SCC or facade dependency forces a unit into another wave | No. The must-not-break item is already whole in wave 1. | high | analysis field `wave_seed` |
+| A wave over 25 units needs a cut | No. The wave holds 4 units. | high | analysis field `wave_seed` |
+| Something the extractor could not see changes what a unit is | Considered for JOBC and rejected. The comment says it is retired, but a comment is not proof, and no other wave exists for it to join. It goes to Open Questions and to `do_not_port` as provisional. | medium | `scripts/nightly.sh:2`, `scripts/nightly.sh:6` |
+| A high-high unit is placed early | No unit is high-high. The wrapper is low-high. | high | `modernization-assessment/risks.json:13` |
+
+## Not placed
+
+Nothing. Every unit is placed (`03a-wave-seed.md`). Steps, the external utility `ext:IEFBR14` and the
+rest move with their owners.

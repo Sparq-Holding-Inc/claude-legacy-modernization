@@ -1,23 +1,45 @@
 # 05 Dead code
 
-Telemetry: none. Every claim in this file is provisional. The register is in `modernization-assessment/dead-code.json`.
+Telemetry: none. Every claim in this file is provisional. The candidates come from `05a-dead-code-candidates.md`
+and `modernization-assessment/dead-code.json`.
 
 ## Result
 
-All three buckets are empty. The extractor's candidates are in `05a-dead-code-candidates.md`, and I kept them as they are.
+All three buckets are empty.
 
-| Bucket | Units | Reason | Confidence | Evidence |
-|---|---|---|---|---|
-| Unreachable | none | Every unit is reached from `job:READJOB` or `job:WRITEJOB`. Both jobs are entry points (`analysis`, field `entry_points`). | medium | `app/jcl/READJOB.jcl:2`, `app/jcl/WRITEJOB.jcl:2` |
-| Reachable but dormant | none. Not measured. | No last-modified dates exist, because the work folder is not a git repository. The extractor did not compute this bucket. An empty list here means not measured. | low | analysis (field `warnings`) |
-| Unknown | none | The extractor found no computed call, so no reachable code could reach an unlisted program (`analysis`, field `unresolved_dynamic`). | medium | analysis (field `unresolved_dynamic`) |
+| Bucket | Count | Confidence | Evidence |
+|---|---|---|---|
+| Unreachable | 0 | high, as far as the tree goes | analysis: `dead_code_candidates` in `modernization-assessment/graph.json` |
+| Reachable but dormant | 0, and this means not measured | none | analysis: `warnings` in `modernization-assessment/graph.json` |
+| Unknown | 0 | high, as far as the tree goes | analysis: `unresolved_dynamic` in `modernization-assessment/graph.json` |
 
-## What is not proved
+## Why each bucket is empty
 
-- **Dormancy was not measured.** With no git history and no telemetry, I cannot say whether either job still runs. Nothing here proposes deletion on a date.
-- **No scheduler was parsed.** A job that no parsed scheduler names still counts as an entry point, so it never shows in a bucket (`analysis.warnings`). I cannot tell whether WRITEJOB and READJOB still run in the nightly cycle. That is a question for the client (`00-summary.md`).
-- **The dataset name says TEST.** SPARQ.TEST.MASTER (`app/jcl/WRITEJOB.jcl:3`) may be a test fixture. If the whole pair is a test harness that nobody runs, the assessment describes dead code. Only the client can say so, and that would be a finding of its own.
+- **Unreachable.** Both programs are started by a JCL job, and both jobs are entry points. Both copybooks are
+  included by a program that a job runs. Evidence: `app/jcl/READJOB.jcl:2`, `app/jcl/WRITEJOB.jcl:2`,
+  `app/cbl/PGMR.cbl:11`, `app/cbl/PGMW.cbl:11`. Nothing in the tree is left without a path.
+- **Dormant.** This bucket was not computed. The tree is not a git repository, so no unit has a last-modified
+  date. An empty dormant list here means not measured, not that nothing is old. Evidence: analysis: `warnings`
+  in `modernization-assessment/graph.json`, and the `Last modified` column of `01-inventory.md`. To measure it
+  the client would have to supply last-change dates, or run the extractor from a checkout with history.
+- **Unknown.** No computed call exists, so no program can hide behind one. Evidence: analysis:
+  `unresolved_dynamic` in `modernization-assessment/graph.json`. No embedded JCL was found either. Evidence:
+  analysis: `embedded_jcl` in `modernization-assessment/graph.json`.
 
-## Copybooks
+## What this does not say
 
-Both copybooks are included by a reachable program (`app/cbl/PGMW.cbl:11`, `app/cbl/PGMR.cbl:11`), so neither is unreachable. They duplicate one layout (see `02-coupling.md`). That is a consolidation candidate for wave 2, and it is not dead code.
+- A job that no parsed scheduler names still counts as an entry point, so it never shows in a bucket. No
+  scheduler was parsed. Both jobs are therefore reachable only in the sense that they exist. Whether either one
+  still runs is not known, and `unscheduled_jobs` is empty only because there was no scheduler to compare
+  against. Evidence: analysis: `unscheduled_jobs` and `warnings` in `modernization-assessment/graph.json`.
+  This is an open question for the client (see `00-summary.md`).
+- With no telemetry, "reachable" means reachable on paper. A job log or SMF extract for the last 12 months
+  would show whether `READJOB` and `WRITEJOB` ran. Inference.
+- The dataset name contains `TEST`. If this is a test artifact in a system that has a production twin, both jobs
+  may be test scaffolding. Inference. Evidence: `app/jcl/WRITEJOB.jcl:3`. It is not proposed as dead code,
+  because a name is not evidence.
+
+## Proposal
+
+No deletion is proposed. Instrument both jobs and both programs first, to collect the telemetry that is missing.
+Inference. Evidence: `app/jcl/READJOB.jcl:1`, `app/jcl/WRITEJOB.jcl:1`.
