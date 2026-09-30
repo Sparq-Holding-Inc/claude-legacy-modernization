@@ -1,56 +1,103 @@
 # 02 Coupling
 
-The full edge list is in `02a-edge-tables.md`. This file is the argument. The tree is small: 3 JCL jobs, 3 steps, 1 shell wrapper, and one external system program (IEFBR14). There are no COBOL programs, copybooks, datasets, or computed calls, so the extractor found no call, data or contract coupling among application code. Every finding below is either an extractor fact with a citation or is labeled inference.
+Facts come from `graph.json` and `02a-edge-tables.md`. Anything I added by reading source is labeled
+inference. The extractor found 9 edges: 5 call, 3 include, 1 temporal. It found no data edge and no
+contract edge. The tree has no application program, no copybook and no dataset.
 
-## Pattern 1. Temporal coupling is the only real coupling, and it lives in a shell wrapper
+## What the tree holds
 
-`scripts/nightly.sh:4` submits JOBA and `scripts/nightly.sh:5` submits JOBB. The extractor records this as one temporal edge, `job:JOBA` to `job:JOBB`, at medium confidence. Nothing in the JCL says JOBB needs JOBA (`jcl/JOBA.jcl:2`, `jcl/JOBB.jcl:2`). The order exists only because of the line order in the wrapper. A port that reads the JCL alone would lose it.
+Every JCL step runs `IEFBR14`, a system program that does nothing, and none of the three jobs has a
+DD statement. The only call edges point at `ext:IEFBR14`.
 
-Two details make this edge weaker than it looks.
+| Fact | Detail | Evidence |
+|---|---|---|
+| JOBA runs only IEFBR14 | one step, no DD | `jcl/JOBA.jcl:2` |
+| JOBB runs only IEFBR14 | one step, no DD | `jcl/JOBB.jcl:2` |
+| JOBC runs only IEFBR14 | one step, no DD | `jcl/JOBC.jcl:2` |
+| COBOL, copybooks, datasets, procs | none scanned | analysis (`meta.files_seen` in `modernization-assessment/graph.json`) |
 
-- `set -e` at `scripts/nightly.sh:3` aborts the wrapper if a `submit` command fails. So JOBB is never submitted when the JOBA submit fails.
-- The `submit` command is not defined anywhere in the tree. If it returns when the job is queued, the order guaranteed is order of submission, not order of completion, and `set -e` sees the submit status, not JOBA's return code. If it waits and returns the job's return code, the order is a real completion dependency. The source does not say which. Inference, and the first thing to ask the client.
+## The coupling patterns that constrain the sequence
 
-## Pattern 2. One retired job left behind
+### 1. Temporal coupling held only by line order in a shell wrapper
 
-`scripts/nightly.sh:2` says JOBC is retired and `scripts/nightly.sh:6` has its submit commented out. `jcl/JOBC.jcl:1` is still in the tree. The extractor lists `job:JOBC` under `unscheduled_jobs` and keeps it as an entry point, because a job no scheduler names may be run by hand. Whether anything else runs it cannot be settled from the tree. It is a dead-code question (see `05-dead-code.md`), not a wave question.
+| Before | After | Confidence | Why it matters | Evidence |
+|---|---|---|---|---|
+| job:JOBA | job:JOBB | medium | The order is the order of two `submit` lines. Nothing in either JCL member states it. A port that treats the two jobs as independent tasks can run them in parallel or in reverse with no abend. | `scripts/nightly.sh:4`, `scripts/nightly.sh:5` |
 
-## Pattern 3. What is absent
+The extractor rates this edge `medium` because it is a submit order. Whether JOBB starts after JOBA
+ends, or only after JOBA is submitted, depends on what `submit` does. `submit` is not defined in the
+tree. That is inference, and it is the largest open question of the assessment.
 
-There are no `data` or `contract` edges. All three steps run `IEFBR14` (`jcl/JOBA.jcl:2`, `jcl/JOBB.jcl:2`, `jcl/JOBC.jcl:2`), a system utility that does nothing, and none has a DD statement. Either the tree is a skeleton and the real programs and datasets live elsewhere, or these jobs are placeholders. That is an open question, not a finding. It bounds everything else in this assessment: the coupling that matters for a real nightly cycle, such as shared VSAM files and record layouts, cannot be seen here.
+### 2. Failure coupling the graph does not model
+
+| Item | What the source shows | Confidence | Evidence |
+|---|---|---|---|
+| `set -e` | The wrapper stops if a `submit` command fails, so JOBB is not submitted when the JOBA submit fails. It says nothing about JOBA ending with a bad return code. | low | `scripts/nightly.sh:3` |
+
+This is inference. The extractor does not model shell control flow, so no edge carries it. A target
+scheduler must say which of the two behaviors it keeps: stop on a failed submit, or stop on a failed job.
+
+### 3. No data, call or contract coupling
+
+There is nothing to sequence around: no shared dataset, no shared layout, no program calling
+another. This is also a gap. A nightly cycle that touches no data has no business purpose the tree
+can show, so the real work is probably not in this tree. See the open questions in `00-summary.md`.
 
 ## Cluster view
 
 ```mermaid
 graph LR
-  T["trigger (not in tree)"] -. inference .-> W["nightly.sh wrapper"]
-  W -->|submit 1| A["JOBA"]
-  W -->|submit 2, after JOBA| B["JOBB"]
-  W -. commented out .-> C["JOBC (retired)"]
-  A --> X["IEFBR14 (system no-op)"]
+  W["scripts/nightly.sh wrapper"] -->|"submit 1st"| A["JOBA"]
+  W -->|"submit 2nd"| B["JOBB"]
+  A -. "order, medium" .-> B
+  C["JOBC, retired per comment, not submitted"]
+  A --> X["IEFBR14 (no-op utility)"]
   B --> X
   C --> X
 ```
 
-## Structure the extractor computed
+## Structure computed from the graph
 
-| Fact | Result | Evidence |
+| Fact | Value | Evidence |
 |---|---|---|
-| Strongly connected components | none, so no wave can split one | inference |
-| God modules | none, there is no program fan-in | inference |
-| Articulation points | none | inference |
-| Data hubs | none, no datasets | inference |
-| Computed calls (`unresolved_dynamic`) | none | inference |
-| Unscheduled jobs | `job:JOBC` only | `scripts/nightly.sh:6` |
+| Strongly connected components | none, so no unit is forced to move with another | analysis (`sccs`) |
+| God modules | none | analysis (`god_modules`) |
+| Articulation points | none | analysis (`articulation_points`) |
+| Data hubs | none | analysis (`data_hubs`) |
 
-The evidence cells for the rows that say inference record an absence. The extractor found nothing, and the limits in `graph.json` `meta.limits` (no IF/THEN/ELSE or COND, no internal-reader submits, only shell wrappers that name JCL files) mean an absence is only an absence in what it reads.
+The structure facts are computed over programs, and the tree has zero programs (`reachable_programs`
+is 0). Empty here means there was nothing to measure. It does not show that the system is flat.
 
-## Dependency-cartographer work, done inline
+## Edges the extractor left open, worked by hand
 
-There were 0 unresolved computed calls, 0 low confidence edges, and 1 medium confidence edge (the temporal edge above). That is under the threshold for a hand-off, so I worked it myself. Findings on the medium edge are in Pattern 1 and are inference.
+There are no computed calls (`unresolved_dynamic` is empty). One edge has confidence below high, the
+JOBA to JOBB order above. That is far fewer than 20, so I worked it myself and did not hand it to the
+`dependency-cartographer` agent. I followed that agent's method inline.
+
+Computed calls:
+
+| Caller | Node | Reaches | Evidence |
+|---|---|---|---|
+| none | none | nothing to resolve | analysis (`unresolved_dynamic` is empty) |
+
+Medium and low confidence edges:
+
+| Edge | What the source shows | Still open | Evidence |
+|---|---|---|---|
+| job:JOBA to job:JOBB, temporal | JOBA is submitted on line 4 and JOBB on line 5, with `set -e` set before both. | Whether `submit` waits for job end, and which return code it passes back. Inference: the source cannot settle this. | `scripts/nightly.sh:4`, `scripts/nightly.sh:5`, `scripts/nightly.sh:3` |
+
+Things the extractor does not model, checked by reading:
+
+| Item | Found | Evidence |
+|---|---|---|
+| JCL `IF/THEN/ELSE` or `COND=` | none in the three members | `jcl/JOBA.jcl:2` |
+| A job submitted from a program through the internal reader | no program exists to do it | analysis (`reachable_programs` is 0) |
+| CICS `RETURN TRANSID`, `START`, `SEND MAP` chains | no CICS source in the tree | analysis (`meta.files_seen` shows 0 COBOL) |
+| A commented-out submit of JOBC | not an edge, and not proof the job is dead | `scripts/nightly.sh:6` |
 
 ## The honest boundary
 
-- What starts `scripts/nightly.sh` is not in the tree (cron, an enterprise scheduler, or an operator). It is an entry point with no caller. Inference.
-- The extractor does not follow jobs submitted from inside programs, and there are no programs here to submit any.
-- `IEFBR14` is the only thing the jobs execute. If production jobs run other programs, the tree is not the system.
+The graph is complete for what was scanned, and what was scanned is small. Four things sit outside it.
+The definition of `submit`. Any scheduler other than this wrapper: only Control-M XML and shell
+wrappers that name JCL files are read. Any JCL, proc or program that was not delivered. And the real
+content of jobs that here do nothing.

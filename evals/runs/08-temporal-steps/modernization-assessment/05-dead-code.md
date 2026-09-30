@@ -1,38 +1,29 @@
 # 05 Dead code
 
-Telemetry is `none`. Every dead-code claim below is provisional.
+Telemetry: none. Every dead-code claim here is provisional. The candidates are in
+`modernization-assessment/05a-dead-code-candidates.md`. The register is `modernization-assessment/dead-code.json`.
 
-## Result
+| Bucket | Units | Confidence | Evidence |
+|---|---|---|---|
+| Unreachable | none | high | `analysis` field `dead_code_candidates` |
+| Reachable but dormant | none. **Not measured.** | low | `analysis` field `warnings` |
+| Unknown | none | high | `analysis` field `unresolved_dynamic` is empty |
 
-| Bucket | Count | Evidence |
-|---|---|---|
-| Unreachable | 0 | `app/jcl/SEQJOB.jcl:2` |
-| Reachable but dormant | 0 | inference |
-| Unknown | 0 | `app/cbl/PGMA.cbl:4` |
+## Dormant is not measured
 
-## Why each bucket is empty
+The target is not a git repository, so no unit has a last-modified date. The dormant bucket was NOT
+computed (`analysis` field `warnings`). An empty dormant list therefore means not measured. It does not
+mean nothing is dormant. The same reading applies to the unreachable bucket only in one direction: an
+empty unreachable list is a real result, because all three programs are reached from `job:SEQJOB`
+(`app/jcl/SEQJOB.jcl:2`, `app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:4`).
 
-- **Unreachable: 0.** All nine nodes are reachable from the one entry point, `job:SEQJOB`. Each
-  program is run by a step of that job. Evidence: `app/jcl/SEQJOB.jcl:2`, `app/jcl/SEQJOB.jcl:3`,
-  `app/jcl/SEQJOB.jcl:4`.
-- **Unknown: 0.** The tree has no computed call, so no program is held open by one. Evidence:
-  `app/cbl/PGMA.cbl:4`, `app/cbl/PGMB.cbl:4`, `app/cbl/PGMC.cbl:4`.
-- **Dormant: 0, and this is a gap, not a finding.** Every `last_modified` is null. The work folder
-  is not under git, so the extractor had no dates. Dormancy could not be tested. An empty dormant list
-  does not mean the code is fresh. Ask for last-change dates from the client's source control.
-  Evidence: inference.
+## Jobs that no scheduler names
 
-## Reachable, but probably does nothing
+`job:SEQJOB` counts as an entry point, so it never shows in a bucket. No scheduler artifact was
+parsed (`analysis` field `warnings`), so nothing says whether SEQJOB still runs. Ask.
 
-The last step, on line 5, runs IEFBR14 with no DD statements. IEFBR14 is a system null program, so
-this step appears to do nothing. It is reachable, so it is not in any bucket. It is listed under
-`do_not_port` in `risks.json` as a candidate, and needs the client to confirm that no restart or
-scheduler rule names it. Do not delete on this reading alone. Inference. Evidence:
-`app/jcl/SEQJOB.jcl:5`.
+## External program
 
-## What would change this
-
-- A scheduler export could show SEQJOB is never triggered. That would make the whole tree dormant.
-  Evidence: inference.
-- Job logs or SMF records for the last 12 months would turn every line above from provisional into
-  evidence. Evidence: inference.
+`ext:IEFBR14` is a system utility that does nothing. It is not in the tree, and it is called at
+`app/jcl/SEQJOB.jcl:5`. It is not a candidate for deletion. The step that calls it is a candidate
+for review (inference): a step that runs a null program after the last real step adds nothing.

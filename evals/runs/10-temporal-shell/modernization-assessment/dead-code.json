@@ -1,17 +1,6 @@
 {
   "telemetry": "none",
-  "unreachable": [
-    {
-      "id": "job:JOBC",
-      "reason": "The wrapper comment says JOBC is retired and its submit line is commented out, and no other parsed scheduler names it. The extractor still lists it as an entry point because a job no scheduler names could be run by hand, so its own candidate lists are empty. There is no telemetry, so this is provisional: confirm no other scheduler or operator submits it before deleting.",
-      "confidence": "medium",
-      "evidence": [
-        {"file": "scripts/nightly.sh", "line": 2},
-        {"file": "scripts/nightly.sh", "line": 6},
-        {"file": "jcl/JOBC.jcl", "line": 1}
-      ]
-    }
-  ],
+  "unreachable": [],
   "dormant": [],
   "unknown": []
 }

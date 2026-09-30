@@ -1,66 +1,74 @@
 # 00 Summary
 
-Assessment of the tree in `.` (2 COBOL programs, 11 lines, 1 call edge). Facts came from `extract.py`.
-Judgment is mine, and it is labeled `inference` where the tree does not show it.
-
 ## Scoping answers
 
-| Question | Answer | How it was set |
+| Question | Answer | Source |
 |---|---|---|
-| Target state | refactor | `--target refactor` flag |
-| What must not break | the nightly batch cycle | `--must-not-break` flag |
-| Runtime telemetry | none | `--telemetry none` flag. Every dead-code claim is provisional. |
+| Target state | refactor | flag `--target refactor` |
+| Must not break | the nightly batch cycle | flag `--must-not-break` |
+| Runtime telemetry | none | flag `--telemetry none` |
+| Scope | `.` | no scope argument given |
 
-All three came as flags, so no defaults were applied and nothing was assumed.
+All three answers came as flags: no defaults applied.
 
-## Result
+## What was assessed
 
-- **Wave count: 1.** PROGA and PROGB are one deployable unit: one static call, no shared dataset, no
-  cycle, no articulation point (`app/cbl/PROGA.cbl:6`, `02-coupling.md`). I did not invent a second wave.
-  See `03-waves.md` for what I would cut if the system were ten times larger.
-- **Estimate:** 5 to 10 person-days for wave 1, low confidence. The range is driven by the missing JCL and
-  scheduler, not by the code (`04-estimate.md`).
-- **Dead code:** nothing is unreachable. Both programs are unknown, because the tree has no entry point
-  (`modernization-assessment/graph.json:109`). Nothing is proposed for deletion (`05-dead-code.md`).
-- **Risk:** both programs score port difficulty 1 and blast radius 2, `low-low` (`risks.json`).
-  The `dependency-cartographer` agent was not needed: there are no open edges.
+Two COBOL programs, 11 lines in all. `PROGA` displays a message, calls `PROGB`, and stops. `PROGB` returns.
+The tree holds no copybooks, JCL, procs, CICS definitions, scheduler files, shell wrappers or datasets
+(`meta.files_seen` in `modernization-assessment/graph.json`).
+
+| Finding | Confidence | Evidence |
+|---|---|---|
+| One call edge: PROGA calls PROGB with a literal target, resolved, high confidence | high | `app/cbl/PROGA.cbl:6` |
+| PROGB does nothing but return | high | `app/cbl/PROGB.cbl:4` |
+| No datasets, no contract edges, no temporal edges, no computed calls, no embedded JCL | high for these files | analysis: `edge_counts`, `unresolved_dynamic`, `embedded_jcl` |
+| No entry point exists, so no reachability can be shown and both units are unknown | high | analysis: `entry_points`, `dead_code_candidates` |
+| PROGA writes the text "CALL FAILED IF WE GET HERE" on every run, before the call, whether or not the call works | high | `app/cbl/PROGA.cbl:5` |
+| Nothing handles a failed CALL | medium | `app/cbl/PROGA.cbl:6` |
+
+## Wave count
+
+**1**, and it is a placeholder. The extractor cut zero waves, because the tree has no entry point. The wave
+validator rejects an empty plan, so PROGA and PROGB were placed in one wave by a recorded deviation. See
+`03-waves.md`. Confidence: low.
 
 ## Single largest risk
 
-The tree holds no JCL, scheduler definition, shell wrapper or dataset
-(`modernization-assessment/graph.json:20-29`). Nothing links these two programs to the nightly batch cycle
-the client says must not break. The wave is low risk on the evidence, but the evidence is a fragment. The
-job order, the return code contract and any downstream reader of PROGA's output are all unseen. Inference.
+The must-not-break item, the nightly batch cycle, cannot be assessed from this tree. Nothing in it shows
+where PROGA sits in that cycle, what runs before or after it, or whether it runs at all. A migration
+planned from these two files could break the cycle in a way this assessment cannot see. Evidence: analysis:
+`warnings` (no entry points found), and `app/cbl/PROGA.cbl:1`. Inference for the consequence.
 
 ## Open Questions for the client's engineers
 
-| # | Question | Evidence |
-|---|---|---|
-| 1 | What job, scheduler entry or other caller starts PROGA, and what runs before and after it in the nightly cycle? The extractor found no entry point. | `modernization-assessment/graph.json:72` |
-| 2 | Is "the nightly batch cycle" just these two programs, or is most of it missing from the tree (JCL, procs, other programs, datasets)? | `modernization-assessment/graph.json:20-29` |
-| 3 | Does anything read PROGA's console line `CALL FAILED IF WE GET HERE`, and is it intended? It prints on every run, before the call. | `app/cbl/PROGA.cbl:5` |
-| 4 | Does any scheduler condition or downstream job depend on PROGA's return code? `STOP RUN` sets none. | `app/cbl/PROGA.cbl:7` |
-| 5 | Does the production load module for PROGB match this four-line `GOBACK` source? The CALL is by literal name, so the link-edit decides. | `app/cbl/PROGB.cbl:4` |
-| 6 | What does the runtime do if the CALL fails? There is no `ON EXCEPTION` clause. | `app/cbl/PROGA.cbl:6` |
-| 7 | Can you supply 12 months of job logs or SMF records for PROGA, including month-end and fiscal year-end? This is the only route to non-provisional dead-code claims and to a replay oracle. | inference |
-| 8 | Do you use a scheduler other than Control-M or shell wrappers (for example CA-7 or TWS)? The extractor reads only those two, so such a scheduler would be invisible. | `modernization-assessment/graph.json:18` |
-
-## Files the extractor did not parse
-
-None. `unparsed` is empty (`modernization-assessment/graph.json:68`).
+1. Which JCL job and which scheduler entry run PROGA, and where does that job sit in the nightly batch
+   cycle? Neither JCL nor a scheduler is in the tree (analysis: `entry_points` is empty).
+2. Does anything other than PROGA call PROGB, in code that is not in this tree? If so, PROGB is a shared
+   subprogram and wave 1 splits.
+3. Is the DISPLAY at `app/cbl/PROGA.cbl:5` intentional? Its text says the call failed, but it prints on every run
+   before the call. Does any log scraper, alert or operator procedure act on that text?
+4. Is the CALL at `app/cbl/PROGA.cbl:6` bound statically or loaded at run time (the DYNAM option), and what
+   should happen if PROGB is missing? The tree does not show it, and no ON EXCEPTION is coded.
+5. Was the rest of the system left out of this copy on purpose? Copybooks, JCL, procs, CSD, BMS and
+   scheduler files all count zero in `meta.files_seen`. The extractor listed nothing as not parsed, so the
+   gap is in the tree and not in the tool.
+6. Can you supply a full business cycle of job logs or SMF records for the job that runs PROGA? With
+   `--telemetry none`, every dead-code claim is provisional, and the oracle for wave 1 is weak.
+7. Can you supply source-control or library change dates? The folder is not a git repository, so the
+   dormant bucket was not computed (analysis: `warnings`). An empty dormant list means not measured.
 
 ## Extractor limits that touch this system
 
-| Limit | Why it matters here | Evidence |
-|---|---|---|
-| Only Control-M XML and shell wrappers that name JCL files are read as schedulers. | No scheduler was found. Another scheduler product would be invisible, so temporal coupling is unknown. | `modernization-assessment/graph.json:18` |
-| IF/THEN/ELSE and COND= in JCL are not modeled. Nested PROCs, INCLUDE members and jobs submitted through the internal reader are not followed. | No JCL is in the tree. If the cycle's JCL is added, these limits apply to it. | `modernization-assessment/graph.json:15-16` |
-| A called subprogram gets no DDs from its caller's JCL step. | Not triggered today, because neither program uses a dataset. It would matter once JCL arrives. | `modernization-assessment/graph.json:13` |
-| EXEC CICS RETURN TRANSID, START and SEND MAP are not edges. | Neither source uses CICS, so this does not touch the system today. Inference from a read of both files. | `app/cbl/PROGA.cbl:3-7` |
-| COBOL is read as fixed format. Free format files are listed as not parsed. | Both files parsed, so they are fixed format. | `modernization-assessment/graph.json:10` |
+- No last-modified dates, so dormancy was not computed (analysis: `warnings`).
+- Only Control-M XML and shell wrappers that name JCL files are read as schedulers, and none were present, so
+  no job order is modeled (`meta.limits`).
+- IF/THEN/ELSE and COND= in JCL are not modeled. This would matter as soon as JCL arrives (`meta.limits`).
+- A variable call target is resolved only from VALUE clauses and literal MOVEs in the same program. Neither
+  program makes a variable call (`meta.limits`).
+- Files not parsed: none (`unparsed` is empty).
 
-## Artifacts
+## Files
 
-`01-inventory.md`, `02a-edge-tables.md`, `02-coupling.md`, `03-waves.md`, `04-estimate.md`,
-`05a-dead-code-candidates.md`, `05-dead-code.md`, `06-test-strategy.md`, `graph.json`, `waves.json`,
-`dead-code.json`, `risks.json`.
+`01-inventory.md`, `02-coupling.md`, `02a-edge-tables.md`, `03-waves.md`, `03a-wave-seed.md`,
+`03a-waves-draft.json`, `04-estimate.md`, `05-dead-code.md`, `05a-dead-code-candidates.md`,
+`06-test-strategy.md`, and the four JSON outputs `graph.json`, `waves.json`, `risks.json`, `dead-code.json`.

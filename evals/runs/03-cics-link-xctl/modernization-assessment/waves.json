@@ -3,10 +3,11 @@
   "waves": [
     {
       "wave": 1,
-      "name": "CICS routing chain (PROGA and its callees)",
-      "units": ["PROGB", "PROGC", "PROGD", "PROGA"],
-      "rationale": "Four programs and one call chain, with no JCL, datasets, copybooks or scheduler in the tree. PROGA is the only program that calls anything, and its computed LINK can reach any of the others, so no boundary inside the tree can be proven safe. It is one wave. Inside the wave, port the leaf callees first, then PROGA last, behind a routing facade, because PROGA scores high-high.",
-      "unblocks": "Proves the toolchain and the test harness on the CICS LINK and XCTL dispatch pattern. It does not unblock the nightly batch cycle, which has no artifact in this tree.",
+      "family": "none: the extractor found no entry point, so the seed placed nothing",
+      "name": "PROGA call tree, moved whole",
+      "units": ["PROGA", "PROGB", "PROGC", "PROGD"],
+      "rationale": "The seed placed no unit, because the tree holds no transaction definition, JCL job or scheduler entry. These four programs form one call tree rooted at PROGA, the only articulation point, and PROGA can LINK to a program chosen by its caller (computed call at line 16). Nothing can be proven to sit outside it, so it is one wave, not several. Inside the wave, port PROGB, PROGC and PROGD first (each is a bare RETURN, low-low in risks.json) and PROGA last (high-high, put behind a facade that keeps the COMMAREA program-name contract). This wave is a placeholder made to satisfy the plan validator, not an argument for a sequence.",
+      "unblocks": "Nothing that can be named from this tree. No transaction, map, dataset or business function is present, so no stakeholder outcome can be cited. It is a chore until the CSD, the callers of PROGA and the nightly batch cycle are supplied.",
       "blast_radius": "medium",
       "confidence": "low",
       "evidence": [
@@ -17,5 +18,36 @@
       ]
     }
   ],
-  "unassigned": []
+  "unassigned": [],
+  "deviations": [
+    {
+      "unit": "PROGA",
+      "from_wave": null,
+      "to_wave": 1,
+      "reason": "The seed left it unplaced because no entry point exists. A computed LINK from its COMMAREA means it cannot be shown to be outside any flow, so it is placed as the root of the only call tree.",
+      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 16}]
+    },
+    {
+      "unit": "PROGB",
+      "from_wave": null,
+      "to_wave": 1,
+      "reason": "Statically linked from PROGA at its first statement, so it moves with PROGA.",
+      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 12}]
+    },
+    {
+      "unit": "PROGC",
+      "from_wave": null,
+      "to_wave": 1,
+      "reason": "Transferred to from PROGA through WS-NEXT-PGM, which is assigned only the literal PROGC, so it moves with PROGA.",
+      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 19}, {"file": "app/cbl/PROGA.cbl", "line": 20}]
+    },
+    {
+      "unit": "PROGD",
+      "from_wave": null,
+      "to_wave": 1,
+      "reason": "Transferred to from PROGA by constant LIT-PGM-D, but the transfer follows an XCTL that never returns, so it is probably never reached from there. The COMMAREA-driven LINK could still reach it, so it is not dropped.",
+      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 23}],
+      "inference": true
+    }
+  ]
 }

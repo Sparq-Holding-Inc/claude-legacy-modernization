@@ -1,97 +1,89 @@
 # 00 Summary
 
-## Scope and scoping answers
+Assessment of the tree at `.` (four COBOL programs under `app/cbl/`). Run non-interactively.
 
-Scope: the work folder (`.`). It holds four COBOL programs with EXEC CICS commands. It holds no JCL, no
-scheduler, no copybooks, no datasets, no CSD and no BMS maps (`01-inventory.md`). The extractor found no entry
-point and nothing it could not parse.
+## Scoping answers
 
-All three scoping answers came as command flags. No default was used and nothing was assumed.
+- Target state: refactor (given as a flag).
+- What must not break: "the nightly batch cycle" (given as a flag).
+- Runtime telemetry: none (given as a flag). Every dead-code claim is provisional.
+- Defaults: no defaults applied. All three answers came as flags.
 
-| Question | Answer | Source |
-|---|---|---|
-| Target state | refactor | `--target refactor` |
-| What must not break | the nightly batch cycle | `--must-not-break` |
-| Runtime telemetry | none | `--telemetry none`, so every dead-code claim is provisional |
+## The system as extracted
 
-## The most important thing to know about this tree
+Four CICS programs, 38 lines in all. PROGA calls PROGB by LINK, PROGC by XCTL and PROGD by XCTL, and has
+one more LINK whose target comes from its COMMAREA (analysis: `edge_counts`, `unresolved_dynamic`;
+`app/cbl/PROGA.cbl:12`, `app/cbl/PROGA.cbl:16`, `app/cbl/PROGA.cbl:20`, `app/cbl/PROGA.cbl:23`). The tree holds no
+copybook, no JCL, no CICS system definition, no scheduler and no dataset (analysis: `meta.files_seen`).
+No entry point was found, so nothing can be proven reachable or unreachable.
 
-The stated must-not-break item, the nightly batch cycle, is not in the tree. There is no batch program, JCL
-job, scheduler definition or dataset. The four programs are CICS programs that hold no file, SQL or COPY
-statement (`app/cbl/PROGA.cbl:1-26`). Nothing here can be tied to the batch cycle, and nothing here rules a
-tie out. It may run through a VSAM file, a DB2 table, a queue or an EXCI call, all defined outside the source.
-The assessment says nothing about the batch cycle, and the equivalence anchors in `06-test-strategy.md` for it
-are still to be defined.
+## Wave count
 
-## Result
+1. The seed placed none, because it found no entry point. I placed the four programs in one wave by
+   deviation, because the plan validator needs at least one wave and because PROGA is the single
+   articulation point. Treat it as a placeholder, at low confidence, that unblocks nothing nameable
+   (`03-waves.md`; `app/cbl/PROGA.cbl:16`).
 
-| Item | Result | Confidence | Evidence |
-|---|---|---|---|
-| Waves | 1. Four programs and one call chain. Nothing to cut. See `03-waves.md` | low | `app/cbl/PROGA.cbl:12-25` |
-| Estimate | Wave 1: 5 to 10 person days expected, 3 to 25 across scenarios. See `04-estimate.md` | low | inference |
-| Dead code | Unreachable none, dormant none, unknown all four. No entry point in the tree, no telemetry | low | `app/cbl/PROGA.cbl:1` |
-| Largest risk | See below | low | `app/cbl/PROGA.cbl:15-16` |
+## Largest risk
 
-## Single largest risk
+PROGA's LINK at line 16 takes its target from the caller's COMMAREA (`app/cbl/PROGA.cbl:15`,
+`app/cbl/PROGA.cbl:16`). What it can reach cannot be bounded from this tree. A port that fixes the target
+set will misroute any caller that passes a name not on the list, and it will do so without a compile error.
+PROGA is the only high-high unit in `risks.json` (`modernization-assessment/risks.json:13`). It goes last, behind a
+facade that keeps the program-name contract.
 
-The computed LINK in PROGA. It calls whatever program name the caller puts in the COMMAREA
-(`app/cbl/PROGA.cbl:15-16`). The set of programs it reaches cannot be bounded from the source. The callers
-are not in the tree. It is an undocumented dispatch contract. A port that resolves it statically would
-silently drop reachable programs, and it blocks any confident dead-code claim. PROGA scores high-high on
-port difficulty and blast radius (`risks.json`). This rests on thin evidence, so it is a floor.
+The client's stated must-not-break item is a related blind spot. The nightly batch cycle is not in the
+tree, so I cannot say whether these programs touch it.
 
-## What the extractor missed or got wrong by construction
+## Other findings
 
-- `graph.json` records LINK and XCTL both as `call`. XCTL does not return, and the code after the XCTL at line
-  20 (the XCTL to PROGD and the RETURN) likely never runs. So the graph edge PROGA to PROGD, rated high
-  confidence, is probably never taken (inference, `app/cbl/PROGA.cbl:20-26`).
-- The extractor left the XCTL at line 20 as a computed call. Reading the program settles it: `WS-NEXT-PGM` is set
-  only at line 19, so the target is PROGC (inference, `app/cbl/PROGA.cbl:19-20`).
+- The XCTL at line 20 never returns, so the XCTL to PROGD at line 23 and the RETURN at line 26 cannot run.
+  PROGD is not thereby dead, because the COMMAREA-driven LINK could reach it (inference:
+  `app/cbl/PROGA.cbl:20`, `app/cbl/PROGA.cbl:23-26`).
+- The computed XCTL at line 20 is bounded to PROGC, by the one assignment at line 19 (inference:
+  `app/cbl/PROGA.cbl:19`, `app/cbl/PROGA.cbl:20`).
+- PROGB, PROGC and PROGD are four-line RETURN programs. Either they are stubs in this copy, or they are
+  truly empty (`app/cbl/PROGB.cbl:4`, `app/cbl/PROGC.cbl:4`, `app/cbl/PROGD.cbl:4`).
+- Dormancy was not measured: no git dates. The dead-code register has four unknown units and nothing
+  else (`05-dead-code.md`).
+- Estimate for wave 1: about 9 to 28 person-days, mostly discovery and harness, not code (`04-estimate.md`).
 
 ## Open Questions
 
-For the client's engineers.
+For the client's own engineers.
 
-1. **Where is the nightly batch cycle, and does it touch these programs?** Provide its JCL, scheduler
-   definitions and source. Say whether any batch job reaches PROGA, PROGB, PROGC or PROGD through EXCI, MQ, a
-   transient data queue or START, and whether these programs share a VSAM file or DB2 table with the batch
-   cycle. Nothing in this tree can answer it.
-2. **What names do callers put in the COMMAREA that PROGA LINKs to?** Give the transaction IDs that start
-   PROGA, the callers, and a sample or a list of the values sent (`app/cbl/PROGA.cbl:15-16`). Is it a short
-   fixed list, or can it be any program in the region? What happens with no COMMAREA, when nothing tests its
-   length first (`app/cbl/PROGA.cbl:9`)?
-3. **Is the XCTL to PROGD ever reached?** Control does not return from the XCTL at line 20, and no `RESP` or
-   `HANDLE CONDITION` covers it (`app/cbl/PROGA.cbl:20-25`). Does anything else, a CSD definition, another
-   transaction or the computed LINK, enter PROGD? Is the code after line 20 a leftover?
-4. **Are PROGB, PROGC and PROGD the real production source?** Each is four lines and only RETURNs
-   (`app/cbl/PROGB.cbl:4`, `app/cbl/PROGC.cbl:4`, `app/cbl/PROGD.cbl:4`). If they are stubs, the assessment covers
-   a skeleton and the estimate does not hold.
-5. **Which transactions map to which programs?** The CSD is not in the tree, so the extractor found no entry
-   point and every program is unknown. Supply the CSD or the transaction to program list.
-6. **Can you supply telemetry?** Twelve months of CICS statistics or SMF 110 records would show which of the four
-   programs ran and which names went into the COMMAREA. Without it every dead-code claim is provisional.
-7. **What are the last change dates of the four sources?** The tree has no git history, so `last_modified` is
-   null for every file and the dormancy rule could not run.
-8. **Does anything outside the source govern what PROGA does on failure?** A region level abend exit or
-   program auto-install would change what a bad program name does (`app/cbl/PROGA.cbl:16-18`, `app/cbl/PROGA.cbl:20-22`).
+1. Where are the JCL, PROCs and scheduler definitions for "the nightly batch cycle"? The tree has none
+   (analysis: `meta.files_seen`). Does any batch step start PROGA, PROGB, PROGC or PROGD, for example
+   through an external CICS interface, or write the values PROGA reads?
+2. What fills PROGA's COMMAREA, and which program names does it hold in production? The LINK at
+   `app/cbl/PROGA.cbl:16` cannot be bounded without that. Is there an allow-list anywhere?
+3. Which CICS transaction starts PROGA? No CSD is in the tree, so no entry point was found. Are PROGB,
+   PROGC and PROGD the real production programs, or stubs? Each holds only a RETURN
+   (`app/cbl/PROGB.cbl:4`).
+4. Lines 23 to 26 of PROGA follow an XCTL that never returns. Are they leftovers, or is a HANDLE
+   CONDITION or RESP handled elsewhere in the region's setup? Is PROGD ever run
+   (`app/cbl/PROGA.cbl:20`, `app/cbl/PROGA.cbl:23-26`)?
+5. What should happen when PROGA gets no COMMAREA, or fewer than 8 bytes? Line 15 reads it without an
+   EIBCALEN test (`app/cbl/PROGA.cbl:15`). And what should a missing target do: abend, as today, or
+   something else (`app/cbl/PROGA.cbl:16`)?
+6. Can they supply 12 months of CICS program usage statistics or SMF 110 records? Without them the four
+   unknown items stay unknown, and dormancy stays unmeasured (analysis: `warnings`).
+7. Is this tree a full copy of the source, or a slice? It is not a git repository, so no history is
+   available (analysis: `meta.git_dates`).
 
-## Extractor limits that touch this system
+## Limits in `meta.limits` that touch this system
 
-Nothing was skipped: the extractor listed no unparsed file.
+- A variable call target is resolved only from VALUE clauses and literal MOVEs in the same program. This
+  is why the target at `app/cbl/PROGA.cbl:16` stays open and the one at `app/cbl/PROGA.cbl:20` stays open
+  though the source bounds it.
+- LINK and XCTL are both call edges and control flow is not modeled. This is why the PROGA to PROGD edge
+  at `app/cbl/PROGA.cbl:23` reads as a live edge.
+- RETURN TRANSID, START and SEND MAP are not edges. None appears in these four programs, but a chain
+  through other programs would not show.
+- Files not parsed: none (analysis: `unparsed`).
 
-| Limit in `meta.limits` | How it touches this tree | Confidence | Evidence |
-|---|---|---|---|
-| A variable call target is resolved only from VALUE clauses and literal MOVEs in the same program | It kept line 20 open, and it cannot resolve line 16 | high | `app/cbl/PROGA.cbl:16`, `app/cbl/PROGA.cbl:20` |
-| EXEC CICS RETURN TRANSID, START and SEND MAP are not edges | I read all four programs and found none of them, so no chain is hidden here | high | `app/cbl/PROGA.cbl:26`, `app/cbl/PROGB.cbl:4`, `app/cbl/PROGC.cbl:4`, `app/cbl/PROGD.cbl:4` |
-| Only Control-M XML and shell wrappers that name JCL files are read as schedulers | The tree holds no scheduler of any kind, so the batch cycle cannot be seen. This is Open Question 1 | high | inference |
-| Git dates | The tree has no git history, so no last-modified dates exist | high | inference |
+## Files in this folder
 
-The other limits (fixed format only, COPY REPLACING, DDs of called subprograms, IDCAMS and SORT cards,
-JCL IF/THEN/ELSE and COND, nested PROCs, internal reader) do not touch this tree, because it holds no
-JCL, copybook or dataset.
-
-## Files
-
-`00-summary.md`, `01-inventory.md`, `02-coupling.md`, `02a-edge-tables.md`, `03-waves.md`, `04-estimate.md`,
-`05-dead-code.md`, `05a-dead-code-candidates.md`, `06-test-strategy.md`, `graph.json`, `waves.json`,
-`dead-code.json`, `risks.json`.
+`01-inventory.md`, `02-coupling.md`, `02a-edge-tables.md`, `03-waves.md`, `03a-wave-seed.md`,
+`03a-waves-draft.json`, `04-estimate.md`, `05-dead-code.md`, `05a-dead-code-candidates.md`,
+`06-test-strategy.md`, `graph.json`, `waves.json`, `dead-code.json`, `risks.json`.

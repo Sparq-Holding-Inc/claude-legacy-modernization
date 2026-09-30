@@ -1,25 +1,22 @@
 # 05 Dead code
 
-Telemetry is `none`, as given in `--telemetry none`. Every claim in this file is provisional.
+Telemetry: none. Every dead-code claim in this file is provisional. The register is in `modernization-assessment/dead-code.json`. All three buckets are present and all three are empty.
 
-The extractor's candidate tables are in `05a-dead-code-candidates.md`. The machine readable register
-is `dead-code.json`.
+## The three buckets
 
-| Bucket | Count | Reason | Evidence |
-|---|---|---|---|
-| Unreachable | 0 | Both programs are entry points, defined as transactions in the CSD. The copybook is included by both. The dataset is read and written. | `app/csd/DEMO.CSD:4`, `app/csd/DEMO.CSD:6`, `app/cbl/PROGR.cbl:5`, `app/cbl/PROGW.cbl:5` |
-| Unknown | 0 | There are no computed calls in reachable code, so nothing could reach an unlisted program. | `app/cbl/PROGR.cbl:6-11`, `app/cbl/PROGW.cbl:6-11` |
-| Dormant | 0 | See the caveat below. The empty bucket is not evidence that the code is recent. | `app/csd/DEMO.CSD:4` |
+| Bucket | Count | Reason | Confidence | Evidence |
+|---|---|---|---|---|
+| Unreachable | 0 | Both programs are entry points through CSD transactions. The one copybook is included by both. | medium | `app/csd/DEMO.CSD:4-7`, `app/cbl/PROGR.cbl:5`, `app/cbl/PROGW.cbl:5` |
+| Reachable but dormant | 0, not measured | The tree is not a git repository, so no last-modified date exists. The dormant bucket was not computed. An empty list here means not measured. | low | analysis field `warnings` |
+| Unknown | 0 | The extractor found no computed call, so no unit is held open by one. | medium | analysis field `unresolved_dynamic` |
 
-**Caveat on dormant.** The extractor recorded `last_modified` as unknown for every node
-(`graph.json` `meta.git_dates` is false, and `01-inventory.md` shows `unknown` for both programs).
-The dormancy rule of 5 years needs a date, so it could not fire for any unit. Zero dormant means
-"could not tell", not "all recent". Nothing here proposes deletion.
+## Reading the result
 
-**Not in the tree.** The tree defines no transaction for anything beyond TRNW and TRNR
-(`app/csd/DEMO.CSD:4-9`). Any program outside the tree is not classified here. `inference`.
+- **Reachable means defined, not run.** The extractor treats every CSD transaction as an entry point. It proves TRNR and TRNW are defined in group DEMO. It does not prove the group is installed, or that either transaction ran in the last year. There is no `DEFINE LIST` in the CSD file. Evidence: `app/csd/DEMO.CSD:4-9`, inference.
+- **No dormant list is not a clean bill.** Both programs have no last-modified date. Dormancy is not measured, and nothing may be proposed for deletion on that basis. Evidence: analysis field `warnings`.
+- **No unscheduled jobs.** `unscheduled_jobs` is empty because the tree has no jobs at all. That is not evidence the batch cycle is gone. Ask whether the jobs that touch ACCTDAT still run. Evidence: analysis field `unscheduled_jobs`, inference.
+- **Nothing was moved between buckets.** No evidence contradicts an extractor bucket, and no unit moves from unknown to unreachable.
 
-## What would firm this up
+## What telemetry would change
 
-12 months of CICS transaction statistics for TRNR and TRNW, and SMF or job logs for the nightly batch
-cycle. Without them, no claim in this file is better than static reachability.
+The client can settle this with twelve months of CICS statistics or SMF records for TRNR and TRNW. That would turn "defined" into "ran N times" and would give the dormant bucket a measured basis. Evidence: inference.

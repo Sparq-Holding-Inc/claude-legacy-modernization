@@ -1,0 +1,44 @@
+{
+ "target_state": null,
+ "waves": [
+  {
+   "wave": 1,
+   "family": "batch-readonly",
+   "name": null,
+   "units": [
+    "PGMR",
+    "job:READJOB"
+   ],
+   "rationale": null,
+   "unblocks": null,
+   "blast_radius": null,
+   "confidence": null,
+   "evidence": [
+    {
+     "file": "app/jcl/READJOB.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "wave": 2,
+   "family": "batch-writers",
+   "name": null,
+   "units": [
+    "PGMW",
+    "job:WRITEJOB"
+   ],
+   "rationale": null,
+   "unblocks": null,
+   "blast_radius": null,
+   "confidence": null,
+   "evidence": [
+    {
+     "file": "app/cbl/PGMW.cbl",
+     "line": 6
+    }
+   ]
+  }
+ ],
+ "unassigned": []
+}

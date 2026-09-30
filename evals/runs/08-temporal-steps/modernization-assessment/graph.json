@@ -13,9 +13,12 @@
    "A called subprogram gets no DDs from its caller's JCL step.",
    "IDCAMS, SORT and other in-stream control cards are not read. Dataset modes on utility steps come from DISP only.",
    "IF/THEN/ELSE and COND= in JCL are not modeled. Step order is file order.",
-   "Nested PROC calls, INCLUDE members and jobs submitted through the internal reader are not followed.",
+   "Nested PROC calls and INCLUDE members are not followed. JCL text inside a COBOL literal is noticed, but it makes no edge. A proc or program it names is called unknown, never unreachable.",
    "EXEC CICS RETURN TRANSID, START and SEND MAP are not edges.",
-   "Only Control-M XML and shell wrappers that name JCL files are read as schedulers."
+   "Only Control-M XML and shell wrappers that name JCL files are read as schedulers.",
+   "DCB, LRECL and RECFM are not read, so a record length on a DD is not compared with a copybook.",
+   "A contract edge is high when both sides COPY the same layout. A program can COPY a layout and still read the record through a private one, so high means shared layout, not proven equal.",
+   "LINK and XCTL are both call edges. XCTL never returns, and control flow is not modeled."
   ],
   "files_seen": {
    "bms": 0,
@@ -303,7 +306,8 @@
   "entry_points": [
    "job:SEQJOB"
   ],
-  "reachable_count": 9,
+  "reachable_nodes": 9,
+  "reachable_programs": 3,
   "dead_code_candidates": {
    "unreachable": [],
    "dormant": [],
@@ -311,6 +315,7 @@
   },
   "dead_code_reasons": {},
   "unresolved_dynamic": [],
+  "embedded_jcl": [],
   "structure_basis": "programs reachable from an entry point (3 of 3)",
   "fan_in": {},
   "fan_out": {},
@@ -332,7 +337,35 @@
    "jcl_job": 1,
    "jcl_step": 4
   },
+  "wave_seed": {
+   "basis": "family of the entry points that use a unit, in a fixed order. Facts only, no risk judgment.",
+   "waves": [
+    {
+     "wave": 1,
+     "family": "batch-readonly",
+     "description": "Batch jobs that run application programs and write nothing another entry point uses",
+     "units": [
+      "PGMA",
+      "PGMB",
+      "PGMC",
+      "job:SEQJOB"
+     ],
+     "entry_points": [
+      "job:SEQJOB"
+     ],
+     "evidence": [
+      {
+       "file": "app/jcl/SEQJOB.jcl",
+       "line": 1
+      }
+     ]
+    }
+   ],
+   "unassigned": []
+  },
   "warnings": [
+   "app/jcl/SEQJOB.jcl:5: job SEQJOB repeats a step name. The extractor calls this one STEP2#2.",
+   "No last-modified dates exist (the target is not a git repository, or --no-git was used). The dormant bucket was NOT computed. An empty dormant list means not measured.",
    "1 JCL job(s) are in the tree but no scheduler artifact was parsed. The order jobs run in across jobs is unknown. Ask for the scheduler export."
   ]
  }

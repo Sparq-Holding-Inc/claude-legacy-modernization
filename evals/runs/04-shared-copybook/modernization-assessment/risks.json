@@ -4,24 +4,24 @@
       "id": "PROGA",
       "port_difficulty": {
         "score": 1,
-        "why": "Eight lines: one MOVE of the literal 1 to SH-CUST-ID and GOBACK. No I/O, no arithmetic, no branches."
+        "why": "One MOVE of a constant into SH-CUST-ID, then GOBACK. No arithmetic, no I/O, no branching."
       },
       "blast_radius": {
         "score": 2,
-        "why": "Touches no dataset and nothing in the tree calls it, but the tree holds no JCL or scheduler, so its place in the nightly batch cycle is unverified."
+        "why": "It reads and writes no dataset and nothing calls it, so a wrong port cannot damage another unit in this tree. Whether it sits in the nightly batch cycle is unknown, because the tree holds no JCL or scheduler."
       },
       "quadrant": "low-low",
       "wave": 1,
-      "driving_fact": "Includes SHARED01, the same layout copybook PROGB includes, so both programs change together whenever SH-CUST-ID or the COMP-3 SH-BALANCE field changes.",
+      "driving_fact": "It includes SHARED01 (the same layout PROGB includes, with a COMP-3 balance field) but only touches SH-CUST-ID.",
       "confidence": "low",
       "evidence": [
         {
           "file": "app/cbl/PROGA.cbl",
-          "line": 5
+          "line": 7
         },
         {
           "file": "app/cbl/PROGA.cbl",
-          "line": 7
+          "line": 5
         }
       ]
     },
@@ -29,24 +29,24 @@
       "id": "PROGB",
       "port_difficulty": {
         "score": 1,
-        "why": "Eight lines: one MOVE of the literal 2 to SH-CUST-ID and GOBACK. No I/O, no arithmetic, no branches."
+        "why": "One MOVE of a constant into SH-CUST-ID, then GOBACK. No arithmetic, no I/O, no branching."
       },
       "blast_radius": {
         "score": 2,
-        "why": "Touches no dataset and nothing in the tree calls it, but the tree holds no JCL or scheduler, so its place in the nightly batch cycle is unverified."
+        "why": "It reads and writes no dataset and nothing calls it, so a wrong port cannot damage another unit in this tree. Whether it sits in the nightly batch cycle is unknown, because the tree holds no JCL or scheduler."
       },
       "quadrant": "low-low",
       "wave": 1,
-      "driving_fact": "Includes SHARED01, the same layout copybook PROGA includes, so both programs change together whenever SH-CUST-ID or the COMP-3 SH-BALANCE field changes.",
+      "driving_fact": "It includes SHARED01 (the same layout PROGA includes, with a COMP-3 balance field) but only touches SH-CUST-ID.",
       "confidence": "low",
       "evidence": [
         {
           "file": "app/cbl/PROGB.cbl",
-          "line": 5
+          "line": 7
         },
         {
           "file": "app/cbl/PROGB.cbl",
-          "line": 7
+          "line": 5
         }
       ]
     }

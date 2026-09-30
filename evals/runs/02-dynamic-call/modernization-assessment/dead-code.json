@@ -5,15 +5,29 @@
   "unknown": [
     {
       "id": "PROGA",
-      "reason": "No JCL step, scheduler job or CSD transaction in the tree runs it, so the extractor found no entry point. It reads its target name at run time and ends with STOP RUN, which is the shape of a main program. It is probably started by a job outside this tree. No telemetry was given, so this is provisional.",
+      "reason": "No entry point in the tree names it, and no JCL, CSD or scheduler file exists to run it. It has no LINKAGE SECTION and ends with STOP RUN, so it reads as a main program (inference), but that is not an extractor entry point. Dormancy was not measured: the tree has no git dates.",
       "confidence": "low",
-      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 8}]
+      "evidence": [
+        {
+          "file": "app/cbl/PROGA.cbl",
+          "line": 10
+        }
+      ]
     },
     {
       "id": "PROGB",
-      "reason": "No static caller. PROGA makes a computed call and PROGB is the only other program in the tree, so it could be the target. The value is ACCEPTed at run time, so the set of reachable programs cannot be bounded from the source. It stays in unknown. No telemetry was given, so this is provisional.",
+      "reason": "No static caller and no entry point in the tree. PROGA's computed call at line 9 takes its target from ACCEPT and could name PROGB, so it stays unknown and is not proposed for deletion. It holds only GOBACK.",
       "confidence": "low",
-      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 9}]
+      "evidence": [
+        {
+          "file": "app/cbl/PROGB.cbl",
+          "line": 4
+        },
+        {
+          "file": "app/cbl/PROGA.cbl",
+          "line": 9
+        }
+      ]
     }
   ]
 }

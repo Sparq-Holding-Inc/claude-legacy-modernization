@@ -3,19 +3,43 @@
   "waves": [
     {
       "wave": 1,
-      "name": "Master file writer and reader pair",
-      "units": ["PGMR", "PGMW", "job:READJOB", "job:WRITEJOB"],
-      "rationale": "The whole tree is two single step jobs and two programs coupled only through SPARQ.TEST.MASTER and the LAYOUTX copybook. There is no call, no cycle and no second cluster to cut. Inside the wave, port the reader first (low-low), prove the harness on it, then port the writer (low-high).",
-      "unblocks": "A tested byte level definition of the SPARQ.TEST.MASTER record and the equivalence harness that any further nightly-cycle jobs outside this tree would reuse.",
-      "blast_radius": "medium",
+      "family": "batch-readonly",
+      "name": "Reader side of the master file",
+      "units": [
+        "PGMR",
+        "job:READJOB"
+      ],
+      "rationale": "PGMR and READJOB read SPARQ.TEST.MASTER and write nothing another entry point uses, so this is the batch-readonly family and a sound first wave: the port is one OPEN, one READ, one CLOSE, and the legacy writer keeps feeding it during coexistence. The weakness is that PGMR produces no output. Its testable boundary is the dataset it reads and its return code, and the business value is close to nil, so this wave is mainly a toolchain and harness proof.",
+      "unblocks": "The LAYOUTX copybook conversion (wave 2 includes it too) and a harness that can decode SPARQ.TEST.MASTER on the target platform, including the packed decimal field, before the writer is touched.",
+      "blast_radius": "low",
       "confidence": "medium",
       "evidence": [
-        {"file": "app/cbl/PGMW.cbl", "line": 11},
-        {"file": "app/cbl/PGMR.cbl", "line": 11},
-        {"file": "app/jcl/WRITEJOB.jcl", "line": 3},
-        {"file": "app/jcl/READJOB.jcl", "line": 3}
+        {
+          "file": "app/jcl/READJOB.jcl",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "family": "batch-writers",
+      "name": "Writer of the master file",
+      "units": [
+        "PGMW",
+        "job:WRITEJOB"
+      ],
+      "rationale": "PGMW and WRITEJOB write the one dataset another entry point reads, so this is the batch-writers family and it belongs after the reader: the consumer is proven against the legacy format first, then the producer is replaced and its bytes compared. It cannot be cut earlier because it is the only writer and READJOB has no other source. Do not read this as low risk: the port is easy and the verification is the work.",
+      "unblocks": "Retirement of the legacy writer and, if the dataset is later replaced by a table or a service, the one place where that change can be made.",
+      "blast_radius": "high",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/cbl/PGMW.cbl",
+          "line": 6
+        }
       ]
     }
   ],
-  "unassigned": []
+  "unassigned": [],
+  "deviations": []
 }

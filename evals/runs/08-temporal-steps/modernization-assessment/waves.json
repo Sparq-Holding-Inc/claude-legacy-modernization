@@ -3,16 +3,16 @@
   "waves": [
     {
       "wave": 1,
-      "name": "SEQJOB step chain",
-      "units": ["job:SEQJOB", "PGMA", "PGMB", "PGMC"],
-      "rationale": "One job and three empty programs. The only behavior in the tree is the order the steps run in, and step order is temporal coupling that no wave cut can honor. It is deployable behind one scheduler entry, roll-backable by switching that entry back, and testable at the job boundary by comparing step order and return codes.",
-      "unblocks": "The port toolchain, the comparison harness and the scheduler translation for anything larger. If SEQJOB is the nightly batch cycle, it also moves the cycle the client named.",
+      "family": "batch-readonly",
+      "name": "Sequenced batch job",
+      "units": ["PGMA", "PGMB", "PGMC", "job:SEQJOB"],
+      "rationale": "One job, three programs, no shared dataset. The seed puts the whole system in one family, and that is sound: there is no second entry point to sequence against, no data hub, no cycle and no computed call. The programs are empty (GOBACK only), so the family test 'writes nothing shared' holds by absence of code, not by proof of behavior. The one constraint is the step order in SEQJOB, which lives only in JCL file order. It can be deployed and rolled back as one job, and its boundary is testable by step order and return codes.",
+      "unblocks": "Nothing else in this tree depends on it. It is the whole system, so it works as the proof of the toolchain, and it is a chore beyond that until the real program bodies and the scheduler export arrive.",
       "blast_radius": "medium",
       "confidence": "low",
-      "evidence": [{"file": "app/jcl/SEQJOB.jcl", "line": 2}, {"file": "app/jcl/SEQJOB.jcl", "line": 3}, {"file": "app/jcl/SEQJOB.jcl", "line": 4}, {"file": "app/jcl/SEQJOB.jcl", "line": 5}]
+      "evidence": [{"file": "app/jcl/SEQJOB.jcl", "line": 1}]
     }
   ],
-  "unassigned": [
-    {"id": "step:SEQJOB.STEP2#2", "reason": "Runs IEFBR14 with no DDs and reuses the name STEP2. Not a unit. It moves with SEQJOB, or is dropped once the client confirms nothing names it."}
-  ]
+  "unassigned": [],
+  "deviations": []
 }

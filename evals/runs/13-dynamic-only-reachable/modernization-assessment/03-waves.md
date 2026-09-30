@@ -1,76 +1,57 @@
 # 03 Waves
 
-Target state: refactor. The plan is in `waves.json`. Risk scores are in `risks.json`, written by the
-`migration-risk-assessor` steps, which I followed inline.
+Target state: refactor. The plan was cut from `03a-waves-draft.json`. The result is in
+`waves.json`. No unit was moved, so `deviations` is empty.
 
-## One wave, on purpose
+## Plan
 
-The tree is one job, one step and two programs (`app/jcl/MAINJOB.jcl:2`, `app/cbl/PGMMAIN.cbl:9`,
-`app/cbl/HIDDEN01.cbl:1`). It has no strongly connected component, no articulation point and no shared
-dataset. There is nothing to cut along. I did not invent a second wave to make the plan look
-substantial.
+| Wave | Family | Units | Unblocks | Blast radius | Confidence | Evidence |
+|---|---|---|---|---|---|---|
+| 1 | batch-readonly | PGMMAIN, job:MAINJOB | Nothing the graph shows. A chore that proves the toolchain and the harness, and forces the callee question. | medium | low | `app/jcl/MAINJOB.jcl:1`, `app/cbl/PGMMAIN.cbl:9` |
+| not placed | none | HIDDEN01 | It must move with wave 1 if PGMMAIN dispatches to it. | low | low | `app/cbl/HIDDEN01.cbl:1` |
 
-If the system were ten times larger, I would cut it this way, in this order. This is inference:
+## Wave 1. Program dispatcher batch job
 
-1. The leaf programs with no computed calls and no shared datasets, to prove the toolchain and the
-   test harness.
-2. The programs that share datasets, cut along the writer to reader contracts, once the harness works.
-3. The dispatcher `PGMMAIN` and its targets last, behind a facade. It is high-high, and the risk
-   quadrants say that belongs at the end.
+- **Why the family holds.** The extractor found no dataset edge for the job, so the seed put it in
+  the read-only batch family. That is a fact about the edges it could see (`analysis`, field
+  `wave_seed`).
+- **Why the family is weaker than it looks.** PGMMAIN calls a program chosen at run time
+  (`app/cbl/PGMMAIN.cbl:9`). What the job really writes depends on that program. The family name is
+  a claim the tree cannot support alone. The wave blast radius is therefore set to medium and the
+  confidence to low, above what the seed would give. This is inference.
+- **What it unblocks.** Nothing that the graph shows. There are no shared datasets, no shared
+  copybooks and no callers. It proves the toolchain and the equivalence harness on the smallest
+  possible unit, and it forces the answer to what PGMMAIN dispatches to. That answer is what unblocks
+  every later wave.
+- **The four validity tests.**
 
-## Risk scores that drive the plan
-
-Port difficulty and blast radius are scored separately. They are not added or multiplied.
-
-| Unit | Port difficulty | Blast radius | Quadrant | Confidence | Evidence |
-|---|---|---|---|---|---|
-| `job:MAINJOB` | 1 | 3 | low-high | low | `app/jcl/MAINJOB.jcl:2` |
-| `PGMMAIN` | 3 | 4 | high-high | medium | `app/cbl/PGMMAIN.cbl:9` |
-| `HIDDEN01` | 1 | 2 | low-low | low | `app/cbl/HIDDEN01.cbl:4` |
-
-## Wave 1: main job and its dispatcher
-
-| Field | Value | Evidence |
+| Test | Holds | Evidence |
 |---|---|---|
-| Units | `job:MAINJOB`, `PGMMAIN`, `HIDDEN01` | `app/jcl/MAINJOB.jcl:2` |
-| Blast radius | high | `app/cbl/PGMMAIN.cbl:9` |
-| Confidence | low | inference |
-| Unblocks | Running the main job off the legacy platform, and a bounded list of the programs `PGMMAIN` can dispatch to | inference |
+| Deployable independently, behind a flag or facade | Yes for MAINJOB and PGMMAIN as written. A dispatch registry facade is needed for the callees. | `app/cbl/PGMMAIN.cbl:9` |
+| Rollback independently | Yes. No writes are visible. The dispatched program may write, so this holds only if it is in the tree or the same wave. | inference |
+| Testable boundary | Yes at the job's outputs and return code. It needs the production input for the ACCEPT. | `app/cbl/PGMMAIN.cbl:8` |
+| Delivers something a stakeholder can name | Partly. The must-not-break item is "the nightly batch cycle", and nothing in the tree ties MAINJOB to it. | inference |
 
-Why `HIDDEN01` is in the wave. It has no static caller, but a computed call in reachable code could
-name it (`app/cbl/PGMMAIN.cbl:9`). If the port left it behind and `PGMMAIN` is given its name, the
-call fails. It is four lines and only returns (`app/cbl/HIDDEN01.cbl:4`), so carrying it costs almost
-nothing. It stays in the unknown bucket in `dead-code.json`. Moving it with the wave is not a claim
-that it runs.
+## Not placed
 
-The four validity tests:
+HIDDEN01 stays in `unassigned`. No static path reaches it (`analysis`, field `dead_code_candidates`),
+and the computed call at `app/cbl/PGMMAIN.cbl:9` could. If the client confirms it is a dispatch
+target, it moves with wave 1, because a port of PGMMAIN without it breaks the dispatch. Its four
+lines are a bare GOBACK (`app/cbl/HIDDEN01.cbl:4`), so moving it costs nearly nothing.
 
-| Test | Answer | Evidence |
-|---|---|---|
-| Deployed independently, behind a flag or facade | Yes, if the new dispatcher sits behind a facade that can route to the legacy job. The job has no DDs, so there is no shared file to move | `app/jcl/MAINJOB.jcl:2` |
-| Rolled back independently | Yes, by pointing the scheduler back at the legacy job. This assumes nothing the job runs writes to a system of record in a way that cannot be reversed. That is not known | inference |
-| Testable boundary | Only after the input values are known. The job's inputs are `ACCEPT` values, and its outputs are whatever the called program produces | `app/cbl/PGMMAIN.cbl:8` |
-| Business stakeholder can name it | "The nightly batch cycle moves off the mainframe", if `job:MAINJOB` is part of that cycle. The tree does not show that | inference |
+## Deviations
 
-## A high-high unit in the first half
+None. A plan with no deviations is a fine answer for a tree this size. The single reason to move
+anything would be to place HIDDEN01 in wave 1, and that would assert a call the source does not
+prove.
 
-The rule says: if a plan puts a high-high unit in the first half, say so plainly. `PGMMAIN` is
-high-high (`risks.json`) and it is in the only wave. The system gives no alternative. So the wave is
-planned with three conditions, and it does not start until the first two are met:
+## Waves not needed
 
-1. The set of names `PGMMAIN` has ever been given is known. That comes from job logs and `SYSIN`
-   history, not from the source (inference, `app/cbl/PGMMAIN.cbl:8`).
-2. Every program in that set is in the tree, or it is added to the scope and this plan is redone
-   (inference).
-3. The port keeps the dispatch behind a facade, so the legacy job can take the traffic back.
+One wave holds every placed unit, and there is no SCC or articulation point to cut on. Splitting the
+job from its program would be inventing a wave for tidiness.
 
-Under a refactor target, the dispatcher becomes an explicit registry of the known targets instead of a
-free `CALL` on an input string. That is a behavior change on purpose. Any name that used to be
-accepted and is not in the registry goes into the deviation register (see `06-test-strategy.md`).
+## Where this plan may be wrong
 
-## What the client asked to protect
-
-The client said the nightly batch cycle must not break. The tree holds one job and no scheduler, so I
-cannot say which jobs make up the cycle, what runs before `job:MAINJOB` or what runs after it. The
-extractor warned about this (`app/jcl/MAINJOB.jcl:1`). Until the scheduler export arrives, the order
-constraint that matters most to that requirement is unknown, and this plan cannot vouch for it.
+If PGMMAIN dispatches to programs that are not in this tree, those programs are units that this plan
+does not have, and they may write shared data, touch DB2, or run only at fiscal close. Waves 2 and
+up would then exist, and wave 1 would be blocked until they were known. This is inference.

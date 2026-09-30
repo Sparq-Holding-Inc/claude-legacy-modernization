@@ -230,6 +230,23 @@ def main():
                "valid" if r["json_all_valid"] else "INVALID", r.get("wave_count", "n/a"),
                "yes" if r["hook_gave_up"] else "no"))
         w("")
+    lp = load("e2e-loops.json")
+    if lp and lp.get("loops"):
+        w("## Fix loops for the wave metrics")
+        w("")
+        w(lp["note"])
+        w("")
+        w("| Loop | Plugin commit | What changed | Wave counts | Jaccard | Rand | Unit overlap | Result |")
+        w("|---|---|---|---|---|---|---|---|")
+        for lo in lp["loops"]:
+            ok = lo["wave_count_identical"] and lo["jaccard"] >= .8
+            w("| %d | `%s` | %s | %s | %s | %s | %s | %s |" %
+              (lo["loop"], lo["plugin_commit"], lo["what_changed"], lo["wave_counts"], pct(lo["jaccard"]),
+               pct(lo["rand_index"]), pct(lo["unit_overlap"]), "PASS" if ok else "FAIL"))
+        w("")
+        for lo in lp["loops"]:
+            w("- Loop %d: %s" % (lo["loop"], lo["diagnosis"]))
+        w("")
     prov = load("e2e-provenance.json")
     if prov and s and s["runs_scored"]:
         w("## How the end to end runs were produced")

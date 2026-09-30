@@ -1,82 +1,79 @@
 # 06 Test strategy
 
-This follows the `behavioral-equivalence` skill. The bar is not that the port compiles or passes tests
-written next to it. The bar is that, for the inputs this system actually sees, the port produces the same
-outputs as the legacy programs, and any difference is recorded on purpose.
-
-Anchor from the scoping answers: **the nightly batch cycle must not break** (`--must-not-break`).
-Telemetry: none.
+Skill: `behavioral-equivalence`. The bar is not "it compiles" and not "it passes the tests written with the
+port". The bar is that the new implementation produces the same outputs as the old one on the inputs the
+system actually sees, and that every difference is written down on purpose.
 
 ## The tree holds no datasets
 
-There are no datasets, no VSAM files and no DB2 tables in the graph (`modernization-assessment/graph.json:99`),
-and neither program opens a file (`app/cbl/PROGA.cbl:3-7`, `app/cbl/PROGB.cbl:3-4`). There are no JCL
-jobs to read job order from (`modernization-assessment/graph.json:26`). So the oracle cannot come from
-data files. It has to come from job output, logs and reports. The only observable outputs the source
-shows are the console text at `app/cbl/PROGA.cbl:5` and the process return code at `app/cbl/PROGA.cbl:7`.
+Neither program opens a file, so there is no master to diff. The oracle has to come from job output, logs
+and return codes (`app/cbl/PROGA.cbl:5`, `app/cbl/PROGA.cbl:7`, `app/cbl/PROGB.cbl:4`). The observable
+behavior of the pair is small: one line written by DISPLAY, a call that returns, and a normal end.
 
 ## Oracle for wave 1
 
 | Rank | Oracle | Available? | Evidence |
 |---|---|---|---|
-| 1 | Parallel run: run legacy and port on the same night, diff the outputs | Ask. Unknown. Cheap here because the programs do no I/O. | inference |
-| 2 | Captured production replay | Ask for job logs covering month-end and fiscal year-end. | inference |
-| 3 | Golden master from archived outputs | Ask for archived SYSOUT and job logs of the nightly cycle. | inference |
-| 4 | Characterization tests from source | Available now. Provisional only, because it encodes what the code says, not what it does. | `app/cbl/PROGA.cbl:5-7` |
+| 1 | Parallel run of the legacy job and the port on the same nightly input | Ask. The tree cannot say. With no dataset the input is the job's parameters and its place in the cycle. | inference |
+| 2 | Captured job output replayed against the port | Ask the client for the job logs from the nightly cycle | inference |
+| 3 | Golden master from archived job output | Ask the client for archived SYSOUT of the job that runs PROGA. The DISPLAY line is in it on every run. | `app/cbl/PROGA.cbl:5` |
+| 4 | Characterization tests from source | Available now. Weakest. Encodes what the code says, not what it does. Provisional. | `app/cbl/PROGA.cbl:6` |
 
-Chosen oracle: rank 4 for the first pass, because nothing else is in the tree, then upgrade to rank 1 or
-2 as soon as the client supplies job logs or a parallel run slot. Label all coverage from rank 4 provisional.
+Chosen oracle: rank 3 if the client supplies archived SYSOUT, otherwise rank 4, labeled provisional. This is
+a decision made from what the tree offers, and the client should confirm it.
 
-## What to ask the client to supply
+## What to ask the client for
 
-- The JCL job, proc or scheduler entry that runs PROGA, and the jobs before and after it in the nightly
-  cycle.
-- SYSOUT and return codes for PROGA for at least 12 months, including month-end and fiscal year-end.
-- The link-edit or load library listing that shows which module PROGB resolves to in production.
-- Anything downstream that reads PROGA's console output or its condition code.
+- The JCL member and the scheduler entry that run PROGA, and the place of that job in the nightly batch cycle.
+- SYSOUT, return codes and elapsed times from the job for a full cycle. It should include month-end.
+- The compile and link options for both programs, in particular DYNAM, so the call can be tested as it
+  actually binds.
+- The name of anything that reads the job log or the return code of this job.
 
-## Normalization spec (for a human to sign off)
+## Normalization spec
 
-| Item | Proposal | Why it might hide a bug | Evidence |
+| Item | Decision | Why it might hide a bug | Evidence |
 |---|---|---|---|
-| Timestamps, job numbers, page numbers in SYSOUT | Mask | Low risk here: neither program writes any. | inference |
-| The text `CALL FAILED IF WE GET HERE` | Do not mask. Compare it exactly. | It prints on every run, before the call, whether or not the call fails. Removing it is a behavior change. | `app/cbl/PROGA.cbl:5` |
-| Return code | Compare exactly. | `STOP RUN` sets no code, so the value comes from the runtime. A port to another runtime may return a different default. | `app/cbl/PROGA.cbl:7` |
-| Trailing whitespace and padding in the console line | Compare bytes, then decide with a human. | Fixed width padding can differ between runtimes. | inference |
-| Packed decimal and collating sequence | Not applicable now. | Neither program has numeric fields or sorts. If the nightly cycle adds programs that do, put both in the spec. | `app/cbl/PROGB.cbl:3` |
+| Job name, job number, run timestamp in SYSOUT | Ignore | Only if nothing keys on them | inference |
+| The DISPLAY text `CALL FAILED IF WE GET HERE` | Keep exact. Do not normalize it | It prints on every run, ahead of the call, so a log scraper may depend on it | `app/cbl/PROGA.cbl:5` |
+| Return code | Compare exactly | PROGA ends with STOP RUN and sets none, so a port that returns a different code changes step condition tests | `app/cbl/PROGA.cbl:7` |
+| Packed decimal, collating sequence, REDEFINES | Not applicable. No data items exist | None | `app/cbl/PROGB.cbl:3` |
 
-## Cases to cover deliberately
+Keep the list short and have a human sign it.
 
-- **The normal run.** PROGA prints, calls PROGB, PROGB returns, PROGA ends. Assert the console text and the
-  return code (`app/cbl/PROGA.cbl:5-7`).
-- **The call fails.** The CALL has no `ON EXCEPTION` and no `USING` (`app/cbl/PROGA.cbl:6`). What the runtime
-  does when PROGB is missing decides whether the job abends or continues. Test that in the target
-  runtime and record the difference in the Deviation Register.
-- **The message ordering.** The message prints before the call. If the port buffers output differently, the
-  order of the message and any output from PROGB can change. PROGB prints nothing in this source
-  (`app/cbl/PROGB.cbl:4`).
-- **Boundary dates.** Month-end, quarter-end and fiscal year-end runs. Neither program reads a date. Inference:
-  the programs behave the same on those dates, but the schedule may not, so test the schedule.
-- **Job order.** No temporal edges are in the graph, because no scheduler was found
-  (`modernization-assessment/graph.json:100`). The harness must keep whatever order the client's
-  scheduler enforces once we are given it.
-- **Zero-record and maximum-size inputs.** Not applicable. The programs take no input.
+## Targeted cases
+
+- The normal run: PROGA prints its line, calls PROGB, PROGB returns, PROGA stops.
+- PROGB missing from the load library. There is no ON EXCEPTION at `app/cbl/PROGA.cbl:6`. Capture what the
+  legacy job does, since a port that continues silently changes the batch cycle. Inference.
+- Boundary dates, empty input and bad legacy data: none of them reach code here, because neither
+  program reads input. Say so in the harness README, so nobody adds cases to look busy.
+- The job placed in the cycle at month-end and at year-end: the job stream around it may behave differently
+  even if these two programs do not. Inference.
+
+## Job order
+
+`graph.json` holds no temporal edges, because there is no scheduler or JCL in the tree. The orders the harness
+must keep are unknown. Getting them from the client is the first task of the wave.
 
 ## Deviation Register
 
-One proposed entry so far. Every intentional difference gets a row before it ships.
+Empty. No intentional difference has been agreed.
 
-| ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact |
-|---|---|---|---|---|---|
-| D-001 | Console message `CALL FAILED IF WE GET HERE` prints on every run (`app/cbl/PROGA.cbl:5`) | Proposed only: decide with the client whether to keep it | Message text says failure, but it prints before the call and on success | Pending | Unknown: anything that scrapes the console output |
+| ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact | Evidence |
+|---|---|---|---|---|---|---|
+| none yet | The DISPLAY at line 5 says a call failed, and prints on every run | Not decided | Not decided | Not decided | Unknown. A log scraper may match the text | `app/cbl/PROGA.cbl:5` |
+
+The first candidate entry is that DISPLAY. Do not change its text without an approver's name in this row.
 
 ## Exit bar for wave 1
 
-Wave 1 is done when:
+- The replay diff is clean, modulo the normalization spec and the register above.
+- The normal run and the missing-module case both pass.
+- The harness is under version control and runs in CI.
+- The register is signed by someone who can sign it.
 
-- the replay or parallel run diff is clean, modulo the normalization spec and the Deviation Register
-- the cases above pass, including the failed-CALL case
-- the harness is under version control and runs in CI
-- the Deviation Register is signed by someone with authority to sign it
+## After cutover
 
-Keep the harness after cutover. It is the only executable specification this system will have.
+Keep the harness. It becomes the regression suite for the port and is the only executable specification of the
+job. Budget for its upkeep.

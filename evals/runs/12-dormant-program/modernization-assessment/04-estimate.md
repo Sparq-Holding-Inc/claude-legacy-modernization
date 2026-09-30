@@ -1,37 +1,42 @@
 # 04 Estimate
 
-## Method
+Method: a range per wave, driven by the count of coupling edges that cross the wave boundary, the
+availability of an oracle, god modules and database logic, not by lines of code. Every number here is
+inference. The tree holds 14 lines of COBOL and 2 lines of JCL, and no dataset. The estimate holds only
+for what the tree shows.
 
-An estimate per wave, built from the things that move it, in order of weight: coupling edges that cross the wave boundary, a behavioral oracle, god modules, logic in the database, and whether the team can read COBOL. It is not built from line count. The figures below are judgment, not measurement, and the range is deliberately wide.
+## Wave 1: nightly batch cycle (4 units)
 
-| Driver | Value for wave 1 | Evidence |
-|---|---|---|
-| Coupling edges crossing the wave boundary | 0 inside the tree. The whole system is in the wave. Cross-job edges are unknown. | inference |
-| Behavioral oracle | None in the tree. No datasets. It would have to come from job logs and return codes | `app/jcl/MAINJOB.jcl:2` |
-| God modules | None | `app/cbl/PGMMAIN.cbl:6` |
-| Logic in the database | None visible. No SQL in the tree | inference |
-| Size | 16 lines across 4 units | `app/cbl/PGMMAIN.cbl:6` |
-
-## Wave 1
-
-| Item | Range | Confidence | Evidence |
+| Driver | Reading | Confidence | Evidence |
 |---|---|---|---|
-| Toolchain and pipeline setup for the target | 2 to 4 person-days | low | inference |
-| Port of PGMMAIN, OLDPGM, NEWPGM and MAINJOB | 0.5 to 1 person-day | medium | `app/cbl/PGMMAIN.cbl:4` |
-| Oracle capture and the diff harness | 1 to 3 person-days | low | inference |
-| Instrumenting OLDPGM to settle its status | 0.5 to 1 person-day | medium | `app/cbl/OLDPGM.cbl:4` |
-| Parallel run and cutover | 1 to 3 person-days | low | inference |
-| **Total** | **5 to 12 person-days** | low | inference |
+| Coupling edges crossing the wave boundary | 0. No dataset, no second entry point, no scheduler successor is visible. | medium | analysis fields `data_hubs`, `entry_points` |
+| Behavioral oracle | None in the tree. It has to be collected from the client (job logs, archived output). | high | analysis field `data_hubs` |
+| God modules | None | high | analysis field `god_modules` |
+| Business logic in the database | None visible. No EXEC SQL, no DB2 node. | medium | analysis field `node_counts` |
+| Team can read COBOL | Unknown | low | inference |
 
-The code is the small part. The time goes on getting a build environment, getting the logs, and agreeing what "the same" means for a job with no output files.
+| Item | Range (person-days) |
+|---|---|
+| Port of 4 units, refactor target | 1 to 2 |
+| Collect the oracle and the normalization spec | 2 to 5 |
+| Build and run the equivalence harness, including a parallel or replay run over one month-end | 3 to 6 |
+| Total for wave 1 | 6 to 13 |
 
-## The assumptions the range depends on
+## The assumptions the range is most sensitive to
 
-1. Assumes the deployed load modules for OLDPGM and NEWPGM are built from the four line sources in the tree (`app/cbl/OLDPGM.cbl:4`, `app/cbl/NEWPGM.cbl:4`). If either carries logic that is not in this tree, wave 1 grows by roughly an order of magnitude, because the port and the oracle would have to come from the load module and its job output.
-2. Assumes MAINJOB is the whole nightly batch cycle (inference, no scheduler export). If the scheduler shows more jobs chained to it, each is a temporal edge across the wave boundary and the plan needs another wave and a new estimate.
-3. Assumes 12 months of job logs and return codes for MAINJOB can be obtained in the first week. If they cannot, the harness falls back to characterization tests, which are provisional, and the exit bar in `06-test-strategy.md` cannot be met.
+1. Assumes the tree is the whole nightly cycle. If `OLDPGM` and `NEWPGM` are stubs and the real logic is
+   built or linked from elsewhere, the port line roughly multiplies by the size of that code, and the
+   range no longer applies. Evidence for the doubt: `app/cbl/OLDPGM.cbl:4`, `app/cbl/NEWPGM.cbl:4`.
+2. Assumes the client can supply at least 12 months of job logs or archived output for `MAINJOB`. If
+   they cannot, the oracle falls back to characterization tests, and the harness line roughly doubles
+   while the result is only provisional.
+3. Assumes `OLDPGM` still does something the cycle needs. If it turns out to be retired and its call is
+   a leftover, the port drops one unit but a decision to remove it needs a signed row in the deviation
+   register. Evidence: `app/cbl/PGMMAIN.cbl:4`.
 
-## Where Claude Code helps and where it does not
+## What Claude Code can and cannot do here
 
-- Strong: transliterating four small units once a harness exists. There is no arithmetic, no packed decimal and no file handling in them (`app/cbl/PGMMAIN.cbl:4`).
-- Weak: saying why PGMMAIN calls both OLDPGM and NEWPGM. Nothing in the source states the intent. The names suggest an old and a new implementation of the same job, but that is inference and someone who knows the system has to confirm it.
+- Can do: transliterate the two `CALL` statements and the `GOBACK`s to the target, and write a job
+  wrapper that keeps the call order. That is mechanical, and with a harness it is safe.
+- Cannot do: say what `OLDPGM` and `NEWPGM` are for, or whether their order matters. The tree has no
+  intent to infer. That comes from the client's engineers.

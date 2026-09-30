@@ -2,7 +2,7 @@
  "generated": "2026-09-30",
  "summary": {
   "citations": {
-   "total": 11323,
+   "total": 11272,
    "unresolved": 0,
    "resolve_rate": 1.0
   },
@@ -12,16 +12,26 @@
   "json_all_valid_runs": 16,
   "unreachable_on_dynamic_total": 0,
   "carddemo_waves": {
-   "jaccard": 0.15295551492992077,
-   "rand_index_mean": 0.8399823643721742,
-   "unit_overlap": 0.8571428571428571,
+   "jaccard": 0.766789667896679,
+   "rand_index_mean": 0.9719223421742414,
+   "unit_overlap": 1.0,
    "wave_counts": [
     7,
-    9,
-    8
+    7,
+    7
    ],
    "runs_compared": 3,
-   "wave_count_identical": false
+   "wave_count_identical": true,
+   "deviations": [
+    23,
+    21,
+    18
+   ],
+   "seed_jaccard": [
+    0.5216811207471648,
+    0.5571808510638298,
+    0.6247408431237043
+   ]
   },
   "cost_usd_total": null
  },
@@ -31,9 +41,9 @@
    "run": "carddemo-1",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 532773,
-    "tool_uses": 107,
-    "duration_ms": 1633924
+    "tokens": 559035,
+    "tool_uses": 122,
+    "duration_ms": 1799927
    },
    "claude": {
     "is_error": null,
@@ -46,7 +56,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 3400,
+    "total": 3255,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -67,9 +77,9 @@
    "run": "carddemo-2",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 465043,
-    "tool_uses": 94,
-    "duration_ms": 1499556
+    "tokens": 503331,
+    "tool_uses": 90,
+    "duration_ms": 1739253
    },
    "claude": {
     "is_error": null,
@@ -82,7 +92,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 3304,
+    "total": 3482,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -96,16 +106,16 @@
    },
    "json_all_valid": true,
    "unreachable_on_dynamic": [],
-   "wave_count": 9
+   "wave_count": 7
   },
   {
    "case": "carddemo",
    "run": "carddemo-3",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 450329,
-    "tool_uses": 91,
-    "duration_ms": 1368003
+    "tokens": 527090,
+    "tool_uses": 100,
+    "duration_ms": 1682342
    },
    "claude": {
     "is_error": null,
@@ -118,7 +128,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 3266,
+    "total": 3284,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -132,16 +142,16 @@
    },
    "json_all_valid": true,
    "unreachable_on_dynamic": [],
-   "wave_count": 8
+   "wave_count": 7
   },
   {
    "case": "01-static-call",
    "run": "01-static-call",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 112595,
-    "tool_uses": 32,
-    "duration_ms": 190283
+    "tokens": 118047,
+    "tool_uses": 25,
+    "duration_ms": 188704
    },
    "claude": {
     "is_error": null,
@@ -154,7 +164,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 78,
+    "total": 49,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -175,9 +185,9 @@
    "run": "02-dynamic-call",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 108288,
-    "tool_uses": 24,
-    "duration_ms": 161698
+    "tokens": 116874,
+    "tool_uses": 26,
+    "duration_ms": 194797
    },
    "claude": {
     "is_error": null,
@@ -190,7 +200,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 46,
+    "total": 63,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -211,9 +221,9 @@
    "run": "03-cics-link-xctl",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 133314,
-    "tool_uses": 27,
-    "duration_ms": 254450
+    "tokens": 143591,
+    "tool_uses": 30,
+    "duration_ms": 270601
    },
    "claude": {
     "is_error": null,
@@ -226,7 +236,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 123,
+    "total": 146,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -247,9 +257,9 @@
    "run": "04-shared-copybook",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 123583,
-    "tool_uses": 23,
-    "duration_ms": 208523
+    "tokens": 114330,
+    "tool_uses": 18,
+    "duration_ms": 168040
    },
    "claude": {
     "is_error": null,
@@ -262,7 +272,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 71,
+    "total": 49,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -283,9 +293,9 @@
    "run": "05-vsam-cics-pair",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 114894,
-    "tool_uses": 18,
-    "duration_ms": 211930
+    "tokens": 127224,
+    "tool_uses": 25,
+    "duration_ms": 264003
    },
    "claude": {
     "is_error": null,
@@ -298,7 +308,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 110,
+    "total": 102,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -312,16 +322,16 @@
    },
    "json_all_valid": true,
    "unreachable_on_dynamic": [],
-   "wave_count": 1
+   "wave_count": 2
   },
   {
    "case": "06-contract-match",
    "run": "06-contract-match",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 128353,
-    "tool_uses": 28,
-    "duration_ms": 232861
+    "tokens": 117648,
+    "tool_uses": 17,
+    "duration_ms": 210766
    },
    "claude": {
     "is_error": null,
@@ -334,7 +344,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 127,
+    "total": 164,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -348,16 +358,16 @@
    },
    "json_all_valid": true,
    "unreachable_on_dynamic": [],
-   "wave_count": 1
+   "wave_count": 2
   },
   {
    "case": "07-contract-mismatch",
    "run": "07-contract-mismatch",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 140202,
-    "tool_uses": 30,
-    "duration_ms": 291500
+    "tokens": 128742,
+    "tool_uses": 29,
+    "duration_ms": 239056
    },
    "claude": {
     "is_error": null,
@@ -370,7 +380,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 171,
+    "total": 153,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -384,16 +394,16 @@
    },
    "json_all_valid": true,
    "unreachable_on_dynamic": [],
-   "wave_count": 1
+   "wave_count": 2
   },
   {
    "case": "08-temporal-steps",
    "run": "08-temporal-steps",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 111865,
+    "tokens": 104935,
     "tool_uses": 18,
-    "duration_ms": 196973
+    "duration_ms": 132318
    },
    "claude": {
     "is_error": null,
@@ -406,7 +416,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 133,
+    "total": 92,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -427,9 +437,9 @@
    "run": "09-temporal-controlm",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 121466,
-    "tool_uses": 24,
-    "duration_ms": 226750
+    "tokens": 117484,
+    "tool_uses": 21,
+    "duration_ms": 202783
    },
    "claude": {
     "is_error": null,
@@ -442,7 +452,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 101,
+    "total": 130,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -463,9 +473,9 @@
    "run": "10-temporal-shell",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 126403,
-    "tool_uses": 29,
-    "duration_ms": 200028
+    "tokens": 132404,
+    "tool_uses": 20,
+    "duration_ms": 245485
    },
    "claude": {
     "is_error": null,
@@ -499,9 +509,9 @@
    "run": "11-dead-program",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 136413,
+    "tokens": 134687,
     "tool_uses": 30,
-    "duration_ms": 274167
+    "duration_ms": 236486
    },
    "claude": {
     "is_error": null,
@@ -514,7 +524,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 119,
+    "total": 82,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -540,9 +550,9 @@
    "run": "12-dormant-program",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 105668,
-    "tool_uses": 17,
-    "duration_ms": 150429
+    "tokens": 113226,
+    "tool_uses": 21,
+    "duration_ms": 182460
    },
    "claude": {
     "is_error": null,
@@ -555,7 +565,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 83,
+    "total": 60,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -581,9 +591,9 @@
    "run": "13-dynamic-only-reachable",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 127705,
-    "tool_uses": 25,
-    "duration_ms": 216631
+    "tokens": 117831,
+    "tool_uses": 18,
+    "duration_ms": 184885
    },
    "claude": {
     "is_error": null,
@@ -596,7 +606,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 98,
+    "total": 68,
     "unresolved": 0,
     "resolve_rate": 1.0
    },

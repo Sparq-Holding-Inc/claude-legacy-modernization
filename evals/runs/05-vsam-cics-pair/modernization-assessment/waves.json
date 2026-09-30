@@ -3,19 +3,41 @@
   "waves": [
     {
       "wave": 1,
-      "name": "ACCTDAT online pair",
-      "units": ["PROGR", "PROGW"],
-      "rationale": "The whole system is two online transactions (TRNR, TRNW) over one keyed file with one shared layout copybook. There is no call edge, no cycle, no JCL and no scheduler. It is one wave. Inside the wave, port and prove PROGR first, then PROGW.",
-      "unblocks": "The decision on where the ACCTDAT KSDS lives after refactor, and a proven byte-level harness for the 17-byte ACCTREC record that any later batch wave can reuse once its JCL is supplied.",
+      "family": "online-readonly",
+      "name": "Account file read transaction (TRNR)",
+      "units": [
+        "PROGR"
+      ],
+      "rationale": "Read-only online transaction. It reads ACCTDAT and writes nothing another entry point uses, so a wrong port can be routed back with no data to repair. It proves the toolchain and the ACCTREC packed decimal mapping. The wave is sound only if ACCTDAT stays where it is until wave 2, because the ported reader still reads a file the legacy PROGW writes. Its business value is close to nil: the program never uses the record it reads, so this wave is mostly a chore.",
+      "unblocks": "The ACCTREC decimal mapping and the access path to the KSDS, both of which wave 2 reuses. Nothing a stakeholder can name.",
+      "blast_radius": "low",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/csd/DEMO.CSD",
+          "line": 6
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "family": "online-writers",
+      "name": "Account file write transaction (TRNW)",
+      "units": [
+        "PROGW"
+      ],
+      "rationale": "The only writer of ACCTDAT in the tree, and the writer for the contract edge to PROGR. It moves after the reader because it writes a dataset another entry point uses. It is sound as a wave only when the write path can be routed back and replayed against a copy of the file. The tree holds no batch job, so whether a nightly cycle also writes ACCTDAT is not known, and that could change this wave.",
+      "unblocks": "Moving ownership of ACCTDAT, which ends the shared file between the legacy and new sides and lets the KSDS be retired.",
       "blast_radius": "high",
       "confidence": "low",
       "evidence": [
-        {"file": "app/csd/DEMO.CSD", "line": 4},
-        {"file": "app/csd/DEMO.CSD", "line": 6},
-        {"file": "app/cbl/PROGW.cbl", "line": 7},
-        {"file": "app/cbl/PROGR.cbl", "line": 7}
+        {
+          "file": "app/cbl/PROGW.cbl",
+          "line": 7
+        }
       ]
     }
   ],
-  "unassigned": []
+  "unassigned": [],
+  "deviations": []
 }

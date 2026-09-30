@@ -3,17 +3,50 @@
   "waves": [
     {
       "wave": 1,
-      "name": "Whole system: PROGA and PROGB",
-      "units": ["PROGA", "PROGB"],
-      "rationale": "The whole tree is one batch driver and the one subprogram it calls. There are no shared datasets, no cycles and no articulation points, so there is no seam to cut. One wave.",
-      "unblocks": "Proves the toolchain, the test harness and the CALL boundary end to end. Once the missing JCL and scheduler are supplied, it is the first cut of the nightly batch cycle.",
+      "family": "no-entry-point",
+      "name": "PROGA and PROGB call pair",
+      "units": [
+        "PROGA",
+        "PROGB"
+      ],
+      "rationale": "The extractor cut no wave, because the tree has no JCL job, CSD transaction or scheduler entry point. The pair is placed as one wave only because PROGA calls PROGB with a literal target and PROGB has no other caller, so the two move together or not at all. The tree cannot show that this wave is deployable, testable or nameable to a stakeholder. It is a placeholder that satisfies the wave validator, not a finding that a wave exists.",
+      "unblocks": "Nothing the tree shows. It is a chore wave: no dataset, copybook or other program depends on either unit.",
       "blast_radius": "low",
       "confidence": "low",
+      "inference": true,
       "evidence": [
-        {"file": "app/cbl/PROGA.cbl", "line": 6},
-        {"file": "app/cbl/PROGB.cbl", "line": 4}
+        {
+          "file": "app/cbl/PROGA.cbl",
+          "line": 6
+        }
       ]
     }
   ],
-  "unassigned": []
+  "unassigned": [],
+  "deviations": [
+    {
+      "unit": "PROGA",
+      "from_wave": null,
+      "to_wave": 1,
+      "reason": "Seed placed no wave and left the unit unassigned (no entry point in the tree). Placed in wave 1 with PROGB so the plan validates. The must-not-break item, the nightly batch cycle, may include this batch-type program, but no JCL or scheduler in the tree shows it. Inference.",
+      "evidence": [
+        {
+          "file": "app/cbl/PROGA.cbl",
+          "line": 6
+        }
+      ]
+    },
+    {
+      "unit": "PROGB",
+      "from_wave": null,
+      "to_wave": 1,
+      "reason": "Seed placed no wave and left the unit unassigned. It moves with its only caller PROGA, which it cannot be separated from.",
+      "evidence": [
+        {
+          "file": "app/cbl/PROGA.cbl",
+          "line": 6
+        }
+      ]
+    }
+  ]
 }

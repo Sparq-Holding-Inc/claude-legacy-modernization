@@ -1,0 +1,31 @@
+{
+ "target_state": null,
+ "waves": [
+  {
+   "wave": 1,
+   "family": "batch-utility",
+   "name": null,
+   "units": [
+    "job:JOBA",
+    "job:JOBB",
+    "sch:NIGHTLY/JOBA",
+    "sch:NIGHTLY/JOBB"
+   ],
+   "rationale": null,
+   "unblocks": null,
+   "blast_radius": null,
+   "confidence": null,
+   "evidence": [
+    {
+     "file": "app/jcl/JOBA.jcl",
+     "line": 1
+    },
+    {
+     "file": "app/jcl/JOBB.jcl",
+     "line": 1
+    }
+   ]
+  }
+ ],
+ "unassigned": []
+}

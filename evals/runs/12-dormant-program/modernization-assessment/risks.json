@@ -1,39 +1,18 @@
 {
   "units": [
     {
-      "id": "job:MAINJOB",
-      "port_difficulty": {
-        "score": 1,
-        "why": "Two line job with one EXEC PGM step and no DD statements, so there is no JCL logic to translate."
-      },
-      "blast_radius": {
-        "score": 3,
-        "why": "It is the only entry point in the tree and runs PGMMAIN. If it is the nightly batch cycle (inference, no scheduler was supplied) a wrong port stops the cycle. Failure would be loud (a step abend or bad return code)."
-      },
-      "quadrant": "low-high",
-      "wave": 1,
-      "driving_fact": "The only entry point, and its single step runs PGMMAIN.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/jcl/MAINJOB.jcl",
-          "line": 2
-        }
-      ]
-    },
-    {
       "id": "PGMMAIN",
       "port_difficulty": {
         "score": 1,
-        "why": "Six lines. It calls OLDPGM and then NEWPGM and returns. No arithmetic, no files, no data items."
+        "why": "Six lines: two unconditional CALLs and GOBACK. No arithmetic, no files, no branches."
       },
       "blast_radius": {
         "score": 3,
-        "why": "Articulation point: every path to OLDPGM and NEWPGM goes through it. The call order (OLDPGM then NEWPGM) is the only behavior it has and it is an ordering a port must keep."
+        "why": "The only application program the only job runs, and the single articulation point, so a wrong call order or a missed call silently drops OLDPGM or NEWPGM from the nightly cycle."
       },
       "quadrant": "low-high",
       "wave": 1,
-      "driving_fact": "Calls OLDPGM at line 4 and NEWPGM at line 5, unconditionally and in that order.",
+      "driving_fact": "PGMMAIN is the articulation point and calls OLDPGM then NEWPGM unconditionally, in that order.",
       "confidence": "medium",
       "evidence": [
         {
@@ -50,16 +29,16 @@
       "id": "OLDPGM",
       "port_difficulty": {
         "score": 1,
-        "why": "Four lines and the only statement is GOBACK. Nothing to port in the source as it stands."
+        "why": "Four lines, GOBACK only. There is no logic in this tree to port."
       },
       "blast_radius": {
         "score": 2,
-        "why": "One caller, PGMMAIN, and no files or shared data. Last modified 2011-03-04, and there is no telemetry, so whether the deployed load module matches this source is unverified."
+        "why": "Fan-in of 1, no dataset attached in this tree. It is unchanged since 2011 and PGMMAIN calls it unconditionally, so it probably runs, but nothing in the tree shows what it does."
       },
       "quadrant": "low-low",
       "wave": 1,
-      "driving_fact": "Called unconditionally by PGMMAIN at line 4, so it very likely runs on every execution although it has not changed since 2011.",
-      "confidence": "medium",
+      "driving_fact": "Dormant by date (last modified 2011-03-04) but PGMMAIN calls it unconditionally, so it very likely runs every cycle.",
+      "confidence": "low",
       "evidence": [
         {
           "file": "app/cbl/OLDPGM.cbl",
@@ -75,16 +54,16 @@
       "id": "NEWPGM",
       "port_difficulty": {
         "score": 1,
-        "why": "Four lines and the only statement is GOBACK. Nothing to port in the source as it stands."
+        "why": "Four lines, GOBACK only. There is no logic in this tree to port."
       },
       "blast_radius": {
         "score": 2,
-        "why": "One caller, PGMMAIN, and no files or shared data. Modified 2026-05-01, so it is the recently active program."
+        "why": "Fan-in of 1, no dataset attached in this tree. Modified 2026-05-01 and called unconditionally by PGMMAIN, so it runs every cycle, but nothing in the tree shows what it does."
       },
       "quadrant": "low-low",
       "wave": 1,
-      "driving_fact": "Called unconditionally by PGMMAIN at line 5 and touched most recently of the three programs.",
-      "confidence": "medium",
+      "driving_fact": "Recently modified (2026-05-01) and called unconditionally by PGMMAIN after OLDPGM.",
+      "confidence": "low",
       "evidence": [
         {
           "file": "app/cbl/NEWPGM.cbl",
@@ -93,6 +72,32 @@
         {
           "file": "app/cbl/PGMMAIN.cbl",
           "line": 5
+        }
+      ]
+    },
+    {
+      "id": "job:MAINJOB",
+      "port_difficulty": {
+        "score": 1,
+        "why": "One step running PGMMAIN. No DD statements, no PROC, no COND, so there is no data or step-order behavior in the JCL."
+      },
+      "blast_radius": {
+        "score": 3,
+        "why": "It is the only job and the only entry point, so it is very likely the nightly batch cycle the client says must not break. No scheduler was parsed, so its schedule and successors are unknown."
+      },
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "The only entry point in the tree, and no scheduler artifact was parsed.",
+      "confidence": "low",
+      "inference": true,
+      "evidence": [
+        {
+          "file": "app/jcl/MAINJOB.jcl",
+          "line": 1
+        },
+        {
+          "file": "app/jcl/MAINJOB.jcl",
+          "line": 2
         }
       ]
     }

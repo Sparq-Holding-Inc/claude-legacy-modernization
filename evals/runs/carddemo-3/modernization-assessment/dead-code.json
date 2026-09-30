@@ -3,7 +3,7 @@
  "unreachable": [
   {
    "id": "cpy:UNUSED1Y",
-   "reason": "No program includes it and no path reaches it. Provisional, because there is no telemetry, but copybooks are compile-time only.",
+   "reason": "No COPY statement in the tree names it, and a copybook cannot be the target of a computed call. Provisional: no telemetry, and the tree may not hold every program that ran on the client's system.",
    "confidence": "high",
    "evidence": [
     {
@@ -16,79 +16,39 @@
  "dormant": [],
  "unknown": [
   {
-   "id": "proc:TRANREPT",
-   "reason": "The extractor lists this as unreachable. It is not dead. CORPT00C builds a job that runs EXEC PROC=TRANREPT and writes it to the JOBS queue (the internal reader), and the extractor does not follow the internal reader. Treat it as live and do not delete it.",
-   "confidence": "low",
+   "id": "CBPAUP0C",
+   "reason": "No static edge reaches it, but job CBPAUP0J runs it through the IMS batch driver PARM, which the extractor does not read, and the CA-7 listing triggers CBPAUP0J after CLOSEFIL. Likely live. It stays in unknown because nothing here proves the job still runs.",
+   "confidence": "medium",
    "evidence": [
     {
-     "file": "app/cbl/CORPT00C.cbl",
-     "line": 94
+     "file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl",
+     "line": 25
     },
     {
-     "file": "app/cbl/CORPT00C.cbl",
-     "line": 518
+     "file": "app/scheduler/CardDemo.ca7",
+     "line": 43
     }
    ]
   },
   {
    "id": "CBTRN01C",
-   "reason": "No JCL step runs it and no program calls it. The 28 computed calls in this tree are CICS transfers between online programs, so they are unlikely to reach a batch program, but the tree does not prove it. Its header says it posts daily transactions, which CBTRN02C does. It may be an earlier draft. Ask before deleting.",
+   "reason": "No job, CICS program definition or caller names it, and its six DDs map to no JCL. The computed calls in the tree resolve to CSD-defined online programs (menu table COMEN02Y, admin table COADM02Y) or to the caller kept in the COMMAREA, and it is a batch program with no CSD entry, so I infer none of them reaches it. Its header says it posts the daily file, like CBTRN02C, so it may be an older version. Kept in unknown by rule. Ask whether it ever ran.",
    "confidence": "low",
    "evidence": [
     {
      "file": "app/cbl/CBTRN01C.cbl",
      "line": 5
-    }
-   ]
-  },
-  {
-   "id": "CBPAUP0C",
-   "reason": "Run by the IMS BMP job CBPAUP0J, which names it in PARM. The extractor does not read PARM, so it lists the program as unknown. It is live: CA-7 triggers CBPAUP0J after CLOSEFIL. Not a deletion candidate.",
-   "confidence": "low",
-   "evidence": [
+    },
     {
-     "file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl",
-     "line": 25
-    }
-   ]
-  },
-  {
-   "id": "DBUNLDGS",
-   "reason": "Run by UNLDGSAM.JCL, which names it in PARM. The job is not in any scheduler in the tree, so it may be a manual utility. Instrument it before any deletion.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL",
-     "line": 27
-    }
-   ]
-  },
-  {
-   "id": "PAUDBLOD",
-   "reason": "Run by LOADPADB.JCL, which names it in PARM. The job is not in any scheduler in the tree. Manual load utility. Instrument it before any deletion.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL",
-     "line": 27
-    }
-   ]
-  },
-  {
-   "id": "PAUDBUNL",
-   "reason": "Run by UNLDPADB.JCL, which names it in PARM. The job is not in any scheduler in the tree. Manual unload utility. Instrument it before any deletion.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL",
-     "line": 39
+     "file": "app/cpy/COMEN02Y.cpy",
+     "line": 21
     }
    ]
   },
   {
    "id": "COBTUPDT",
-   "reason": "Run by MNTTRDB2.jcl through a DSN command, and Control-M schedules MNTTRDB2 weekly. It is live. Not a deletion candidate.",
-   "confidence": "low",
+   "reason": "Not dead. The weekly Control-M job MNTTRDB2 runs it from an in-stream DSN card (RUN PROGRAM(COBTUPDT)), which the extractor does not read.",
+   "confidence": "medium",
    "evidence": [
     {
      "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
@@ -101,10 +61,47 @@
    ]
   },
   {
-   "id": "cpy:IMSFUNCS",
-   "reason": "Included only by DBUNLDGS, PAUDBLOD and PAUDBUNL, which are themselves in this bucket. Its status follows theirs.",
-   "confidence": "low",
+   "id": "DBUNLDGS",
+   "reason": "Job UNLDGSAM runs it through the IMS batch driver PARM. No scheduler in the tree names UNLDGSAM, so ask whether it runs.",
+   "confidence": "medium",
    "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL",
+     "line": 27
+    }
+   ]
+  },
+  {
+   "id": "PAUDBLOD",
+   "reason": "Job LOADPADB runs it through the IMS batch driver PARM. No scheduler in the tree names LOADPADB, so ask whether it runs.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL",
+     "line": 27
+    }
+   ]
+  },
+  {
+   "id": "PAUDBUNL",
+   "reason": "Job UNLDPADB runs it through the IMS batch driver PARM. No scheduler in the tree names UNLDPADB, so ask whether it runs.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL",
+     "line": 39
+    }
+   ]
+  },
+  {
+   "id": "cpy:IMSFUNCS",
+   "reason": "Included only by PAUDBLOD and DBUNLDGS, which are themselves in unknown. Its status follows theirs. A copybook cannot be a computed call target, so the extractor's reason is beside the point.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL",
+     "line": 142
+    },
     {
      "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
      "line": 136
@@ -113,8 +110,8 @@
   },
   {
    "id": "cpy:PADFLPCB",
-   "reason": "Included only by DBUNLDGS. Its status follows that program.",
-   "confidence": "low",
+   "reason": "Included only by DBUNLDGS, which is in unknown. Its status follows the program's.",
+   "confidence": "medium",
    "evidence": [
     {
      "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
@@ -124,8 +121,8 @@
   },
   {
    "id": "cpy:PASFLPCB",
-   "reason": "Included only by DBUNLDGS. Its status follows that program.",
-   "confidence": "low",
+   "reason": "Included only by DBUNLDGS, which is in unknown. Its status follows the program's.",
+   "confidence": "medium",
    "evidence": [
     {
      "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
@@ -135,12 +132,31 @@
   },
   {
    "id": "cpy:PAUTBPCB",
-   "reason": "Included by DBUNLDGS, PAUDBLOD and PAUDBUNL. Its status follows theirs.",
-   "confidence": "low",
+   "reason": "Included by PAUDBLOD and DBUNLDGS, which are in unknown. Its status follows theirs.",
+   "confidence": "medium",
    "evidence": [
     {
      "file": "app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL",
      "line": 161
+    },
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
+     "line": 154
+    }
+   ]
+  },
+  {
+   "id": "proc:TRANREPT",
+   "reason": "Run at run time: CORPT00C builds a job that executes PROC=TRANREPT and writes it to the JOBS queue. The extractor makes no edge for JCL text inside COBOL. Live if anyone uses the online report screen. It is the online path of the must-not-break transaction report.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 94
+    },
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 517
     }
    ]
   }

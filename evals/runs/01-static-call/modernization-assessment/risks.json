@@ -2,23 +2,45 @@
   "units": [
     {
       "id": "PROGA",
-      "port_difficulty": {"score": 1, "why": "Seven lines: one DISPLAY, one static CALL, STOP RUN. No files, no arithmetic, no REDEFINES, no CICS."},
-      "blast_radius": {"score": 2, "why": "Touches no dataset and has no callers in the tree. Scored low on evidence only: nothing in the tree ties it to the nightly batch cycle, so the true blast radius is unknown."},
+      "port_difficulty": {
+        "score": 1,
+        "why": "Four statements: a DISPLAY, one static CALL and STOP RUN. No files, no arithmetic, no copybooks."
+      },
+      "blast_radius": {
+        "score": 2,
+        "why": "No datasets, no writers, no readers, and nothing calls it. What it would break depends on whether a job outside this tree runs it in the nightly batch cycle, which the tree cannot show."
+      },
       "quadrant": "low-low",
       "wave": 1,
-      "driving_fact": "Unconditionally calls PROGB after printing a message, and no scheduler or JCL in the tree starts it.",
+      "driving_fact": "Statically calls PROGB and has no caller, job step or scheduler entry in the tree.",
       "confidence": "low",
-      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 6}]
+      "evidence": [
+        {
+          "file": "app/cbl/PROGA.cbl",
+          "line": 6
+        }
+      ]
     },
     {
       "id": "PROGB",
-      "port_difficulty": {"score": 1, "why": "Four lines, a bare GOBACK. No LINKAGE SECTION, no parameters, no logic."},
-      "blast_radius": {"score": 2, "why": "One caller (PROGA), no datasets, no side effects visible in this source. The source may not match the load module that runs in production."},
+      "port_difficulty": {
+        "score": 1,
+        "why": "The body is a single GOBACK. Nothing to port."
+      },
+      "blast_radius": {
+        "score": 1,
+        "why": "No datasets, no side effects, one caller. It cannot corrupt data or produce a wrong number."
+      },
       "quadrant": "low-low",
       "wave": 1,
-      "driving_fact": "Has exactly one caller, PROGA, through a static literal CALL, and does nothing.",
+      "driving_fact": "Called by PROGA and does nothing but return.",
       "confidence": "medium",
-      "evidence": [{"file": "app/cbl/PROGB.cbl", "line": 4}]
+      "evidence": [
+        {
+          "file": "app/cbl/PROGB.cbl",
+          "line": 4
+        }
+      ]
     }
   ],
   "do_not_port": []

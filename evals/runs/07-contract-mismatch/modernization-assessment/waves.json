@@ -3,19 +3,27 @@
   "waves": [
     {
       "wave": 1,
-      "name": "Writer, reader and the shared master file",
-      "units": ["job:WRITEJOB", "PGMW", "job:READJOB", "PGMR"],
-      "rationale": "Two jobs, two programs and one dataset. The dataset is the only edge between the halves and it is a medium confidence contract, so the halves move together. No cycle, no god module and no computed call splits them any further.",
-      "unblocks": "One shared record layout that neither program owns, and a byte-level comparison harness for SPARQ.TEST.MASTER that any later job touching the file can reuse.",
+      "family": "batch-readonly",
+      "name": "Reader step of the nightly cycle",
+      "units": ["PGMR", "job:READJOB"],
+      "rationale": "READJOB runs PGMR, which only reads SPARQ.TEST.MASTER and writes nothing another entry point uses. It can be deployed behind a flag by swapping the one EXEC step, and rolled back by swapping it back. The boundary is the dataset, so equivalence can be asserted on the bytes it is given. It is a sound first wave for the toolchain, with one condition: the ported reader must decode the record the legacy writer still produces in wave 2, and the two copybooks that describe that record are separate files.",
+      "unblocks": "Little of business value. It proves the toolchain and gives the harness a consumer of the shared dataset. It is close to a chore, and it should not be sold as more.",
       "blast_radius": "medium",
       "confidence": "medium",
-      "evidence": [
-        {"file": "app/jcl/WRITEJOB.jcl", "line": 2},
-        {"file": "app/jcl/READJOB.jcl", "line": 2},
-        {"file": "app/cbl/PGMW.cbl", "line": 11},
-        {"file": "app/cbl/PGMR.cbl", "line": 11}
-      ]
+      "evidence": [{"file": "app/jcl/READJOB.jcl", "line": 1}]
+    },
+    {
+      "wave": 2,
+      "family": "batch-writers",
+      "name": "Writer step of the nightly cycle",
+      "units": ["PGMW", "job:WRITEJOB"],
+      "rationale": "WRITEJOB runs PGMW, which creates SPARQ.TEST.MASTER that READJOB reads. It goes after the reader because it owns the record layout every consumer depends on, and because the boundary test for it is a byte comparison of the file it writes. It can be rolled back by swapping the step back, provided the dataset is deleted first, since the DD is DISP=(NEW,CATLG,DELETE). The seed puts the reader before the writer, and I kept that. The contract edge between them is medium, but the two layouts are the same 15 bytes by their PIC clauses, so it does not force the writer earlier.",
+      "unblocks": "Retires the legacy writer of SPARQ.TEST.MASTER. It lets the two copies of the record layout, LAYOUTX and LAYOUTY, become one.",
+      "blast_radius": "high",
+      "confidence": "medium",
+      "evidence": [{"file": "app/cbl/PGMW.cbl", "line": 6}]
     }
   ],
-  "unassigned": []
+  "unassigned": [],
+  "deviations": []
 }

@@ -1,66 +1,42 @@
 {
   "units": [
     {
-      "id": "job:MAINJOB",
-      "port_difficulty": {
-        "score": 1,
-        "why": "One EXEC PGM step with no DD statements, so nothing but a step launch to move."
-      },
-      "blast_radius": {
-        "score": 3,
-        "why": "It is the only entry point, so every path in the tree runs through it, and it may be part of the nightly batch cycle the client named."
-      },
-      "quadrant": "low-high",
+      "id": "PGMMAIN",
+      "port_difficulty": {"score": 3, "why": "Ten lines, but it CALLs a program whose name comes from ACCEPT, so the set of callees the port must reproduce is unknown."},
+      "blast_radius": {"score": 4, "why": "It is the only application program the only JCL job runs, and it can hand control to any program, so a wrong dispatch fails silently or abends the run."},
+      "quadrant": "high-high",
       "wave": 1,
-      "driving_fact": "Sole entry point. It runs PGMMAIN, which makes a computed call, so what it really launches is unknown.",
-      "confidence": "low",
+      "driving_fact": "CALL WS-PGM-NAME at line 9 takes its target from ACCEPT at line 8, and WS-PGM-NAME has no VALUE clause, so the target cannot be bounded from source.",
+      "confidence": "medium",
       "evidence": [
-        {
-          "file": "app/jcl/MAINJOB.jcl",
-          "line": 2
-        }
+        {"file": "app/cbl/PGMMAIN.cbl", "line": 8},
+        {"file": "app/cbl/PGMMAIN.cbl", "line": 9}
       ]
     },
     {
-      "id": "PGMMAIN",
-      "port_difficulty": {
-        "score": 3,
-        "why": "Ten lines, but it is a dispatcher: CALL WS-PGM-NAME with the name from ACCEPT has no clean target equivalent until the set of targets is known."
-      },
-      "blast_radius": {
-        "score": 4,
-        "why": "It can run any program the load library holds, has no ON EXCEPTION clause, and a wrong target fails silently or abends depending on input nobody has seen."
-      },
-      "quadrant": "high-high",
+      "id": "job:MAINJOB",
+      "port_difficulty": {"score": 1, "why": "One step, no DD statements, no parameters to translate."},
+      "blast_radius": {"score": 3, "why": "It is the only job in the tree and no scheduler was parsed, so whether it is part of the nightly batch cycle is unproven, and it has no SYSIN DD for the ACCEPT."},
+      "quadrant": "low-high",
       "wave": 1,
-      "driving_fact": "CALL WS-PGM-NAME at line 9 takes its target from ACCEPT at line 8. No VALUE clause or MOVE bounds it.",
+      "driving_fact": "Its single step runs PGMMAIN and defines no SYSIN, so the program name PGMMAIN needs must come from somewhere this tree does not show.",
       "confidence": "medium",
       "evidence": [
-        {
-          "file": "app/cbl/PGMMAIN.cbl",
-          "line": 9
-        }
+        {"file": "app/jcl/MAINJOB.jcl", "line": 1},
+        {"file": "app/jcl/MAINJOB.jcl", "line": 2}
       ]
     },
     {
       "id": "HIDDEN01",
-      "port_difficulty": {
-        "score": 1,
-        "why": "Four lines, and the body is only GOBACK, so there is no logic to port."
-      },
-      "blast_radius": {
-        "score": 2,
-        "why": "It does nothing, but if PGMMAIN calls it by name, dropping it would turn a working call into a failed call."
-      },
+      "port_difficulty": {"score": 1, "why": "Four lines and a GOBACK. There is no logic to port."},
+      "blast_radius": {"score": 2, "why": "It does nothing today, but if PGMMAIN calls it, deleting it turns a working dispatch into a run-time failure."},
       "quadrant": "low-low",
-      "wave": 1,
-      "driving_fact": "No static caller. Only the computed call at app/cbl/PGMMAIN.cbl:9 could reach it, so it is unknown rather than dead.",
-      "confidence": "low",
+      "wave": null,
+      "driving_fact": "No static edge reaches it, and the computed CALL at PGMMAIN.cbl line 9 could.",
+      "confidence": "medium",
       "evidence": [
-        {
-          "file": "app/cbl/HIDDEN01.cbl",
-          "line": 4
-        }
+        {"file": "app/cbl/HIDDEN01.cbl", "line": 1},
+        {"file": "app/cbl/PGMMAIN.cbl", "line": 9}
       ]
     }
   ],

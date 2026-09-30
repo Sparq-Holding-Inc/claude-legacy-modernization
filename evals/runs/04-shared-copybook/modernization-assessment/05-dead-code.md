@@ -1,29 +1,29 @@
 # 05 Dead code
 
-Machine-readable register: `dead-code.json`. Candidate tables: `05a-dead-code-candidates.md`. Telemetry: **none**, from the `--telemetry none` flag. Every claim here is provisional.
+Telemetry: `none`. Every claim here is provisional. The candidate list is in `05a-dead-code-candidates.md`. The machine readable version is `dead-code.json`.
 
-## The result
+## The tree has no entry point
+
+The extractor found no CSD transaction, JCL job, scheduler job or wrapper (`analysis`, field `entry_points` is empty). So nothing can be proven unreachable. Every candidate is unknown. The extractor said so in its warnings (`analysis`, field `warnings`).
+
+## Dormancy was not measured
+
+The tree is not a git repository, so no last-modified date exists (`analysis`, field `warnings`). The dormant bucket was NOT computed. The empty dormant list means not measured. It does not mean nothing is old.
+
+## The three buckets
 
 | Bucket | Units | Confidence | Evidence |
 |---|---|---|---|
-| Unreachable | none | high | inference |
-| Dormant | none. `last_modified` is unknown for all three files because no git dates were available (`meta.git_dates` is false). | low | inference |
-| Unknown | PROGA, PROGB, `cpy:SHARED01` | low | `app/cbl/PROGA.cbl:1`, `app/cbl/PROGB.cbl:1`, `app/cpy/SHARED01.cpy:1` |
+| Unreachable | none | not applicable | analysis, field `dead_code_candidates` |
+| Reachable but dormant | none. Not measured. | not applicable | analysis, field `warnings` |
+| Unknown | PROGA | low | `app/cbl/PROGA.cbl:1` |
+| Unknown | PROGB | low | `app/cbl/PROGB.cbl:1` |
+| Unknown | cpy:SHARED01 | low | `app/cpy/SHARED01.cpy:1` |
 
-Nothing is proposed for deletion.
+The copybook is included by both programs (`app/cbl/PROGA.cbl:5`, `app/cbl/PROGB.cbl:5`). It stays in the unknown bucket for as long as they do.
 
-## Why everything is unknown
+## What to ask the client
 
-The extractor found no entry point: no JCL job, no scheduler job, no CICS transaction, no wrapper script (`analysis.entry_points` is empty, `reachable_count` is 0). Without an entry point nothing can be shown to be reachable, and nothing can be shown to be unreachable either. The extractor placed all three units in the unknown bucket, and the validator forbids moving them to unreachable.
-
-This is not the usual reason for unknown. The usual reason is a computed call in reachable code. Here there are no computed calls (`analysis.unresolved_dynamic` is empty). The bucket is open because the tree is incomplete, not because of dynamic dispatch.
-
-## Notes on each unit
-
-- **PROGA and PROGB.** Eight lines each. Neither is called from anywhere in the tree. A program that sits in a source tree with no job that names it is often a job's target from JCL kept elsewhere. Do not read the absence of a caller as evidence that it is dead. Ask for the JCL. Evidence: `app/cbl/PROGA.cbl:2`, `app/cbl/PROGB.cbl:2`.
-- **cpy:SHARED01.** Both programs include it, so it is live whenever either is. It is not a deletion candidate whatever the answer for the programs. Evidence: `app/cbl/PROGA.cbl:5`, `app/cbl/PROGB.cbl:5`.
-- **Tie to the must-not-break item.** The nightly batch cycle is the anchor. If either program is a step in it, then it is live by definition and belongs in no dead-code bucket. That is checkable in one look at the client's scheduler.
-
-## What would firm this up
-
-12 months of job-run history (SMF or scheduler logs) for these two program names. Without it, every entry above stays provisional.
+- Does any job, scheduler entry or CICS transaction run PROGA or PROGB? If yes, the missing JCL or scheduler needs to come into the tree, and this file gets redone.
+- Which programs ran in the last 12 months? Job logs or SMF records would answer this. See `06-test-strategy.md`.
+- Nothing here is a proposal to delete. A program with no entry point in a partial tree may run every night in the part that was not supplied.

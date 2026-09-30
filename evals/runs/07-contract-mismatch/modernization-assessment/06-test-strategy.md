@@ -1,102 +1,84 @@
 # 06 Test strategy
 
-Wave 1 is the only wave: `job:WRITEJOB`, `PGMW`, `job:READJOB`, `PGMR`. "Correct" means: for the
-inputs this system really sees, the new pair produces the same bytes in `SPARQ.TEST.MASTER` and the
-same step results as the old pair. Every difference is either covered by the normalization spec
-below or written in the deviation register on purpose.
+The bar is this: for the inputs the nightly batch cycle sees, the new reader and writer produce the same outputs as the old ones. Where they do not, someone decided that on purpose and wrote it down in the deviation register. Target state is refactor, so the behavior stays and the code is restructured.
 
-## The oracle
+## The oracle problem
 
-The tree names one dataset (`app/jcl/WRITEJOB.jcl:3`) but holds no data. There is no sample file, no
-archived output, no report, no job log and no test. So no oracle exists in the tree. It has to come
-from the client.
+The tree holds no datasets, no job output, no logs and no reports. It holds two programs, two copybooks and two JCL members. So the oracle has to come from the client. There is no telemetry (`--telemetry none`), so nothing tells us which runs are typical.
 
-Chosen oracle for wave 1, strongest first:
+Ask the client to supply:
 
-1. **Parallel run.** Both jobs are tiny and `PGMW` takes no input file (`app/cbl/PGMW.cbl:6`,
-   `app/cbl/PGMW.cbl:13`). Running the old and new writer side by side is cheap. Ask first whether it
-   is possible. Teams assume it is not, and are often wrong.
-2. **Golden master from archived outputs.** If a parallel run is not possible, use archived copies of
-   `SPARQ.TEST.MASTER` from each night's run, if any were kept.
-3. **Characterization tests from the source.** Last resort. It encodes what the code says, not what
-   it does, so any coverage from it is provisional. Nothing more is available today.
+1. **Archived copies of SPARQ.TEST.MASTER**, or of what it is copied to. The DD creates a new non-generation dataset each run (`app/jcl/WRITEJOB.jcl:3`), so prior runs exist only if someone copied them. Ask whether it is a GDG upstream, or copied to backup.
+2. **SYSOUT and return codes of WRITEJOB and READJOB** for at least one full business cycle, including month end.
+3. **The scheduler export** for the nightly cycle, so the job order is known and not assumed.
+4. **Every consumer of the dataset outside this tree**, and the layout each one uses.
+5. **An answer on the record length.** 15 bytes, or 80 (`app/jcl/WRITEJOB.jcl:4`).
 
-### What to ask the client to supply
+## Oracle per wave
 
-| Ask | Why | Evidence |
-|---|---|---|
-| Copies of `SPARQ.TEST.MASTER` after each run, over a full business cycle including month end and year end | Each copy is a golden master with a date on it | `app/jcl/WRITEJOB.jcl:3` |
-| The catalog entry for the dataset (record format, record length, block size) | The DD says `LRECL=80` and the layouts are 15 bytes. The real length decides the compare | `app/jcl/WRITEJOB.jcl:4`, `app/cpy/LAYOUTX.cpy:3` |
-| Job logs or SMF records for `WRITEJOB` and `READJOB`, 12 months | Return codes and run order. They double as telemetry for `05-dead-code.md` | inference: no logs in the tree |
-| The scheduler export | The only source of the order these two jobs run in | `app/jcl/READJOB.jcl:3` |
-| The `SYSOUT` from both jobs | Both jobs allocate one. Neither program writes to it in source, so any content came from the runtime | `app/jcl/WRITEJOB.jcl:5`, `app/jcl/READJOB.jcl:4` |
-| Any other job, partner extract or utility that reads the file | Each is another reader of the same 15 bytes | inference: the extractor reads only what is in the tree |
+| Wave | Oracle, strongest available first | Why | Evidence |
+|---|---|---|---|
+| 1. Reader (`PGMR`, `job:READJOB`) | Captured copy of a real SPARQ.TEST.MASTER written by the legacy PGMW, replayed into the new reader, with the return code and SYSOUT compared. If no copy exists, run the legacy WRITEJOB once in a test region and capture what it writes. | The reader's only input is the dataset. The reader writes nothing, so its output is its return code and SYSOUT. | `app/jcl/READJOB.jcl:3`, `app/cbl/PGMR.cbl:14` |
+| 2. Writer (`PGMW`, `job:WRITEJOB`) | Parallel run, if the legacy job can stay up: run both writers against the same trigger, and compare the two datasets byte for byte. Otherwise golden master from the archived copies above. | The writer's only output is the dataset. It has no input file. | `app/cbl/PGMW.cbl:13`, `app/jcl/WRITEJOB.jcl:3` |
 
-## Normalization spec
+Characterization tests generated from the source are the weakest oracle. In this tree they would only say that PGMW writes one record and PGMR reads one, and they would encode the unfilled record. Use them only where the four sources above cannot be had, and label the coverage provisional.
 
-Every line below is a claim that a difference does not matter. Each is a place a real bug can hide.
-A human signs the list before the first diff is trusted.
+## The contract edge, tested at the wave boundary
+
+The medium contract edge, PGMW to PGMR (`app/cbl/PGMR.cbl:11`, `app/cbl/PGMW.cbl:11`), gets its own test and it runs in both waves.
+
+- **Layout equality test.** Parse the same file with the layout from `LAYOUTX` and with the layout from `LAYOUTY` and assert the same offsets, lengths and types. By the PIC clauses they are equal (`app/cpy/LAYOUTX.cpy:2`, `app/cpy/LAYOUTX.cpy:3`, `app/cpy/LAYOUTY.cpy:2`, `app/cpy/LAYOUTY.cpy:3`). The test keeps them equal after a change to either.
+- **Record length test.** Assert the length of the record the writer produces, against the `LRECL=80` on the DD (`app/jcl/WRITEJOB.jcl:4`). If they disagree, the test fails, and the client decides which is right. Do not port past this until they have.
+- **Cross wave test.** In wave 1 the new reader reads a file the legacy writer made. In wave 2 the new writer produces the file and the new reader reads it. Both must pass, and the second is the one that proves the cutover.
+
+## Normalize before you diff
+
+The normalization spec is short, and each entry is a place a bug can hide. A human signs it off.
 
 | Item | Rule | Evidence |
 |---|---|---|
-| Amount field `LR-AMT` | Compare as a decimal value with zero tolerance. Use a decimal type in the target. Never a float. Also compare the raw bytes, because a valid packed number has more than one sign nibble | `app/cpy/LAYOUTX.cpy:3` |
-| Key field `LR-KEY` | Compare byte for byte. Decide whether trailing blanks and low values count as the same | `app/cpy/LAYOUTX.cpy:2` |
-| Record length and padding | The DD says 80, the record is 15. Decide which bytes past 15 are compared, once the real catalog entry is known | `app/jcl/WRITEJOB.jcl:4` |
-| Record order | One record is written, so order is not visible today. Assume it matters until the client says otherwise | `app/cbl/PGMW.cbl:14` |
-| Timestamps and run ids | None appear in the record. If the real file adds them, list them here | `app/cpy/LAYOUTX.cpy:2-3` |
-| Collating sequence | The file is sequential, not a keyed VSAM file, so no key order is read back. Treat any sort in the new system as a difference to review | `app/cbl/PGMR.cbl:7` |
-| Job order | `WRITEJOB` before `READJOB`. This is the one order the harness must keep, and it is not in any scheduler artifact we have | `app/jcl/WRITEJOB.jcl:3`, `app/jcl/READJOB.jcl:3` |
+| Packed decimal amount | Compare as a decimal type with zero tolerance. Never use a float. The field is `S9(7)V99 COMP-3`. | `app/cpy/LAYOUTX.cpy:3` |
+| Key text | Compare bytes. The `X(10)` field is EBCDIC on the legacy side. If the target is ASCII, convert the text field only and never the packed field. | `app/cpy/LAYOUTX.cpy:2` |
+| Record padding | Decide whether trailing bytes up to 80 matter. Write the decision down. It depends on the LRECL answer. | `app/jcl/WRITEJOB.jcl:4` |
+| Timestamps, run ids, page numbers | Mask in SYSOUT only. The dataset has none, on the source we have. | inference |
+| Record order | One record per run, so order is not an issue today. Revisit if the client says the file holds more. | `app/cbl/PGMW.cbl:14` |
 
-## Cover the input space on purpose
+## Cover the input space deliberately
 
-Replay covers the common night well. These are the cases replay will miss.
+- **Bad data that is already in there.** PGMW writes its record without filling it in (`app/cbl/PGMW.cbl:13`, `app/cbl/PGMW.cbl:14`). Inference: the packed field may hold bytes that are not a valid packed number. The new reader must reproduce what the legacy reader does with such a record, which is nothing, because PGMR never looks at a field (`app/cbl/PGMR.cbl:14`). A port that validates the packed field would fail on real files, and that would be a behavior change.
+- **The empty file.** PGMR reads one record with no end of file handling (`app/cbl/PGMR.cbl:14`). Test an empty dataset. Inference: the legacy behavior is not defined by the source.
+- **Rerun.** Run WRITEJOB twice without a delete. The legacy DD is `DISP=(NEW,CATLG,DELETE)` (`app/jcl/WRITEJOB.jcl:3`). Inference: the second run fails. The new writer must do the same, or the deviation register must say why not.
+- **Failed run.** Abend PGMW after the open. The third DISP subparameter deletes the dataset. Test that READJOB then fails the same way the legacy one does.
+- **Order.** Run READJOB before WRITEJOB, and against a stale copy. The extractor found no scheduler, so nothing in the tree enforces the order (`analysis.warnings`).
+- **Boundary dates.** Month end and, if the client says the cycle is financial, fiscal year end. The tree has no date logic, so this is a question about the cycle, not the code.
 
-| Case | What to check | Evidence |
-|---|---|---|
-| Amount at its limits: 9999999.99, 0, negative, negative zero | The packed field holds nine digits and a sign. Boundary values are where a rounding or a sign rule differs | `app/cpy/LAYOUTX.cpy:3` |
-| A record that holds invalid packed data | `PGMW` fills no field, so the file may already hold bytes that are not valid packed decimal (inference). `PGMR` never unpacks the amount, so the legacy read does not care. A port that unpacks it may fail where the old one did not | `app/cbl/PGMW.cbl:14`, `app/cbl/PGMR.cbl:14` |
-| An empty dataset | `PGMR` has no end of file handling, so the legacy step may end abnormally (inference). The new step must do the same or the difference goes in the register | `app/cbl/PGMR.cbl:14` |
-| A dataset that already exists when `WRITEJOB` starts | `DISP=(NEW,...)` on an existing name fails in the job step allocation (inference). Find out what deletes the old dataset each night | `app/jcl/WRITEJOB.jcl:3` |
-| `READJOB` run before `WRITEJOB` | Expected result is a loud failure on a missing dataset (inference). The new scheduler must not reorder them | `app/jcl/READJOB.jcl:3` |
-| Month end, quarter end, year end, leap day | Nothing in the two programs reads a date. Still capture across those nights, because the data written may vary with them | inference: the writer's source of data is unknown |
-| Layout drift test | Change one copybook in a copy of the tree and confirm the harness fails. That proves the check works | `app/cpy/LAYOUTX.cpy:2`, `app/cpy/LAYOUTY.cpy:2` |
+## Mainframe traps for this system
 
-## Mainframe traps that apply here
-
-- **Packed decimal.** `LR-AMT` and `LY-VALUE` are `S9(7)V99 COMP-3` (`app/cpy/LAYOUTX.cpy:3`,
-  `app/cpy/LAYOUTY.cpy:3`). Zero tolerance on the value. Both `C` and `F` are valid positive sign
-  nibbles, so compare the bytes as well as the number.
-- **`REDEFINES`.** There is none in either copybook. Nothing to test.
-- **Record padding.** The `LRECL=80` against a 15 byte record is the item to settle first.
-- **Job order.** The temporal edge the harness must keep is not in `graph.json`, because no scheduler
-  was parsed. Take it from the scheduler export when it arrives.
+- **Packed decimal.** The one numeric field is `COMP-3` (`app/cpy/LAYOUTX.cpy:3`, `app/cpy/LAYOUTY.cpy:3`).
+- **Data transfer to the target platform.** In wave 1 the reader runs on the target and the writer still runs on the mainframe. The file must cross as binary, with only the text field converted. This is inference, and it is the most likely place for wave 1 to fail.
+- **Collating sequence.** Not a factor while the file is sequential (`app/cbl/PGMR.cbl:7`, `app/cbl/PGMW.cbl:7`), and it becomes one if a key sorted file replaces it.
+- **`REDEFINES`.** None in either copybook.
+- **Job order.** The one temporal edge the harness must keep is writer before reader. It comes from the data, and no scheduler states it.
 
 ## Deviation register
 
-Nothing is approved. The register starts empty and nothing may differ without a row in it.
+Nothing differs from legacy behavior yet. The rows below are open decisions found during the assessment. None is approved.
 
-| ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact |
-|---|---|---|---|---|---|
-| none yet | | | | | |
+| ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact | Evidence |
+|---|---|---|---|---|---|---|
+| DR-1 | Record written without being filled in. Content undefined. | Open. Decide: reproduce, or write defined values. | Undefined bytes cannot be compared. | Pending | Unknown consumers outside the tree | `app/cbl/PGMW.cbl:14`, inference |
+| DR-2 | Record layout kept as two copybooks with different field names. | Open. Decide: one copybook for both programs. | Removes the drift hazard. | Pending | None expected, both are 15 bytes | `app/cpy/LAYOUTX.cpy:1`, `app/cpy/LAYOUTY.cpy:1` |
+| DR-3 | LRECL 80 on the DD, layout of 15 bytes. | Open. Decide which is right. | Two sources disagree. | Pending | Any outside reader | `app/jcl/WRITEJOB.jcl:4` |
 
-### Candidates to raise with the client
+## Exit bar per wave
 
-These are the behaviors most likely to need a row. They are for the client's engineers to decide.
+A wave is done when:
 
-| ID | Candidate | Evidence |
-|---|---|---|
-| C1 | The legacy writer writes a record without setting any field. The new writer should write defined values. That is a change on purpose and needs a signature | `app/cbl/PGMW.cbl:14` |
-| C2 | One shared copybook replaces two. Names change from `LR-`/`LY-` to one set. The bytes must not change | `app/cpy/LAYOUTX.cpy:2-3`, `app/cpy/LAYOUTY.cpy:2-3` |
-| C3 | The reader gains end of file and file status handling. The legacy reader has none | `app/cbl/PGMR.cbl:14` |
+- the replay diff is clean, modulo the normalization spec and the deviation register,
+- the contract tests above pass, along with every boundary case listed,
+- the harness is under version control and runs in CI,
+- the deviation register is signed by someone with the authority to sign it.
 
-## Exit bar for wave 1
+Not when the port compiles. Not when it passes tests written beside the port.
 
-Wave 1 is done when all four hold. Not when the port compiles.
-
-- The replay or parallel diff is clean, apart from the normalization spec and the deviation register.
-- Every case in the table above passes.
-- The harness is under version control and runs in CI.
-- The deviation register is signed by someone with the authority to sign it.
-
-After cutover, keep the harness. It becomes the regression suite for the new pair, and it is the
-only executable statement of what `SPARQ.TEST.MASTER` holds.
+Keep the harness after cutover. It becomes the regression suite for the modernized system.

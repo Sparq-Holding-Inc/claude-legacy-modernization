@@ -1,68 +1,80 @@
 # 02 Coupling
 
-The full edge list is in `02a-edge-tables.md`. This file is the argument. The tree is small: two programs, one copybook, one dataset and two single step jobs. There is no call edge between programs, no cycle, and no computed call. All of the coupling is through one dataset.
+Scoping: target state `refactor`, must-not-break "the nightly batch cycle", telemetry `none`.
 
-## The coupling patterns that will constrain the sequence
+The extractor found 8 nodes and 9 edges in a tree of two COBOL programs, one copybook and two JCL
+jobs (`modernization-assessment/graph.json:1`). It found no computed calls, no strongly connected
+components and no god modules. There were fewer than 20 open edges (zero), so the
+`dependency-cartographer` agent was not needed. I read the source for the three points below.
 
-### 1. Contract coupling through SPARQ.TEST.MASTER (high confidence)
+## Coupling patterns that constrain the sequence
 
-PGMW writes the dataset and PGMR reads it. Both include the same layout copybook, so the extractor rates the contract edge PGMW to PGMR as high confidence. The layout is `LR-KEY PIC X(10)` and `LR-AMT PIC S9(7)V99 COMP-3` (`app/cpy/LAYOUTX.cpy:2`, `app/cpy/LAYOUTX.cpy:3`). Both programs pull it in with the same COPY (`app/cbl/PGMR.cbl:11`, `app/cbl/PGMW.cbl:11`). The writer opens the dataset for output (`app/cbl/PGMW.cbl:13`) and the reader opens it for input (`app/cbl/PGMR.cbl:13`).
+| # | Pattern | What it means for the sequence | Confidence | Evidence |
+|---|---|---|---|---|
+| 1 | Contract: PGMW writes SPARQ.TEST.MASTER and PGMR reads it through the same copybook LAYOUTX | The reader must keep decoding what the writer produces. Port the reader first, against the legacy writer. The layout is the API. | high (shared copybook) | `app/cbl/PGMW.cbl:11`, `app/cbl/PGMR.cbl:11`, `app/cpy/LAYOUTX.cpy:1`, `app/jcl/WRITEJOB.jcl:3`, `app/jcl/READJOB.jcl:3` |
+| 2 | The copybook and the JCL disagree on record length: LAYOUTX describes 15 bytes, the writer DD asks for LRECL=80 | High confidence on this edge means both sides copy one layout. It does not mean the bytes on disk match it. The extractor does not read DCB (limit: "DCB, LRECL and RECFM are not read"). Which of the two governs on the mainframe must be settled before a port fixes the record length. | low | `app/cpy/LAYOUTX.cpy:2`, `app/cpy/LAYOUTX.cpy:3`, `app/jcl/WRITEJOB.jcl:4`, inference |
+| 3 | Temporal: nothing in the tree says WRITEJOB runs before READJOB, or when either runs | The data edge implies the writer runs first. No scheduler was parsed, so the "nightly batch cycle" the client named cannot be located in the tree. | low | `analysis` field `warnings`, `app/jcl/WRITEJOB.jcl:1`, `app/jcl/READJOB.jcl:1` |
 
-Arithmetic: X(10) is 10 bytes, and S9(7)V99 is 9 digits, which packs into 5 bytes, so the logical record is 15 bytes (inference, computed from `app/cpy/LAYOUTX.cpy:2`).
+Detail on pattern 2. The record is a 10 byte key (`LR-KEY PIC X(10)`) and a packed decimal amount
+(`LR-AMT PIC S9(7)V99 COMP-3`), which is 9 digits and so 5 bytes: 15 bytes in all
+(`app/cpy/LAYOUTX.cpy:2`, `app/cpy/LAYOUTX.cpy:3`). The FD names no RECORD CONTAINS clause
+(`app/cbl/PGMW.cbl:10`, `app/cbl/PGMR.cbl:10`). The writer DD says `RECFM=FB,LRECL=80`
+(`app/jcl/WRITEJOB.jcl:4`). The reader DD names no DCB and takes what the catalog holds
+(`app/jcl/READJOB.jcl:3`). This is inference: I did not run anything, and I do not know whether the
+runtime pads, truncates or rejects the file at OPEN.
 
-This is the one edge that constrains everything. A port that changes the byte encoding of the packed amount, or the record padding, breaks the reader without any abend.
+Two more facts from the source, both inference:
 
-### 2. The physical format lives in JCL, not in the copybook (inference, medium confidence)
+- PGMW writes `LAYOUT-REC` with no MOVE to any field before it (`app/cbl/PGMW.cbl:14`). What it writes
+  depends on what the runtime leaves in the buffer.
+- The DD is `DISP=(NEW,CATLG,DELETE)` (`app/jcl/WRITEJOB.jcl:3`). A second night's run would try to
+  create a dataset that already exists, unless something outside this tree removes it first.
 
-The only place that states how the file is laid out on disk is the writer's DD: `RECFM=FB,LRECL=80` with `DISP=(NEW,CATLG,DELETE)` (`app/jcl/WRITEJOB.jcl:3`, `app/jcl/WRITEJOB.jcl:4`). The reader's DD names the same dataset with `DISP=SHR` and no DCB (`app/jcl/READJOB.jcl:3`). It takes its attributes from the catalog entry the writer created.
-
-So the copybook says 15 bytes and the JCL says 80. Which one governs the bytes on disk depends on the compiler and runtime options, which are not in the tree. This is the largest unknown in the contract. It is an inference, and the engineers can settle it in minutes by listing the real dataset (see Open Questions in `00-summary.md`).
-
-### 3. Temporal coupling is invisible (gap)
-
-The reader is only correct if the writer has run first. Nothing in the tree enforces that. The extractor found no scheduler artifact and reports zero temporal edges (`02a-edge-tables.md`). Each job is a single step, so there is no step order to read either. The order writer before reader is derived from the data hub rule "every writer runs before its readers". It is inference, not a fact from a scheduler. The nightly cycle named in the scoping answer is not in the tree in any form I can identify.
-
-## Structure computed by the extractor
-
-| Fact | Result | Evidence |
-|---|---|---|
-| Strongly connected components | none | inference (extractor `sccs` is empty) |
-| Self recursive programs | none | inference (extractor `self_recursive` is empty) |
-| God modules | none | inference (extractor `god_modules` is empty) |
-| Articulation points | `ds:SPARQ.TEST.MASTER` | `app/cbl/PGMW.cbl:13`, `app/cbl/PGMR.cbl:13` |
-| Data hubs | `ds:SPARQ.TEST.MASTER`, 1 writer, 1 reader | `app/jcl/WRITEJOB.jcl:3`, `app/jcl/READJOB.jcl:3` |
-| Unresolved computed calls | none | inference (extractor `unresolved_dynamic` is empty) |
-
-No strongly connected component exists, so no wave can split one. No god module exists, so nothing needs a facade for size reasons. The single articulation point is the dataset. It is the natural boundary for the test harness, because it is the one place where the two halves meet. A dataset is not a movable unit, so it cannot be a wave in its own right. The unit that owns it in each direction is.
-
-## Cluster view
+## Cluster graph
 
 ```mermaid
 graph LR
-  subgraph Writer side
-    WJ[job:WRITEJOB] --> PW[PGMW]
+  subgraph writer[Writer cluster]
+    JW[job:WRITEJOB] --> PW[PGMW]
   end
-  subgraph Reader side
-    RJ[job:READJOB] --> PR[PGMR]
+  subgraph shared[Shared contract]
+    DS[(ds:SPARQ.TEST.MASTER)]
+    CP[cpy:LAYOUTX]
   end
-  PW -- write --> DS[(SPARQ.TEST.MASTER)]
+  subgraph reader[Reader cluster]
+    JR[job:READJOB] --> PR[PGMR]
+  end
+  PW -- write --> DS
   DS -- read --> PR
-  CPY[cpy:LAYOUTX] -. shared layout .- PW
-  CPY -. shared layout .- PR
+  PW -.-> CP
+  PR -.-> CP
 ```
+
+Evidence for the graph: `app/jcl/WRITEJOB.jcl:2`, `app/jcl/READJOB.jcl:2`, `app/cbl/PGMW.cbl:13`,
+`app/cbl/PGMR.cbl:13`, `app/cbl/PGMW.cbl:11`, `app/cbl/PGMR.cbl:11`.
+
+## Structure computed by the extractor
+
+| Fact | Units | Evidence |
+|---|---|---|
+| Strongly connected components | none | `analysis` field `sccs` |
+| Self recursive programs | none | `analysis` field `self_recursive` |
+| God modules | none. Fan-in is zero for both programs, so there is nothing to strangle behind a facade. | `analysis` fields `god_modules`, `fan_in` |
+| Articulation points | `ds:SPARQ.TEST.MASTER`. It is the natural wave boundary and the plan cuts there. | `analysis` field `articulation_points`, `app/cbl/PGMW.cbl:13`, `app/cbl/PGMR.cbl:13` |
+| Data hubs | `ds:SPARQ.TEST.MASTER`, one writer, one reader | `analysis` field `data_hubs` |
+
+The articulation point is a dataset, not a program. The basis is "call edges between programs plus data
+edges from programs to datasets" (`analysis` field `articulation_basis`), so the boundary sits on a
+file that both waves touch. Wave 1 and wave 2 share it. That is the reason wave 1 must be a reader.
 
 ## The honest boundary
 
-- **Computed calls.** There are none, so there are no unresolved dynamic edges and no reason to hand edges to the `dependency-cartographer` agent. That is far below the threshold of about 20.
-- **What the graph cannot show.** The extractor does not follow jobs submitted through the internal reader, nested PROCs, or anything outside COBOL, copybooks, JCL, CICS definitions, Control-M XML and shell wrappers. Any other consumer of SPARQ.TEST.MASTER outside this tree is invisible. Its existence would change the blast radius of PGMW, so it is the first thing to ask (inference).
-- **Reachability is by construction.** The extractor marks every JCL job as an entry point (`app/jcl/READJOB.jcl:1`, `app/jcl/WRITEJOB.jcl:1`). With no scheduler, "reachable" does not prove either job actually runs.
-
-## Coupling findings
-
-| Finding | Confidence | Evidence |
-|---|---|---|
-| PGMW writes and PGMR reads SPARQ.TEST.MASTER with the same copybook | high | `app/cbl/PGMW.cbl:13`, `app/cbl/PGMR.cbl:13`, `app/cpy/LAYOUTX.cpy:1` |
-| Physical format (FB, LRECL=80) is declared only on the writer DD; layout is 15 bytes | medium | `app/jcl/WRITEJOB.jcl:4`, `app/cpy/LAYOUTX.cpy:3` |
-| Writer before reader order is not enforced anywhere in the tree | low | inference |
-| PGMW writes LAYOUT-REC with no MOVE, so field values are never set in this tree | medium | `app/cbl/PGMW.cbl:14` |
-| PGMR reads one record and stops, with no AT END, no loop and no FILE STATUS | medium | `app/cbl/PGMR.cbl:14` |
+- Computed calls: none found (`analysis` field `unresolved_dynamic`). The extractor resolves a variable
+  target only from VALUE clauses and literal MOVEs in the same program. Neither program has a CALL at
+  all (`app/cbl/PGMR.cbl:12`, `app/cbl/PGMW.cbl:12`).
+- No CICS, no scheduler, no DB2, no copybook beyond LAYOUTX. Files seen: 2 COBOL, 1 copy, 2 JCL
+  (`modernization-assessment/graph.json:1`).
+- Anything that reads or writes SPARQ.TEST.MASTER outside this tree is invisible. The tree cannot
+  tell us whether PGMR is the only reader.
+- The dataset is named `SPARQ.TEST.MASTER`. That is a test name. If production uses another name, the
+  JCL here may not be the JCL that runs the nightly cycle. Inference. It is in Open Questions.

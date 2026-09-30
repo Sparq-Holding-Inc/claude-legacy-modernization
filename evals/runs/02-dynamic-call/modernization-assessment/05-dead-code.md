@@ -1,32 +1,31 @@
 # 05 Dead code
 
-Telemetry: none. Every claim in this file is provisional. The extractor's candidate lists are in `05a-dead-code-candidates.md`. The structured version is `dead-code.json`.
+Telemetry is `none`, so every claim here is provisional. Two warnings from the extractor apply, and both change what an empty bucket means (analysis field `warnings`):
 
-## Result
-
-Nothing can be called unreachable. The extractor found no entry point: no JCL job, no scheduler job, no CSD transaction, no wrapper (`graph.json` `analysis.warnings`). With no starting point it cannot prove that anything is unreachable, so both programs are unknown. In addition, PROGA makes a computed call whose target cannot be bounded, and that keeps the unknown bucket open on its own.
+- No last-modified dates exist. The tree is not a git repository. The dormant bucket was not computed. An empty dormant list means not measured, not "nothing is dormant".
+- No entry points were found. Nothing can be proven unreachable, so every candidate is unknown.
 
 ## Unreachable
 
-| Unit | Reason | Confidence | Evidence |
-|---|---|---|---|
-| none | No entry point exists to measure reachability from. | high | inference |
+Empty. Nothing can be proven unreachable, because `PROGA` makes a computed call that could name any program (`app/cbl/PROGA.cbl:9`) and there are no entry points to trace from (analysis field `entry_points`).
 
 ## Reachable but dormant
 
-| Unit | Reason | Confidence | Evidence |
-|---|---|---|---|
-| none | The extractor could not date either file. Git dates were off (`graph.json` `meta.git_dates` is false), so `last_modified` is empty and the dormancy rule cannot fire. | medium | inference |
+Empty, and not measured. No unit has a last-modified date (analysis field `warnings`).
 
 ## Unknown
 
-| Unit | Reason | Confidence | Evidence |
-|---|---|---|---|
-| PROGA | No static caller and no entry point in the tree. It ACCEPTs a program name and ends with STOP RUN, the shape of a main program, so it is probably started by a job outside this tree. Do not delete. | low | `app/cbl/PROGA.cbl:8` |
-| PROGB | No static caller. PROGA's computed call could reach it, and it is the only other program in the tree. I cannot bound the call, so it stays unknown. | low | `app/cbl/PROGA.cbl:9` |
+| Unit | Type | Reason | Confidence | Evidence |
+|---|---|---|---|---|
+| PROGA | batch | No entry point in the tree names it. It has no LINKAGE SECTION and ends with `STOP RUN`, so it reads as a main program that some job or operator starts, but no such job is in the tree. Do not delete. | low | `app/cbl/PROGA.cbl:10`. Inference on the main-program reading. |
+| PROGB | batch | No static caller. `PROGA` reads a program name from `ACCEPT` and calls it, so `PROGB` could be the target. It holds only `GOBACK`. Do not delete on this evidence. | low | `app/cbl/PROGB.cbl:4`, `app/cbl/PROGA.cbl:9` |
+
+I did not move either program out of unknown, and could not bound the computed call: `WS-PGM-NAME` has no value in the source, so the target set is not something the code states (`app/cbl/PROGA.cbl:5`, `app/cbl/PROGA.cbl:8`).
+
+## Jobs no scheduler names
+
+There are no jobs of any kind in the tree (analysis field `unscheduled_jobs` is empty). That is not a sign that all jobs are scheduled. It is a sign that no JCL was supplied. Open question for the client: which jobs run `PROGA`, and do they still run?
 
 ## What would firm this up
 
-- The JCL and scheduler entry that starts PROGA. It would give the extractor an entry point, and PROGA becomes reachable.
-- Twelve months of job logs or SMF records for PROGA, with the values fed to its ACCEPT. Each distinct value is a program that is live. PROGB is live only if its name appears among them.
-- The wider source library. A computed call that names programs outside this tree makes any dead-code claim about the whole system provisional.
+Twelve months of job logs or SMF records showing which programs ran, and the values `PROGA` read at its `ACCEPT`. With those, `PROGB` and any other callee can be moved to evidence-based buckets. Without them, all of this stays provisional.

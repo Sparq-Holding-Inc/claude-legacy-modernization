@@ -3,21 +3,25 @@
   "waves": [
     {
       "wave": 1,
-      "name": "Nightly chain (wrapper, JOBA, JOBB)",
-      "units": ["sch:scripts/nightly.sh", "job:JOBA", "job:JOBB"],
-      "rationale": "The whole live system is one wrapper that submits two jobs in a fixed order. There is no call, data or contract coupling to cut along, and the only coupling is the JOBA-before-JOBB order, so splitting the two jobs would break the one constraint the tree enforces. One wave.",
-      "unblocks": "The order and return-code harness for the nightly cycle, and the decision to delete JOBC. Nothing else in this tree depends on it.",
+      "family": "batch-utility",
+      "name": "Nightly batch cycle and its wrapper",
+      "units": [
+        "job:JOBA",
+        "job:JOBB",
+        "job:JOBC",
+        "sch:scripts/nightly.sh"
+      ],
+      "rationale": "The whole tree is one family. All three jobs run only IEFBR14 with no DD statements, so no dataset, copybook or application program is shared and no call, data or contract edge crosses the wave. It is a sound wave on those facts. It is not a proven one: the tree shows no work the jobs do, so a porter is moving an order (JOBA before JOBB, held only by line order in the wrapper) and not any logic. JOBC is in the wave because the extractor counts every job as an entry point. The wrapper calls it retired, so its task is confirm-and-retire, not port.",
+      "unblocks": "Nothing else in this tree. This wave is the whole tree, so it is a chore that carries the must-not-break nightly cycle. It proves the target scheduler can reproduce the JOBA-then-JOBB order.",
       "blast_radius": "medium",
-      "confidence": "medium",
+      "confidence": "low",
       "evidence": [
-        {"file": "scripts/nightly.sh", "line": 4},
-        {"file": "scripts/nightly.sh", "line": 5},
-        {"file": "jcl/JOBA.jcl", "line": 2},
-        {"file": "jcl/JOBB.jcl", "line": 2}
+        {"file": "jcl/JOBA.jcl", "line": 1},
+        {"file": "jcl/JOBB.jcl", "line": 1},
+        {"file": "jcl/JOBC.jcl", "line": 1}
       ]
     }
   ],
-  "unassigned": [
-    {"id": "job:JOBC", "reason": "Retired per the wrapper comment and not submitted. It is a deletion candidate, not a port unit. Confirm with the client first."}
-  ]
+  "unassigned": [],
+  "deviations": []
 }

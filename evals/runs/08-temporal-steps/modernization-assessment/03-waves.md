@@ -1,55 +1,49 @@
 # 03 Waves
 
-**One wave.** The tree is one JCL job and three programs. Splitting it would cut a temporal chain,
-and step order is the only behavior it holds. I did not invent more waves.
+Starting point: `modernization-assessment/03a-wave-seed.md` and `modernization-assessment/03a-waves-draft.json`.
+Target state: refactor (given as a flag). The plan is in `modernization-assessment/waves.json`.
 
-Target state is `refactor`, given as a flag. See `00-summary.md`.
+## Wave count: 1
 
-## Wave 1: SEQJOB step chain
+| Wave | Family | Units | Blast radius | Confidence | Evidence |
+|---|---|---|---|---|---|
+| 1 | batch-readonly | PGMA, PGMB, PGMC, job:SEQJOB | medium | low | `app/jcl/SEQJOB.jcl:1` |
 
-| Field | Value | Confidence | Evidence |
+## Why one wave
+
+The seed placed every unit in one family, and I kept it. There is one entry point, `job:SEQJOB`.
+There is no strongly connected component, no articulation point and no dataset that a second entry
+point uses (`analysis` fields `sccs`, `articulation_points`, `data_hubs`). No cut can be argued from
+the evidence. Splitting the three programs into separate waves would break the step order that ties
+them (`app/jcl/SEQJOB.jcl:2`, `app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:4`).
+
+The four tests for a wave:
+
+| Test | Result | Confidence | Evidence |
 |---|---|---|---|
-| Units | `job:SEQJOB`, `PGMA`, `PGMB`, `PGMC` | high | `app/jcl/SEQJOB.jcl:1`, `app/jcl/SEQJOB.jcl:2`, `app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:4` |
-| Moves with the job, not listed | the four steps, including the second STEP2 that runs IEFBR14 | high | `app/jcl/SEQJOB.jcl:5` |
-| Blast radius | medium. SEQJOB is the only job, so it is very likely the nightly batch cycle the client named. That is inference. | low | inference |
-| Unblocks | the toolchain, the comparison harness and the scheduler translation for anything larger | low | inference |
-| Order inside the wave | step order as written: PGMA, PGMB, PGMC, then IEFBR14 | high | `app/jcl/SEQJOB.jcl:2`, `app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:4`, `app/jcl/SEQJOB.jcl:5` |
+| Deployed independently | Yes. It is one job. | medium | `app/jcl/SEQJOB.jcl:1` |
+| Rolled back independently | Yes. Keep the old job and switch back. | medium | inference |
+| Testable boundary | Yes, but only at step order and return codes, because no dataset exists. | medium | `app/cbl/PGMA.cbl:4` |
+| Nameable by a stakeholder | Only if SEQJOB is the nightly batch cycle. Nothing in the tree says so. | low | inference |
 
-## Why it is valid
+## What wave 1 unblocks
 
-Each test from the skill, in turn.
+Nothing else in this tree. It is the whole system. It proves the toolchain and the job order. Beyond
+that it is a chore until the real program bodies and the scheduler export arrive.
 
-| Test | Holds because | Confidence | Evidence |
-|---|---|---|---|
-| Deploys independently | The job is the only entry point. It can go behind one scheduler entry or one facade. | medium | `app/jcl/SEQJOB.jcl:1` |
-| Rolls back independently | Nothing else in the tree reads or writes what it touches. Switch the scheduler entry back to the legacy job. | medium | inference |
-| Testable boundary | Job-level: the sequence of programs that ran and each return code. No dataset is named, so there is no file boundary to diff. | medium | `app/jcl/SEQJOB.jcl:2`, `app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:4` |
-| Business stakeholder can name it | "The nightly batch cycle", if SEQJOB is that. Not confirmed. | low | inference |
+## The must-not-break item
 
-## Where the risk scores put it
+The client named "the nightly batch cycle". No job, scheduler entry or comment in the tree carries
+that name. I take `job:SEQJOB` to be it because it is the only job and the only entry point. That
+is inference, and the first open question asks the client to confirm it.
 
-| Unit | Port difficulty | Blast radius | Quadrant | Evidence |
-|---|---|---|---|---|
-| PGMA | 1 | 2 | low-low | `app/cbl/PGMA.cbl:4` |
-| PGMB | 1 | 2 | low-low | `app/cbl/PGMB.cbl:4` |
-| PGMC | 1 | 2 | low-low | `app/cbl/PGMC.cbl:4` |
-| job:SEQJOB | 2 | 3 | low-high | `app/jcl/SEQJOB.jcl:1` |
+## Deviations from the seed
 
-The job is `low-high`. The skill says that means the verification is the work and the harness must
-be proven first. Here that is right. The port is trivial. Proving the order survived is the wave. No
-unit is `high-high`, so nothing needs a facade for difficulty reasons.
+None. The plan has no deviation.
 
-## Unassigned
+## Duplicate step name
 
-| Item | Reason | Evidence |
-|---|---|---|
-| `step:SEQJOB.STEP2#2` | Runs IEFBR14, a null program, with no DDs, and shares the name STEP2 with line 3. It moves with SEQJOB or is dropped after the client confirms nothing names it. | `app/jcl/SEQJOB.jcl:5` |
-
-## If the system were ten times larger
-
-Cut by job. A job and the programs its steps run form one unit, because step order binds them. Then
-order the jobs by two constraints from `graph.json`: the `temporal` edges a scheduler enforces
-between jobs, and the `data_hubs`, where every writer runs before its readers. Any strongly
-connected component moves whole. Any `god_modules` entry is strangled behind a facade rather than
-ported. Any `high-high` unit goes last. Wave 1 would be the `low-low` job with the fewest crossing
-edges, chosen to prove the toolchain and the harness. Inference.
+`app/jcl/SEQJOB.jcl:3` and `app/jcl/SEQJOB.jcl:5` both declare STEP2. The extractor called the second
+`STEP2#2` and put it last. If the job is a real one, a port must decide what STEP2 means. If the
+IEFBR14 step is a leftover, it can go. Both readings are inference, so this is a question for the
+client's engineers, not a finding.

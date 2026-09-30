@@ -3,21 +3,26 @@
   "waves": [
     {
       "wave": 1,
-      "name": "Nightly chain JOBA to JOBB",
-      "units": ["job:JOBA", "job:JOBB", "sch:NIGHTLY/JOBA", "sch:NIGHTLY/JOBB"],
-      "rationale": "Two jobs whose only coupling is a Control-M condition. Splitting them would put a scheduler condition across a wave boundary, so they move as one deployable unit. Everything in the tree is one nightly cycle.",
-      "unblocks": "The nightly batch cycle with its ordering proven and a shadow-run harness that any larger tree can reuse. Nothing else in this tree depends on it.",
-      "blast_radius": "medium",
+      "family": "batch-utility",
+      "name": "Nightly batch cycle (JOBA then JOBB)",
+      "units": [
+        "job:JOBA",
+        "job:JOBB",
+        "sch:NIGHTLY/JOBA",
+        "sch:NIGHTLY/JOBB"
+      ],
+      "rationale": "This is the whole tree and the whole must-not-break item. Both jobs run only IEFBR14 and touch no dataset, so the seed family fits. The order JOBA then JOBB exists only as the Control-M condition JOBA-DONE, so the two jobs and their two scheduler entries cannot be split across waves without bridging that condition between two schedulers. One wave is sound. The wave is small, but its boundary is the condition chain and not the JCL.",
+      "unblocks": "Nothing else in this tree. It is a chore in dependency terms. Its value is that it proves the scheduler semantics (external input, posted condition, consumed and deleted condition) that any later wave from the wider estate will reuse. Nothing consumes JOBB-DONE inside the tree, so whatever depends on it lives outside.",
+      "blast_radius": "high",
       "confidence": "medium",
       "evidence": [
-        {"file": "app/scheduler/nightly.xml", "line": 4},
+        {"file": "app/jcl/JOBA.jcl", "line": 1},
+        {"file": "app/jcl/JOBB.jcl", "line": 1},
         {"file": "app/scheduler/nightly.xml", "line": 6},
-        {"file": "app/scheduler/nightly.xml", "line": 8},
-        {"file": "app/scheduler/nightly.xml", "line": 9},
-        {"file": "app/jcl/JOBA.jcl", "line": 2},
-        {"file": "app/jcl/JOBB.jcl", "line": 2}
+        {"file": "app/scheduler/nightly.xml", "line": 9}
       ]
     }
   ],
-  "unassigned": []
+  "unassigned": [],
+  "deviations": []
 }

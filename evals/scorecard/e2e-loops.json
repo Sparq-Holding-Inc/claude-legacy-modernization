@@ -1,0 +1,55 @@
+{
+ "note": "Hand-maintained record of the fix loops for the failing wave metrics. Numbers are copied from scorecard/e2e.json at the moment each loop was scored. The bar and the truth never changed.",
+ "loops": [
+  {
+   "loop": 0,
+   "plugin_commit": "f33744c",
+   "what_changed": "Nothing. First measurement.",
+   "carddemo_runs": 3,
+   "wave_counts": [
+    7,
+    9,
+    8
+   ],
+   "wave_count_identical": false,
+   "jaccard": 0.153,
+   "rand_index": 0.84,
+   "unit_overlap": 0.857,
+   "citations_resolve": "11,323 of 11,323 (16 runs)",
+   "json_valid": "16 of 16",
+   "graph_unmodified": "16 of 16",
+   "unreachable_on_dynamic": 0,
+   "diagnosis": "The skill gave no procedure that yields one answer. Three runs cut three defensible plans, and they did not even agree on which unit kinds to place (scheduler jobs: 19, 19 and 10)."
+  },
+  {
+   "loop": 1,
+   "plugin_commit": "9ca4dbc",
+   "what_changed": "The extractor computes a wave seed (families in a fixed order). Claude copies the draft, fills in names and reasons, and may change it only for a cited reason.",
+   "carddemo_runs": 3,
+   "wave_counts": [
+    7,
+    7,
+    7
+   ],
+   "wave_count_identical": true,
+   "jaccard": 0.767,
+   "rand_index": 0.972,
+   "unit_overlap": 1.0,
+   "deviations": [
+    23,
+    21,
+    18
+   ],
+   "seed_jaccard": [
+    0.522,
+    0.557,
+    0.625
+   ],
+   "citations_resolve": "11272 of 11272 (16 runs)",
+   "json_valid": "16 of 16",
+   "graph_unmodified": "16 of 16",
+   "unreachable_on_dynamic": 0,
+   "diagnosis": "Wave count now identical and every run placed the same units. The three runs made 18 to 23 changes each to the seed, and mostly the same ones: three DB2 or IMS jobs the extractor could not see into (the program is named in PARM or in a TSO RUN PROGRAM card), and refresh jobs whose IDCAMS control cards prove they write the masters. Those are facts the extractor does not read. The runs also shared one scratch folder, and two of them reported that a sibling overwrote a helper script, so the agreement figure may be a little high. Fixture runs 01 to 04 showed a defect: the seed has no waves when the tree has no entry point, but the validator demanded at least one."
+  }
+ ]
+}

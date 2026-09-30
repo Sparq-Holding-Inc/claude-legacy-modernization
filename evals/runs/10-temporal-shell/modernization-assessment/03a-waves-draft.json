@@ -1,0 +1,35 @@
+{
+ "target_state": null,
+ "waves": [
+  {
+   "wave": 1,
+   "family": "batch-utility",
+   "name": null,
+   "units": [
+    "job:JOBA",
+    "job:JOBB",
+    "job:JOBC",
+    "sch:scripts/nightly.sh"
+   ],
+   "rationale": null,
+   "unblocks": null,
+   "blast_radius": null,
+   "confidence": null,
+   "evidence": [
+    {
+     "file": "jcl/JOBA.jcl",
+     "line": 1
+    },
+    {
+     "file": "jcl/JOBB.jcl",
+     "line": 1
+    },
+    {
+     "file": "jcl/JOBC.jcl",
+     "line": 1
+    }
+   ]
+  }
+ ],
+ "unassigned": []
+}

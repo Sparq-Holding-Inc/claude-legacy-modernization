@@ -1,110 +1,67 @@
 # 00 Summary
 
-Assessment of the tree in the current directory: two COBOL programs, two copybooks and two JCL jobs.
+A modernization assessment of the batch system in the work folder: two COBOL programs, two copybooks, two JCL jobs and one shared dataset. Facts come from the extractor and its `graph.json`. Judgment is mine, and it is labeled `inference` where the source does not prove it.
 
 ## Scoping answers
 
-| Question | Answer | Where it came from |
+| Question | Answer | Source |
 |---|---|---|
-| Target state | refactor | given as `--target refactor` |
-| What must not break | the nightly batch cycle | given as `--must-not-break` |
-| Runtime telemetry | none | given as `--telemetry none` |
+| Scope | `.` (the work folder) | command line |
+| Target state | refactor | `--target refactor` |
+| Must not break | the nightly batch cycle | `--must-not-break` |
+| Runtime telemetry | none | `--telemetry none` |
 
-All three came as flags, so no defaults were applied and nothing was assumed. The run was
-non-interactive and no one was asked anything. Because telemetry is `none`, every dead-code claim is
-provisional.
+All three answers came as flags. No defaults applied.
 
-## The result in five lines
+Telemetry is none, so every dead-code claim is provisional. Dormancy was not measured at all, because the folder holds no git history (`05-dead-code.md`).
 
-- **Waves: 1.** Two jobs, two programs and one shared dataset are one wave. Cutting it apart would
-  fail the independent deploy and rollback tests (`03-waves.md`).
-- **Largest risk: the file hand-off between the two jobs.** `PGMW` writes `SPARQ.TEST.MASTER` and
-  `PGMR` reads it. Each takes its record layout from a different copybook
-  (`app/cbl/PGMW.cbl:11`, `app/cbl/PGMR.cbl:11`). I compared them and they are identical today: ten
-  characters and one packed decimal amount (`app/cpy/LAYOUTX.cpy:2-3`, `app/cpy/LAYOUTY.cpy:2-3`).
-  Nothing keeps them identical. The extractor marked the link medium confidence for that reason.
-- **No scheduler was supplied.** The order `WRITEJOB` then `READJOB` is not written anywhere in the
-  tree, and nothing shows either job belongs to the nightly batch cycle.
-- **The programs hold no business logic.** Each opens a file, moves one record, and closes it
-  (`app/cbl/PGMW.cbl:13-15`, `app/cbl/PGMR.cbl:13-15`). The work is the proof, not the port.
-- **Effort: about 20 to 45 person-days, low confidence** (`04-estimate.md`).
+"The nightly batch cycle" is not named anywhere in the tree, and there is no scheduler. I read it as WRITEJOB followed by READJOB. That is inference.
 
-## Findings
+## Result
 
-| Finding | Confidence | Evidence |
+| Item | Result | Evidence |
 |---|---|---|
-| Writer and reader share one dataset and no call links them | high | `app/jcl/WRITEJOB.jcl:3`, `app/jcl/READJOB.jcl:3` |
-| The two layout copybooks are byte compatible and differ only in field names | high | `app/cpy/LAYOUTX.cpy:2-3`, `app/cpy/LAYOUTY.cpy:2-3` |
-| No cycle, no god module, no computed call | high | inference: the extractor's `analysis` block is empty for all three |
-| The writer creates the dataset with `DISP=(NEW,CATLG,DELETE)` | high | `app/jcl/WRITEJOB.jcl:3` |
-| The DD declares `LRECL=80` and the record is 15 bytes | high for the two facts, low for what happens at run time | `app/jcl/WRITEJOB.jcl:4`, `app/cpy/LAYOUTX.cpy:3` |
-| The writer writes a record without setting any field | high | `app/cbl/PGMW.cbl:14` |
-| No dead code can be shown, and dormancy cannot be judged at all | low | inference: no dates and no telemetry |
+| Waves | 2 | `modernization-assessment/waves.json:3` |
+| Wave 1 | Reader step: `PGMR`, `job:READJOB`. Blast radius medium. | `app/jcl/READJOB.jcl:1` |
+| Wave 2 | Writer step: `PGMW`, `job:WRITEJOB`. Blast radius high. | `app/cbl/PGMW.cbl:6` |
+| Deviations from the extractor's seed | None | `modernization-assessment/waves.json:28` |
+| Effort | About 10 to 19 engineer days, mostly harness and environment | inference |
+| Dead code | None in any bucket. Dormancy not measured. | analysis |
+| God modules, strongly connected components, computed calls | None | analysis |
 
-## Open Questions
+## The single largest risk
 
-For the client's own engineers.
+The one contract in the system, on SPARQ.TEST.MASTER, is held together by two separate copybooks and by an LRECL that matches neither. PGMW writes through `LAYOUTX` (`app/cbl/PGMW.cbl:11`) and PGMR reads through `LAYOUTY` (`app/cbl/PGMR.cbl:11`). The extractor rated the edge medium. I compared them by hand. Both are 10 bytes of text and a 5 byte packed decimal, so 15 bytes, and I found no mismatch today (`app/cpy/LAYOUTX.cpy:2`, `app/cpy/LAYOUTY.cpy:2`). But the output DD says `LRECL=80` (`app/jcl/WRITEJOB.jcl:4`), and the extractor never compares that with a layout. Nothing in the tree checks any of this. A silent break here would sit on the path the user said must not break, and the reader would not notice, because it never uses a field (`app/cbl/PGMR.cbl:14`). This is inference.
 
-1. **Which scheduler runs these two jobs, and are they part of the nightly batch cycle?** No
-   scheduler artifact was parsed, so the order across jobs is unknown. The extractor reads only
-   Control-M XML and shell wrappers that name JCL files (`meta.limits` in `graph.json`). If yours is
-   CA-7, TWS, cron or something else, please send the export in any form. Evidence:
-   `app/jcl/READJOB.jcl:3`.
-2. **What does the file really look like on disk?** The DD says `RECFM=FB,LRECL=80`
-   (`app/jcl/WRITEJOB.jcl:4`) and both copybooks describe 15 bytes (`app/cpy/LAYOUTX.cpy:3`). Send
-   the catalog entry. Does the run pad to 80, or does the open fail? The extractor does not read
-   DCB parameters at all, so it could not tell (inference).
-3. **How does `WRITEJOB` survive its second night?** `DISP=(NEW,CATLG,DELETE)` on a name that already
-   exists fails the step (inference). Is something earlier deleting the dataset, is this a
-   generation dataset in the real system, or is `SPARQ.TEST.MASTER` a test dataset and the real one
-   differs? Evidence: `app/jcl/WRITEJOB.jcl:3`.
-4. **Is this the whole system?** The writer sets no field before its write, the reader has no end of
-   file handling, and neither has a file status clause (`app/cbl/PGMW.cbl:14`,
-   `app/cbl/PGMR.cbl:14`, `app/cbl/PGMR.cbl:6`). If these are stubs, where is the real logic, and which programs use the
-   amount? The estimate roughly doubles if the real writer computes it. Evidence: `04-estimate.md`.
-5. **Who else reads `SPARQ.TEST.MASTER`?** The layout is copied, not shared, so every other reader
-   has its own copy of a 15 byte layout. Include partner extracts and utility steps. The extractor
-   does not read IDCAMS or SORT control cards (`meta.limits`). Evidence:
-   `app/jcl/READJOB.jcl:3`.
-6. **Who owns the layout?** Two files, `LAYOUTX` and `LAYOUTY`, describe one record with different
-   names for the same bytes. Which name is right, and who signs a change to it? Evidence:
-   `app/cpy/LAYOUTX.cpy:1`, `app/cpy/LAYOUTY.cpy:1`.
-7. **Can you send 12 months of job logs or SMF records for both jobs, and file dates for the four
-   source members?** The tree is not a git repository, so the extractor read no dates and every unit
-   shows "unknown". Without them, the dormant bucket cannot be judged. Evidence: inference, from
-   `git_dates` being false in `graph.json`.
+## Open Questions for the client's engineers
 
-## Files the extractor could not parse
+1. **Is SPARQ.TEST.MASTER a test dataset or the real master?** The name carries a `TEST` qualifier (`app/jcl/WRITEJOB.jcl:3`). If the whole pair is a test fixture, the assessment describes something other than the nightly cycle.
+2. **What is the record length of SPARQ.TEST.MASTER, 15 or 80 bytes?** The DD says `LRECL=80` (`app/jcl/WRITEJOB.jcl:4`). Both copybooks describe 15 bytes. What happens at open, and does any consumer expect padding?
+3. **Which scheduler runs WRITEJOB and READJOB, and in what order?** The extractor found none (`analysis.warnings`). Please supply the export. Only Control-M XML and shell wrappers that name JCL files are read. Without it the order writer then reader is inference, and so is the nightly schedule itself.
+4. **What else reads SPARQ.TEST.MASTER outside this tree?** The tree holds one reader. Any other consumer changes the blast radius of wave 2, and the layout it uses matters.
+5. **What does PGMW put in the record?** It writes `LAYOUT-REC` without ever filling it in (`app/cbl/PGMW.cbl:13`, `app/cbl/PGMW.cbl:14`). Is that a stub, or does something fill the record that we cannot see? Does any reader accept a packed field that is not valid?
+6. **How is the dataset deleted between runs?** WRITEJOB creates it new with `DISP=(NEW,CATLG,DELETE)` (`app/jcl/WRITEJOB.jcl:3`), and no job in the tree deletes the old one.
+7. **Do both jobs still run?** No telemetry and no git history exist, so dormancy was not measured. Can the client supply job history for the last 12 months, or SMF records?
+8. **Can the legacy system stay up for a parallel run of the writer, and can the client supply archived copies of the dataset and the SYSOUT for a month end?** This decides the oracle for both waves (`06-test-strategy.md`).
 
-None. `unparsed` in `graph.json` is empty. All six source files parsed.
+## Not parsed, and limits that touch this system
 
-## Limits in `meta.limits` that touch this system
+- **Not parsed:** nothing. The extractor listed no unparsed file (`analysis`, field `unparsed` is empty in `graph.json`).
+- **DCB, LRECL and RECFM are not read**, so the record length on the DD was never compared with a copybook (`meta.limits`). This is why question 2 is open.
+- **No scheduler was parsed.** The order of jobs across jobs is unknown (`analysis.warnings`).
+- **Dormancy was not computed.** No last-modified dates exist (`analysis.warnings`).
+- **`IF/THEN/ELSE` and `COND=` are not modeled** (`meta.limits`). Neither JCL member uses them, so it does not change this result (`app/jcl/READJOB.jcl:1`, `app/jcl/WRITEJOB.jcl:1`).
+- **A contract edge is high only when both sides share a layout copybook** (`meta.limits`). High would still not prove the layouts are equal. The medium rating here is why I checked by hand.
+- **JCL text inside COBOL, EXEC CICS chains, IMS, DB2 and MQ:** none appear in the tree, and this plugin does not analyze them. Anything outside the tree is unseen.
 
-| Limit | Touches this tree | Evidence |
-|---|---|---|
-| Only Control-M XML and shell wrappers are read as schedulers | Yes. No scheduler was found, so cross-job order is unknown | inference: `analysis.warnings` in `graph.json` |
-| IDCAMS, SORT and other in-stream control cards are not read | Only for steps outside this tree. Neither job has a utility step | `app/jcl/WRITEJOB.jcl:2`, `app/jcl/READJOB.jcl:2` |
-| IF/THEN/ELSE and COND= in JCL are not modeled | No effect. Neither job uses them | `app/jcl/WRITEJOB.jcl:1-5`, `app/jcl/READJOB.jcl:1-4` |
-| Nested PROC calls, INCLUDE members and the internal reader are not followed | No effect. Neither job uses a PROC | `app/jcl/WRITEJOB.jcl:2`, `app/jcl/READJOB.jcl:2` |
-| A called subprogram gets no DDs from its caller's step | No effect. Neither program makes a call | `app/cbl/PGMW.cbl:12-16`, `app/cbl/PGMR.cbl:12-16` |
-| A variable call target is resolved only from VALUE and literal MOVE | No effect. There are no calls | `app/cbl/PGMW.cbl:12-16`, `app/cbl/PGMR.cbl:12-16` |
-| COPY REPLACING is not applied | No effect. Both COPY statements are plain | `app/cbl/PGMW.cbl:11`, `app/cbl/PGMR.cbl:11` |
-| COBOL is read as fixed format | No effect. Both programs parsed | `app/cbl/PGMW.cbl:1`, `app/cbl/PGMR.cbl:1` |
-| CICS RETURN TRANSID, START and SEND MAP are not edges | No effect. There is no CICS | `app/cbl/PGMW.cbl:12-16`, `app/cbl/PGMR.cbl:12-16` |
+## Files
 
-One limit is missing from that list: the extractor does not read DCB parameters such as `LRECL`, and
-`meta.limits` does not say so. It matters here (question 2).
-
-## Provisional throughout
-
-No telemetry was given. The dead-code register is empty, and its empty dormant list means "cannot
-tell". See `05-dead-code.md`.
-
-## What is in this folder
-
-| File | Written by |
+| File | What it holds |
 |---|---|
-| `graph.json`, `01-inventory.md`, `02a-edge-tables.md`, `05a-dead-code-candidates.md` | scripts |
-| `02-coupling.md`, `03-waves.md`, `waves.json` | assessment |
-| `04-estimate.md`, `05-dead-code.md`, `dead-code.json`, `risks.json` | assessment |
-| `06-test-strategy.md` | assessment, following the `behavioral-equivalence` skill |
+| `01-inventory.md`, `02a-edge-tables.md`, `03a-wave-seed.md`, `05a-dead-code-candidates.md` | Generated fact tables |
+| `02-coupling.md` | Coupling argument and the hand check of the contract edge |
+| `03-waves.md`, `waves.json` | The wave plan |
+| `04-estimate.md` | Estimate with sensitivity |
+| `05-dead-code.md`, `dead-code.json` | Dead code register |
+| `06-test-strategy.md` | Oracle, normalization, deviation register |
+| `risks.json` | Two axis risk scores |

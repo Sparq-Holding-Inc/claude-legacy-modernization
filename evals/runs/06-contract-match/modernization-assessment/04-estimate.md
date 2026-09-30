@@ -1,36 +1,55 @@
 # 04 Estimate
 
-Method: bottom-up by task, in person-days, for a team that can read COBOL and JCL. It is not derived from LOC. The whole tree is 16 lines per program (`app/cbl/PGMR.cbl:16`, `app/cbl/PGMW.cbl:16`), so LOC would say almost nothing. Every number here is inference. There is no history, telemetry or velocity data in the tree to calibrate against.
+This is an estimate by method, per wave. It is inference throughout. Effort is in person-days for a
+small team that can read COBOL and JCL, with a target runtime and a decimal type already chosen. The
+estimate is driven by the edges crossing each wave boundary, not by lines of code. The tree is 32
+lines of COBOL and 9 lines of JCL (`app/cbl/PGMR.cbl:16`, `app/cbl/PGMW.cbl:16`,
+`app/jcl/READJOB.jcl:4`, `app/jcl/WRITEJOB.jcl:5`). Line count would say a day. The coupling says
+otherwise.
 
-## Wave 1: master file writer and reader pair
+## Range per wave
 
-| Task | Range (person-days) | Confidence | Evidence |
+| Wave | Range (person-days) | Driver | Confidence | Evidence |
+|---|---|---|---|---|
+| 1. Reader side | 3 to 8 | Toolchain proof, reading a packed decimal record in the target, a harness that decodes the dataset. Two units. | low | `app/cbl/PGMR.cbl:13`, `app/cpy/LAYOUTX.cpy:3` |
+| 2. Writer of the master file | 4 to 10 | One contract edge and one data hub to prove equal byte for byte, and no oracle in the tree. Two units. | low | `app/cbl/PGMW.cbl:14`, `app/jcl/WRITEJOB.jcl:4` |
+| Test harness and oracle capture (shared) | 3 to 8 | Getting archived outputs, job logs and a scheduler export from the client. Mostly waiting. | low | inference |
+| Total | 10 to 26 | | low | inference |
+
+Do not read the total as a commitment. This tree is a fragment. It has no CICS, no scheduler, no
+data and no tests. It may be all of the system or one corner of a large one. The range assumes it is
+the whole system.
+
+## Assumptions the range is most sensitive to
+
+1. Assumes PGMR is the only reader of SPARQ.TEST.MASTER. If other programs outside this tree read it,
+   wave 2 roughly doubles, because each reader is another consumer of the layout to prove equal
+   (`analysis` field `data_hubs` counts one reader, in this tree only).
+2. Assumes the 15 byte copybook record and the LRECL=80 in the JCL can be reconciled by a decision, for
+   example that the runtime pads to 80. If real files hold 15 byte records that other tools read, or 80
+   byte records with a used filler that the copybook does not describe, wave 1 and wave 2 each add 2 to
+   4 days to find and fix the disagreement (`app/cpy/LAYOUTX.cpy:3`, `app/jcl/WRITEJOB.jcl:4`).
+3. Assumes an archived copy of SPARQ.TEST.MASTER, or a job log of a WRITEJOB run, can be had. If not,
+   the oracle is characterization from source, which is provisional, and PGMW's unset record
+   (`app/cbl/PGMW.cbl:14`) cannot be settled from the source. Add 3 to 5 days and mark wave 2 provisional.
+
+## What moves the estimate here
+
+In rough order of weight, for this tree:
+
+- Coupling edges crossing the wave boundary: one contract edge, one data hub, zero calls.
+- Behavioral oracle: none in the tree.
+- God modules: none. Fan-in is zero (`analysis` field `god_modules`).
+- Business logic in a database: none seen. No DB2 in the tree.
+- Team skill: unknown. Ask whether anyone at the client can read the source.
+
+## Where Claude Code can do the mechanical port, and where it cannot
+
+| Part | Claude Code | Confidence | Evidence |
 |---|---|---|---|
-| Discovery: get the scheduler export, the real dataset listing and the list of consumers | 2 to 5 | low | inference |
-| Port PGMR and job:READJOB | 1 to 2 | medium | `app/cbl/PGMR.cbl:14` |
-| Port PGMW and job:WRITEJOB, including byte exact packed decimal output | 2 to 4 | medium | `app/cbl/PGMW.cbl:14`, `app/jcl/WRITEJOB.jcl:4` |
-| Equivalence harness: byte compare, normalization spec, boundary cases | 3 to 6 | medium | `app/cpy/LAYOUTX.cpy:3` |
-| Deviation register, sign off, cutover and rollback rehearsal | 1 to 3 | low | inference |
-| **Total** | **9 to 20** | low | inference |
-
-The range is wide on purpose. Most of the width sits in discovery and the harness, not in the port.
-
-## The assumptions the range is most sensitive to
-
-1. **Assumes SPARQ.TEST.MASTER has no consumer other than PGMR.** If other programs, sort steps or partner extracts read it, the harness scope and the blast radius grow, and the total roughly doubles. Nothing in the tree shows other readers, but the extractor cannot see outside the tree (inference).
-2. **Assumes a real copy of the dataset, or an archived generation of it, can be obtained.** If none exists, the oracle is characterization tests built from source, which are provisional, and add about 3 to 5 days to build test data (inference).
-3. **Assumes the 15 byte logical record and the LRECL=80 on the DD are reconcilable in a day.** If the real file on disk is 80 byte padded records and a downstream reader depends on that, the porting rules for record padding become a decision with a sign off. If the real file is 15 byte records, the DD is misleading and the physical format must come from the catalog. Either answer is fast to find, but an unexpected answer adds a deviation register entry (`app/jcl/WRITEJOB.jcl:4`, `app/cpy/LAYOUTX.cpy:3`).
-4. **Assumes the tree is the whole nightly cycle.** If the cycle has jobs outside the tree, this estimate covers a fragment only, and the fragment's place in the sequence is unknown (inference).
-
-## What moves this estimate
-
-- **Coupling edges crossing the boundary.** One: the contract edge on the dataset (`02a-edge-tables.md`). This keeps the estimate low.
-- **Behavioral oracle.** None is in the tree. It is the largest swing factor, in assumption 2.
-- **God modules.** None.
-- **Business logic in the database.** No SQL or DB2 in the tree (`graph.json` has no db2 datasets), so none is visible.
-- **Language skills.** Assumed present. If not, add discovery time for every task.
-
-## Where Claude Code helps and where it does not
-
-- **Strong here.** Transliterating PGMR and PGMW is a mechanical port of two 16 line programs. Generating the byte level comparison harness and boundary cases for the 15 byte record is also well suited to it, once the oracle exists.
-- **Weak here.** Deciding intent. PGMW never sets a field before it writes (`app/cbl/PGMW.cbl:14`), and PGMR reads only one record (`app/cbl/PGMR.cbl:14`). Whether that is a stub, a test fixture, or a real behavior to preserve is a business question. It cannot be settled from source. Neither can what the nightly cycle is.
+| Transliterating PGMR and PGMW into the target language | Strong, given a test harness. Each is one open, one read or write, one close. | high | `app/cbl/PGMR.cbl:13`, `app/cbl/PGMW.cbl:13` |
+| Packed decimal encode and decode of `S9(7)V99 COMP-3` in a decimal type | Strong, and checkable by unit test against known byte strings. | high | `app/cpy/LAYOUTX.cpy:3` |
+| Rewriting the two JCL jobs into the target scheduler | Strong for the step and the DD. The DISP and DCB semantics need a human decision. | medium | `app/jcl/WRITEJOB.jcl:3` |
+| Deciding what PGMW should write when it moves no data into the record | Cannot. It needs an archived output or an owner who knows the intent. | low | `app/cbl/PGMW.cbl:14` |
+| Deciding whether LRECL=80 or the 15 byte layout is the truth | Cannot. It needs the catalog entry for the dataset. | low | `app/jcl/WRITEJOB.jcl:4` |
+| Finding the nightly order and other readers of the dataset | Cannot. It is not in the tree. | low | `analysis` field `warnings` |

@@ -1,42 +1,27 @@
 # 04 Estimate
 
-All figures here are inference. There is no history, no team velocity and no oracle in the tree to calibrate against. Target state is `refactor`. Do not quote a single number from this file. Quote the range and the assumptions.
+Method: per wave, as a range, with the assumptions it is most sensitive to. The count of edges crossing the wave boundary drives it, not lines of code. Here the boundary edges are: none call, none data, none temporal (`analysis`, field `edge_counts` holds only `include`). The estimate is judgment. It is labeled inference.
 
-## Method
+## Wave 1: PROGA and PROGB (provisional)
 
-Estimated per wave from the factors that move effort, in the order the skill weights them, not from lines of code.
+| Part | Range | Confidence | Evidence |
+|---|---|---|---|
+| Port both programs and the copybook to the target, with a decimal type for the balance | 1 to 3 engineer-days | low | inference |
+| Build the equivalence harness for the wave | not estimable until the client supplies the batch cycle output | low | inference |
 
-| Factor | Reading for wave 1 | Evidence |
-|---|---|---|
-| Coupling edges crossing the wave boundary | 0. Both include edges (PROGA and PROGB to SHARED01) sit inside the wave. | `app/cbl/PROGA.cbl:5`, `app/cbl/PROGB.cbl:5` |
-| Behavioral oracle available | None in the tree. No dataset, report, log or GDG is present. | inference |
-| God modules in the wave | None. No call edges exist. | inference |
-| Business logic in the database | Unknown. No SQL, no DB2 include. | inference |
-| Team can read COBOL | Unknown. Not stated. | inference |
-| Arithmetic sensitivity | Latent. `SH-BALANCE` is packed decimal but neither program uses it. | `app/cpy/SHARED01.cpy:3` |
+The programs hold 8 lines each and one MOVE each (`app/cbl/PROGA.cbl:7`, `app/cbl/PROGB.cbl:7`). The port is close to nothing. The real cost sits in the harness and in whatever the missing JCL adds. A number for the whole wave would suggest rigor the tree cannot support.
 
-## Wave 1 range
+### Assumptions the range is most sensitive to
 
-| Wave | Scope | Range | Confidence | Evidence |
-|---|---|---|---|---|
-| 1 | Port PROGA and PROGB, re-express SHARED01 once, build the harness for the pair | 3 to 8 person-days for the visible code and its harness scaffolding | low | `app/cbl/PROGA.cbl:7`, `app/cbl/PROGB.cbl:7`, `app/cpy/SHARED01.cpy:1-3` |
-| 1, if the surroundings turn out to matter | Same, plus the JCL, the file or interface that carries `SHARED-AREA`, and the nightly batch cycle order | 15 to 30 person-days | low | inference |
+1. Assumes this tree is the whole of what PROGA and PROGB do. If the missing JCL runs them against files that use the SHARED01 layout, the wave gains a contract edge and a harness on that file. The range roughly doubles or more.
+2. Assumes nobody reads SH-BALANCE outside the tree. If a report or partner extract reads it by offset, the packed decimal layout must be reproduced byte for byte, and the wave needs a decimal type with zero tolerance.
+3. Assumes the two programs are live. If no job runs them, the right cost is a deletion review, not a port. See `05-dead-code.md`.
 
-The first row assumes the visible 19 lines are the whole story. The second row is what happens if they are a fragment. The gap between the rows is the finding. The port itself is hours. The cost is in finding out what the programs are for, and building a definition of "correct" (see `06-test-strategy.md`).
+## Where Claude Code can do the port, and where it cannot
 
-## What the range is most sensitive to
+- Strong: the transliteration of both programs and the copybook. It is mechanical, given a test harness.
+- Weak: intent. Nothing says why PROGA moves 1 and PROGB moves 2 into SH-CUST-ID. The source has no comment and no calling context. A person who knows the nightly cycle must say whether these values are real.
 
-State these as claims a client engineer can check.
+## What was not estimated
 
-1. **Assumes SHARED01 is included only by PROGA and PROGB.** If other programs outside this tree include it, wave 1 grows by one port per includer and the harness must cover each. Effort roughly scales with the number of includers.
-2. **Assumes neither program reads or writes a dataset, and neither is started by a job that carries data between them.** The tree contains no `SELECT`, `FD` or JCL. If `SHARED-AREA` is the record of a file one program writes and the other reads, wave 1 gains a contract edge, the harness must diff that file, and the estimate roughly doubles.
-3. **Assumes the literals 1 and 2 moved to `SH-CUST-ID` are stubs and not business rules.** If they are hardcoded customer ids, each needs its rule written down and signed off before the port. Evidence: `app/cbl/PROGA.cbl:7`, `app/cbl/PROGB.cbl:7`.
-
-## Where Claude Code can do the mechanical port, and where it cannot
-
-| Part | Claude Code | Evidence |
-|---|---|---|
-| Transliterate the two procedure divisions (one MOVE and GOBACK each) | Strong. Mechanical. | `app/cbl/PROGA.cbl:6-8`, `app/cbl/PROGB.cbl:6-8` |
-| Re-express `SHARED-AREA` as one shared record type, with `SH-BALANCE` as a fixed-point decimal type | Strong, with a test that checks the packed decimal byte layout | `app/cpy/SHARED01.cpy:1-3` |
-| Say what customer ids 1 and 2 mean, or where the programs run in the nightly batch cycle | Cannot. This is intent the source does not hold. The client engineers must answer it. | inference |
-| Build the harness and choose the oracle | Claude Code can write the harness. It cannot supply the oracle. That has to come from the client (job output, reports, archived files). | inference |
+The nightly batch cycle. It is not in the tree, so nothing about it can be sized.

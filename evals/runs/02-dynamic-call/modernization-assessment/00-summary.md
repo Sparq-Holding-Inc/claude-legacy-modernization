@@ -1,46 +1,56 @@
 # 00 Summary
 
-Scope: `.` (the work folder). Two COBOL files, 14 lines, no JCL, no scheduler, no copybooks, no datasets (`graph.json` `meta.files_seen`).
+Scope: the whole work folder (`.`). The tree holds two COBOL programs, `app/cbl/PROGA.cbl` and `app/cbl/PROGB.cbl`, 14 lines in all. It holds no JCL, no scheduler file, no CICS definition, no copybook and no dataset. Everything below rests on those two files and the extractor's `graph.json`.
 
 ## Scoping answers
 
-All three came as flags. No defaults were applied. The run was non-interactive.
-
-| Question | Answer | Source |
+| Item | Answer | Source |
 |---|---|---|
-| Target state | refactor | `--target refactor` |
-| What must not break | the nightly batch cycle | `--must-not-break` |
-| Runtime telemetry | none. Every dead-code claim is provisional. | `--telemetry none` |
+| Target state | refactor | `--target refactor` flag |
+| Must not break | the nightly batch cycle | `--must-not-break` flag |
+| Runtime telemetry | none | `--telemetry none` flag |
+| Defaults applied | no defaults applied | all three came as flags |
+
+Because telemetry is `none`, every dead-code claim in this assessment is provisional.
 
 ## Result
 
-- **Waves: 1.** Two programs and nothing else. There is nothing to cut, so I did not invent more. See `03-waves.md`.
-- **Largest risk: the computed call at `app/cbl/PROGA.cbl:9`.** PROGA ACCEPTs a program name at run time and CALLs it (`app/cbl/PROGA.cbl:8`). The source cannot say what it calls. A port that replaces the CALL with a fixed table silently drops any program missing from the table, and the CALL has no ON EXCEPTION, so today an unknown name abends the job. Confidence: medium. The edge is a fact, its reach is unknown.
-- **Nothing is proven dead.** No entry point exists in the tree, so both programs are in the unknown bucket (`05-dead-code.md`).
-- **Next step:** get the JCL that runs PROGA, and 12 months of the values fed to its ACCEPT.
+| Finding | Value | Confidence | Evidence |
+|---|---|---|---|
+| Wave count | 1. The extractor's seed placed no unit (it found no entry point), so the one wave holds both programs by deviation. It is a wave of last resort, not a sound family. See `03-waves.md`. | low | `modernization-assessment/waves.json:5`, analysis field `wave_seed` |
+| Coupling edges found | 1 edge in total, a call edge with a computed target | high | `app/cbl/PROGA.cbl:9`, analysis field `edge_counts` |
+| Entry points found | 0 | high | analysis field `entry_points` |
+| Dead code | 0 unreachable, 0 dormant, 2 unknown. Nothing can be proven unreachable. | low | analysis field `dead_code_candidates` |
 
-## Files
+## Single largest risk
 
-`01-inventory.md`, `02a-edge-tables.md` and `05a-dead-code-candidates.md` are generated. `02-coupling.md`, `03-waves.md`, `04-estimate.md`, `05-dead-code.md` and `06-test-strategy.md` are the argument. `graph.json`, `waves.json`, `dead-code.json` and `risks.json` are the data. The `dependency-cartographer` agent was not run, because there is one open edge. The `migration-risk-assessor` work was done inline.
+`PROGA` calls a program whose name it reads from run-time input. The name goes into `WS-PGM-NAME` by `ACCEPT` and is never set anywhere else (`app/cbl/PROGA.cbl:5`, `app/cbl/PROGA.cbl:8`, `app/cbl/PROGA.cbl:9`). The set of programs it can start cannot be bounded from source. Any of them could be a program on the nightly batch cycle, which must not break. A refactor that resolves calls at build time would fail only for the input values that hit a name it did not know about, and nothing in the tree says what those values are. Scored high-high, confidence low (`modernization-assessment/risks.json:5`).
 
-## Open questions for the client's engineers
+## What the defaults and gaps mean
 
-1. What job or scheduler entry runs PROGA, and is it part of the nightly batch cycle? Where does the value for its ACCEPT come from, SYSIN or the console? (`app/cbl/PROGA.cbl:8`)
-2. Which program names have been supplied to it in the last 12 months, including month-end and fiscal year-end? Where do those programs live, and are they in scope for this assessment? (`app/cbl/PROGA.cbl:9`)
-3. Is PROGB a live target or a leftover stub? It only returns (`app/cbl/PROGB.cbl:4`). Does anything else call it?
-4. What does operations do today when the name matches no program? The CALL has no ON EXCEPTION, so I expect an abend. Is a restart or fallback procedure attached to it? (`app/cbl/PROGA.cbl:9`)
-5. Is this folder the whole system or a slice? Only two source files were seen, and the extractor found no JCL, no scheduler, no copybooks and no datasets (`graph.json` `meta.files_seen`).
-6. Do the called programs depend on files from the DD statements of PROGA's job step? The extractor gives a called program no DDs from its caller's step (`graph.json` `meta.limits`).
-7. Which scheduler holds the nightly cycle? The extractor reads only Control-M XML and shell wrappers that name JCL files (`graph.json` `meta.limits`). Anything else, such as CA-7 or OPC, was not read and nothing was listed as unparsed.
-8. Are there JCL IF/THEN/ELSE or COND= rules around that step? The extractor does not model them (`graph.json` `meta.limits`).
+- The `must-not-break` item, "the nightly batch cycle", cannot be tied to any unit. No job, scheduler entry or dataset in the tree names it. That is a finding: the behavioral-equivalence anchor has to come from the client (`06-test-strategy.md`). Evidence: inference, from analysis fields `entry_points` and `unscheduled_jobs` both being empty.
+- Dormancy was not computed. The folder is not a git repository, so no unit has a last-modified date (analysis field `warnings`). An empty dormant list means not measured.
 
-## Limits that touch this system
+## Open Questions
 
-| Limit | Effect here | Evidence |
+For the client's engineers.
+
+1. What feeds the `ACCEPT` at `app/cbl/PROGA.cbl:8`: SYSIN in a JCL step, the operator console, or something else? What values did it see over the last 12 months, including month-end and fiscal year-end?
+2. Which JCL job, scheduler entry or CICS transaction starts `PROGA`, and is it part of the nightly batch cycle? The tree has none of these files, so no entry point was found.
+3. Which programs on the production load library can the `CALL` at `app/cbl/PROGA.cbl:9` reach? Which of them are on the nightly batch cycle, and do any of them lack source?
+4. `PROGB` holds only `GOBACK` (`app/cbl/PROGB.cbl:4`). Is it a real no-op, a stub, or a placeholder for a program whose source is somewhere else?
+5. Is this tree a complete extract? It has no copybooks, datasets, JCL, PROCs, scheduler XML or shell wrappers. Which of those exist and were left out?
+6. What does the nightly batch cycle consist of: job names, order, and the files each job reads and writes? Without that list, the temporal edges are absent from the graph.
+7. Is there a version-control history, or any other record of last change, for these two files? Without one, no dormancy claim can be made.
+8. Does the site run `CALL` with no `ON EXCEPTION` deliberately? Nothing in `PROGA` handles a missing target (`app/cbl/PROGA.cbl:9`), so behavior on a bad name is whatever the runtime does. That behavior has to be reproduced or changed on purpose.
+
+## Extractor limits that touch this system
+
+| Limit | Why it matters here | Evidence |
 |---|---|---|
-| A variable call target is resolved only from VALUE clauses and literal MOVEs in the same program | It cannot resolve PROGA's target, which comes from ACCEPT | `app/cbl/PROGA.cbl:8` |
-| A called subprogram gets no DDs from its caller's JCL step | The targets' file access is unknown | `app/cbl/PROGA.cbl:9` |
-| IF/THEN/ELSE and COND= in JCL are not modeled | The real job is not here to check | inference |
-| Only Control-M XML and shell wrappers that name JCL files are read as schedulers | The extractor found no entry point at all | inference |
+| A variable call target is resolved only from VALUE clauses and literal MOVEs in the same program | `WS-PGM-NAME` has no VALUE clause and no MOVE, so the call was left unresolved | `app/cbl/PROGA.cbl:5`, `app/cbl/PROGA.cbl:9` |
+| Only Control-M XML and shell wrappers that name JCL files are read as schedulers | The tree has neither, so no entry point and no temporal edge exists | analysis field `warnings` |
+| COBOL is read as fixed format | Both files read as fixed format. Nothing was listed as not parsed | analysis, `unparsed` is empty |
+| JCL text inside a COBOL literal is noticed but makes no edge | None was found in either program | analysis field `embedded_jcl` |
 
-Files the extractor could not parse: none (`graph.json` `unparsed` is empty).
+Files the extractor listed as not parsed: none.

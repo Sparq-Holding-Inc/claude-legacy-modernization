@@ -1,59 +1,62 @@
 # 05 Dead code
 
-The candidates come from the extractor and are listed in `05a-dead-code-candidates.md`. This file is my judgment on them. Telemetry is none, so **every claim here is provisional**. Nothing below is safe to delete on this evidence alone, with one exception noted in the first bucket.
+Telemetry is none, so every claim below is provisional. Nothing here is a reason to delete anything except one copybook, and that only after the client agrees. The candidates come from `modernization-assessment/05a-dead-code-candidates.md`, which the extractor computed. The register is in `modernization-assessment/dead-code.json`.
 
-## The three buckets
+## Read this first
 
-### Unreachable
-
-| Unit | Verdict | Confidence | Evidence |
+| Warning | What it means for the buckets | Confidence | Evidence |
 |---|---|---|---|
-| cpy:UNUSED1Y | Propose for deletion after the client confirms. No program includes it and the name appears nowhere else in the tree | high | `app/cpy/UNUSED1Y.cpy:1` |
+| The CA-7 scheduler file was not parsed | Every job it schedules counts as unscheduled, so the list of 35 unscheduled jobs is overstated. I read the listing by hand. It names eight of the 35 (see below). | high | `app/scheduler/CardDemo.ca7:43`, `app/scheduler/CardDemo.ca7:340`, `app/scheduler/CardDemo.ca7:495` |
+| The dormant bucket is empty, and that does not mean nothing is dormant | Dormancy is measured from the last change date in git. Across the programs, copybooks, jobs and procs there are only four distinct dates, and 99 units share 2022-09-01, which is 4 years before the as-of date and under the 5 year line. The dates look like bulk commits, not real change dates. Dormancy was not measured in any useful way. | high | `analysis` (fields `as_of`, `dormant_years` and `dead_code_candidates`), `app/cpy/CVACT01Y.cpy:1` |
+| Every job is an entry point | A job no parsed scheduler names is still an entry point, so it never appears in a bucket. Only programs and copybooks can. | high | `analysis` (field `unscheduled_jobs`) |
+| The extractor does not read how IMS and DB2 jobs name their programs | Five programs that look uncalled are run by jobs (see the unknown bucket). | high | `app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl:25`, `app/app-transaction-type-db2/jcl/MNTTRDB2.jcl:30` |
+| The catalog listing is not telemetry | It shows generation counts of five GDGs from a 2022 listing (DALYREJS up to generation 26, SYSTRAN 22, TRANREPT 14). That says the posting, interest and report jobs ran in that environment. It says nothing about production or the last 12 months. | medium | `app/catlg/LISTCAT.txt:696`, `app/catlg/LISTCAT.txt:1112`, `app/catlg/LISTCAT.txt:1541` |
 
-The extractor also put `proc:TRANREPT` here. I moved it to the unknown bucket, because it is live. See below.
+## Bucket 1. Unreachable
 
-### Reachable but dormant
+No static path from any entry point, and no reachable code makes a computed call that could name it.
 
-Empty. The extractor's rule is 5 years without a modification as of 2026-09-30. The oldest file dates in the tree are 2022-09-01, which is 4 years old. Those dates come from the git history of this copy, so they are the date the code was imported and not the date the mainframe source last changed. Dormancy says nothing about this system. Fifteen programs carry the 2022-09-01 date (see `01-inventory.md`), and on 2027-09-01 all of them would flip to dormant with no change in behavior. Do not use date-based dormancy on this tree.
+| Unit | What it is | Reason | Confidence | Evidence |
+|---|---|---|---|---|
+| `cpy:UNUSED1Y` | Copybook, 7 lines | No program includes it. It holds a user shaped record with a password field and a 2022 version stamp. A copybook cannot be the target of a computed CALL. Safe to propose for deletion, after the client agrees. | high | `app/cpy/UNUSED1Y.cpy:1` |
 
-### Unknown
+## Bucket 2. Reachable but dormant
 
-Eleven units. Ten came from the extractor. One I moved in from the unreachable list.
+Empty. See the warning above. Propose instrumentation for any program the client cannot name a caller for, starting with the six programs in the unknown bucket.
 
-| Unit | What I found | Likely status | Evidence |
+## Bucket 3. Unknown
+
+Not reached by a static edge. Do not delete any of these. Five of the six programs are run by IMS or DB2 jobs, which the extractor cannot see, so they very likely run. I kept them here because the skill does not let me move an item out of the extractor's bucket. Each confidence is my confidence that the item is dead, and it is low for all of them.
+
+| Unit | What it is | Reason | Confidence | Evidence |
+|---|---|---|---|---|
+| `CBPAUP0C` | IMS batch purge of expired authorizations | Run as an IMS BMP by job CBPAUP0J. The CA-7 listing chains CBPAUP0J ahead of POSTTRAN. Very likely live. | low | `app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl:25`, `app/scheduler/CardDemo.ca7:70` |
+| `CBTRN01C` | Batch, 415 lines, six files | No JCL, wrapper or scheduler entry runs it. Its six DDs map to nothing. The computed calls cannot reach it because they are CICS XCTLs to programs in the CSD, and it is not defined there, but the bucket stays open. The only program with no sign of a caller. | low | `app/cbl/CBTRN01C.cbl:29`, `app/csd/CARDDEMO.CSD:173` |
+| `COBTUPDT` | DB2 batch maintenance of the transaction type table | Run by job MNTTRDB2 through `RUN PROGRAM`, which the extractor does not read. Named in README. The weekly Control-M folder runs MNTTRDB2. | low | `app/app-transaction-type-db2/jcl/MNTTRDB2.jcl:30`, `app/scheduler/CardDemo.controlm:27` |
+| `DBUNLDGS` | IMS unload to GSAM | Run by job UNLDGSAM under DFSRRC00. No scheduler names UNLDGSAM. | low | `app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL:27` |
+| `PAUDBLOD` | IMS load of the authorization database | Run as a BMP by job LOADPADB. No scheduler names LOADPADB. | low | `app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL:27` |
+| `PAUDBUNL` | IMS unload to two flat files | Run by job UNLDPADB under DFSRRC00. No scheduler names UNLDPADB. | low | `app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL:39` |
+| `cpy:IMSFUNCS`, `cpy:PADFLPCB`, `cpy:PASFLPCB`, `cpy:PAUTBPCB` | IMS PCB and function copybooks | Included only by DBUNLDGS, PAUDBLOD and PAUDBUNL. They follow those programs. | low | `app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL:136`, `app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL:161`, `app/app-authorization-ims-db2-mq/cbl/PAUDBUNL.CBL:150` |
+| `proc:TRANREPT` | Proc that holds the report steps | Named only in JCL text inside CORPT00C, which writes it to the JOBS TD queue for submission. It has no edge, so it is unknown and not unreachable. It is the proc the online report runs. The batch job TRANREPT does not call it and carries a copy of the same steps. Must-not-break, so never delete. | low | `app/cbl/CORPT00C.cbl:94`, `app/cbl/CORPT00C.cbl:518`, `app/csd/CARDDEMO.CSD:499`, `app/proc/TRANREPT.prc:57` |
+
+The extractor gives 28 reachable computed calls as the reason for most of the unknown bucket. All 28 are XCTL to a CICS program, and I bounded them in `modernization-assessment/02-coupling.md`. That does not change the bucket.
+
+## Jobs nobody in the tree schedules
+
+The extractor lists 35 jobs no parsed scheduler names. The CA-7 listing names eight of them, so they are scheduled, not orphaned.
+
+| Job | Where the CA-7 listing names it | Confidence | Evidence |
 |---|---|---|---|
-| proc:TRANREPT | CORPT00C writes JCL text containing `EXEC PROC=TRANREPT` to the JOBS TDQ. The extractor does not follow the internal reader. The proc file's first line declares a proc named REPROC, so the name in the JCL library member and the proc name inside it disagree | Live. The online report path depends on it | `app/cbl/CORPT00C.cbl:94`, `app/proc/TRANREPT.prc:1` |
-| CBPAUP0C | Run as an IMS BMP by CBPAUP0J through a PARM. The CA-7 listing chains CBPAUP0J ahead of POSTTRAN | Probably live | `app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl:25`, `app/scheduler/CardDemo.ca7:43` |
-| CBTRN01C | No runner anywhere in the tree. Reads six files and its header says it posts daily transactions | Cannot tell. Instrument it | `app/cbl/CBTRN01C.cbl:5` |
-| COBTUPDT | Run by MNTTRDB2 through a DSN command. MNTTRDB2 is in the Control-M weekly folder | Probably live weekly | `app/app-transaction-type-db2/jcl/MNTTRDB2.jcl:30`, `app/scheduler/CardDemo.controlm:27` |
-| DBUNLDGS | Run by UNLDGSAM through a DL/I PARM. No scheduler names the job | Probably run by hand | `app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL:27` |
-| PAUDBLOD | Run by LOADPADB as a BMP. No scheduler names the job | Probably a one time load | `app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL:27` |
-| PAUDBUNL | Run by UNLDPADB through a DL/I PARM. No scheduler names the job | Probably run by hand | `app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL:39` |
-| cpy:IMSFUNCS | Included only by three programs that are themselves in this bucket | Follows its includers | `app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL:136`, `app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL:142` |
-| cpy:PADFLPCB | Included only by DBUNLDGS | Follows DBUNLDGS | `app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL:156` |
-| cpy:PASFLPCB | Included only by DBUNLDGS | Follows DBUNLDGS | `app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL:155` |
-| cpy:PAUTBPCB | Included only by DBUNLDGS, PAUDBLOD and PAUDBUNL | Follows its includers | `app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL:154`, `app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL:161` |
+| CBPAUP0J | Triggered by CLOSEFIL, and it triggers POSTTRAN | high | `app/scheduler/CardDemo.ca7:43`, `app/scheduler/CardDemo.ca7:70` |
+| READACCT, READCARD, READCUST, READXREF | A chain after CLOSEFIL | high | `app/scheduler/CardDemo.ca7:340`, `app/scheduler/CardDemo.ca7:367`, `app/scheduler/CardDemo.ca7:394`, `app/scheduler/CardDemo.ca7:421` |
+| CREASTMT, TXT2PDF1 | A chain after CLOSEFIL | high | `app/scheduler/CardDemo.ca7:468`, `app/scheduler/CardDemo.ca7:495` |
+| PRTCATBL | Triggered by the second CLOSEFIL block | high | `app/scheduler/CardDemo.ca7:537` |
 
-**The computed calls are bounded, and that does not change any placement.** The extractor's reason for the unknown bucket is that 28 computed calls in reachable code could target any unreached program. I read them (see `02-coupling.md`). Every one is an `EXEC CICS XCTL` in an online program, and every program name that can reach them is an online program. So none of the batch programs above can be the target of any of them. The rule says to say so and to leave them in unknown, and I did. What keeps them unknown is different: the extractor does not follow the three ways they are actually run, which are the IMS PARM, the DSN command and the internal reader.
+The remaining 27 are named in no scheduler, wrapper or listing I have. Ask whether they still run: CBADMCDJ, CBEXPORT, CBIMPORT, CBLDBMS, CICCMP, CIDBCMP, CNJBATMP, CREADB2, DALYREJS, DBPAUTP0, DEFCUST, DEFGDGB, DEFGDGD, ESDSRRDS, FTPJCLS, IMSMQCMP, INTRDRJ1, INTRDRJ2, LISTFILS, LOADPADB, RACFCMDS, REPRTEST, REPTFILE, SORTTEST, TRANREPT, UNLDGSAM and UNLDPADB. Several are one-off setup jobs that would run once, such as the GDG definitions (`app/jcl/DEFGDGB.jcl:25`), the compile jobs, and the sample tests. TRANREPT is the one that matters. It is a must-not-break item and nothing schedules it. It runs on demand, from the menu (`app/cbl/CORPT00C.cbl:94`) or by hand.
 
-## Beyond the extractor's buckets
+## What to instrument first
 
-These are jobs. A job with no caller is an entry point, so the extractor never calls it dead. I list them because the migration should not carry them. None is a deletion proposal on its own, and each needs a client answer.
-
-| Unit | Why it may not be needed | Evidence |
-|---|---|---|
-| job:DEFCUST | Defines AWS.CUSTDATA.CLUSTER, which no program reads. Its key length of 10 disagrees with CUST-ID PIC 9(09) and with CUSTFILE.jcl | `app/jcl/DEFCUST.jcl:37`, `app/jcl/CUSTFILE.jcl:50` |
-| job:ESDSRRDS | Builds ESDS and RRDS copies of the user file that nothing reads | `app/jcl/ESDSRRDS.jcl:26` |
-| job:FTPJCLS | FTP demo. The login fields are in the JCL stream, so rotate that credential | `app/jcl/FTPJCL.JCL:34` |
-| job:INTRDRJ1 and job:INTRDRJ2 | Internal reader demos | `app/jcl/INTRDRJ1.JCL:14` |
-| job:REPRTEST and job:SORTTEST | Test jobs | `samples/jcl/REPRTEST.jcl:1`, `samples/jcl/SORTTEST.jcl:1` |
-| job:REPTFILE | Defines the TRANREPT generation group with a limit of 10, and DEFGDGB defines the same group with a limit of 5. One of them is stale | `app/jcl/REPTFILE.jcl:27`, `app/jcl/DEFGDGB.jcl:38` |
-| Compile jobs and procs | CBLDBMS, CICCMP, CIDBCMP, CNJBATMP, IMSMQCMP and the four BUILD procs. The new build pipeline replaces them | `samples/jcl/BMSCMP.jcl:1`, `samples/proc/BUILDBAT.prc:1` |
-
-## What telemetry would change
-
-Ask the client for 12 months of SMF type 30 records or job logs for the batch side and CICS transaction statistics for the online side. With them:
-
-- CBPAUP0C, COBTUPDT, DBUNLDGS, PAUDBLOD and PAUDBUNL would move to live or to dormant with evidence.
-- CBTRN01C would either get a runner or become a deletion candidate.
-- The dormant bucket would become meaningful, because run dates would replace commit dates.
+1. The six programs above: a one-line counter or a job log search for the last 12 months (job logs and SMF records show which programs ran).
+2. CBTRN01C, because nothing names it.
+3. The 27 unscheduled jobs, by job log.
+4. CORPT00C, to see whether the monthly, yearly and custom report paths are all used, since the port has to cover all three (`app/cbl/CORPT00C.cbl:230`, `app/cbl/CORPT00C.cbl:250`).

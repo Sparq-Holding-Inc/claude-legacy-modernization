@@ -4,15 +4,15 @@
       "id": "PGMA",
       "port_difficulty": {
         "score": 1,
-        "why": "Four lines, GOBACK only. No logic, no files, no arithmetic."
+        "why": "The program body is a single GOBACK. There is no logic, no arithmetic and no file I/O to port."
       },
       "blast_radius": {
         "score": 2,
-        "why": "Empty body and no shared data, so nothing it could silently corrupt in this tree. Its place in the nightly cycle is inference."
+        "why": "Runs first in the only job. It touches no dataset, so no reader can see a wrong value. If the job is the nightly cycle, a wrong step order is the risk, not this program."
       },
       "quadrant": "low-low",
       "wave": 1,
-      "driving_fact": "Runs as STEP1, the first step of SEQJOB, and is ordered before PGMB's step.",
+      "driving_fact": "STEP1 runs PGMA first in SEQJOB, and PGMA is an empty program that returns at once.",
       "confidence": "medium",
       "evidence": [
         {
@@ -29,15 +29,15 @@
       "id": "PGMB",
       "port_difficulty": {
         "score": 1,
-        "why": "Four lines, GOBACK only. No logic, no files, no arithmetic."
+        "why": "The program body is a single GOBACK. There is nothing to port."
       },
       "blast_radius": {
         "score": 2,
-        "why": "Empty body and no shared data. Only its position between PGMA and PGMC matters, and that is a property of the job."
+        "why": "Runs second, under a step name (STEP2) that the job uses twice. It touches no dataset. The order among the steps is the only constraint on it."
       },
       "quadrant": "low-low",
       "wave": 1,
-      "driving_fact": "Runs as STEP2, after PGMA and before PGMC, by JCL step order alone. No dataset ties them.",
+      "driving_fact": "STEP2 runs PGMB, and the job repeats the step name STEP2 on line 5, so which step a reference to STEP2 means is not clear.",
       "confidence": "medium",
       "evidence": [
         {
@@ -54,15 +54,15 @@
       "id": "PGMC",
       "port_difficulty": {
         "score": 1,
-        "why": "Four lines, GOBACK only. No logic, no files, no arithmetic."
+        "why": "The program body is a single GOBACK. There is nothing to port."
       },
       "blast_radius": {
         "score": 2,
-        "why": "Empty body and no shared data. It runs after PGMB by step order only."
+        "why": "Runs third and touches no dataset. Like the others, it is exposed only through step order."
       },
       "quadrant": "low-low",
       "wave": 1,
-      "driving_fact": "Runs as STEP3, after PGMB, and is followed by a second step that reuses the name STEP2.",
+      "driving_fact": "STEP3 runs PGMC after PGMB, in file order. No scheduler artifact was parsed to confirm the order.",
       "confidence": "medium",
       "evidence": [
         {
@@ -79,24 +79,21 @@
       "id": "job:SEQJOB",
       "port_difficulty": {
         "score": 2,
-        "why": "Five lines and no DDs, but the step order is the only behavior in the tree and it must be carried into the target scheduler. Step name STEP2 is used twice."
+        "why": "Three program steps and one IEFBR14 step, with no DD statements and no COND or IF. The one difficulty is the duplicate step name STEP2 on lines 3 and 5, which a port must resolve on purpose."
       },
       "blast_radius": {
         "score": 3,
-        "why": "The only job and the only entry point, so it is very likely the nightly batch cycle the client named. A reordered or dropped step would be silent. No scheduler file confirms the membership."
+        "why": "It is the only job and the only entry point. If it is the nightly batch cycle (nothing in the tree says so, inference), the step order is what must not break. A duplicate step name is a JCL error on z/OS, so the job may not run as written."
       },
       "quadrant": "low-high",
       "wave": 1,
-      "driving_fact": "Four EXEC steps in fixed order, with STEP2 declared twice (lines 3 and 5).",
+      "driving_fact": "SEQJOB orders PGMA, PGMB, PGMC and IEFBR14 by file order alone, and no scheduler was parsed.",
       "confidence": "low",
+      "inference": true,
       "evidence": [
         {
           "file": "app/jcl/SEQJOB.jcl",
           "line": 1
-        },
-        {
-          "file": "app/jcl/SEQJOB.jcl",
-          "line": 3
         },
         {
           "file": "app/jcl/SEQJOB.jcl",
@@ -105,10 +102,5 @@
       ]
     }
   ],
-  "do_not_port": [
-    {
-      "id": "step:SEQJOB.STEP2#2",
-      "reason": "Provisional. Runs IEFBR14, a system null program, with no DD statements, and reuses the name STEP2. It appears to do nothing. Confirm with the client that no restart or scheduler rule names it, then drop it."
-    }
-  ]
+  "do_not_port": []
 }

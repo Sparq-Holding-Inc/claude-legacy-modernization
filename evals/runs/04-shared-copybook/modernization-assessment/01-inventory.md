@@ -44,6 +44,9 @@ Nothing was skipped.
 - A called subprogram gets no DDs from its caller's JCL step.
 - IDCAMS, SORT and other in-stream control cards are not read. Dataset modes on utility steps come from DISP only.
 - IF/THEN/ELSE and COND= in JCL are not modeled. Step order is file order.
-- Nested PROC calls, INCLUDE members and jobs submitted through the internal reader are not followed.
+- Nested PROC calls and INCLUDE members are not followed. JCL text inside a COBOL literal is noticed, but it makes no edge. A proc or program it names is called unknown, never unreachable.
 - EXEC CICS RETURN TRANSID, START and SEND MAP are not edges.
 - Only Control-M XML and shell wrappers that name JCL files are read as schedulers.
+- DCB, LRECL and RECFM are not read, so a record length on a DD is not compared with a copybook.
+- A contract edge is high when both sides COPY the same layout. A program can COPY a layout and still read the record through a private one, so high means shared layout, not proven equal.
+- LINK and XCTL are both call edges. XCTL never returns, and control flow is not modeled.

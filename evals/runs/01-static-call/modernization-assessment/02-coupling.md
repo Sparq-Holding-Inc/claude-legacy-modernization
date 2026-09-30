@@ -1,69 +1,63 @@
 # 02 Coupling
 
-The full edge list is in `02a-edge-tables.md`. This file holds the argument. The tree is very small:
-two COBOL programs, one call edge, no datasets, no JCL, no scheduler, no copybooks
-(`modernization-assessment/graph.json:20-29`).
+`02a-edge-tables.md` holds every edge the extractor found. There is one. This file is the argument
+about what it means for the sequence, and about what the tree cannot tell us.
 
-## Open edges
-
-The extractor left nothing to settle. There are no computed calls, no `resolved: false` edges, and no
-`medium` or `low` confidence edges. That is far below the roughly 20 edges that would justify the
-`dependency-cartographer` agent, so I did not start it. I read both source files to check for what the
-extractor does not model.
-
-| Check | Result | Evidence | Confidence |
-|---|---|---|---|
-| Computed calls (`?dynamic:`) | None. The only CALL uses a literal name. | `app/cbl/PROGA.cbl:6` | high |
-| Medium or low confidence edges | None. The one edge is `high`. | `app/cbl/PROGA.cbl:6` | high |
-| EXEC CICS RETURN TRANSID, START, SEND MAP | None in either source. | inference | medium |
-| Job submitted through the internal reader | None visible in either source. | inference | medium |
-| Files, SQL, MQ or IMS access | None. Neither source opens a file or names a dataset. | inference | medium |
-| Parameters passed on the CALL | None. No `USING` on the CALL, and no `LINKAGE SECTION` in the callee. | `app/cbl/PROGB.cbl:3` | high |
+No edge was left open. `analysis.unresolved_dynamic` is empty, and the one edge is `resolved: true` with
+`high` confidence. That is far below the 20 open edges that would call for the `dependency-cartographer`
+agent, so no edge work was handed off.
 
 ## The coupling patterns that constrain the sequence
 
-1. **One static call, and nothing else.** PROGA calls PROGB unconditionally by literal name
-   (`app/cbl/PROGA.cbl:6`). Fan-in of PROGB is 1 and fan-out of PROGA is 1
-   (`modernization-assessment/graph.json:88-92`). The two programs are one deployable unit. Splitting
-   them gains nothing, because the boundary between them carries no data and no parameters.
-2. **The real coupling is outside the tree.** The tree holds no JCL, no scheduler definition and no
-   shell wrapper, so there is no temporal edge and no entry point
-   (`modernization-assessment/graph.json:72`, `modernization-assessment/graph.json:109`). The
-   client said the nightly batch cycle must not break. Whatever starts PROGA, and whatever runs
-   before and after it, is not in what we were given. Every ordering constraint on this system is
-   unknown. This is the biggest gap in the assessment, not a footnote.
-3. **A message and an exit path that a harness must pin.** PROGA prints `CALL FAILED IF WE GET HERE`
-   on every run, before the call, whether or not the call fails (`app/cbl/PROGA.cbl:5`). It then
-   ends with `STOP RUN` and sets no return code (`app/cbl/PROGA.cbl:7`). Inference: an operator, a
-   log scraper or a scheduler condition may key off that output or off the return code.
+| Pattern | Finding | Confidence | Evidence |
+|---|---|---|---|
+| Call coupling | PROGA calls PROGB with a literal target. PROGB is a leaf: it has one caller and calls nothing. PROGA has no caller in the tree. | high | `app/cbl/PROGA.cbl:6`, `app/cbl/PROGB.cbl:4` |
+| Data coupling | None found. Neither program names a file, dataset, VSAM cluster or DB2 table, and the tree has no JCL to map a DD to. `analysis.data_hubs` is empty. | high for these two files, none for the system around them | `app/cbl/PROGA.cbl:3`, `app/cbl/PROGB.cbl:3` |
+| Contract coupling | None found, because there are no datasets. | high for these two files | analysis: `edge_counts` holds only `call` |
+| Temporal coupling | None found. The tree holds no JCL, Control-M XML or shell wrapper, so step order and job order are invisible. The must-not-break item, the nightly batch cycle, is a temporal structure, and it is the one thing this tree cannot show. | low | analysis: `warnings`, `meta.files_seen` all zero except cobol |
+
+The pattern that will most constrain the sequence is the last row. The two programs are coupled to each
+other by one call, and that is the whole of what is provable. Whatever couples them to the nightly batch
+cycle lives in JCL and a scheduler that are not here. Inference.
 
 ## Cluster graph
 
+The tree is one cluster. The dashed box is what the tree does not contain.
+
 ```mermaid
 graph LR
-  subgraph Batch["Cluster 1: the whole tree (2 programs)"]
-    PROGA["PROGA (batch driver)"] -->|"static CALL"| PROGB["PROGB (no-op subprogram)"]
+  subgraph CLUSTER1["Call pair (one cluster)"]
+    PROGA -->|"CALL, literal"| PROGB
   end
-  Outside["Scheduler / JCL: not in tree"] -.->|"unknown"| PROGA
+  OUTSIDE["JCL, scheduler, other callers<br/>not in the tree"]:::missing -.->|"unknown"| PROGA
+  classDef missing stroke-dasharray: 4 4
 ```
 
-## Structure computed from the graph
+## Strongly connected components
 
-| Fact | Result | Evidence |
-|---|---|---|
-| Strongly connected components | None. No wave split can break one. | `modernization-assessment/graph.json:95` |
-| Self recursive programs | None. | `modernization-assessment/graph.json:96` |
-| God modules | None. | `modernization-assessment/graph.json:94` |
-| Articulation points | None. There is no natural wave boundary inside the tree. | `modernization-assessment/graph.json:97` |
-| Data hubs | None. No dataset appears in the graph. | `modernization-assessment/graph.json:99` |
+None. `analysis.sccs` is empty and `analysis.self_recursive` is empty. Nothing constrains a wave cut here.
 
-Note on basis: with no entry points, the extractor computed these over all programs, not only reachable
-ones (`modernization-assessment/graph.json:87`). With two programs, the result is the same either way.
+## God modules
+
+None. `analysis.god_modules` is empty. Two programs cannot have a top-decile fan-in.
+
+## Articulation points
+
+None. `analysis.articulation_points` is empty. There is no boundary to cut a wave at, so the pair moves as
+one unit.
 
 ## The honest boundary
 
-There are no computed calls, so the call graph inside the tree is complete. The boundary of the
-analysis is the tree itself. The extractor reads only Control-M XML and shell wrappers as schedulers
-(`modernization-assessment/graph.json:18`), and it found none. A scheduler in another product (for
-example CA-7 or TWS), a JCL library, or other programs that call PROGA from outside would all be
-invisible. Any claim that PROGA and PROGB are "the nightly batch cycle" is inference.
+- **No computed calls.** `analysis.unresolved_dynamic` is empty and `analysis.embedded_jcl` is empty. That
+  bounds only these two files. It says nothing about callers in code that is not in the tree. Inference.
+- **No entry points.** `analysis.entry_points` is empty. Every structural fact in `graph.json` was computed
+  over all programs, because no reachable subset exists (`analysis.structure_basis`).
+- **Static or dynamic link is not visible.** The target is a literal, so the extractor resolves it
+  (`app/cbl/PROGA.cbl:6`). Whether the load module is bound in or loaded at run time depends on the DYNAM
+  compiler option, which is not in the tree. Inference.
+- **PROGA prints before it calls.** The DISPLAY at `app/cbl/PROGA.cbl:5` runs on every execution, ahead of the
+  CALL. Its text says the call failed. It does not say that on any path the code takes. Anything that scrapes
+  the job log for that string will see it on every run. Inference about downstream consumers, fact about the
+  statement order.
+- **Nothing handles a failed CALL.** There is no ON EXCEPTION on `app/cbl/PROGA.cbl:6`. Inference: if PROGB
+  cannot be found at run time, the run abends rather than continuing.

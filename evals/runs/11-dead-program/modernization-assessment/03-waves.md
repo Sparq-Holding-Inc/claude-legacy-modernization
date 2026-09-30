@@ -1,48 +1,47 @@
 # 03 Waves
 
-Target state: **refactor**. This is the middle case. The plan below would change little under rehost or replatform, because the tree is too small for the target to move the cut.
+Target state: **refactor** (given by `--target refactor`). The machine-readable plan is `modernization-assessment/waves.json`. It starts from the extractor's seed in `03a-wave-seed.md`.
 
-## Verdict: one wave
+## The plan
 
-The live system is one JCL job, one step, and a two-program call chain. There is no dataset, no contract edge and no ordering edge inside it (`modernization-assessment/graph.json:184`). A system this size is one wave. Cutting it would create waves that fail the four tests: they could not be rolled back or tested apart.
+One wave. The extractor put the only entry point, `job:MAINJOB`, in the `batch-readonly` family. That is the first of the seven fixed families, and the others are empty (analysis: `wave_seed`).
 
-## The wave
-
-| Wave | Units | Blast radius | Confidence | Unblocks | Evidence |
+| Wave | Family | Units | Blast radius | Confidence | Evidence |
 |---|---|---|---|---|---|
-| 1. Nightly batch cycle, whole tree | `job:MAINJOB`, `PGMMAIN`, `PGMLIVE` | medium | medium | Retiring the COBOL runtime for this cycle. A proven toolchain and harness for whatever else the client has outside this tree. | `app/jcl/MAINJOB.jcl:2`, `app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMLIVE.cbl:4` |
+| 1 | batch-readonly | `job:MAINJOB`, `PGMMAIN`, `PGMLIVE` | low | medium | `app/jcl/MAINJOB.jcl:1` |
 
-Step `step:MAINJOB.S1` moves with its job. It is not listed as a unit.
+Not placed: `PGMDEAD`. It is unreachable, so it is not ported. See `05-dead-code.md`. The copybook `cpy:UNUSED` is unreferenced and has no owner to move with.
 
-## The four validity tests
+## Why one wave is the honest answer
 
-| Test | Holds? | Evidence |
-|---|---|---|
-| Deployable independently, behind a flag or facade | Yes. Run the refactored job beside MAINJOB and switch the scheduler entry. The tree has no shared dataset to guard. | `app/jcl/MAINJOB.jcl:2` |
-| Rollback independently | Yes. Keep MAINJOB in the scheduler as the fallback. Rollback is a scheduler switch. This assumes the cycle writes nothing irreversible, which the tree cannot show (inference). | inference |
-| Testable boundary | Partly. The boundary is the job's return code and any output it produces. The tree shows no output, so the boundary cannot be named yet. See `06-test-strategy.md`. | `app/jcl/MAINJOB.jcl:1` |
-| Delivers something a stakeholder can name | Yes, on one assumption: MAINJOB is the nightly batch cycle the client said must not break. Nothing in the tree confirms that (inference). | inference |
+I did not invent a second wave. A cut needs a reason I can cite, and none of the four reasons in the skill applies.
 
-## Why the blast radius is medium, not low
+- **A must-not-break item, a strongly connected component or a facade dependency forces a move.** No strongly connected component exists (analysis: `sccs`). The one must-not-break item, "the nightly batch cycle", cannot be tied to a unit with evidence, since the only job in the tree is `job:MAINJOB` and no scheduler names it. I treat the job as the likely holder of that cycle. That is inference.
+- **A wave holds more than 25 units.** It holds three.
+- **Something the extractor could not see changes what a unit is.** No computed call and no embedded JCL exist (analysis: `unresolved_dynamic`, `embedded_jcl`).
+- **`risks.json` puts a unit in high-high and its family puts it early.** No unit is high-high. The scores are low-low for both programs and low-high for the job (`modernization-assessment/risks.json:2`).
 
-The risk quadrants put PGMLIVE at low-low, and PGMMAIN and MAINJOB at low-high (`modernization-assessment/risks.json:13`, `modernization-assessment/risks.json:38`, `modernization-assessment/risks.json:63`). All three are trivial to port. They are not cheap to get wrong, because they are by inference the path the client named as must not break.
+Deviations from the seed: none. A plan with no deviations is a fine answer.
 
-The ordering rule says early waves should buy learning at low blast radius. This system cannot follow it, because the only live wave is the must-not-break cycle. The mitigation is process, not sequence: shadow the refactored job against MAINJOB for several nights before cutover, and keep MAINJOB as the fallback.
+## Wave 1. Nightly batch job, whole tree
 
-## Units left out of every wave
+| Test | Holds? | Confidence | Evidence |
+|---|---|---|---|
+| Deploys independently, behind a flag or facade | Yes. The job is the only entry point and touches no shared data, so a second copy of the job can run beside the old one | medium | `app/jcl/MAINJOB.jcl:2` |
+| Rolls back independently | Yes. It writes no dataset, so there is nothing to undo | medium | `app/cbl/PGMMAIN.cbl:4` |
+| Has a testable boundary | Weakly. There is no dataset to compare, so the boundary is the job return code, the job log and what the real job writes | low | inference |
+| Delivers something a stakeholder can name | Only if `job:MAINJOB` is the nightly batch cycle. If it is, the wave is that cycle. If not, it is a toolchain proof | low | inference |
 
-| Unit | Why | Evidence |
-|---|---|---|
-| PGMDEAD | Unreachable from any entry point. It is not ported. Propose deletion once instrumentation or out-of-tree JCL confirms it never runs. | `app/cbl/PGMDEAD.cbl:4` |
-| cpy:UNUSED | No program includes it. It is not ported. Propose deletion. | `app/cpy/UNUSED.cpy:1` |
+**Unblocks.** Nothing else in the tree depends on this wave. On this evidence it is a chore: it proves the toolchain and the harness. If the real nightly cycle has more jobs than this tree shows, the plan needs a second look, and this wave becomes the first of several.
 
-## If the system were ten times larger
+**Order inside the wave.** Port the leaf first, then its caller, then the job.
 
-This is inference from how the plan would scale, not something read in the tree.
+1. PGMLIVE (`app/cbl/PGMLIVE.cbl:4`)
+2. PGMMAIN (`app/cbl/PGMMAIN.cbl:4`)
+3. `job:MAINJOB` step S1 (`app/jcl/MAINJOB.jcl:2`)
 
-1. Wave 1: leaf subprograms with no dataset edges and one live caller, the shape PGMLIVE has. They prove the toolchain and the harness.
-2. Wave 2: batch programs with private datasets and no `medium` contract edges.
-3. Wave 3 and later: programs that write shared datasets, cut at the articulation points and data hubs the extractor computes, with any strongly connected component moving as one unit.
-4. Last: god modules and anything high-high, strangled behind a facade.
+**Rollback.** Keep the legacy job. Run the ported job beside it. Switch the scheduler entry for `job:MAINJOB` between the two. Rolling back is a scheduler change. The scheduler export is not in the tree, so this procedure is inference until someone supplies it.
 
-Business value would lead only from wave three.
+## What I would put behind a facade
+
+Nothing. No unit is high-high, and no god module exists (analysis: `god_modules`).

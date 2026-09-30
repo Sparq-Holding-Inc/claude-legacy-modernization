@@ -1,42 +1,23 @@
 # 05 Dead code
 
-Telemetry: none. Every claim here is provisional. `dead-code.json` holds the same result in
-machine form. The extractor's candidate tables are in `05a-dead-code-candidates.md`.
+Telemetry: none. Every claim in this file is provisional. The register is in `modernization-assessment/dead-code.json`.
 
 ## Result
 
-All three buckets are empty. That needs two careful readings, because "empty" means different things
-in each bucket.
+All three buckets are empty. The extractor's candidates are in `05a-dead-code-candidates.md`, and I kept them as they are.
 
-| Bucket | Count | What the empty list means | Evidence |
-|---|---|---|---|
-| Unreachable | 0 | Every program is reachable. Both jobs are entry points and each runs one program | `app/jcl/WRITEJOB.jcl:2`, `app/jcl/READJOB.jcl:2` |
-| Unknown | 0 | There are no computed calls in the tree, so nothing can be the hidden target of one | `app/cbl/PGMW.cbl:12-16`, `app/cbl/PGMR.cbl:12-16` |
-| Dormant | 0 | This one is not evidence of anything. See below | inference: every node has `last_modified` of null in `graph.json` |
+| Bucket | Units | Reason | Confidence | Evidence |
+|---|---|---|---|---|
+| Unreachable | none | Every unit is reached from `job:READJOB` or `job:WRITEJOB`. Both jobs are entry points (`analysis`, field `entry_points`). | medium | `app/jcl/READJOB.jcl:2`, `app/jcl/WRITEJOB.jcl:2` |
+| Reachable but dormant | none. Not measured. | No last-modified dates exist, because the work folder is not a git repository. The extractor did not compute this bucket. An empty list here means not measured. | low | analysis (field `warnings`) |
+| Unknown | none | The extractor found no computed call, so no reachable code could reach an unlisted program (`analysis`, field `unresolved_dynamic`). | medium | analysis (field `unresolved_dynamic`) |
 
-## Why the dormant bucket is empty for the wrong reason
+## What is not proved
 
-The extractor decides dormancy from the last change date. This tree is not a git repository, so the
-extractor read no dates (`meta.git_dates` is false in `graph.json`). Every unit shows "unknown" as
-its last-modified date in `01-inventory.md`. With no dates it cannot call anything old.
+- **Dormancy was not measured.** With no git history and no telemetry, I cannot say whether either job still runs. Nothing here proposes deletion on a date.
+- **No scheduler was parsed.** A job that no parsed scheduler names still counts as an entry point, so it never shows in a bucket (`analysis.warnings`). I cannot tell whether WRITEJOB and READJOB still run in the nightly cycle. That is a question for the client (`00-summary.md`).
+- **The dataset name says TEST.** SPARQ.TEST.MASTER (`app/jcl/WRITEJOB.jcl:3`) may be a test fixture. If the whole pair is a test harness that nobody runs, the assessment describes dead code. Only the client can say so, and that would be a finding of its own.
 
-So the empty dormant list means "cannot tell". It does not mean "nothing is old". With no telemetry
-either, there is no evidence in either direction. Do not read this file as saying the system is
-free of dead code.
+## Copybooks
 
-## What I would ask for
-
-- Job logs or SMF records for the last 12 months for `WRITEJOB` and `READJOB`. They turn this file
-  from speculation into evidence.
-- File dates from the client's source library, or a git history if one exists.
-- Whether both jobs really run at all. Each job is an entry point only because it is a job in the
-  tree (`app/jcl/WRITEJOB.jcl:1`, `app/jcl/READJOB.jcl:1`). Nothing shows a scheduler that submits
-  them (inference).
-
-## Duplicate layout, not dead code
-
-`cpy:LAYOUTX` and `cpy:LAYOUTY` are both included, so neither is unused
-(`app/cbl/PGMW.cbl:11`, `app/cbl/PGMR.cbl:11`). They are duplicates of one layout. That is a
-coupling problem and it is handled in `02-coupling.md` and `03-waves.md`, not here. I did not put
-either one in `do_not_port`, because deleting the reader's copy without a shared replacement would
-break the reader.
+Both copybooks are included by a reachable program (`app/cbl/PGMW.cbl:11`, `app/cbl/PGMR.cbl:11`), so neither is unreachable. They duplicate one layout (see `02-coupling.md`). That is a consolidation candidate for wave 2, and it is not dead code.

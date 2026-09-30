@@ -1,81 +1,86 @@
 # 06 Test strategy
 
-Follows the `behavioral-equivalence` skill. What must not break: the nightly batch cycle. In this tree that is the wrapper `scripts/nightly.sh` and the two jobs it submits, JOBA and JOBB.
+Skill: `behavioral-equivalence`. The bar is not "it runs". The bar is that the new nightly cycle runs
+the same jobs in the same order with the same return codes as the old one, and that any difference
+was decided and written down.
 
-"Correct" here means: for every night the old chain ran, the new chain submits the same jobs in the same order, stops in the same situations, and each job ends with the same return code and the same output, except where someone decided otherwise and wrote it in the Deviation Register.
+## The tree holds no datasets
 
-## The oracle problem
+The graph has no dataset node, so there are no archived generations, no golden master files and no
+record layouts to compare (analysis, `node_counts`). The oracle has to come from job output, logs and
+reports. The client must supply them.
 
-The tree holds no datasets and no data edges. Every step runs the IEFBR14 no-op utility (`jcl/JOBA.jcl:2`, `jcl/JOBB.jcl:2`) with no DD statements. So there are no output files in the tree to compare, and no archived generations to use as golden masters. The oracle has to come from what the running system leaves behind: job output, logs and reports. Characterization tests from source would only assert that a no-op ends with return code 0. That is provisional and proves almost nothing.
+## What to ask the client for
 
-Chosen oracle for wave 1, strongest first:
+1. Scheduler or job history for the nightly cycle: start time, end time and return code of JOBA and
+   JOBB, for at least a month and including a month end. Inference: this is the executable definition
+   of the cycle.
+2. The definition of `submit` used at `scripts/nightly.sh:4`. Does it wait for the job to end? What does it
+   return on a job abend?
+3. SYSOUT and job logs for a sample of runs, and any report or extract the cycle produces.
+4. Whether JOBA and JOBB ever ran overlapped in the history. If they did, only submit order holds.
+5. Any month-end, quarter-end or holiday variant of the nightly chain. The tree has one wrapper.
+6. Confirmation that the production JCL for JOBA, JOBB and JOBC matches the members in the tree
+   (`jcl/JOBA.jcl:2`, `jcl/JOBB.jcl:2`, `jcl/JOBC.jcl:2`).
 
-1. **Parallel run.** Run the refactored chain beside the legacy chain on the same nightly trigger and diff job order, return codes and output. Ask for this first. The chain is small and the jobs appear to write nothing, so running both is probably cheap. Teams assume it is impossible and are often wrong.
-2. **Replay from captured job history.** If parallel run is refused, replay against the archived job log record of the last 12 months, including a month-end, a quarter-end and a fiscal year-end.
-3. **Characterization from the source** only for the failure behavior of the wrapper (below), labeled provisional.
+## Oracle for wave 1
 
-## What to ask the client to supply
+| Rank | Oracle | Use for wave 1 | Evidence |
+|---|---|---|---|
+| 1 | Parallel run: old wrapper and new chain fed the same nights, compare job order and return codes | Preferred. The jobs do nothing visible, so a parallel run is cheap and safe. Ask whether it is possible before settling for less. | inference |
+| 2 | Captured job history replay | Fallback. Replay the recorded start and end order against the new scheduler's simulation. | inference |
+| 3 | Golden master from archived outputs | Only if the client has archived reports or SYSOUT from the cycle. None in the tree. | analysis (no dataset nodes) |
+| 4 | Characterization test from source | Weakest. It would assert the order in `scripts/nightly.sh:4` and `scripts/nightly.sh:5`, which is what the code says and not necessarily what runs. Label it provisional. | `scripts/nightly.sh:4` |
 
-- JES job logs or SMF job records for JOBA and JOBB for at least 12 months: start and end times, return codes per step, and which nights the chain aborted.
-- Whatever archived SYSOUT, reports or extracts JOBA and JOBB produced. In this tree they run IEFBR14, so ask whether the real jobs differ.
-- The definition of `submit` (`scripts/nightly.sh:4`): does it wait for the job, and what does it return?
-- What triggers `scripts/nightly.sh` each night, and its history: cron, an enterprise scheduler, or an operator.
-- Proof that JOBC has not run since it was retired (`scripts/nightly.sh:2`).
-- Any downstream job, partner feed or report that consumes the output of JOBA or JOBB.
+## Assertions at the wave boundary
 
-## What the harness asserts
-
-| Assertion | Why it matters | Evidence |
+| Assertion | Meaning | Evidence |
 |---|---|---|
-| JOBA is submitted before JOBB | The only order the tree enforces. It is the temporal edge `job:JOBA` to `job:JOBB`, medium confidence. | `scripts/nightly.sh:4`, `scripts/nightly.sh:5` |
-| If the JOBA submit fails, JOBB is not submitted and the wrapper exits non-zero | `set -e` aborts the chain. This failure behavior is part of what must not break. | `scripts/nightly.sh:3` |
-| JOBC is never submitted | The submit line is commented out. A refactored chain that picks it up again would change the cycle. | `scripts/nightly.sh:6` |
-| Each job ends with the same return code as legacy | The only observable result of an IEFBR14 step in the tree. | `jcl/JOBA.jcl:2`, `jcl/JOBB.jcl:2` |
-| Whether JOBB waits for JOBA to finish is the same as legacy | Depends on `submit`, which is undefined in the tree. Decide before porting, and record any change as a deviation. | inference |
+| JOBB is submitted after JOBA | The weak form. It is what the wrapper states. | `scripts/nightly.sh:4`, `scripts/nightly.sh:5` |
+| JOBB starts after JOBA ends with return code 0 | The strong form. Assert it only if the history shows the legacy chain does it. | inference |
+| A failed JOBA submit stops the chain | Failure injection. `set -e` implies JOBB is not submitted. | `scripts/nightly.sh:3` |
+| A JOBA abend after a good submit | Observe what the legacy chain does with JOBB and copy it, or record a deviation. | inference |
+| JOBC is not submitted | The new chain must not run JOBC unless the client says it is live. | `scripts/nightly.sh:6` |
 
 ## Normalization spec
 
-Every entry is a claim that a difference does not matter. A human signs off on each.
+Keep it short. Each line is a claim that a difference does not matter, and a human signs it off.
 
-- Job numbers (JOBnnnnn), submit and start and end timestamps, run dates in headers, sysout page numbers.
-- Elapsed time: compare order, not durations, unless the client names a service window.
-- Trailing whitespace and fixed-width padding in captured output.
-- Do not normalize away submit order or return codes. They are the assertions.
+| Ignore | Why | Evidence |
+|---|---|---|
+| JES job numbers and run IDs | They change every run. | inference |
+| Absolute timestamps | Compare order and elapsed spans, not clock times. | inference |
+| Trailing whitespace in SYSOUT | Padding only. | inference |
 
-## Mainframe traps, and which apply here
+Not ignored: order, return codes and the set of jobs run. Packed decimal, collating sequence and
+`REDEFINES` do not apply, because the tree has no data or COBOL. Add them when real data appears.
 
-- **Job order.** Applies. The temporal edge is the only order in the tree, and it comes from a shell wrapper, not from the JCL.
-- **Packed decimal, collating sequence, `REDEFINES`, record padding.** No datasets, COBOL programs or record layouts exist in this tree, so none applies to wave 1. They apply the moment the real jobs run application programs. See the second sensitivity in `04-estimate.md`.
+## Traps for this tree
 
-## Cases beyond the common path
+- **Job order.** The temporal edge JOBA to JOBB is the one order the harness must keep
+  (`scripts/nightly.sh:4`, `scripts/nightly.sh:5`). It is medium confidence, so the harness is what
+  raises it to high or shows it was never real.
+- **Boundary dates.** A nightly chain that crosses a month end, a quarter end, a fiscal year end, a
+  leap day or a daylight saving change can order differently. Cover each in the history sample.
+  Inference.
+- **Empty and enormous runs.** With no datasets, this means a night with no work and a night when JOBA
+  is late. Inference.
+- **Fiscal close paths.** If a close variant of the chain exists outside this tree, it is not covered
+  here. This is the failure that shows up six months after cutover. Ask for it.
 
-- **Boundary dates.** A run on month-end, quarter-end, fiscal year-end, leap day, and the two DST transitions, because the cycle is nightly and its trigger time may shift.
-- **Failure of JOBA.** Force a non-zero result and check the wrapper stops before JOBB. Only meaningful once `submit` is defined.
-- **Failure of JOBB.** Check the wrapper's exit status and that nothing else is submitted.
-- **A night the trigger fires twice, or not at all.** The tree shows no lock or guard, so record what legacy does.
-- **The bad data that is already there.** Not applicable in this tree, because there is no input data. Ask whether the real jobs read any.
-- **Fiscal close.** Ask whether any real work only runs at fiscal close. IEFBR14 gives no hint.
+## Deviation register
 
-## Deviation Register
+Nothing differs without a row here. One candidate row is seeded.
 
-Nothing differs from legacy without a row here.
-
-| ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact |
-|---|---|---|---|---|---|
-| DEV-001 | `jcl/JOBC.jcl` exists but is never submitted (`scripts/nightly.sh:6`) | Removed from the estate | Retired per `scripts/nightly.sh:2` | pending, client owner | None expected. Confirm nothing else submits it |
-| DEV-002 (candidate) | Order is submission order set by shell line order (`scripts/nightly.sh:4`, `scripts/nightly.sh:5`) | Scheduler-enforced completion dependency | Only if `submit` turns out to be asynchronous | pending, client owner | JOBB could start later than it did before |
+| ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact | Evidence |
+|---|---|---|---|---|---|---|
+| DR-1 (candidate) | JOBC exists as JCL but the wrapper does not submit it | JOBC is not deployed | Wrapper comment calls it retired. Unconfirmed. | pending, client owner | none known, none can be seen | `scripts/nightly.sh:2`, `scripts/nightly.sh:6` |
 
 ## Exit bar for wave 1
 
-Wave 1 is done when:
+- The order and return code diff against the oracle is clean, modulo the normalization spec and the register.
+- Each failure and boundary case above passes.
+- The harness is under version control and runs in CI.
+- The register is signed by someone with authority to sign it.
 
-- the replay or parallel-run diff is clean, modulo the normalization spec and the Deviation Register
-- the boundary cases above pass, including the JOBA failure case
-- the harness is in version control and runs in CI
-- the Deviation Register is signed by someone with authority to sign it
-
-Not when the refactored chain compiles or runs once.
-
-## After cutover
-
-Keep the harness. It becomes the regression suite for the modernized chain, and for any real job later added behind the wrapper.
+Not when the new chain starts. After cutover the harness stays as the regression suite for the cycle.

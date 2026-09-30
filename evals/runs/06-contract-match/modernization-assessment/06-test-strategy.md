@@ -1,75 +1,82 @@
-# 06 Test strategy
+# 06 Test strategy: behavioral equivalence
 
-The bar is not "it passes the tests". The bar is: for the inputs this system really sees, the new implementation writes the same bytes as the old one, and every difference is a decision someone wrote down.
+The bar: for the inputs this system sees, the new code produces the same outputs as the legacy code.
+Where it does not, someone decided that on purpose and wrote it in the Deviation Register. Target state is
+`refactor`, so the legacy code and the new code must agree on the bytes of SPARQ.TEST.MASTER during
+coexistence.
 
-Anchor from the scoping answer: **the nightly batch cycle must not break**. The tree does not name a nightly cycle or a scheduler. I assume the two jobs are part of it (inference). The anchor therefore attaches to the one thing that crosses between them: the bytes of SPARQ.TEST.MASTER and the order the jobs run in.
+## The oracle
 
-## The tree holds no datasets
+The tree holds no datasets, no archived reports and no logs. It holds source only (`graph.json` lists
+2 COBOL files, 1 copybook and 2 JCL files: `modernization-assessment/graph.json:1`). The oracle has to
+come from job output, logs and reports the client supplies.
 
-The tree has JCL and source but no data. The one dataset is named only in the DDs (`app/jcl/WRITEJOB.jcl:3`, `app/jcl/READJOB.jcl:3`). The oracle has to come from the client's own runs. What I would ask them to supply is in the last section.
+What to ask the client for:
 
-## Oracle for wave 1, strongest first
+1. A hex dump of SPARQ.TEST.MASTER as WRITEJOB last produced it, and every archived generation, if the
+   real dataset is a generation data group. Golden master, level 3 of the oracle ladder.
+2. The catalog entry (LISTCAT) for the dataset: RECFM, LRECL, BLKSIZE. It settles the 15 byte layout
+   against LRECL=80 question (`app/cpy/LAYOUTX.cpy:3`, `app/jcl/WRITEJOB.jcl:4`).
+3. Job logs and SMF step records for READJOB and WRITEJOB for at least 12 months, with return codes
+   and times. They show the nightly order and are the telemetry for the dead-code register
+   (`modernization-assessment/05-dead-code.md:1`).
+4. The scheduler export. The temporal edges are missing (`analysis` field `warnings`).
+5. A list of every other program or partner that reads or writes the dataset.
+6. Whether legacy can stay up, so a parallel run is possible. Ask before settling for less.
 
-| Rank | Oracle | Available here | Confidence | Evidence |
+## Oracle per wave
+
+| Wave | Oracle | Why | Strength | Evidence |
 |---|---|---|---|---|
-| 1 | Parallel run: new and old writer process the same run, outputs diffed byte for byte | Unknown. It depends on whether the old jobs can stay up beside the new ones. Ask before assuming no. | low | inference |
-| 2 | Replay of captured production inputs and outputs | Unknown. PGMW takes no input file in this tree (`app/cbl/PGMW.cbl:13`), so what varies run to run is unclear. | low | inference |
-| 3 | Golden master from archived copies of the dataset | Possible. The DSN carries no generation suffix, so prior runs may not be kept automatically (`app/jcl/WRITEJOB.jcl:3`). Ask for archived copies or backups. | low | inference |
-| 4 | Characterization tests generated from the source | Always possible. Weakest, and provisional. It encodes what the code says, not what it did. | medium | `app/cbl/PGMW.cbl:14` |
+| 1. Reader (PGMR, READJOB) | Parallel run if legacy stays up: both readers read the same archived or live copy of the dataset and the return codes and decoded records are compared. Reading is side-effect free. | The job reads with DISP=SHR and writes nothing, so a parallel run costs little. | strongest available | `app/jcl/READJOB.jcl:3`, `app/cbl/PGMR.cbl:13` |
+| 2. Writer (PGMW, WRITEJOB) | Golden master from archived copies of the dataset, then parallel run of legacy and new writers into two datasets, compared byte for byte. | The output is a single file, so a byte diff is the assertion. | medium, until an archived copy exists | `app/cbl/PGMW.cbl:14`, `app/jcl/WRITEJOB.jcl:3` |
+| Fallback for either wave | Characterization tests generated from source. | Only if no archived output can be had. Label the coverage provisional. It encodes what the code says, not what it did. | weak | inference |
 
-Use rank 3 for PGMR (feed it real legacy-written files) and rank 1 or 3 for PGMW. If only rank 4 is available, label all wave 1 coverage provisional.
+## Normalization spec (each line needs human sign-off)
 
-## Normalization spec (each line is a claim that a difference does not matter)
-
-Keep this list short and have a person sign it.
-
-| Item | Rule | Why | Evidence |
+| Item | Rule | Why it is safe or where a bug can hide | Evidence |
 |---|---|---|---|
-| Money field LR-AMT | Compare as decimal, zero tolerance, also compare the sign nibble | Packed decimal S9(7)V99 is 5 bytes. A float type would round, and a different sign nibble is a real difference. | `app/cpy/LAYOUTX.cpy:3` |
-| Key field LR-KEY | Compare as raw bytes, no case or trim rules | It is X(10). Do not let a port trim or re-encode it. | `app/cpy/LAYOUTX.cpy:2` |
-| Record length and padding | Decide and record: 15 byte records or 80 byte padded records. Pad byte compared, not ignored. | Layout says 15 bytes, the DD says LRECL=80. | `app/jcl/WRITEJOB.jcl:4` |
-| Bytes of unset fields | Do not normalize them away. Compare them, then decide with a person. | PGMW writes the record with no MOVE, so the bytes depend on storage defaults. | `app/cbl/PGMW.cbl:14` |
-| Timestamps, run ids, page numbers | None in the layout, so nothing to ignore | The record has only the two fields. | `app/cpy/LAYOUTX.cpy:1` |
-| Record ordering | One record is written per run in this tree. Ordering is not a factor here. | Single WRITE. | `app/cbl/PGMW.cbl:14` |
+| Packed decimal `LR-AMT` | Compare in a decimal type, tolerance zero. Compare the raw bytes as well, including the sign nibble (C, D or F). | An IEEE float would round. A different sign nibble is a real difference to any reader that checks it. | `app/cpy/LAYOUTX.cpy:3` |
+| Record length and padding | Decide, from LISTCAT, whether the stored record is 15 or 80 bytes, and what the padding is (spaces or low values). Then compare with that rule. | The copybook and the JCL disagree. Padding that "does not matter" to PGMR may matter to another reader. | `app/cpy/LAYOUTX.cpy:3`, `app/jcl/WRITEJOB.jcl:4` |
+| Unset record fields | Do not normalize. Record the observed legacy bytes and raise a Deviation Register row. | PGMW writes the record with no MOVE before it, so the legacy output may hold whatever the buffer held. A port cannot copy that on purpose. | `app/cbl/PGMW.cbl:14` |
+| Collating sequence | Compare `LR-KEY` as bytes. Do not sort in the harness. | EBCDIC and ASCII order differ. Nothing in the tree sorts, but an unseen reader may depend on key order. | `app/cpy/LAYOUTX.cpy:2` |
+| Timestamps and run identifiers | Strip only from job logs. The record holds none. | The record has just a key and an amount. | `app/cpy/LAYOUTX.cpy:1` |
+| Record ordering | Compare in file order. Do not treat order as incidental. | The file is sequential. One record is written per run in this tree, but a consumer may rely on order. | `app/cbl/PGMW.cbl:7` |
+| REDEFINES | None in the tree. Nothing to test. | The copybook has no REDEFINES. | `app/cpy/LAYOUTX.cpy:1` |
 
-Mainframe traps that apply: packed decimal (yes, the amount), collating sequence (only if a downstream sort or compare on LR-KEY exists, so ask), REDEFINES (none in LAYOUTX), padding and low values (yes), job order (see below).
+## Targeted cases
 
-## Cases to add on purpose
-
-- Amount at the extremes: 0, 9999999.99, negative values, and the sign nibble variants.
-- A key of all spaces, and a key with low values.
-- A run against an existing dataset. `DISP=(NEW,CATLG,DELETE)` should fail at allocation (`app/jcl/WRITEJOB.jcl:3`). The replacement must behave the same or the change is a registered deviation.
-- The reader started before the writer has ever run. The dataset does not exist, so the read fails loudly (inference).
-- The reader on a file that holds more than one record. PGMR reads only the first (`app/cbl/PGMR.cbl:14`), and a port must not "fix" that unless a deviation is signed.
-- Bad data already in the real file. I cannot know what is there. Ask for a sample.
-- Boundary dates and fiscal close paths. The record carries no date, so these matter only through whatever feeds the nightly cycle outside this tree (inference). Ask what runs at month end and year end.
+- First run: the dataset does not exist. Legacy creates it (`app/jcl/WRITEJOB.jcl:3`).
+- Rerun the same night after a failure. DISP=NEW,CATLG,DELETE meets an existing dataset. Record what the
+  legacy job does, and what the scheduler does around it.
+- Amount extremes: 9,999,999.99, 0.00, negative amounts, and the smallest step of 0.01.
+- Bad data already in the file: an invalid packed field, a key of spaces or low values, a short record.
+  PGMR does not use the amount (`app/cbl/PGMR.cbl:14`), so a bad amount passes today. Decide whether
+  the port must also pass it.
+- Empty dataset, and a dataset of exactly one record.
+- Boundary dates. The tree has no date logic, so month-end and fiscal-close cases only apply if the
+  client's nightly cycle sends month-end data through this dataset. Ask.
 
 ## Order the harness must keep
 
-The graph holds no ordering edge between the jobs, because no scheduler was parsed (`02a-edge-tables.md`). The rule to keep is: WRITEJOB runs before READJOB in the same cycle. That comes from the data hub, so it is inference. The scheduler export replaces it with a fact.
+| Before | After | Evidence |
+|---|---|---|
+| WRITEJOB | READJOB | `app/cbl/PGMW.cbl:13`, `app/cbl/PGMR.cbl:13` |
 
-## Deviation register
+That order is implied by the data edge. No scheduler or step order enforces it in the tree, so it is
+inference. Get the scheduler export to confirm it (`analysis` field `warnings`).
 
-Nothing differs without a row. It is empty today. Two decisions will probably need rows once the client answers: what bytes PGMW writes for fields it never sets (`app/cbl/PGMW.cbl:14`), and which record length is authoritative (`app/jcl/WRITEJOB.jcl:4`).
+## Deviation Register (starting rows)
 
-| ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact |
-|---|---|---|---|---|---|
-| none yet | | | | | |
+| ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact | Evidence |
+|---|---|---|---|---|---|---|
+| DEV-001 | PGMW writes the record without setting its fields | To be decided. Explicit initial values, or reproduce the archived bytes | Reproducing storage contents by accident is not portable | pending | Any reader of the amount field | `app/cbl/PGMW.cbl:14` |
+| DEV-002 | Copybook record is 15 bytes, JCL says LRECL=80 | To be decided from LISTCAT | The two must not disagree in the target | pending | Every reader of the dataset, in or out of this tree | `app/cpy/LAYOUTX.cpy:3`, `app/jcl/WRITEJOB.jcl:4` |
 
-## Exit bar for wave 1
+Both rows are candidates. Nothing differs until a row is signed.
 
-- The byte diff of SPARQ.TEST.MASTER is clean, modulo the normalization spec and the register.
-- Every case above passes.
-- The harness is in version control and runs in CI.
-- The deviation register is signed by someone who has the authority.
+## Exit bar per wave
 
-The harness stays after cutover. It becomes the regression suite for the new jobs.
-
-## What to ask the client to supply
-
-- Two or more real copies of SPARQ.TEST.MASTER, or archived copies, from ordinary days and from month end and year end.
-- The job log or SYSOUT of recent WRITEJOB and READJOB runs, with return codes and run times.
-- A directory listing or catalog entry that shows the real RECFM and LRECL and the record count.
-- The scheduler export that shows where these two jobs sit in the nightly cycle.
-- The list of every other reader of the dataset, including partner extracts and utility steps.
-- Any report or file produced downstream of READJOB.
+A wave is done when the replay diff is clean modulo the normalization spec and the register, every targeted
+case passes, the harness is in version control and runs in CI, and the register is signed by someone with
+authority. Not when the port compiles. Keep the harness after cutover as the regression suite.

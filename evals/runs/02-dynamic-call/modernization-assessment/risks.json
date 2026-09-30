@@ -2,23 +2,45 @@
   "units": [
     {
       "id": "PROGA",
-      "port_difficulty": {"score": 2, "why": "Three executable statements: ACCEPT a name, CALL it, STOP RUN. No arithmetic and no files. The one hard part is that the target is a run-time string, so the target platform needs an explicit dispatch table or a dynamic loader."},
-      "blast_radius": {"score": 3, "why": "It can start any program whose name arrives on the input card, including programs outside this tree. The CALL has no ON EXCEPTION clause, so a bad name abends the job. The tree holds no JCL or scheduler entry, so I cannot tie it to the nightly batch cycle. That is a gap, not evidence that it is safe."},
-      "quadrant": "low-high",
+      "port_difficulty": {
+        "score": 3,
+        "why": "Ten lines, no arithmetic, but it CALLs a program whose name is read at run time by ACCEPT, so the port needs a run-time program registry and the callee set is not in the tree."
+      },
+      "blast_radius": {
+        "score": 4,
+        "why": "Its callee is chosen by run-time input, so it can start any program on the load library, including one on the nightly batch cycle; the tree has no JCL to show what feeds it, and the failure would surface only for the input values that hit a missing or renamed target."
+      },
+      "quadrant": "high-high",
       "wave": 1,
-      "driving_fact": "PROGA calls a program named by a value it ACCEPTs at run time, so the callee set cannot be read from the source.",
-      "confidence": "medium",
-      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 9}]
+      "driving_fact": "CALL WS-PGM-NAME at line 9 takes a name that only ACCEPT at line 8 sets, so its reach cannot be bounded from source.",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "app/cbl/PROGA.cbl",
+          "line": 9
+        }
+      ]
     },
     {
       "id": "PROGB",
-      "port_difficulty": {"score": 1, "why": "One statement, GOBACK. Nothing to translate."},
-      "blast_radius": {"score": 2, "why": "It does nothing, so a wrong port is loud only if it fails to load. Its real exposure is that PROGA may call it by name, which the source cannot confirm. It is the only in-tree program PROGA could reach."},
+      "port_difficulty": {
+        "score": 1,
+        "why": "Four lines: PROGRAM-ID then GOBACK. No data, no logic."
+      },
+      "blast_radius": {
+        "score": 2,
+        "why": "It does nothing and touches no data; it is one of the programs PROGA could dispatch to, but nothing in the tree calls it by name."
+      },
       "quadrant": "low-low",
       "wave": 1,
-      "driving_fact": "PROGB has no static caller and is a possible target of PROGA's computed call.",
+      "driving_fact": "PROCEDURE DIVISION holds only GOBACK.",
       "confidence": "medium",
-      "evidence": [{"file": "app/cbl/PROGB.cbl", "line": 4}]
+      "evidence": [
+        {
+          "file": "app/cbl/PROGB.cbl",
+          "line": 4
+        }
+      ]
     }
   ],
   "do_not_port": []

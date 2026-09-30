@@ -1,33 +1,33 @@
 # 04 Estimate
 
-Target state: refactor. There is one wave.
+Method: effort is driven by the edges crossing the wave boundary and by whether an oracle exists, not by lines of code. The two programs are 14 lines together (`app/cbl/PROGA.cbl:10`, `app/cbl/PROGB.cbl:4`), so the code is the small part. The unknowns are the size of the callee set and the source of the input. All figures are inference and are low confidence.
 
-## Method
+## Per wave
 
-There is no team velocity, no history and no telemetry to calibrate against, so this is a judgment estimate, not a measurement. It is built from what moves an estimate: coupling edges crossing the wave boundary, whether an oracle exists, god modules, logic in the database, and who can read COBOL. On this tree: one unresolved edge, no oracle supplied, no god modules, no database, and the skills of the client team unknown.
+| Wave | Range (person-days) | What the range covers | Confidence | Evidence |
+|---|---|---|---|---|
+| 1 (PROGA, PROGB) | 4 to 12 | Port of the 14 lines: 0.5 to 1. Registry for the dynamic call: 1 to 3. Capture of the input and the called programs' output, and the replay harness: 2.5 to 8. | low | inference. Basis: `app/cbl/PROGA.cbl:9` for the dynamic call, no dataset or JCL in the tree for the oracle. |
 
-## Wave 1 (PROGB and PROGA)
+This is a range for wave 1 only. It does not cover the programs `PROGA` might call. Those are outside the tree, so they are outside the estimate. The effort to assess and port them is unknown until the callee set is known.
 
-| Item | Estimate | Confidence | Evidence |
-|---|---|---|---|
-| Port of PROGB and PROGA, 14 lines | under 1 person-day | high | `app/cbl/PROGA.cbl:9` |
-| Harness for the wave: capture input cards and job output, normalization spec, diff runner | 2 to 4 person-days | low | inference |
-| Replacement for the computed CALL (dispatch table or loader) and the run-time target set | 1 to 3 person-days, and only for the targets that are in scope | low | `app/cbl/PROGA.cbl:8` |
-| Total for this wave | 3 to 8 person-days | low | inference |
+## The assumptions the range is most sensitive to
 
-The total excludes every program PROGA can call that is not in this tree. Those belong to their own waves and are not estimated here. Any estimate for them would be made up.
+1. Assumes the `ACCEPT` at `app/cbl/PROGA.cbl:8` takes fewer than about 10 distinct program names over a business cycle. If it takes 50 or more, or free text an operator types, the registry and harness work roughly doubles.
+2. Assumes every program `PROGA` can call exists on the load library with source. If any of them is a load module with no source, it cannot be ported in this wave and needs a rehost shim, which adds days per module that cannot be sized here.
+3. Assumes the input values can be recovered from job logs or SYSIN archives for a full business cycle. If they cannot, the oracle falls to source-generated characterization tests, which are weaker, and the wave needs a longer parallel run.
 
-## What the range is most sensitive to
+## What Claude Code can do and what it cannot
 
-1. **Assumes the input card names a small set of programs, ten or fewer, over a full business cycle.** If it names dozens, the dispatch table and its harness dominate and this wave roughly doubles. Evidence: `app/cbl/PROGA.cbl:9`.
-2. **Assumes the client can supply input cards and job output for at least one month-end, and fiscal year-end if any target is financial.** If they cannot, the oracle falls to characterization tests written from source, coverage is provisional, and I would add 1 to 2 person-days. Evidence: inference.
-3. **Assumes the target platform has an equivalent of a run-time named call.** If it does not, the replacement is a redesign of how the batch cycle chooses its next program, and the low end of this range no longer holds. Evidence: inference.
+- Strong: transliterating `PROGA` and `PROGB` to the target language, and building the registry and the replay harness once the input capture exists. This is mechanical with a good harness.
+- Weak: working out which programs the input names, and what the nightly batch cycle expects of them. Neither is in the source (`app/cbl/PROGA.cbl:9`). This is intent and operational knowledge, and it has to come from the client's engineers.
+- Not applicable in this tree: packed decimal, `REDEFINES` and record layouts. None appears in the two programs (inference, from reading both files).
 
-## Where Claude Code helps and where it does not
+## What moves the estimate, in order
 
-| Area | Fit | Evidence |
+| Factor | State here | Evidence |
 |---|---|---|
-| Transliterating PROGA and PROGB with a harness in place | Strong. It is mechanical. | `app/cbl/PROGB.cbl:4` |
-| Building the input capture and diff runner | Strong once the client supplies the inputs | inference |
-| Learning which programs the card really names, and why | Weak. It lives in the client's job stream and operating procedures, not in the source. | `app/cbl/PROGA.cbl:8` |
-| Deciding what the nightly batch cycle needs from PROGA | Weak. It needs the client's engineers. | inference |
+| Coupling edges crossing the wave boundary | 1, and it is computed | `app/cbl/PROGA.cbl:9` |
+| Behavioral oracle | none in the tree | inference |
+| God modules in the wave | none | analysis field `god_modules` |
+| Business logic in the database | no database access in the two programs | inference |
+| Team can read the source language | not known. Asked in Open Questions. | inference |

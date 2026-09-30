@@ -3,11 +3,23 @@
   "unreachable": [],
   "dormant": [],
   "unknown": [
-    {"id": "PROGA", "reason": "The tree has no entry point (no JCL job, scheduler job, CSD transaction or wrapper), so reachability cannot be tested. No computed call exists, but nothing can be proven unreachable either. The JCL that would run it may live outside this tree.", "confidence": "low",
-     "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 1}]},
-    {"id": "PROGB", "reason": "The tree has no entry point (no JCL job, scheduler job, CSD transaction or wrapper), so reachability cannot be tested. No computed call exists, but nothing can be proven unreachable either. The JCL that would run it may live outside this tree.", "confidence": "low",
-     "evidence": [{"file": "app/cbl/PROGB.cbl", "line": 1}]},
-    {"id": "cpy:SHARED01", "reason": "Included by PROGA and PROGB, so it is live whenever either program is. Listed as unknown only because the tree has no entry point.", "confidence": "low",
-     "evidence": [{"file": "app/cpy/SHARED01.cpy", "line": 1}, {"file": "app/cbl/PROGA.cbl", "line": 5}, {"file": "app/cbl/PROGB.cbl", "line": 5}]}
+    {
+      "id": "PROGA",
+      "reason": "The tree has no entry point, so nothing can be proven unreachable. It may be the target of a job or scheduler that was not supplied.",
+      "confidence": "low",
+      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 1}]
+    },
+    {
+      "id": "PROGB",
+      "reason": "The tree has no entry point, so nothing can be proven unreachable. It may be the target of a job or scheduler that was not supplied.",
+      "confidence": "low",
+      "evidence": [{"file": "app/cbl/PROGB.cbl", "line": 1}]
+    },
+    {
+      "id": "cpy:SHARED01",
+      "reason": "Both PROGA and PROGB include it, so it lives or dies with them. Nothing can be proven unreachable while the programs are unknown.",
+      "confidence": "low",
+      "evidence": [{"file": "app/cpy/SHARED01.cpy", "line": 1}, {"file": "app/cbl/PROGA.cbl", "line": 5}, {"file": "app/cbl/PROGB.cbl", "line": 5}]
+    }
   ]
 }

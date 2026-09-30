@@ -1,42 +1,69 @@
 # 03 Waves
 
-Target state: **refactor** (given as a flag). Risk scores come from `risks.json`, written first and used to order the work.
+Target state: `refactor` (same behavior in restructured code). The plan is in
+`modernization-assessment/waves.json:1`. It is the extractor's seed with names, rationale and blast
+radius filled in. I made no deviations.
 
-## The plan is one wave
+## Summary
 
-The tree is two single step jobs, two programs, one shared copybook and one dataset. There is no second cluster to separate, no cycle, no god module and no computed call. I am not inventing a second wave. The only seam in the system is the dataset that PGMW writes and PGMR reads (`app/jcl/WRITEJOB.jcl:3`, `app/jcl/READJOB.jcl:3`), and cutting there would put the byte level contract on the wave boundary with no benefit at this size.
+| Wave | Family | Units | Blast radius | Unblocks | Confidence | Evidence |
+|---|---|---|---|---|---|---|
+| 1 | batch-readonly | `PGMR`, `job:READJOB` | low | The LAYOUTX conversion and a harness that decodes SPARQ.TEST.MASTER on the target | medium | `app/jcl/READJOB.jcl:2`, `app/cbl/PGMR.cbl:13` |
+| 2 | batch-writers | `PGMW`, `job:WRITEJOB` | high | Retiring the legacy writer of SPARQ.TEST.MASTER | medium | `app/jcl/WRITEJOB.jcl:2`, `app/cbl/PGMW.cbl:13` |
 
-| Wave | Units | Blast radius | Confidence | Evidence |
-|---|---|---|---|---|
-| 1. Master file writer and reader pair | `PGMR`, `PGMW`, `job:READJOB`, `job:WRITEJOB` | medium | medium | `app/cbl/PGMW.cbl:11`, `app/cbl/PGMR.cbl:11`, `app/jcl/WRITEJOB.jcl:3`, `app/jcl/READJOB.jcl:3` |
+Every unit in the graph is placed. Steps, the copybook `cpy:LAYOUTX` and the dataset
+`ds:SPARQ.TEST.MASTER` move with their owners and are not listed (`analysis` field `wave_seed`, key
+`unassigned` is empty). The copybook is included by both programs (`app/cbl/PGMR.cbl:11`,
+`app/cbl/PGMW.cbl:11`), so it moves with the earliest family that uses it, wave 1.
 
-The copybook `cpy:LAYOUTX` and the dataset `ds:SPARQ.TEST.MASTER` move with their owners. They are not listed as units.
+## Wave 1. Reader side of the master file
 
-## Does wave 1 meet the four tests
+Units: `PGMR`, `job:READJOB`. Port order: `PGMR` first, then `job:READJOB`.
 
-| Test | Answer | Confidence | Evidence |
-|---|---|---|---|
-| Deployed independently, behind a flag or facade | Yes. Run the new writer beside the old one against a separate dataset name, and switch the job that names the dataset. | medium | `app/jcl/WRITEJOB.jcl:3` |
-| Rolled back independently | Yes, if the new writer's output is byte identical. The old reader can then still read it. | medium | inference |
-| A testable boundary | Yes. The dataset is the boundary, and its bytes can be compared. It is also the articulation point in the graph. | high | `app/cbl/PGMW.cbl:13`, `app/cbl/PGMR.cbl:13` |
-| Delivers something a stakeholder can name | Unproven. Nothing in the tree says what business function PGMR, PGMW or the dataset serve. The names are generic and the dataset name contains TEST. | low | inference |
+- Why it is a sound wave: it reads the dataset and writes nothing another entry point uses
+  (`app/cbl/PGMR.cbl:13`, `app/jcl/READJOB.jcl:3`). It is deployable behind a switch on the job. It
+  rolls back by running the legacy job. Nothing calls PGMR, so nothing else must change.
+- Its testable boundary is weak. PGMR produces no output (`app/cbl/PGMR.cbl:14`). The assertion is the
+  return code plus a decoded copy of the record it reads. Inference: the harness has to read the
+  dataset itself, because PGMR shows nothing.
+- What a stakeholder can name: very little. This wave is a chore that proves the toolchain and the
+  decimal decoding. Say so plainly to the committee.
+- Why first: a consumer can be moved while the legacy producer keeps writing the legacy format. The
+  reverse would change bytes under a reader nobody has tested.
 
-The fourth test is a gap in what I was given, not a pass. It is the first open question for the client.
+## Wave 2. Writer of the master file
 
-## Order inside the wave
+Units: `PGMW`, `job:WRITEJOB`. Port order: `PGMW` first, then `job:WRITEJOB`.
 
-The scores order the work (`risks.json`).
+- Why it is a sound wave: it is the only writer of SPARQ.TEST.MASTER (`analysis` field `data_hubs`,
+  `app/cbl/PGMW.cbl:13`) and it comes after the reader is proven against the legacy bytes. It can be
+  rolled back by running the legacy writer, as long as the dataset name is not shared with a
+  partly migrated reader.
+- Its risk quadrant is low-high: an easy port, and the verification is the work
+  (`modernization-assessment/risks.json:1`). Facts that make the verification hard:
+  the record fields are never set before the WRITE (`app/cbl/PGMW.cbl:14`), and the copybook record is 15
+  bytes while the JCL asks for LRECL=80 (`app/cpy/LAYOUTX.cpy:3`, `app/jcl/WRITEJOB.jcl:4`).
+  Both are inference from the source.
+- It does not break a dependency by being last: PGMR reads what PGMW writes, and wave 1 already
+  covers PGMR.
+- What a stakeholder can name: the nightly master file is produced by the new code with bytes proven
+  equal to the old. That is nameable, if the client confirms the dataset is the real one.
 
-1. `job:READJOB` and `PGMR` (low-low). This proves the toolchain on a consumer that writes nothing. Its test input is a copy of a legacy-written file.
-2. `job:WRITEJOB` and `PGMW` (low-high). The port is easy. Verification is the work: the new output must match the legacy file byte for byte, including the packed amount, padding and record length. Do this only after the harness has proven itself on step 1.
+## Deviations from the seed
 
-## What I would cut if it were ten times larger
+None. Checked against the four reasons the skill allows:
 
-- Cut at datasets that have one writer and few readers. Each dataset boundary is a wave boundary and a test boundary.
-- Move consumer-only, loud-failure jobs first (low-low). Move producers of shared datasets after the harness is proven (low-high). Move anything high on both axes last, behind a facade.
-- Never split a writer from its readers across waves unless the new side reproduces the legacy byte layout exactly. That is the same constraint that applies here.
-- Take the order between jobs from the scheduler export, not from guesswork. It is missing from this tree.
+| Reason | Applies? | Evidence |
+|---|---|---|
+| A must-not-break item, an SCC or a facade dependency forces a unit into another wave | No. "The nightly batch cycle" is not located in the tree (no scheduler parsed), so it moves no unit. No SCC exists. | `analysis` fields `sccs`, `warnings` |
+| A wave holds more than 25 units | No. Each wave holds 2 units. | `modernization-assessment/waves.json:1` |
+| Something the extractor could not see changes what a unit is | No computed call, no embedded JCL, no unparsed file. The two inferences above concern record bytes and do not move a unit. | `analysis` fields `unresolved_dynamic`, `embedded_jcl`, `unparsed` |
+| `risks.json` puts a unit in high-high and its family puts it early | No unit is high-high. PGMW and job:WRITEJOB are low-high and already in the last wave. | `modernization-assessment/risks.json:1` |
 
-## What each wave unblocks
+## What would change this plan
 
-Wave 1 delivers a byte level definition of the SPARQ.TEST.MASTER record and a working equivalence harness. Those are what later jobs of the nightly cycle, outside this tree, would reuse (inference).
+- A scheduler export that shows READJOB running before WRITEJOB, or the two in different cycles.
+  Temporal edges are the order the harness must keep.
+- A third program that reads or writes SPARQ.TEST.MASTER. That program would join the hub, and the
+  writer wave would grow.
+- Confirmation that production uses a different dataset name from SPARQ.TEST.MASTER.

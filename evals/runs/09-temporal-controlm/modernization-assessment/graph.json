@@ -13,9 +13,12 @@
    "A called subprogram gets no DDs from its caller's JCL step.",
    "IDCAMS, SORT and other in-stream control cards are not read. Dataset modes on utility steps come from DISP only.",
    "IF/THEN/ELSE and COND= in JCL are not modeled. Step order is file order.",
-   "Nested PROC calls, INCLUDE members and jobs submitted through the internal reader are not followed.",
+   "Nested PROC calls and INCLUDE members are not followed. JCL text inside a COBOL literal is noticed, but it makes no edge. A proc or program it names is called unknown, never unreachable.",
    "EXEC CICS RETURN TRANSID, START and SEND MAP are not edges.",
-   "Only Control-M XML and shell wrappers that name JCL files are read as schedulers."
+   "Only Control-M XML and shell wrappers that name JCL files are read as schedulers.",
+   "DCB, LRECL and RECFM are not read, so a record length on a DD is not compared with a copybook.",
+   "A contract edge is high when both sides COPY the same layout. A program can COPY a layout and still read the record through a private one, so high means shared layout, not proven equal.",
+   "LINK and XCTL are both call edges. XCTL never returns, and control flow is not modeled."
   ],
   "files_seen": {
    "bms": 0,
@@ -221,7 +224,8 @@
    "sch:NIGHTLY/JOBA",
    "sch:NIGHTLY/JOBB"
   ],
-  "reachable_count": 7,
+  "reachable_nodes": 7,
+  "reachable_programs": 0,
   "dead_code_candidates": {
    "unreachable": [],
    "dormant": [],
@@ -229,6 +233,7 @@
   },
   "dead_code_reasons": {},
   "unresolved_dynamic": [],
+  "embedded_jcl": [],
   "structure_basis": "programs reachable from an entry point (0 of 0)",
   "fan_in": {},
   "fan_out": {},
@@ -250,6 +255,41 @@
    "jcl_step": 2,
    "scheduler_job": 2
   },
-  "warnings": []
+  "wave_seed": {
+   "basis": "family of the entry points that use a unit, in a fixed order. Facts only, no risk judgment.",
+   "waves": [
+    {
+     "wave": 1,
+     "family": "batch-utility",
+     "description": "Batch jobs that run no application program and touch no dataset another entry point uses",
+     "units": [
+      "job:JOBA",
+      "job:JOBB",
+      "sch:NIGHTLY/JOBA",
+      "sch:NIGHTLY/JOBB"
+     ],
+     "entry_points": [
+      "job:JOBA",
+      "job:JOBB"
+     ],
+     "evidence": [
+      {
+       "file": "app/jcl/JOBA.jcl",
+       "line": 1
+      },
+      {
+       "file": "app/jcl/JOBB.jcl",
+       "line": 1
+      }
+     ]
+    }
+   ],
+   "unassigned": []
+  },
+  "warnings": [
+   "app/scheduler/nightly.xml:5: job JOBA waits for condition EXTERNAL-FEED, which no job in this file sets. It is an external input.",
+   "app/scheduler/nightly.xml:10: job JOBB deletes condition JOBA-DONE (SIGN -). That order is not an edge.",
+   "No last-modified dates exist (the target is not a git repository, or --no-git was used). The dormant bucket was NOT computed. An empty dormant list means not measured."
+  ]
  }
 }

@@ -1,0 +1,42 @@
+{
+ "target_state": null,
+ "waves": [
+  {
+   "wave": 1,
+   "family": "online-readonly",
+   "name": null,
+   "units": [
+    "PROGR"
+   ],
+   "rationale": null,
+   "unblocks": null,
+   "blast_radius": null,
+   "confidence": null,
+   "evidence": [
+    {
+     "file": "app/csd/DEMO.CSD",
+     "line": 6
+    }
+   ]
+  },
+  {
+   "wave": 2,
+   "family": "online-writers",
+   "name": null,
+   "units": [
+    "PROGW"
+   ],
+   "rationale": null,
+   "unblocks": null,
+   "blast_radius": null,
+   "confidence": null,
+   "evidence": [
+    {
+     "file": "app/cbl/PROGW.cbl",
+     "line": 7
+    }
+   ]
+  }
+ ],
+ "unassigned": []
+}

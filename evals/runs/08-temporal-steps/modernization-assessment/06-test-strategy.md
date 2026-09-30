@@ -1,89 +1,69 @@
 # 06 Test strategy
 
-The bar for wave 1 is this: for the runs the nightly cycle actually sees, the new implementation
-runs the same steps in the same order with the same return codes, and every difference has a row in
-the deviation register. Passing tests written alongside the port is not the bar.
+The bar: for the inputs this system sees, the new job produces the same outputs as the old one. Where
+it does not, someone decided that on purpose and wrote it down in the Deviation Register below.
 
-**Anchor.** The client said the nightly batch cycle must not break. SEQJOB is the only job in the
-tree, so I treat it as that cycle. This is inference and needs the client's confirmation. Evidence:
-`app/jcl/SEQJOB.jcl:1`.
+## What the oracle can be here
 
-## The tree holds no datasets
+The tree holds no datasets. No program opens a file (`app/cbl/PGMA.cbl:4`, `app/cbl/PGMB.cbl:4`,
+`app/cbl/PGMC.cbl:4`) and the job has no DD statement (`app/jcl/SEQJOB.jcl:1`). So the oracle has to come from
+job output, logs and reports, not from data files. I would ask the client to supply:
 
-No DD statement and no file name appears in the job or the programs. Evidence:
-`app/jcl/SEQJOB.jcl:2`, `app/cbl/PGMA.cbl:3`. There are no archived generations or extract files to
-use as a golden master. The oracle has to come from job output, logs and reports. What to ask the
-client for is at the end of this file.
+- archived job logs and return codes for SEQJOB over at least 13 months, so month-end and year-end are in it
+- SMF records or scheduler history that show which steps ran and in what order
+- any report, extract or SYSOUT the real programs produce, if their real bodies live elsewhere
+- confirmation that the old system can stay up for a parallel run
 
-## Oracle for wave 1
-
-| Rank | Oracle | Use it? | Confidence | Evidence |
+| Wave | Oracle | Strength | Confidence | Evidence |
 |---|---|---|---|---|
-| 1 | Parallel run. Run legacy SEQJOB and the port on the same nights and diff the step sequence and return codes. The programs write nothing in this tree, so a parallel run looks cheap and safe. Ask whether it is possible before settling for less. | Yes, first choice | low | `app/cbl/PGMB.cbl:4` |
-| 2 | Replay from captured job logs. Twelve months of JES job logs and SMF step records for SEQJOB, covering month-end and, if the cycle touches anything financial, fiscal year-end. | Yes, the fallback | low | inference |
-| 3 | Golden master from archived outputs. None visible in the tree. | Only if the client supplies reports or extracts the cycle produces | low | inference |
-| 4 | Characterization tests from the source. The programs are empty, so this encodes nothing about production. | No. Provisional at best. | high | `app/cbl/PGMA.cbl:4` |
+| 1 | Parallel run of SEQJOB on both platforms, comparing step order, return codes and SYSOUT. If a parallel run is not possible, replay against archived job logs. | Strongest available, once the client confirms it. Characterization tests from source are provisional. | low | inference |
 
-## What the harness asserts
+Characterization tests generated from the source would encode three GOBACK statements. They prove
+nothing, so I would not rely on them.
 
-1. **Step order.** PGMA, then PGMB, then PGMC, then the IEFBR14 step. This is the temporal chain in
-   `graph.json`, and it is the list of orders the harness must keep. Evidence:
-   `app/jcl/SEQJOB.jcl:2`, `app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:4`, `app/jcl/SEQJOB.jcl:5`.
-2. **Return codes** for every step, and the job's final condition.
-3. **Step identity by position, not by name.** Two steps are named STEP2. A harness that keys on the
-   name will merge them or drop one. Evidence: `app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:5`.
-4. **Nothing runs that the legacy job did not run,** and nothing is skipped. No IF or COND=
-   appears in the job, so a skipped step is a defect. Evidence: `app/jcl/SEQJOB.jcl:2`.
+## Normalization spec (for a human to sign)
 
-## Normalization spec
+| Item | Rule | Why it may hide a bug | Evidence |
+|---|---|---|---|
+| Job number, timestamps, CPU and elapsed time | Ignore | A step that stops running would show as a missing time, so compare the step list too. | inference |
+| Step order | Do not normalize. Compare exactly. | The order is the whole contract (`app/jcl/SEQJOB.jcl:2`, `app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:4`). | `app/jcl/SEQJOB.jcl:2` |
+| Return codes | Compare exactly per step | A wrong code changes the downstream COND logic. | inference |
+| Trailing spaces and padding in SYSOUT | Ignore, with sign-off | Fixed-width padding can carry meaning. | inference |
 
-Every entry is an assertion that a difference does not matter. Keep it short. A human signs it off.
+Mainframe traps that do not apply to this tree today: packed decimal, EBCDIC collating sequence,
+REDEFINES and low values (there is no arithmetic, sort or record layout in it). If the real program
+bodies turn up, put each into this spec before any diff.
 
-| Item | Rule | Evidence |
+## Order the harness must keep
+
+These are the temporal edges from `modernization-assessment/graph.json`.
+
+| Before | After | Evidence |
 |---|---|---|
-| Job number, run timestamps, elapsed time | Ignore. | inference |
-| Step names | Compare by position. Do not rely on the name STEP2. | `app/jcl/SEQJOB.jcl:5` |
-| Monetary fields | None visible. If the real programs hold any, use a decimal type and zero tolerance. Packed decimal rounds differently from IEEE floats. | inference |
-| Record order and collating sequence | None visible. If any sorted output turns up, EBCDIC and ASCII order differ, and downstream readers may depend on it. | inference |
-| `REDEFINES`, padding, low values | None visible. Revisit when real record layouts arrive. | `app/cbl/PGMA.cbl:3` |
+| step:SEQJOB.STEP1 (PGMA) | step:SEQJOB.STEP2 (PGMB) | `app/jcl/SEQJOB.jcl:2`, `app/jcl/SEQJOB.jcl:3` |
+| step:SEQJOB.STEP2 (PGMB) | step:SEQJOB.STEP3 (PGMC) | `app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:4` |
+| step:SEQJOB.STEP3 (PGMC) | step:SEQJOB.STEP2#2 (IEFBR14) | `app/jcl/SEQJOB.jcl:4`, `app/jcl/SEQJOB.jcl:5` |
 
 ## Cases to add on purpose
 
-- **Boundary dates.** Run the harness over month-end, quarter-end, fiscal year-end, leap day and a
-  DST change. The tree shows no date logic, but the tree is four-line stubs, so this rule guards
-  against what the tree does not show. Evidence: `app/cbl/PGMA.cbl:4`.
-- **A step that fails.** Force a nonzero return code in PGMB and check what happens to PGMC and the
-  last step. No COND= appears in the job, so under JCL defaults a failed step would not by itself stop
-  later ones. The client has to say what the cycle is meant to do. Inference. Evidence:
-  `app/jcl/SEQJOB.jcl:3`.
-- **A restart.** Restart from STEP2 and see which of the two steps is meant. Evidence:
-  `app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:5`.
-- **The fiscal-close-only path.** Nothing in the tree marks one, but ask. Inference.
+| Case | Reason | Evidence |
+|---|---|---|
+| Run at month end, quarter end and fiscal year end | The job may be date driven in code we have not seen | inference |
+| A run where PGMB returns a nonzero code | Shows whether the last step still runs and whether STEP2 refers to line 3 or line 5 | `app/jcl/SEQJOB.jcl:5` |
+| A restart from STEP2 | The duplicate step name makes this ambiguous | `app/jcl/SEQJOB.jcl:3` |
+| A zero-work night | The empty case | inference |
 
-## Deviation register
+## Deviation Register
 
-Nothing differs without a row. One row is already proposed. It is not approved.
-
-| ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact |
-|---|---|---|---|---|---|
-| DEV-001 (proposed) | Two steps share the name STEP2. The second runs IEFBR14, which appears to do nothing (`app/jcl/SEQJOB.jcl:5`). | Not decided. Either give the step a unique name or drop it. | Duplicate step names make restarts and conditions ambiguous. | pending, client engineer | Unknown until the client says what names STEP2. |
+| ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact | Evidence |
+|---|---|---|---|---|---|---|
+| D-1 | Job repeats step name STEP2 on two steps | Pending. Decide whether to rename or drop the IEFBR14 step. | Not approved. A repeated step name is a JCL error on z/OS (inference). | pending | Unknown until the scheduler export is seen | `app/jcl/SEQJOB.jcl:5` |
 
 ## Exit bar for wave 1
 
-- The replay diff is clean, modulo the normalization spec and the deviation register.
-- Every boundary and failure case above passes.
-- The harness is under version control and runs in CI.
-- The deviation register is signed by someone with the authority to sign it.
+- the diff of step order, return codes and SYSOUT is clean, modulo the normalization spec and the register
+- every case above passes
+- the harness is under version control and runs in CI
+- the register is signed by someone with the authority to sign it
 
-## What to ask the client to supply
-
-1. Twelve months of job logs and SMF type 30 step records for SEQJOB, with return codes and start times.
-2. The scheduler export that starts SEQJOB. The extractor read none.
-3. Whether a parallel run is allowed, and for how many nights.
-4. Any report, extract or file the nightly cycle produces, with a sample from month-end and year-end.
-5. Whether SEQJOB is the nightly batch cycle, or one part of it.
-6. What names STEP2: a restart, a condition, a runbook.
-
-## Keep the harness after cutover
-
-The comparison harness becomes the regression suite for the modernized system. Budget to maintain it.
+Keep the harness after cutover. It is the only executable specification this job has.

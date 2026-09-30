@@ -1,67 +1,55 @@
 # 03 Waves
 
-Target state: refactor. `waves.json` holds the same plan in machine form.
+Target state: refactor. The plan is in `modernization-assessment/waves.json`. It starts from the extractor's seed (`03a-wave-seed.md`) and I changed nothing in it. The deviation list is empty.
 
-## The plan is one wave
+## The plan
 
-This system is two jobs, two programs and one shared dataset. The skill says a system that small is
-one wave, and I agree. Cutting it in two would fail the wave test, for a reason you can point at.
+| Wave | Family | Units | Blast radius | Confidence | Unblocks | Evidence |
+|---|---|---|---|---|---|---|
+| 1 | batch-readonly | `PGMR`, `job:READJOB` | medium | medium | Little. Proves the toolchain. Close to a chore. | `app/jcl/READJOB.jcl:1` |
+| 2 | batch-writers | `PGMW`, `job:WRITEJOB` | high | medium | Retires the legacy writer. Lets LAYOUTX and LAYOUTY become one layout. | `app/cbl/PGMW.cbl:6` |
 
-| Wave test | Result if I cut writer and reader apart | Evidence |
-|---|---|---|
-| Deploys independently, behind a flag or facade | No. The writer's output is the reader's input and both take their layout from copybooks that are different files. Moving one side alone changes what the other side reads | `app/cpy/LAYOUTX.cpy:2`, `app/cpy/LAYOUTY.cpy:2` |
-| Rolls back independently | No. Rolling back the writer alone leaves a reader tested against a file the old writer never made | `app/jcl/WRITEJOB.jcl:3`, `app/jcl/READJOB.jcl:3` |
-| Testable boundary | The boundary is the dataset. It is testable, but a test of one half needs the other half's real output as its input, so the halves are checked together | `app/cbl/PGMW.cbl:14`, `app/cbl/PGMR.cbl:14` |
-| Something a business stakeholder can name | Only the pair, as "the master file hand-off". Neither half delivers it alone | inference: no business owner is named anywhere in the tree |
+The seed placed every unit, and no unit is unassigned.
 
-### Wave 1: Writer, reader and the shared master file
+## Why these two waves
 
-| Field | Value | Evidence |
-|---|---|---|
-| Units | `job:WRITEJOB`, `PGMW`, `job:READJOB`, `PGMR` | `app/jcl/WRITEJOB.jcl:2`, `app/jcl/READJOB.jcl:2` |
-| Moves with them | `step:WRITEJOB.S1`, `step:READJOB.S1`, `cpy:LAYOUTX`, `cpy:LAYOUTY`, `ds:SPARQ.TEST.MASTER` | `app/cbl/PGMW.cbl:11`, `app/cbl/PGMR.cbl:11` |
-| Blast radius | medium | inference: the pair is small, but the contract is medium confidence and a break is silent |
-| Confidence | medium | inference: the tree holds no scheduler and no telemetry |
-| Unblocks | One shared record layout that neither program owns, and a comparison harness for the master file that any later job touching it can reuse | `app/cpy/LAYOUTY.cpy:1` |
+**Wave 1, the reader.** READJOB runs PGMR (`app/jcl/READJOB.jcl:2`). PGMR reads the dataset and writes nothing (`app/cbl/PGMR.cbl:13`, `app/cbl/PGMR.cbl:14`). That makes it the batch-readonly family. It meets the four tests for a wave:
 
-**Why this wave leads.** There is only one. It proves the toolchain, the harness and the team's port
-velocity on two programs that hold no business logic, which is the right place to learn them.
+- It deploys independently: swap the one EXEC step.
+- It rolls back independently: swap the step back. The reader changes no data, so nothing needs undoing.
+- It has a testable boundary: the input is the SPARQ.TEST.MASTER file as the legacy writer produces it.
+- It delivers something a stakeholder can name: the reader step of the nightly cycle runs on the new platform. That is thin. I say so in `unblocks`.
 
-**Inside the wave, in this order:**
+The reader is scored `low-high` in `risks.json`. The skill says low-high work is safe to do early once the harness is proven. Here the harness is built in this wave, and the wave is two programs of 16 lines each, so the wave can be the place the harness is proven. The condition is that the harness for wave 1 must include a golden copy of the legacy writer's output. Without one, the ported reader has no real input.
 
-1. Put the layout in one copybook and have both programs include it. Confirm the bytes are unchanged
-   with the harness. This is the refactor step that removes the drift risk from
-   `02-coupling.md`. It changes nothing a job can see.
-2. Build the harness before the port (see `06-test-strategy.md`). Feed it the legacy output first.
-3. Port the writer, then the reader. Run each against the other's legacy counterpart, then run the
-   new pair together.
-4. Cut over the two jobs together, with the scheduler order stated in the new schedule.
+**Wave 2, the writer.** WRITEJOB runs PGMW (`app/jcl/WRITEJOB.jcl:2`). PGMW writes SPARQ.TEST.MASTER (`app/cbl/PGMW.cbl:13`, `app/cbl/PGMW.cbl:14`), and every other unit depends on that layout. This is the batch-writers family. It comes second because its boundary test is a byte comparison of the dataset it produces, and that test needs the wave 1 harness. The scores are `low-high`, driven by blast radius, not by port difficulty. The port is easy. The verification is the work.
 
-**Risk quadrants from `risks.json`.** Three units are low-high: `PGMW`, `PGMR` and `job:WRITEJOB`. The
-port is easy. The verification is the work. `job:READJOB` is low-low. No unit is high-high. The
-plan does not put a high-high unit in the first half, because there is none.
+## Why I did not change the seed
 
-| Unit | Port difficulty | Blast radius | Quadrant | Evidence |
-|---|---|---|---|---|
-| `PGMW` | 2 | 3 | low-high | `app/cbl/PGMW.cbl:14` |
-| `PGMR` | 1 | 3 | low-high | `app/cbl/PGMR.cbl:14` |
-| `job:WRITEJOB` | 2 | 3 | low-high | `app/jcl/WRITEJOB.jcl:3` |
-| `job:READJOB` | 1 | 2 | low-low | `app/jcl/READJOB.jcl:3` |
+The rules allow a deviation for a must-not-break item, a strongly connected component, a facade dependency, a computed call or a high-high unit. I checked each.
 
-## What I would cut if the system were ten times larger
+- **Must-not-break.** The user's item, the nightly batch cycle, holds both waves. It does not force a unit from one wave to the other. The tree has no scheduler and no schedule, so I cannot show that the cycle is ordered any other way than writer then reader (`analysis.warnings`).
+- **Strongly connected component.** None (`analysis`, field `sccs`).
+- **Facade dependency.** None. There are no calls between the programs.
+- **Computed call, unparsed file, embedded JCL.** None (`analysis`, fields `unresolved_dynamic`, `embedded_jcl`; and `unparsed` is empty).
+- **High-high unit.** None. All four units score `low-high` (`modernization-assessment/risks.json:13`).
+- **The medium contract edge.** I considered whether it should force the writer into wave 1, or both units into one wave. It does not, because the two layouts are 15 bytes each by their PIC clauses (`app/cpy/LAYOUTX.cpy:3`, `app/cpy/LAYOUTY.cpy:3`). The reader can be ported against the layout the legacy writer produces. Merging the waves for tidiness is not allowed.
 
-Cut at the dataset, because it is the articulation point in `graph.json`
-(`app/jcl/WRITEJOB.jcl:3`, `app/jcl/READJOB.jcl:3`).
+## What would change the plan
 
-1. Wave 1: shared copybook and the harness, plus every low-low reader of the master file. Readers are
-   the safer side, since they change no shared state.
-2. Wave 2: the writer, once the harness has been proven on the readers. A writer is the side that can
-   corrupt a file every reader trusts.
-3. Any program in a call cycle would stay with its cycle. There are none here.
+Each of these is a falsifiable claim, and each is an open question in `00-summary.md`.
 
-The rule that order comes from is in the skill: earliest waves maximize learning per unit of blast
-radius, not business value. This is inference about a hypothetical system, not a finding.
+- If the LRECL of 80 on the output DD (`app/jcl/WRITEJOB.jcl:4`) means the file really holds 80 byte records, the reader in wave 1 must be ported against an 80 byte record, and the two copybooks do not describe it. The contract edge is then a real mismatch. Inference: it would move the writer up to wave 1, because the record layout would have to be settled first.
+- If another program outside this tree reads SPARQ.TEST.MASTER, the writer has more than one consumer, and wave 2 has a bigger blast radius than the source shows.
+- If a scheduler runs the jobs in a different order, or runs READJOB from a copy of the dataset, the temporal edge changes.
 
-## Unassigned
+## Scoring, for reference
 
-Nothing. Every node in `graph.json` is either a unit in the wave or moves with one.
+| Unit | Port difficulty | Blast radius | Quadrant | Wave | Evidence |
+|---|---|---|---|---|---|
+| `PGMR` | 1 | 3 | low-high | 1 | `app/cbl/PGMR.cbl:11` |
+| `job:READJOB` | 1 | 3 | low-high | 1 | `app/jcl/READJOB.jcl:3` |
+| `PGMW` | 2 | 4 | low-high | 2 | `app/cbl/PGMW.cbl:11` |
+| `job:WRITEJOB` | 2 | 4 | low-high | 2 | `app/jcl/WRITEJOB.jcl:4` |
+
+The scores are on two axes and are not combined. The reasons for each are in `modernization-assessment/risks.json`.

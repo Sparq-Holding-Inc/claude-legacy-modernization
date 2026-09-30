@@ -4,59 +4,21 @@
       "id": "job:JOBA",
       "port_difficulty": {
         "score": 1,
-        "why": "The only step runs IEFBR14, a utility that does nothing, so the tree holds no logic to port."
+        "why": "Two lines of JCL. Its only step runs IEFBR14, the IBM do-nothing utility, with no DD statements, so there is no logic and no arithmetic to port."
       },
       "blast_radius": {
-        "score": 3,
-        "why": "It is the head of the nightly chain, so if it fails or is skipped JOBB never gets its condition."
+        "score": 4,
+        "why": "Head of the nightly cycle, which the client said must not break. It waits on EXTERNAL-FEED, which nothing in the tree sets, and its JOBA-DONE condition is the only thing that releases JOBB. If the condition is lost in a port, the cycle stalls or runs out of order and the JCL gives no hint."
       },
       "quadrant": "low-high",
       "wave": 1,
-      "driving_fact": "JOBA is a two line job whose only step is EXEC PGM=IEFBR14 with no DD statements, so its real behavior cannot be seen in this tree.",
+      "driving_fact": "JOBA posts JOBA-DONE (OUTCOND +) and JOBB waits for it (INCOND), so the order lives only in the Control-M definition.",
       "confidence": "medium",
       "evidence": [
         {
           "file": "app/jcl/JOBA.jcl",
           "line": 2
-        }
-      ]
-    },
-    {
-      "id": "job:JOBB",
-      "port_difficulty": {
-        "score": 1,
-        "why": "The only step runs IEFBR14, a utility that does nothing, so the tree holds no logic to port."
-      },
-      "blast_radius": {
-        "score": 3,
-        "why": "It runs after JOBA on the nightly path, and nothing in the tree shows what consumes JOBB-DONE."
-      },
-      "quadrant": "low-high",
-      "wave": 1,
-      "driving_fact": "JOBB is a two line job whose only step is EXEC PGM=IEFBR14 with no DD statements, so the ordering is enforced entirely outside the JCL.",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/jcl/JOBB.jcl",
-          "line": 2
-        }
-      ]
-    },
-    {
-      "id": "sch:NIGHTLY/JOBA",
-      "port_difficulty": {
-        "score": 2,
-        "why": "One external input condition and one output condition, but the target scheduler must reproduce condition semantics and the ODAT date scoping."
-      },
-      "blast_radius": {
-        "score": 4,
-        "why": "If the EXTERNAL-FEED gate is lost JOBA can run on a missing feed and nothing abends, so the failure is silent."
-      },
-      "quadrant": "low-high",
-      "wave": 1,
-      "driving_fact": "JOBA waits on the condition EXTERNAL-FEED, which no job in the tree produces, then posts JOBA-DONE.",
-      "confidence": "medium",
-      "evidence": [
+        },
         {
           "file": "app/scheduler/nightly.xml",
           "line": 5
@@ -68,20 +30,24 @@
       ]
     },
     {
-      "id": "sch:NIGHTLY/JOBB",
+      "id": "job:JOBB",
       "port_difficulty": {
         "score": 2,
-        "why": "Three conditions, one of them a delete, that a target scheduler must reproduce exactly."
+        "why": "The JCL is as trivial as JOBA's. The one subtle piece is in the scheduler: JOBB deletes JOBA-DONE (SIGN -) and posts JOBB-DONE, so the target scheduler must reproduce consume-and-delete condition semantics."
       },
       "blast_radius": {
         "score": 4,
-        "why": "If the delete of JOBA-DONE is not ported, JOBB can rerun on a stale condition without JOBA rerunning, and no job abends."
+        "why": "Second job of the must-not-break nightly cycle. Nothing in the tree consumes JOBB-DONE, so an unseen downstream consumer may depend on it. A missing or early JOBB-DONE would be silent, not an abend."
       },
       "quadrant": "low-high",
       "wave": 1,
-      "driving_fact": "JOBB requires JOBA-DONE, then deletes it (SIGN minus) and posts JOBB-DONE, so each JOBB run consumes one JOBA run.",
+      "driving_fact": "JOBB waits for JOBA-DONE, deletes it when done, and posts JOBB-DONE, which no job in the tree waits on.",
       "confidence": "medium",
       "evidence": [
+        {
+          "file": "app/jcl/JOBB.jcl",
+          "line": 2
+        },
         {
           "file": "app/scheduler/nightly.xml",
           "line": 9

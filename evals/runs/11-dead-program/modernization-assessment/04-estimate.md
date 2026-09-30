@@ -1,42 +1,42 @@
 # 04 Estimate
 
-## Method
+Every figure here is inference. No team velocity, no telemetry and no oracle was supplied, so nothing calibrates the numbers. The method is bottom-up: unit count, the coupling edges that cross the wave boundary, and the cost of building a way to prove equivalence. Lines of code are not the driver.
 
-This is a judgment-based range, not a model. Lines of code do not drive it: the live tree is 11 lines across the job and two programs (`modernization-assessment/graph.json:46`, `modernization-assessment/graph.json:55`, `modernization-assessment/graph.json:73`). I built the range from the five drivers the skill names, and each is stated below with what the tree shows. The estimate is per wave. There is one wave.
+## Wave 1: the nightly batch job
 
-| Driver | What the tree shows | Effect on the estimate | Evidence |
-|---|---|---|---|
-| Coupling edges crossing the wave boundary | None visible. No dataset, contract or ordering edge. | Pushes the port cost down. It may also mean the tree is hiding its real boundary. | `modernization-assessment/graph.json:184` |
-| Behavioral oracle | None in the tree. No dataset, report or log. | Makes the harness the largest and least certain cost. | `app/jcl/MAINJOB.jcl:2` |
-| God modules in the wave | None. | No facade work. | `modernization-assessment/graph.json:179` |
-| Business logic in the database | No SQL in any of the three programs. Inference from reading all three short files. | No DB2 work visible. Could still exist outside the tree. | `app/cbl/PGMMAIN.cbl:4` |
-| Someone who can read the source language | Not known. Nothing in the tree says. | The port is trivial. The scheduler and job output are what a reader is needed for. | inference |
+Size of the wave: 11 lines across three units (`app/jcl/MAINJOB.jcl:2`, `app/cbl/PGMMAIN.cbl:5`, `app/cbl/PGMLIVE.cbl:4`). Edges crossing the wave boundary: none (analysis: `edge_counts`, `data_hubs`).
 
-## Range for wave 1
+| Work item | Range (person-days) | Driver | Confidence | Evidence |
+|---|---|---|---|---|
+| Port PGMLIVE, PGMMAIN and the job step to the refactor target | 0.5 to 1 | Three units, no data, no logic | medium | `app/cbl/PGMMAIN.cbl:4` |
+| Build the comparison harness: capture job return code, job log and any outputs, then diff | 2 to 5 | No oracle in the tree, so it must be built from job output | low | inference |
+| Confirm the real scope of the nightly cycle with the client's engineers | 1 to 3 | The tree has no scheduler and no datasets | low | inference |
+| Parallel run or replay across a month-end | elapsed time, not effort | The capture window must span a business cycle | low | inference |
+| **Total effort** | **3.5 to 9** | | low | inference |
 
-| Part of wave 1 | Effort range | Evidence |
-|---|---|---|
-| Discovery: scheduler export, real outputs, confirm this is production source | 1 to 3 person-days of work, longer in elapsed time because it waits on the client | inference |
-| Port of job, PGMMAIN and PGMLIVE | 0.5 to 1 person-day | `app/cbl/PGMMAIN.cbl:4` |
-| Oracle capture and comparison harness | 3 to 8 person-days | inference |
-| Shadow run beside MAINJOB before cutover | 5 to 10 nights elapsed, about 1 person-day of watching | inference |
-| **Total** | **about 5 to 13 person-days of effort, and 3 to 4 weeks elapsed** | inference |
+The total is low confidence because two of the four lines have nothing behind them but the shape of the tree.
 
-The port is not where the range comes from. The harness and the discovery are.
+## The assumptions this range is most sensitive to
 
-## What the range is most sensitive to
+1. **Assumes `job:MAINJOB` is the whole nightly batch cycle, or the cycle is a handful of jobs shaped like it.** If the real cycle holds dozens of jobs the tree does not contain, this estimate is void and each further wave is sized from its own edges. The evidence for it is thin: one job, no scheduler (analysis: `warnings`).
+2. **Assumes the real job has no dataset a port could break.** The step has no DD statement (`app/jcl/MAINJOB.jcl:2`). If the production job has DDs the tree omits, the harness cost rises from 2 to 5 days toward 5 to 10, since each dataset layout needs a normalization decision.
+3. **Assumes PGMLIVE and PGMMAIN are the real programs and not stubs.** Both hold no logic (`app/cbl/PGMLIVE.cbl:4`, `app/cbl/PGMMAIN.cbl:4`). If the production versions hold business logic, the port line moves out of the 0.5 to 1 day range and port difficulty must be rescored.
 
-Stated as claims that can be shown false.
+## What moves the estimate
 
-1. **Assumes the source in the tree is the production source.** PGMLIVE holds only a GOBACK and PGMMAIN only calls it (`app/cbl/PGMLIVE.cbl:4`, `app/cbl/PGMMAIN.cbl:4`). If the production versions read files, use DB2 or do arithmetic, then the port and harness numbers above no longer apply, and wave 1 must be cut again.
-2. **Assumes MAINJOB is the whole nightly cycle.** The tree holds one job and no scheduler (`modernization-assessment/graph.json:197`). If the cycle is really ten more jobs outside the tree, this range covers a fraction of the work, and the order jobs run in becomes the main constraint on the plan.
-3. **Assumes an oracle exists outside the tree.** The harness range assumes job output, logs or reports for at least one month-end can be had. If none exists, the harness cost roughly doubles, because only provisional characterization tests from the source remain.
+| Factor | State in this tree | Effect | Confidence | Evidence |
+|---|---|---|---|---|
+| Coupling edges crossing the wave boundary | None | Lowers it | high | analysis: `edge_counts` |
+| A behavioral oracle | None in the tree, and telemetry is none | Raises it. The harness is the main cost | high | inference |
+| God modules in the wave | None | Neutral | high | analysis: `god_modules` |
+| Business logic in the database | No SQL in any source file | Neutral here, unknown for the real system | low | inference |
+| Anyone who can read the source language | Not known | Unknown. Ask | low | inference |
 
-## Where Claude Code helps and where it does not
+## Where Claude Code can do the port, and where it cannot
 
-| Part | Claude Code | Evidence |
-|---|---|---|
-| Transliterating the job step and two programs | Strong. There is almost nothing to translate. | `app/cbl/PGMLIVE.cbl:4` |
-| Building the comparison harness and the normalization scaffold | Strong, once the client supplies real outputs | inference |
-| Deciding what the nightly cycle must produce | Cannot. That intent is not in the source, and there is nothing to infer it from. | `app/jcl/MAINJOB.jcl:2` |
-| Confirming MAINJOB is the nightly cycle, or that PGMDEAD never runs | Cannot from source. Needs the scheduler and job logs. | `modernization-assessment/graph.json:197` |
+- **Can do.** The mechanical part: PGMMAIN is a single CALL and a GOBACK, PGMLIVE is a GOBACK, and the job is one EXEC step (`app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMLIVE.cbl:4`, `app/jcl/MAINJOB.jcl:2`). This is transliteration, and it is safe once the harness exists.
+- **Cannot do.** It cannot say what PGMLIVE is meant to do, since the source holds no rule to infer. It also cannot say what the nightly cycle is, or what it must produce. Those come from the client's engineers, job logs and archived output, not from this source.
+
+## Dead code and the estimate
+
+PGMDEAD and `cpy:UNUSED` are not in the estimate. Nothing gets ported for them. The cost of retiring them is instrumentation plus a delete, under one day once the telemetry route is agreed. That is inference (`05-dead-code.md`).

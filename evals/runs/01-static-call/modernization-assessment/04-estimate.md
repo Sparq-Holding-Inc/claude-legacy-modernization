@@ -1,42 +1,40 @@
 # 04 Estimate
 
-Method: there are 11 lines of COBOL in two programs (`modernization-assessment/graph.json:37-46`).
-Lines of code are not what moves this estimate. Per the plugin's method, the estimate follows the coupling
-edges that cross the wave boundary, the availability of a behavioral oracle, god modules, logic held in the
-database, and who can read COBOL. Here: one internal call edge, no edges crossing the boundary that we can
-see, no oracle in the tree, no god module, no database, and unknown staffing. Every figure is inference.
+Method: effort is estimated per wave, from the coupling edges crossing the wave boundary, not from lines of
+code. There is one placeholder wave. Every figure below is inference. There is no oracle, no telemetry, and
+no history of this team's port velocity to calibrate against.
 
 ## Wave 1: PROGA and PROGB
 
-| Piece of work | Range | Basis | Evidence |
+| Piece of work | Range | Confidence | Evidence |
 |---|---|---|---|
-| Mechanical port of both programs | 0.5 to 1 person-day | One DISPLAY, one CALL, one STOP RUN, one GOBACK. No files, no arithmetic. | `app/cbl/PROGA.cbl:5-7`, `app/cbl/PROGB.cbl:4` |
-| Harness: capture SYSOUT and return code, run legacy and port, diff | 2 to 4 person-days | Small, but the oracle has to be built from job output. No archived output is in the tree. | inference |
-| Wiring to the scheduler, JCL or replacement launcher, and rollback switch | 2 to 5 person-days | The starter is not in the tree, so this piece is the least certain. | `modernization-assessment/graph.json:109` |
-| Total for wave 1 | 5 to 10 person-days | Sum of the rows above. The wide range is entirely the missing JCL and scheduler. | inference |
+| Port the two programs to the refactor target | 0.5 to 1 person-day | medium | `app/cbl/PROGA.cbl:5`, `app/cbl/PROGB.cbl:4` |
+| Find the run environment: the job, the schedule, the load library | 1 to 5 person-days | low | inference |
+| Build the equivalence harness and locate an oracle | 2 to 8 person-days | low | inference |
+| Total for wave 1 | 3.5 to 14 person-days | low | inference |
 
-Confidence in the total is low.
+The port itself is the small part. The eleven lines of source hold one DISPLAY, one CALL, one STOP RUN and
+one GOBACK. The range is wide because the surrounding job stream is not in the tree.
 
-## The assumptions the range is most sensitive to
+## What the range is most sensitive to
 
-1. **Assumes the tree is the whole nightly batch cycle.** If the cycle also has JCL, other programs or
-   datasets that were not supplied, this figure covers only a fragment and is a floor, not an estimate
-   of the cycle. Each additional program with file I/O adds a harness and a normalization spec.
-2. **Assumes PROGB in production is the four-line `GOBACK` in the tree** (`app/cbl/PROGB.cbl:4`). If
-   the production load module is larger, the port cost scales with what it does and the harness cost
-   roughly doubles.
-3. **Assumes nothing downstream reads the `CALL FAILED IF WE GET HERE` line or the return code**
-   (`app/cbl/PROGA.cbl:5`). If a scheduler condition or a log scraper depends on either, the harness must
-   pin them, and the wiring row moves to the top of its range.
+1. Assumes the two programs are run by one JCL step that reads and writes no dataset. If the job step passes a
+   PARM, a DD or a return-code condition that a later step tests, the harness work roughly doubles, because
+   the boundary is then that condition. This tree cannot confirm it.
+2. Assumes nobody outside this tree calls PROGB. If a second caller exists, PROGB is a shared subprogram and
+   moves earlier than PROGA, and wave 1 splits in two.
+3. Assumes the client can supply job logs for a full business cycle. If not, the oracle is characterization
+   tests from source alone, and the wave 1 range moves to the top of its band and the confidence stays low.
 
-## Where Claude Code helps and where it does not
+## What the range does not cover
 
-- **Mechanical port.** Claude Code is strong here. Two trivial programs with no arithmetic are an easy
-  transliteration, provided the harness exists first.
-- **Intent.** Claude Code is weak at inferring why PROGA prints a failure message before the call
-  (`app/cbl/PROGA.cbl:5`). Whether that is a leftover test string or a signal someone relies on must
-  come from the client's engineers.
-- **Environment.** The launcher, the scheduler and the runtime return code conventions are not in the
-  tree. Claude Code cannot infer them.
-- **Staffing.** Whether the team has anyone who can read COBOL is unknown. With programs this small, it
-  matters little for the port and a lot for the wiring.
+The nightly batch cycle. It is the must-not-break item and it is not in the tree. An estimate for
+the migration of the cycle itself needs the JCL, the scheduler definitions and the datasets, and cannot be given from
+these two files.
+
+## Where Claude Code helps
+
+Strong: transliterating these two programs, and writing the harness that runs the legacy and the new one and
+compares the job output and return code. Weak: anything about why PROGA prints a failure message before it
+calls. That is intent in undocumented behavior, and a person who owns the batch cycle has to say what
+downstream reads it. Inference.

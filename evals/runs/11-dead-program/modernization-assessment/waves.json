@@ -3,21 +3,30 @@
   "waves": [
     {
       "wave": 1,
-      "name": "Nightly batch cycle, whole tree",
-      "units": ["job:MAINJOB", "PGMMAIN", "PGMLIVE"],
-      "rationale": "The live tree is one job, one step and a two-program call chain with no dataset, contract or temporal edges. There is no boundary inside it to cut, so it is one wave.",
-      "unblocks": "Retiring the COBOL runtime for this cycle, and a proven toolchain and equivalence harness for whatever else the client has outside this tree.",
-      "blast_radius": "medium",
+      "family": "batch-readonly",
+      "name": "Nightly batch job, whole tree",
+      "units": [
+        "PGMLIVE",
+        "PGMMAIN",
+        "job:MAINJOB"
+      ],
+      "rationale": "One entry point runs one program that calls one leaf. No dataset, no scheduler edge, no shared data, no cycle, so the family is a sound wave: it deploys and rolls back as one job. It is the only wave the tree supports. Whether it is the whole nightly cycle is not shown by the tree.",
+      "unblocks": "Nothing else in the tree depends on it. On this evidence it is a chore that proves the toolchain and the harness. It unblocks more only if the real nightly cycle holds jobs this tree omits.",
+      "blast_radius": "low",
       "confidence": "medium",
       "evidence": [
-        {"file": "app/jcl/MAINJOB.jcl", "line": 2},
-        {"file": "app/cbl/PGMMAIN.cbl", "line": 4},
-        {"file": "app/cbl/PGMLIVE.cbl", "line": 4}
+        {
+          "file": "app/jcl/MAINJOB.jcl",
+          "line": 1
+        }
       ]
     }
   ],
   "unassigned": [
-    {"id": "PGMDEAD", "reason": "Unreachable from any entry point. Propose deletion, provisional until telemetry or out-of-tree JCL confirms it. It is not ported."},
-    {"id": "cpy:UNUSED", "reason": "No program includes it. Propose deletion. It is not ported."}
-  ]
+    {
+      "id": "PGMDEAD",
+      "reason": "dead code candidate, unreachable. See dead-code.json."
+    }
+  ],
+  "deviations": []
 }

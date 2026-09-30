@@ -1,63 +1,40 @@
 # 04 Estimate
 
-This is a range per wave, in engineer-weeks, with the assumptions that move it most. There is no single number, and no calibration data behind it. It is a judgment from the coupling, the oracle and the code I read, and it should be replaced by measured velocity after wave 1.
+Target state is refactor. Every figure is a range in engineer-weeks, per wave, for a team of about four engineers using Claude Code for the mechanical port, with at least one person who can read COBOL and JCL. Whether such a person exists is not known. It is one of the open questions, and it moves every number below. There is no single total on purpose. The ranges are my judgment from the counts in `modernization-assessment/03-waves.md` and the scores in `modernization-assessment/risks.json`. They are not measured velocity, and wave 1 exists to measure it.
 
 ## Method
 
-Engineer-weeks for a small team: one engineer who can read COBOL and JCL, one who builds the harness, and Claude Code for mechanical porting. The range includes writing the harness pieces the wave needs and getting the diff clean. It excludes:
+I estimated three things per wave and added them: the port itself, the verification against the oracle, and the facade work at the wave's boundary. In rough order of weight, the things that move a wave are the edges crossing its boundary, the oracle, the god modules, logic held in the database, and who can read the source language.
 
-- the decision on the target runtime for the CICS transactions and the BMS screens,
-- environments and licences,
-- waiting on the client for captures, sign-off or answers,
-- remediation of the security findings, which are the plain text passwords and the credential in `app/jcl/FTPJCL.JCL:34`.
+| Driver | What I found | Effect | Confidence | Evidence |
+|---|---|---|---|---|
+| Edges crossing a wave boundary | 46 of the 62 contract edges join programs in different waves. 22 program-to-program calls go from waves 5 to 7 back into the wave 3 menu. | The facade and replica work is a large share of waves 3, 5 and 6, more than the port. | high | `analysis` (fields `data_hubs` and `edge_counts`), `app/cbl/COMEN01C.cbl:156` |
+| Behavioral oracle | The tree has sample masters and a 300 record daily file, runtime bundles for a non-mainframe run, and a catalog listing that shows five retained generations of the reject, backup, interest and report files. | A parallel run is likely possible. That is what keeps waves 5 and 6 from being far worse. | medium | `app/catlg/LISTCAT.txt:696`, `app/catlg/LISTCAT.txt:1112`, `app/catlg/LISTCAT.txt:1541`, `app/catlg/LISTCAT.txt:1643` |
+| God modules | None by fan-in. COACTUPC is the largest single program at 3,368 lines. | No strangling at program level. COACTUPC is one long port. | high | `analysis` (field `god_modules`), `app/cbl/COACTUPC.cbl:573` |
+| Logic in the database | DB2 tables and IMS segments hold state for the authorization and transaction type modules only. | Confined to wave 7. The DDL, DBD and PSB files were not read. | low | `app/app-transaction-type-db2/cbl/COBTUPDT.cbl:137`, `app/app-authorization-ims-db2-mq/cbl/CBPAUP0C.cbl:310` |
+| COBOL readers on the team | Not known. | If nobody reads COBOL, every wave grows, and waves 5 and 6 grow most. | low | inference |
 
-What moves the estimate, in order of weight: how many coupling edges cross the wave boundary, whether a behavioral oracle exists, god modules inside the wave (none here), how much of the behavior lives in JCL and not in code, and whether anyone on the team reads the source language. Lines of code are a sanity check only.
+## Estimate per wave
 
-Crossing edges come from `graph.json`. The contract counts below count both endpoints, and they are understated for the reason given in `02-coupling.md`: the extractor records IDCAMS loads as reads.
+| Wave | Scope | Engineer-weeks | Two assumptions the range is most sensitive to | Confidence | Evidence |
+|---|---|---|---|---|---|
+| 1 Utilities and plumbing | 17 units, 342 JCL lines, no COBOL | 2 to 4 | The target has native equivalents for GDG bases, CICS file open and close, and RACF style rules. If it has none, this doubles. The wave also stands up the CI and toolchain, which the range includes. | medium | `app/jcl/DEFGDGB.jcl:25`, `app/jcl/CLOSEFIL.jcl:26` |
+| 2 Read-only batch readers | 6 programs, 1,097 lines, plus the comparison harness | 3 to 6 | The harness costs about half of it. It assumes the four master layouts (CVACT01Y, CVACT02Y, CVACT03Y, CVCUS01Y) map to typed records with no COMP-3 money fields. CBACT01C also calls an assembler date routine that nobody has read. If that routine holds real logic, add 1 to 2 weeks. | medium | `app/cpy/CVACT01Y.cpy:1`, `app/cbl/CBACT01C.cbl:231` |
+| 3 Sign-on, menus, read-only screens | 7 programs, 2,679 lines, 4 read screens, the menu facade | 6 to 12 | Assumes the screens are rebuilt as a web UI. If 3270 emulation is accepted in front of the new services, it falls to 3 to 6. Assumes the menu table is the only routing (it is bounded, see `modernization-assessment/02-coupling.md`), and that the 7 BMS maps carry no logic beyond field attributes. | medium | `app/cpy/COMEN02Y.cpy:28`, `app/bms/COSGN00.bms:1` |
+| 4 Data load and refresh utilities | 15 units to port (11 build and sample jobs are not ported), about 1,000 JCL lines | 4 to 8 | Assumes IDCAMS DELETE, DEFINE and REPRO map one for one to the target loader. If the alternate index on TRANSACT (key 26 bytes at offset 304, non-unique) has to be kept for online browse, add 2 weeks. Assumes the SORT and IEBGENER control cards hold nothing beyond the offsets already seen. | low | `app/jcl/TRANIDX.jcl:25`, `app/jcl/PRTCATBL.jcl:47` |
+| 5 Posting cycle, interest, statements, report | 8 programs, 3,670 lines, 10 jobs, 1 proc, 7 scheduler rows, and the data facade | 14 to 26 | Assumes an oracle exists: the retained generations of DALYREJS, SYSTRAN, TRANSACT.BKUP and TRANREPT, and a run on the runtime bundle. If the client's own archives are gone, the oracle is the sample data and a fresh legacy run, and this wave grows by about 40 percent. Assumes all money fields are DISPLAY numeric with implied decimals (S9(9)V99 and S9(10)V99). A COMP-3 money field in a copybook I did not read adds 2 to 3 weeks per program. | medium | `app/cpy/CVACT01Y.cpy:1`, `app/cpy/CVTRA05Y.cpy:1`, `app/catlg/LISTCAT.txt:696` |
+| 6 Online maintenance of the masters | 9 programs, 7,972 lines | 16 to 30 | COACTUPC is 3,368 lines with 43 REDEFINES and 51 GO TOs and is 5 to 9 weeks alone. Assumes the REDEFINES are alternate views of one record. If they overlay different types on the same bytes, add 4 to 8 weeks. Assumes concurrent writers can be serialized by the target's own locking. COBIL00C and COTRN02C take the highest key plus one, so two users can collide today. | medium | `app/cbl/COACTUPC.cbl:573`, `app/cbl/COBIL00C.cbl:212`, `app/cbl/COTRN02C.cbl:444` |
+| 7 Authorization, DB2 and IMS | 13 programs, 7,071 lines, 8 jobs, 2 scheduler rows | 14 to 30 | Assumes the four DBD and four PSB files describe a two level hierarchy (summary and detail). If deeper, or if the DL/I calls use qualified paths beyond GN, GNP and DLET, this wave roughly doubles. Assumes MQ is used as plain request and reply. | low | `app/app-authorization-ims-db2-mq/cbl/CBPAUP0C.cbl:223`, `app/app-authorization-ims-db2-mq/cbl/CBPAUP0C.cbl:310`, `app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl:35` |
 
-## Ranges
+Adding the ranges gives 59 to 116 engineer-weeks, with waves 5, 6 and 7 carrying 44 to 86 of them. Read that as a spread, not a forecast. It hides the fact that waves 5 and 6 share the account and transaction masters, and if the client wants them cut over on the same day, the two ranges combine and the facade work is done once.
 
-| Wave | Range (weeks) | Program lines | Contract edges crossing | Datasets shared with other waves | Oracle today | Evidence |
-|---|---|---|---|---|---|---|
-| 1 Read-only listings | 2 to 4 | 389 | 2 | 3 | Fixtures only. The harness bring-up dominates | `app/cbl/CBACT02C.cbl:29` |
-| 2 Packed decimal and REDEFINES | 3 to 6 | 1091 | 10 | 5 | Fixtures only | `app/cbl/CBACT01C.cbl:67` |
-| 3 Master refresh | 3 to 6 | none (15 jobs) | 0 | 10 | Parallel build from the same PS files is possible | `app/jcl/ACCTFILE.jcl:40` |
-| 4 Transaction report | 3 to 5 | 545 | 0 | 4 | Archived report generations, if the client has them | `app/cbl/CBTRN03C.cbl:177` |
-| 5 Online front door | 10 to 18 | 4915 | 18 | 6 | None in the tree | inference |
-| 6 Daily posting | 8 to 16 | 619 | 15 | 4 | Parallel run possible, but needs a real daily file | `app/cbl/CBTRN02C.cbl:256` |
-| 7 Month end | 8 to 14 | 1498 | 12 | 6 | Parallel run, one cycle a month | `app/cbl/CBACT04C.cbl:464` |
-| 8 Online writers | 14 to 26 | 6348 | 37 | 7 | None in the tree | `app/cbl/COACTUPC.cbl:858` |
-| 9 Optional modules | 16 to 40, low confidence | 7071 | 12 | 4 | None. IMS, DB2 and MQ are outside this analysis | inference |
+## Where Claude Code does the mechanical port, and where it does not
 
-Waves 1 to 8 together come to about 51 to 95 engineer-weeks. With wave 9 as a placeholder, about 67 to 135. The waves are not independent, so do not treat the sum as a schedule. Wave 7 also needs at least three month end cycles of evidence, so it takes at least three calendar months whatever the effort.
-
-Why the numbers land where they do:
-
-- **Waves 1 and 2** are small in lines. Most of the cost is building the codec and the diff tool the other waves reuse, and the low end assumes that tool takes about two weeks.
-- **Wave 3** has no COBOL. The cost is the verification: key lengths, record sizes, three alternate index offsets, and the CICS fence (`app/jcl/CARDFILE.jcl:85`, `app/jcl/XREFFILE.jcl:74`, `app/jcl/TRANFILE.jcl:84`).
-- **Wave 6** is one 619 line program, and it is more expensive than its size because of what surrounds it. It shares the account and transaction masters with 11 readers each, opens its output file assuming TRANBKP ran, and needs a parallel run environment.
-- **Wave 8** is the largest contract count and the largest program in the tree. I did not read COACTUPC, so this is the least certain of the core waves.
-
-## The assumptions the ranges are most sensitive to
-
-1. **The client can supply a real oracle.** This assumes production daily files and before and after images of the masters for at least three posting cycles. If only the 300 fixture transactions are available (`app/data/ASCII/dailytran.txt:1`), waves 4, 6 and 7 roughly double, because every equivalence claim needs hand built cases and month end evidence has to be manufactured.
-2. **The refresh jobs are a production process.** This assumes the account and card master refresh is a real job that stays a batch operation. The wrappers reach the mainframe through an FTP tunnel (`scripts/remote_refresh.sh:3`), which looks like a test environment reset. If that is what they are, wave 3 shrinks to about one or two weeks, because the target platform's load tooling replaces the jobs, and what the user means by must-not-break for the second item changes.
-3. **New batch code can keep writing the same VSAM files, or synchronized copies of them, while the online programs read them.** If the datastore has to change at wave 6, add a synchronization layer. Waves 6 and 7 grow by about 30 to 50 percent and wave 8 has to move earlier, since the online writers are the other side of that sync (`app/cbl/COBIL00C.cbl:212`, `app/cbl/COTRN02C.cbl:444`).
-4. **The IMS purge job is not in the live daily chain.** If the CA-7 listing is the truth and CBPAUP0J runs ahead of POSTTRAN (`app/scheduler/CardDemo.ca7:43`), wave 6 takes on an IMS dependency and grows by three to six weeks.
-
-## Where Claude Code helps and where it does not
-
-Strong, with a working harness: transliteration of plain batch COBOL and JCL into the target. That covers wave 1, the record codec in wave 2, IDCAMS steps into load scripts in wave 3, the report formatting in wave 4 including the edited pictures (`app/cpy/CVTRA07Y.cpy:1`), and CBTRN02C itself, which is a plain paragraph structure of about 600 lines.
-
-Weak or unsafe without a person:
-
-- **Inferring intent.** Which of the legacy behaviors are rules and which are accidents. Examples: a reject reason that is overwritten by a later check (`app/cbl/CBTRN02C.cbl:414`), a literal replacing zero (`app/cbl/CBACT01C.cbl:237`), the loop exit in the report (`app/cbl/CBTRN03C.cbl:177`). Each needs an answer in the deviation register.
-- **Job lifecycle design.** Why TRANBKP empties the transaction master and COMBTRAN refills it (`app/jcl/TRANBKP.jcl:40`, `app/jcl/COMBTRAN.jcl:48`) is an operating procedure, and the code does not say why.
-- **No modern equivalent.** ALTER and control block reads in the statement program (`app/cbl/CBSTM03A.CBL:266`, `app/cbl/CBSTM03A.CBL:300`). This is redesign, not transliteration.
-- **Runtime semantics.** The date rules from the Language Environment service (`app/cbl/CSUTLDTC.cbl:116`), and packed decimal rounding.
-- **The undocumented 3368 lines of account validation** in COACTUPC (`app/cbl/COACTUPC.cbl:858`).
-- **IMS, DB2 and MQ code.** Outside what this plugin analyzes.
-
-## What the ranges do not include
-
-The scheduler replacement, the target platform choice, the data cutover itself, and the decommissioning of the mainframe. Those are separate work streams that the wave plan depends on.
+| Part | Claude Code | Why | Confidence | Evidence |
+|---|---|---|---|---|
+| The four read-only master readers, the report writer once its layout is fixed, the JCL utilities, copybooks to typed records, BMS maps to UI components | Strong, with a harness | Transliteration with a comparison harness. The logic is I/O and control breaks. | medium | `app/cbl/CBACT02C.cbl:29`, `app/cbl/CBTRN03C.cbl:173` |
+| Undocumented rules that only the source states | Weak. A human decides each one. | Reject reason 103 silently overwrites 102. The interest COMPUTE truncates. Message 2513 counts as a valid date in the report screen. Next transaction id is the highest key plus one. A missing disclosure group falls back to DEFAULT. The interest run date is a JCL constant. | high | `app/cbl/CBTRN02C.cbl:417`, `app/cbl/CBACT04C.cbl:464`, `app/cbl/CORPT00C.cbl:399`, `app/cbl/COBIL00C.cbl:217`, `app/cbl/CBACT04C.cbl:437`, `app/jcl/INTCALC.jcl:22` |
+| The TRANSACT rebuild cycle | Weak on its own. Needs a person who has run it. | The behavior comes from JCL step order, an empty-cluster precondition and GDG limits, not from any program. | high | `app/jcl/TRANBKP.jcl:40`, `app/jcl/TRANBKP.jcl:54`, `app/cbl/CBTRN02C.cbl:256` |
+| The COACTUPC validation | Medium. Fast to draft, slow to trust. | 3,368 lines, 43 REDEFINES, 51 GO TOs, and 138 date and FUNCTION references. Intent has to be recovered from the code. | medium | `app/cbl/COACTUPC.cbl:573` |
+| IMS DL/I, MQ and DB2 access | Weak | The DBD, PSB and DDL files are not read, and the semantics have no clean equivalent. | medium | `app/app-authorization-ims-db2-mq/cbl/CBPAUP0C.cbl:223`, `app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl:35` |
+| Assembler routines COBDATFT and MVSWAIT | Cannot, until someone reads them | The source is in the tree but was not parsed and I did not read it. | high | `app/asm/COBDATFT.asm:1`, `app/asm/MVSWAIT.asm:1` |

@@ -5,21 +5,23 @@
   "unknown": [
     {
       "id": "PROGA",
-      "reason": "No entry point in the tree: there is no CSD, JCL or scheduler to name a transaction that starts it. It has no static caller, so it is probably a transaction entry. Provisional, no telemetry.",
+      "reason": "No entry point in the tree (no CSD, JCL or scheduler), and no program calls it. It has a COMMAREA, so it is probably a transaction entry program defined outside this tree. Its own LINK at line 16 takes its target from the COMMAREA, so it can reach any program in the region.",
       "confidence": "low",
-      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 1}]
+      "evidence": [
+        {"file": "app/cbl/PROGA.cbl", "line": 9},
+        {"file": "app/cbl/PROGA.cbl", "line": 16}
+      ]
     },
     {
       "id": "PROGB",
-      "reason": "No entry point in the tree. PROGA LINKs to it unconditionally at its first statement, so it runs whenever PROGA runs. Likely live, but liveness of PROGA is not shown. Provisional, no telemetry.",
-      "confidence": "medium",
+      "reason": "Linked from PROGA by literal name at line 12, but PROGA itself has no proven entry point, so nothing here is proven to run. Computed calls could also target it.",
+      "confidence": "low",
       "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 12}]
     },
     {
       "id": "PROGC",
-      "reason": "No entry point in the tree. PROGA reaches it through the XCTL at line 20, and WS-NEXT-PGM is set only at line 19, so it runs whenever PROGA gets that far. Likely live. Provisional, no telemetry.",
-      "confidence": "medium",
-      "inference": true,
+      "reason": "Transferred to from PROGA at line 20. WS-NEXT-PGM is assigned only once, at line 19, so that XCTL is bounded to PROGC, but PROGA has no proven entry point.",
+      "confidence": "low",
       "evidence": [
         {"file": "app/cbl/PROGA.cbl", "line": 19},
         {"file": "app/cbl/PROGA.cbl", "line": 20}
@@ -27,11 +29,10 @@
     },
     {
       "id": "PROGD",
-      "reason": "Named only by the XCTL at line 23, which follows an unconditional XCTL at line 20 that does not return, so that path looks unreachable. The computed LINK at line 16 could still target it, and a CSD outside the tree could name it as a transaction program. Keep as unknown, instrument, do not delete. Provisional, no telemetry.",
+      "reason": "Its only static edge is the XCTL at line 23, which comes after an XCTL that never returns, so PROGA probably never reaches it from there. The COMMAREA-driven LINK at line 16 could still target it. Do not treat as dead.",
       "confidence": "low",
       "inference": true,
       "evidence": [
-        {"file": "app/cbl/PROGA.cbl", "line": 16},
         {"file": "app/cbl/PROGA.cbl", "line": 20},
         {"file": "app/cbl/PROGA.cbl", "line": 23}
       ]

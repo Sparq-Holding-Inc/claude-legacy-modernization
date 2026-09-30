@@ -1,21 +1,36 @@
 # 05 Dead code
 
-Telemetry: `none`. Every claim in this file is provisional. The candidate table generated from the extractor is in `05a-dead-code-candidates.md`.
+Telemetry: none, as given by `--telemetry none`. Every claim below is provisional.
+The machine-readable version is `modernization-assessment/dead-code.json`. The generated candidate
+list is `05a-dead-code-candidates.md`. The extractor's three buckets were kept as computed.
 
-## Three buckets
+The extractor computed dormancy as of 2026-09-30 with a 5-year threshold (analysis fields `as_of` and
+`dormant_years`). No dormancy warning was raised, so an empty list here would have meant "none found",
+and the dormant list is not empty.
 
-| Bucket | Units | Confidence | Evidence |
-|---|---|---|---|
-| Unreachable (safe to propose for deletion) | none | high | inference |
-| Reachable but dormant (instrument, do not delete) | OLDPGM | medium | `app/cbl/OLDPGM.cbl:1` |
-| Unknown (a computed call could reach it) | none. There are no computed calls | high | inference |
+| Bucket | Unit | Reason | Confidence | Evidence |
+|---|---|---|---|---|
+| Unreachable | none | Every program is reachable from `job:MAINJOB` (`reachable_programs` is 3 of 3). | high | analysis field `reachable_programs` |
+| Unknown | none | There is no computed call, so nothing is held open. This holds only inside the tree. | medium | analysis field `unresolved_dynamic` |
+| Dormant | `OLDPGM` | Last modified 2011-03-04, older than 5 years. Reachable. | low | `app/cbl/OLDPGM.cbl:1` |
 
-Every program in the tree is reachable from `job:MAINJOB` (`app/jcl/MAINJOB.jcl:2`, `app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMMAIN.cbl:5`). No unit is in the unreachable or the unknown bucket, so nothing in this tree is proposed for deletion.
+## OLDPGM: old is not unused
 
-## OLDPGM: dormant, and probably live
+`PGMMAIN` calls `OLDPGM` unconditionally, as its first statement, and `PGMMAIN` is run by the only
+job in the tree. A live program that calls a dormant program unconditionally very likely runs it.
+`OLDPGM` is proposed for instrumentation, not deletion. Deleting it on the date alone would drop a
+call the nightly cycle very likely makes every run. Evidence: `app/cbl/PGMMAIN.cbl:4`,
+`app/jcl/MAINJOB.jcl:2`.
 
-The extractor lists OLDPGM as dormant because it was last modified on 2011-03-04, more than 5 years before 2026-09-30. Dormant means old, not unused. PGMMAIN calls OLDPGM unconditionally as the first thing it does (`app/cbl/PGMMAIN.cbl:4`), and MAINJOB runs PGMMAIN (`app/jcl/MAINJOB.jcl:2`). So it very likely runs on every execution. Deleting it on the date alone would change the call sequence of the nightly run.
+Two things weaken the date itself. The date comes from git, and the history has two commits, so it may
+be an import date and not the date of the last real change (inference). And `NEWPGM`, changed
+2026-05-01, may have been meant to replace `OLDPGM`, leaving the old call behind. That is a question
+for the client's engineers, not something to settle from the tree (inference).
 
-The recommendation is to instrument it and to read 12 months of job logs before anyone proposes removing it. The source is only a `GOBACK` (`app/cbl/OLDPGM.cbl:4`), so the call may be a leftover from a replacement by NEWPGM. That is inference from the names and the call order, and someone who knows the system should confirm it.
+## What the empty parts mean
 
-The dormant list is kept as the extractor computed it. Confidence is `medium` rather than `high` because there is no telemetry.
+- The job has no DD statement, and no scheduler was parsed. `unscheduled_jobs` is empty because no
+  scheduler was parsed, not because every job is scheduled. Ask whether `job:MAINJOB` still runs and
+  when. Evidence: `app/jcl/MAINJOB.jcl:1`.
+- Nothing here is a candidate for deletion. `do_not_port` in `modernization-assessment/risks.json` is
+  empty for the same reason.

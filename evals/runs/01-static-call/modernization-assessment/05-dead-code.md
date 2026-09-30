@@ -1,45 +1,43 @@
 # 05 Dead code
 
-Telemetry: none. Every claim below is provisional. The candidate tables were generated in
-`05a-dead-code-candidates.md`. The machine readable version is `dead-code.json`.
+Telemetry: `none`, given as a flag. Every claim here is provisional. Machine-readable form:
+`modernization-assessment/dead-code.json`. Candidates from the extractor: `05a-dead-code-candidates.md`.
 
-The extractor found no entry point: no CSD transaction, no JCL job, no scheduler job and no wrapper
-(`modernization-assessment/graph.json:109`). With no entry point, nothing can be proven unreachable, so
-both programs land in the unknown bucket. That is a limit of the tree, not a finding about the code.
+## Result
 
-## Unreachable
+No unit is unreachable, none is dormant, and both are unknown. The extractor put both there, and the
+assessment keeps them there.
 
-Nothing. No unit can be proven unreachable, and none is proposed for deletion.
-
-| Unit | Reason | Confidence | Evidence |
+| Bucket | Units | Confidence | Evidence |
 |---|---|---|---|
-| none | No entry point exists in the tree, so no static path can be tested. | high | `modernization-assessment/graph.json:72` |
+| Unreachable | none | not applicable | analysis: `dead_code_candidates.unreachable` is empty |
+| Reachable but dormant | none. Not measured, see below | not applicable | analysis: `warnings`, the dormant bucket was not computed |
+| Unknown | PROGA | low | `app/cbl/PROGA.cbl:1` |
+| Unknown | PROGB | low | `app/cbl/PROGA.cbl:6` |
 
-## Reachable but dormant
+## Why unknown and not unreachable
 
-Nothing. Dormancy needs a reachable program with a last-modified date older than the 5 year rule. Neither
-program has a last-modified date, because no git dates were available to the extractor (`modernization-assessment/graph.json:7`).
-No program is reachable from an entry point, because there is none.
+The tree has no entry point (analysis: `entry_points` is empty). A program can only be proven unreachable
+by a walk from an entry point, so nothing here can be. The tree also does not include the JCL and scheduler
+files that would name PROGA. A program outside the tree may start it. Deleting either on this evidence would be
+a guess. The validator forbids moving a unit from unknown to unreachable, and this assessment does not.
 
-| Unit | Reason | Confidence | Evidence |
-|---|---|---|---|
-| none | No last-modified date is available, and no unit is reachable from an entry point. | high | `modernization-assessment/graph.json:7` |
+PROGB is a special case. Its only caller is PROGA, which calls it unconditionally
+(`app/cbl/PROGA.cbl:6`). If PROGA runs, PROGB runs. The two share one fate. Inference.
 
-## Unknown
+## Dormant was not measured
 
-| Unit | Reason | Confidence | Evidence |
-|---|---|---|---|
-| PROGA | No entry point in the tree starts it. It is a batch program, so its starter (JCL or a scheduler) is probably outside the tree. Instrument it. Do not delete it. | low | `app/cbl/PROGA.cbl:1` |
-| PROGB | No entry point in the tree, but PROGA calls it unconditionally by literal name, so it runs whenever PROGA runs. Instrument it. Do not delete it. | low | `app/cbl/PROGA.cbl:6` |
+The work folder is not a git repository, so no last-modified date exists for either program
+(`app/cbl/PROGA.cbl:1`, `app/cbl/PROGB.cbl:1`, and the warning in analysis: `warnings`). The empty dormant
+list means not measured, not none. To measure it, supply the source-control history or the member-change
+dates from the mainframe library.
 
-## Computed calls
+## Unscheduled jobs
 
-There are none (`modernization-assessment/graph.json:86`). The unknown bucket is open only because no
-entry point exists, not because a computed call could reach these programs.
+`analysis.unscheduled_jobs` is empty because there are no jobs. That is a gap, not a clean bill. Ask
+whether a job runs PROGA (Open Questions in `00-summary.md`).
 
-## What to do
+## What would firm this up
 
-- Ask the client for the JCL job or scheduler entry that runs PROGA. If one exists, PROGA becomes
-  reachable and PROGB follows from the CALL at `app/cbl/PROGA.cbl:6`.
-- Ask for 12 months of job logs or SMF records for PROGA. That turns this register from speculation into
-  evidence.
+Twelve months of job logs or SMF records that show whether PROGA ran, and a listing of the production load
+library that shows whether a PROGB module exists there. Without them every line above stays provisional.

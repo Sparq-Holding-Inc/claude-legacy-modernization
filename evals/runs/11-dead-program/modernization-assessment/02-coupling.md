@@ -1,42 +1,53 @@
 # 02 Coupling
 
-`02a-edge-tables.md` holds every edge. This file holds the argument. Edge facts come from `modernization-assessment/graph.json`. Where I add something the extractor did not compute, it is labeled `inference`.
+The full edge list is in `02a-edge-tables.md`. This file is the argument. The tree is small: three programs, one job, one copybook, four edges (analysis: `edge_counts`).
 
-## What the tree contains
+## Open edges
 
-The tree is small: one JCL job with one step, three COBOL programs and one copybook. The extractor found 4 edges: 3 `call` and 1 `include`. It found no `data`, `contract` or `temporal` edge, and it left nothing unresolved (`modernization-assessment/graph.json:171`, `modernization-assessment/graph.json:151`). Nothing was skipped as not parsed. No cartographer hand-off was needed: there are no open edges to settle, against a threshold of about 20.
+The extractor left nothing open. There are no computed calls (analysis: `unresolved_dynamic` is empty), no JCL text inside a COBOL literal (analysis: `embedded_jcl` is empty), and no file listed as not parsed. All four edges are resolved and `high` confidence. That is far below the 20 that would justify the `dependency-cartographer` agent, so I read the source myself. It is five short files, and I read all of them.
+
+What I read confirms the graph and adds three inferences about what the extractor does not model.
+
+| Finding | Kind | Confidence | Evidence |
+|---|---|---|---|
+| PGMMAIN calls PGMLIVE by a literal name, so the call is static | graph fact | high | `app/cbl/PGMMAIN.cbl:4` |
+| PGMDEAD calls PGMLIVE by a literal name, so it is a caller only and nothing calls it | graph fact | high | `app/cbl/PGMDEAD.cbl:4` |
+| Step S1 runs PGMMAIN and is the only step of the only job | graph fact | high | `app/jcl/MAINJOB.jcl:2` |
+| The JCL has no `IF/THEN/ELSE` and no `COND=`, so step order is not conditional | inference | medium | `app/jcl/MAINJOB.jcl:2` |
+| No program uses EXEC CICS, EXEC SQL, an internal reader submit, or a file, so the extractor's blind spots hide nothing here | inference | medium | `app/cbl/PGMMAIN.cbl:4` |
+| PGMLIVE holds no logic, only GOBACK, which suggests a stub or an extract of a larger system | inference | low | `app/cbl/PGMLIVE.cbl:4` |
 
 ## The coupling patterns that constrain the sequence
 
-| # | Pattern | What it means for the sequence | Confidence | Evidence |
-|---|---|---|---|---|
-| 1 | One call chain: job MAINJOB, step S1, PGMMAIN, then PGMLIVE. | The job, PGMMAIN and PGMLIVE are one deployable unit. PGMLIVE has no other live caller, so it cannot move ahead of PGMMAIN without a facade. | high | `app/jcl/MAINJOB.jcl:2`, `app/cbl/PGMMAIN.cbl:4` |
-| 2 | PGMDEAD is a second, unreachable caller of PGMLIVE. | The raw edge table shows two callers of PGMLIVE. Only one is live, so the analysis counts fan-in of 1. If PGMDEAD is in fact run from outside the tree, PGMLIVE has two callers and a facade around it must serve both. | medium | `app/cbl/PGMDEAD.cbl:4`, `modernization-assessment/graph.json:172` |
-| 3 | No data, contract or temporal coupling is visible. | Nothing constrains the order of work inside the tree. It also means the tree gives no visible input or output for the nightly cycle. That is a gap in what we can see, not proof the cycle has none. The JCL has no DD statement and the programs open no file. | medium | `app/jcl/MAINJOB.jcl:2`, `app/cbl/PGMMAIN.cbl:3`, `modernization-assessment/graph.json:184` |
+1. **One linear call chain from one entry point.** `job:MAINJOB` holds step S1, which runs PGMMAIN, which calls PGMLIVE (`app/jcl/MAINJOB.jcl:2`, `app/cbl/PGMMAIN.cbl:4`). Nothing branches, so there is no way to cut this chain into two waves that each deploy and roll back on their own. It moves as one unit.
+2. **A dead caller of a live callee.** PGMLIVE has two static callers, PGMMAIN and PGMDEAD (`app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMDEAD.cbl:4`). PGMDEAD is unreachable, so the extractor counts fan-in over reachable programs only and gets 1, not 2 (analysis: `structure_basis`, `fan_in`). The dead caller puts no constraint on the sequence. Deleting PGMDEAD does not touch PGMLIVE, because PGMMAIN keeps it live.
+3. **No data, contract or temporal coupling is visible, and that is a gap, not a finding.** The tree has no dataset, no `contract` edge and no `temporal` edge (analysis: `data_hubs`, `edge_counts`). It also has no scheduler artifact (analysis: `warnings`). The order in which the real nightly cycle runs its jobs is unknown. Once someone supplies the scheduler export and the real job stream, this is the pattern most likely to constrain the sequence. Until then the wave plan holds only what this tree shows.
 
-## Clusters
+## Cluster map
 
-Cluster level only. There are two clusters and one edge between them.
+The tree is one cluster, so this graph is at unit level only because there is nothing to group.
 
 ```mermaid
-graph LR
-  D["Detached: PGMDEAD, cpy:UNUSED (unreachable)"] -->|calls PGMLIVE| L
-  L["Live nightly chain: job:MAINJOB, PGMMAIN, PGMLIVE"]
+flowchart LR
+  J["job:MAINJOB (entry point)"] --> M["PGMMAIN"] --> L["PGMLIVE"]
+  D["PGMDEAD (unreachable)"] -.-> L
+  C["cpy:UNUSED (unreferenced)"]
 ```
 
 ## Structure computed from the call graph
 
-| Fact | Result | Evidence |
-|---|---|---|
-| Strongly connected components | none. Nothing has to move as a unit beyond the call chain above. | `modernization-assessment/graph.json:180` |
-| Self recursive programs | none | `modernization-assessment/graph.json:181` |
-| God modules | none. Nothing needs a facade for being too big. | `modernization-assessment/graph.json:179` |
-| Articulation points | none reported. In a three-program chain, PGMMAIN is the natural boundary by inference, but the extractor computed none. | `modernization-assessment/graph.json:182` |
-| Data hubs | none | `modernization-assessment/graph.json:184` |
-| Unscheduled jobs | none reported, because no scheduler artifact was parsed, so the extractor has no basis to call a job unscheduled | `modernization-assessment/graph.json:185`, `modernization-assessment/graph.json:197` |
+| Fact | Units | Confidence | Evidence |
+|---|---|---|---|
+| Strongly connected components. A wave plan must not split one | none | high | analysis: `sccs` |
+| Self recursive programs | none | high | analysis: `self_recursive` |
+| God modules. They are strangled behind a facade, never ported wholesale | none | high | analysis: `god_modules` |
+| Articulation points. They are the natural wave boundaries | none | high | analysis: `articulation_points` |
+| Data hubs | none | high | analysis: `data_hubs` |
+
+With no strongly connected component, no god module and no articulation point, the plan needs no facade and no internal cut.
 
 ## The honest boundary
 
-- **Computed calls.** There are none. Both CALL statements name their target as a literal (`app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMDEAD.cbl:4`). Because there is no computed call in the tree, the unknown dead-code bucket is empty. That holds for this tree only. A computed call in code outside the tree could still reach PGMDEAD (inference).
-- **Scheduler.** No scheduler artifact was parsed. The order jobs run in across jobs is unknown, and so is whether MAINJOB runs nightly (`modernization-assessment/graph.json:197`). Treating MAINJOB as the nightly batch cycle the client named is inference. The JCL says only that it is class A (`app/jcl/MAINJOB.jcl:1`).
-- **Not modeled.** `IF/THEN/ELSE` and `COND=` are not modeled, nested PROCs and the internal reader are not followed, and only Control-M XML and shell wrappers are read as schedulers (`modernization-assessment/graph.json:9`). The two-line JCL uses none of these, so they do not change this graph. They do limit what we can say about anything outside the tree.
+- **Computed calls.** None. The extractor resolved every call by literal name (analysis: `unresolved_dynamic`). A computed call elsewhere in the real system, outside this tree, is invisible to this assessment.
+- **Scheduler.** One JCL job is in the tree and no scheduler artifact was parsed (analysis: `warnings`). Cross-job order is unknown.
+- **What the tree is.** PGMMAIN and PGMLIVE contain no business logic (`app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMLIVE.cbl:4`). This may be a fragment of a larger system. Everything below is scoped to the tree as given. That is inference.

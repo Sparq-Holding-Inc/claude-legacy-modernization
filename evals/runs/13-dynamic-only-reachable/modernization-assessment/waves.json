@@ -3,17 +3,24 @@
   "waves": [
     {
       "wave": 1,
-      "name": "Main job and its dispatcher",
-      "units": ["job:MAINJOB", "PGMMAIN", "HIDDEN01"],
-      "rationale": "The tree is one job, one step and two programs, so it is one wave. HIDDEN01 rides with PGMMAIN because the computed call at line 9 may name it, and a port that drops it could break a call nobody can see. This is not a low-risk first wave: PGMMAIN is high-high, so the wave is ported behind a facade and only after the target set is known.",
-      "unblocks": "Running the main job off the legacy platform, and a bounded list of the programs PGMMAIN can dispatch to, which the client does not have today.",
-      "blast_radius": "high",
+      "family": "batch-readonly",
+      "name": "Program dispatcher batch job",
+      "units": ["PGMMAIN", "job:MAINJOB"],
+      "rationale": "The extractor found no dataset edge for this job, so the seed puts it in the read-only batch family. That label rests on facts the extractor could see. PGMMAIN calls a program named at run time (app/cbl/PGMMAIN.cbl:9), so what the job really reads and writes is bounded only by whatever program it dispatches to. This is a sound first wave only for proving the toolchain on a tiny unit. It is not a proven low-risk wave until the callee set is known.",
+      "unblocks": "Nothing that the graph shows. There are no shared datasets, copybooks or callers, so on this evidence wave 1 is a chore that proves the toolchain and the equivalence harness. It also forces the answer to what PGMMAIN dispatches to.",
+      "blast_radius": "medium",
       "confidence": "low",
       "evidence": [
-        {"file": "app/jcl/MAINJOB.jcl", "line": 2},
+        {"file": "app/jcl/MAINJOB.jcl", "line": 1},
         {"file": "app/cbl/PGMMAIN.cbl", "line": 9}
       ]
     }
   ],
-  "unassigned": []
+  "unassigned": [
+    {
+      "id": "HIDDEN01",
+      "reason": "No static path reaches it, but the computed call at app/cbl/PGMMAIN.cbl:9 could. If the client confirms PGMMAIN dispatches to it, it must move with wave 1, because a port of PGMMAIN without it breaks the dispatch. It stays unplaced until the callee set is bounded."
+    }
+  ],
+  "deviations": []
 }

@@ -3,18 +3,16 @@
   "waves": [
     {
       "wave": 1,
-      "name": "MAINJOB and its three programs",
-      "units": ["job:MAINJOB", "PGMMAIN", "OLDPGM", "NEWPGM"],
-      "rationale": "The whole system is one job with one step that runs one program, which calls two empty subprograms. Splitting it gives waves that deliver nothing a stakeholder can name and have no testable boundary of their own.",
-      "unblocks": "Proves the toolchain and the test harness on a system with no data coupling. It also turns the OLDPGM dormancy question into an answered one, because wave 1 instruments it.",
+      "family": "batch-readonly",
+      "name": "Nightly batch cycle, whole system",
+      "units": ["NEWPGM", "OLDPGM", "PGMMAIN", "job:MAINJOB"],
+      "rationale": "The tree holds one job, one driver program and two subprograms, and no dataset, so nothing in it is shared with another entry point. The seed puts all four units in the batch-readonly family and there is no fact that would cut them apart. The wave is deployable and rollable back as one unit, by switching the JCL step back to the legacy PGMMAIN. Its boundary is testable only at job level (return code, job log, and any output the client holds), because the extractor sees no files. This is the whole system in one wave, so a single wave is a big-bang for these four units. Its name is an inference: the job is the only entry point, and it is taken to be the nightly batch cycle the client said must not break.",
+      "unblocks": "Nothing else in this tree. It is the only wave, so it is the whole nightly batch cycle. Per the skill this is a chore with no dependent wave, unless the client's full system holds more than this fragment.",
       "blast_radius": "medium",
-      "confidence": "medium",
-      "evidence": [
-        {"file": "app/jcl/MAINJOB.jcl", "line": 2},
-        {"file": "app/cbl/PGMMAIN.cbl", "line": 4},
-        {"file": "app/cbl/PGMMAIN.cbl", "line": 5}
-      ]
+      "confidence": "low",
+      "evidence": [{"file": "app/jcl/MAINJOB.jcl", "line": 1}, {"file": "app/jcl/MAINJOB.jcl", "line": 2}, {"file": "app/cbl/PGMMAIN.cbl", "line": 4}, {"file": "app/cbl/PGMMAIN.cbl", "line": 5}]
     }
   ],
-  "unassigned": []
+  "unassigned": [],
+  "deviations": []
 }

@@ -1,45 +1,73 @@
 # 00 Summary
 
+Assessment of the tree in `.` (3 COBOL programs, 1 JCL job, 14 lines of COBOL and 2 of JCL).
+
 ## Scoping answers
 
 | Question | Answer | Source |
 |---|---|---|
-| Scope | `.` (the work folder) | argument |
-| Target state | `refactor` | flag `--target refactor` |
+| Target state | refactor | flag `--target refactor` |
 | What must not break | the nightly batch cycle | flag `--must-not-break` |
-| Runtime telemetry | `none`. Every dead-code claim is provisional | flag `--telemetry none` |
+| Runtime telemetry | none | flag `--telemetry none` |
 
-All three answers came as flags in a non-interactive run, so no defaults were applied.
+All three came as flags, so no defaults applied. This was a non-interactive run and no question was asked.
 
-## What was found
+## Result
 
-A very small system: one JCL job (MAINJOB), one step that runs PGMMAIN, and two subprograms, OLDPGM and NEWPGM, that PGMMAIN calls in that order (`app/jcl/MAINJOB.jcl:2`, `app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMMAIN.cbl:5`). It is 16 lines in total. The extractor found no computed calls, no copybooks, no datasets, no strongly connected components and no god modules. Nothing was left unparsed.
+- Waves: 1. The extractor's seed was kept, with no deviations (`modernization-assessment/waves.json`).
+  One entry point (`job:MAINJOB`) and one family (batch-readonly) hold all 4 units.
+- Single largest risk: removing `OLDPGM` as dead code. It is old by date (last modified 2011-03-04) but
+  `PGMMAIN` calls it unconditionally, first, in the only job in the tree, so it very likely runs every
+  night. It is proposed for instrumentation, not deletion. Evidence: `app/cbl/PGMMAIN.cbl:4`,
+  `app/cbl/OLDPGM.cbl:1`.
+- Risk quadrants: `PGMMAIN` and `job:MAINJOB` are low-high, `OLDPGM` and `NEWPGM` are low-low. Port
+  difficulty is 1 everywhere because there is no logic in the tree. The work is verification.
+- Dead code: 0 unreachable, 0 unknown, 1 dormant (`OLDPGM`). All provisional, since there is no telemetry.
+- Estimate: 6 to 13 person-days for wave 1, most of it collecting the oracle and running the harness
+  (`04-estimate.md`). It holds only if the tree is the whole nightly cycle.
 
-| Result | Value | Confidence | Evidence |
-|---|---|---|---|
-| Wave count | 1. A system this size is one wave. See `03-waves.md` | medium | `app/jcl/MAINJOB.jcl:2` |
-| Effort for wave 1 | 5 to 12 person-days, dominated by getting an oracle rather than by code. See `04-estimate.md` | low | inference |
-| Dead code | Nothing unreachable, nothing unknown. OLDPGM is dormant (last modified 2011-03-04) but called unconditionally, so it probably runs | medium | `app/cbl/PGMMAIN.cbl:4` |
+## Open Questions for the client's engineers
 
-## Single largest risk
+1. `OLDPGM` and `NEWPGM` contain only `GOBACK`, and `PGMMAIN` only two calls. Is this tree a stub, a
+   redacted copy, or a fragment? Where is the real business logic? (`app/cbl/OLDPGM.cbl:4`,
+   `app/cbl/NEWPGM.cbl:4`)
+2. Does `OLDPGM` still do anything the cycle needs? Was `NEWPGM` (changed 2026-05-01) meant to replace it,
+   leaving the call to `OLDPGM` behind? Is the order OLDPGM then NEWPGM significant?
+   (`app/cbl/PGMMAIN.cbl:4-5`)
+3. Is `job:MAINJOB` the nightly batch cycle, and what runs it? No scheduler was parsed, so the schedule,
+   predecessors and successors are unknown. Please supply the scheduler export
+   (Control-M, CA-7, cron or other). (`app/jcl/MAINJOB.jcl:1`)
+4. Can you supply job logs or SMF records for 12 months showing whether `OLDPGM` ran? Without them the
+   dormant finding stays provisional. Is the 2011-03-04 date a real last change, or an import date? The
+   dates come from a git history of two commits.
+5. What does the nightly cycle produce (reports, extracts, partner files, return codes), and are they
+   archived? The JCL has no DD statement, so the tree shows no input or output. This is the oracle.
+   (`app/jcl/MAINJOB.jcl:2`)
+6. Are there other entry points not in this tree (other jobs, CICS transactions, ad hoc submits) that
+   run `PGMMAIN` or call these programs? A caller outside the tree would not show in the graph.
+7. Does anyone on the team read COBOL, and which compiler options (TRUNC, arithmetic mode) were used?
+   These matter for any numeric field in the real logic.
 
-The requirement is that the nightly batch cycle must not break, and this tree cannot show that cycle. It holds one job and no scheduler export, so where MAINJOB sits, what runs before and after it, and which order must hold across jobs are all unknown. The two subprograms are one-statement `GOBACK` programs (`app/cbl/OLDPGM.cbl:4`, `app/cbl/NEWPGM.cbl:4`), so the source also gives no observable behavior to compare a port against. The wave plan and the test strategy are provisional until both gaps are closed. Confidence: low, since it rests on what is absent (inference).
+## Files the extractor could not parse
 
-A near second risk: OLDPGM looks dead by age and is not. Deleting it on the date alone would change what the nightly run does (`app/cbl/PGMMAIN.cbl:4`).
+None. `unparsed` is empty (3 COBOL and 1 JCL file seen, `meta.files_seen`).
 
-## Open Questions
+## Extractor limits that touch this system (`meta.limits`)
 
-For the client's engineers.
+| Limit | Why it matters here | Evidence |
+|---|---|---|
+| Only Control-M XML and shell wrappers are read as schedulers | No scheduler was parsed, so temporal coupling and unscheduled jobs are not assessed | analysis field `warnings` |
+| IF/THEN/ELSE and COND= in JCL are not modeled | The job has one step and no COND, but the client's production JCL may | `app/jcl/MAINJOB.jcl:2` |
+| A called subprogram gets no DDs from its caller's JCL step | `OLDPGM` and `NEWPGM` may use files the step supplies. The JCL has none. | `app/jcl/MAINJOB.jcl:2` |
+| COBOL is read as fixed format | A free-format file would be listed as not parsed. None were. | analysis field `unparsed` |
+| DCB, LRECL and RECFM are not read | Any record length on a real DD is not compared with a layout | inference |
 
-1. Is MAINJOB the nightly batch cycle, or one job in it? Please send the scheduler export. Nothing was parsed, and the extractor warned that cross-job order is unknown (`app/jcl/MAINJOB.jcl:1`).
-2. Are the deployed load modules for OLDPGM and NEWPGM built from these four line sources? Both only `GOBACK` (`app/cbl/OLDPGM.cbl:4`, `app/cbl/NEWPGM.cbl:4`). If they hold logic that is not in this tree, the assessment changes a great deal.
-3. Does OLDPGM still do anything? It has not changed since 2011 and PGMMAIN still calls it first (`app/cbl/PGMMAIN.cbl:4`). Can you provide 12 months of job logs or SMF records showing whether it runs?
-4. Why does PGMMAIN call both OLDPGM and NEWPGM? The names suggest a replacement in progress (inference). Which one is authoritative, and does the order matter (`app/cbl/PGMMAIN.cbl:5`)?
-5. The step has no DD statements, and neither program touches a file (`app/jcl/MAINJOB.jcl:2`). Is that right, or are DDs, IF/THEN/ELSE or COND= supplied by a proc, an override or a production copy of the JCL that differs from this one?
-6. What does the nightly run produce that anyone reads or that leaves the building (reports, partner files, downstream feeds)? None is visible, and it is the only source of an oracle (`app/jcl/MAINJOB.jcl:2`).
-7. Extractor limits that touch this system: JCL IF/THEN/ELSE and COND= are not modeled, nested PROCs and jobs submitted through the internal reader are not followed, and only Control-M XML and shell wrappers are read as schedulers. Is any other scheduler (CA-7, TWS, other) or internal reader submission in use around MAINJOB? (inference)
-8. Which environment and toolchain will the refactored code run in, and who on the team can read COBOL? The estimate assumes someone can (inference).
+The other limits (COPY REPLACING, computed calls, nested PROCs and embedded JCL, CICS RETURN and SEND
+MAP, IDCAMS and SORT cards, LINK versus XCTL) do not touch this tree, because it has no copybook, no
+computed call, no proc, no CICS and no utility step.
 
-## Files
+## Files in `modernization-assessment/`
 
-`01-inventory.md`, `02-coupling.md`, `02a-edge-tables.md`, `03-waves.md`, `04-estimate.md`, `05-dead-code.md`, `05a-dead-code-candidates.md`, `06-test-strategy.md`, and the four JSON files `graph.json`, `waves.json`, `risks.json`, `dead-code.json`.
+`graph.json`, `01-inventory.md`, `02a-edge-tables.md`, `02-coupling.md`, `03a-wave-seed.md`,
+`03a-waves-draft.json`, `03-waves.md`, `waves.json`, `risks.json`, `04-estimate.md`,
+`05a-dead-code-candidates.md`, `05-dead-code.md`, `dead-code.json`, `06-test-strategy.md`.

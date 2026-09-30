@@ -1,33 +1,50 @@
 # 03 Waves
 
-Target state: `refactor` (given as a flag). Ordering rule: the earliest wave maximizes learning per unit of blast radius, not business value. Risk scores are in `risks.json`.
+Target state: refactor (given as a flag). The wave plan is the extractor's seed, kept as it is. There
+are no deviations. The machine-readable plan is `modernization-assessment/waves.json`.
 
-## Decision: one wave
+## The plan
 
-The system is one job, one step and three programs, 16 lines in all (`app/jcl/MAINJOB.jcl:2`, `app/cbl/PGMMAIN.cbl:6`). A system that is one job and a handful of programs is one wave. The alternatives all fail the four tests:
-
-- A wave for OLDPGM and NEWPGM, then a wave for PGMMAIN and MAINJOB, would make a first wave that delivers nothing a stakeholder can name. Each subprogram is a `GOBACK` and nothing else (`app/cbl/OLDPGM.cbl:4`, `app/cbl/NEWPGM.cbl:4`). It also has no boundary of its own to test, since neither reads or writes any data.
-- Rollback of the subprograms is not independent of PGMMAIN, which calls both (`app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMMAIN.cbl:5`).
-
-## Wave table
-
-| Wave | Units | Quadrants (port difficulty first) | Blast radius | Confidence | Unblocks | Evidence |
+| Wave | Family | Units | Blast radius | Confidence | Unblocks | Evidence |
 |---|---|---|---|---|---|---|
-| 1 | `job:MAINJOB`, `PGMMAIN`, `OLDPGM`, `NEWPGM` | low-high, low-high, low-low, low-low | medium | medium | The toolchain and the test harness, on a system with no data coupling. It also settles whether OLDPGM is live. | `app/jcl/MAINJOB.jcl:2`, `app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMMAIN.cbl:5` |
+| 1 | batch-readonly | `job:MAINJOB`, `PGMMAIN`, `OLDPGM`, `NEWPGM` | medium | low | Nothing further in this tree. It is the whole nightly batch cycle. | `app/jcl/MAINJOB.jcl:1`, `app/cbl/PGMMAIN.cbl:4` |
 
-The wave passes the four tests:
+## Why one wave
 
-1. Independent deploy: swap the one step behind a flag or a facade (`app/jcl/MAINJOB.jcl:2`).
-2. Independent rollback: point the step back at the legacy load module.
-3. Testable boundary: the step's return code and its job log, since it has no datasets. Weak, and covered in `06-test-strategy.md`.
-4. Nameable delivery: a modernized MAINJOB in the nightly cycle. This depends on MAINJOB being part of that cycle, which is inference until a scheduler export arrives.
+There is one entry point, `job:MAINJOB`, and every program is reachable only through it, so there is
+one family (`analysis.wave_seed`). No strongly connected component, god module or must-not-break item
+forces a unit into another wave. No wave holds more than 25 units, so there is no reason to cut at
+the articulation point `PGMMAIN`. The skill says not to invent waves, so none was invented.
 
-Two units score `low-high` because their port is trivial but a wrong step in the nightly cycle stops it. The quadrant guide says a `low-high` unit is safe early only once the equivalence harness is proven. With one wave, the harness has to be built first inside the wave. Nothing here is `high-high`.
+## The four tests for a valid wave
 
-## What I would cut if this were ten times larger
+| Test | Holds? | Evidence |
+|---|---|---|
+| Deployable independently, behind a flag or a facade | Yes. The job step can point at the legacy or the new `PGMMAIN`. | `app/jcl/MAINJOB.jcl:2` |
+| Rollback independently | Yes. Point the step back at the legacy `PGMMAIN`. The tree shows no write to a system of record. | inference |
+| Testable boundary | Weak. The boundary is the job's return code and log, plus any output the client holds. The tree has no dataset to compare. | analysis field `data_hubs` |
+| Delivers something a stakeholder can name | Yes, if `job:MAINJOB` is the nightly batch cycle. That match is an assumption, not a fact in the tree. | inference |
 
-Inference. I would put the leaf subprograms with no data coupling and no dormant history in the first wave, because they are the `low-low` set. I would leave the caller that makes the articulation point (PGMMAIN here) for a later wave, behind a facade. I would keep any strongly connected component whole. And I would order jobs by the scheduler's before and after edges, which the tree does not give us today.
+## What this wave is, said plainly
 
-## Unassigned
+- A wave that holds the whole system is a big-bang cutover for four units. That is acceptable here
+  only because the units are tiny (14 lines of COBOL in total, `analysis` field `node_counts` and
+  `01-inventory.md`). If the client's real cycle has more code than this tree, this plan is wrong and
+  must be redone on the full tree.
+- The wave unblocks nothing else. By the skill's rule that makes it a chore unless it proves the
+  toolchain and the equivalence harness for later work. It does that, and no more.
+- `OLDPGM` looks dormant by date (2011-03-04) but `PGMMAIN` calls it unconditionally. Whatever
+  target the client picks, `OLDPGM` moves with this wave and is not cut.
 
-None. Every reachable unit is in wave 1.
+## Risk quadrants (from `modernization-assessment/risks.json`)
+
+| Unit | Quadrant | Wave | Confidence | Evidence |
+|---|---|---|---|---|
+| `PGMMAIN` | low-high | 1 | medium | `app/cbl/PGMMAIN.cbl:4` |
+| `job:MAINJOB` | low-high | 1 | low | `app/jcl/MAINJOB.jcl:2` |
+| `OLDPGM` | low-low | 1 | low | `app/cbl/OLDPGM.cbl:4` |
+| `NEWPGM` | low-low | 1 | low | `app/cbl/NEWPGM.cbl:4` |
+
+Port difficulty is 1 for every unit, because there is no logic in the tree to port. The verification
+is the work, not the port. Two units are low-high: easy to port, and costly if wrong because the job is
+the only entry point and the client named the nightly cycle as must-not-break.

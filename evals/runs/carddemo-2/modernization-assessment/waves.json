@@ -3,22 +3,108 @@
  "waves": [
   {
    "wave": 1,
-   "name": "Read-only master listings",
+   "family": "batch-utility",
+   "name": "Utilities and plumbing",
    "units": [
-    "CBACT02C",
-    "CBACT03C",
-    "CBCUS01C",
-    "job:READCARD",
-    "job:READXREF",
-    "job:READCUST",
-    "job:PRTCATBL",
-    "proc:REPROC"
+    "job:CBADMCDJ",
+    "job:CLOSEFIL",
+    "job:DALYREJS",
+    "job:DEFCUST",
+    "job:DEFGDGB",
+    "job:ESDSRRDS",
+    "job:FTPJCLS",
+    "job:LISTFILS",
+    "job:OPENFIL",
+    "job:RACFCMDS",
+    "job:REPTFILE",
+    "sch:DAILY-TransactionBackup/CLOSEFIL",
+    "sch:DAILY-TransactionBackup/OPENFIL",
+    "sch:MONTHLY-InterestCalculation/CLOSEFIL",
+    "sch:MONTHLY-InterestCalculation/OPENFIL",
+    "sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL",
+    "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL"
    ],
-   "rationale": "Three 130 line programs that each read one master and write nothing, plus the category balance listing. They prove the build, the KSDS read path and the diff harness on the smallest surface, and later they serve as the readback check after a master refresh.",
-   "unblocks": "The KSDS read layer and the zoned decimal record codec for the card, xref and customer layouts (CVACT02Y, CVACT03Y, CVCUS01Y), which every later wave reuses.",
+   "rationale": "Batch jobs that run no application program and touch no shared data: CICS file close and open, GDG base definitions, RACF and CSD utilities. This is a sound first wave for proving the toolchain and measuring velocity, and it is close to a chore for the business. Six of the 17 units are Control-M rows that only run CLOSEFIL or OPENFIL. Four jobs left it because the extractor could not see what they touch: TRANIDX (an index over the transaction master), and MNTTRDB2, TRANEXTR and CREADB2 (DB2). See deviations. DEFGDGB defines the GDG bases for TRANSACT.BKUP, SYSTRAN and TRANREPT that every later wave writes.",
+   "unblocks": "The CICS close and open bracket that every refresh uses, and the GDG bases that POSTTRAN, INTCALC and TRANREPT write. Nothing else waits on it, so it is a toolchain proof more than a deliverable.",
    "blast_radius": "low",
    "confidence": "medium",
    "evidence": [
+    {
+     "file": "app/app-transaction-type-db2/jcl/CREADB21.jcl",
+     "line": 1
+    },
+    {
+     "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
+     "line": 1
+    },
+    {
+     "file": "app/app-transaction-type-db2/jcl/TRANEXTR.jcl",
+     "line": 1
+    },
+    {
+     "file": "app/jcl/DEFGDGB.jcl",
+     "line": 25
+    },
+    {
+     "file": "app/jcl/CLOSEFIL.jcl",
+     "line": 26
+    },
+    {
+     "file": "app/jcl/OPENFIL.jcl",
+     "line": 26
+    },
+    {
+     "file": "samples/jcl/RACFCMDS.jcl",
+     "line": 1
+    },
+    {
+     "file": "app/jcl/DEFGDGB.jcl",
+     "line": 37
+    }
+   ]
+  },
+  {
+   "wave": 2,
+   "family": "batch-readonly",
+   "name": "Read-only batch readers",
+   "units": [
+    "CBACT01C",
+    "CBACT02C",
+    "CBACT03C",
+    "CBCUS01C",
+    "CBIMPORT",
+    "COBSWAIT",
+    "job:CBIMPORT",
+    "job:READACCT",
+    "job:READCARD",
+    "job:READCUST",
+    "job:READXREF",
+    "job:WAITSTEP",
+    "sch:DAILY-TransactionBackup/WAITSTEP",
+    "sch:MONTHLY-InterestCalculation/WAITSTEP",
+    "sch:WEEKLY-DisclosureGroupsRefresh/WAITSTEP"
+   ],
+   "rationale": "CBACT01C, CBACT02C, CBACT03C and CBCUS01C read one master each and write nothing another entry point uses, so they can be compared against legacy output without risk to any master. CBIMPORT writes work files only. This is a sound wave: it proves the four master layouts (CVACT01Y, CVACT02Y, CVACT03Y, CVCUS01Y) and the comparison harness. The three WAITSTEP scheduler rows and COBSWAIT are a timer, not logic.",
+   "unblocks": "The harness and the decimal and record layout conversions for the account, card, cross-reference and customer masters. Waves 3, 5 and 6 reuse both.",
+   "blast_radius": "low",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/CBIMPORT.jcl",
+     "line": 1
+    },
+    {
+     "file": "app/jcl/READACCT.jcl",
+     "line": 1
+    },
+    {
+     "file": "app/jcl/READCARD.jcl",
+     "line": 1
+    },
+    {
+     "file": "app/cbl/CBACT01C.cbl",
+     "line": 29
+    },
     {
      "file": "app/cbl/CBACT02C.cbl",
      "line": 29
@@ -32,260 +118,229 @@
      "line": 29
     },
     {
-     "file": "app/jcl/PRTCATBL.jcl",
-     "line": 47
-    }
-   ]
-  },
-  {
-   "wave": 2,
-   "name": "Packed decimal and REDEFINES patterns",
-   "units": [
-    "CBACT01C",
-    "CBEXPORT",
-    "CBIMPORT",
-    "job:READACCT",
-    "job:CBEXPORT",
-    "job:CBIMPORT"
-   ],
-   "rationale": "The only batch programs that use COMP-3, OCCURS, REDEFINES and an assembler date call. They only read the masters, so the team learns the hard data patterns where a mistake cannot reach a system of record.",
-   "unblocks": "The packed decimal and multi-record codec, and an export then import round trip that can generate test data for waves 3 to 6.",
-   "blast_radius": "low",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/cbl/CBACT01C.cbl",
-     "line": 67
-    },
-    {
-     "file": "app/cbl/CBACT01C.cbl",
-     "line": 231
-    },
-    {
-     "file": "app/cpy/CVEXPORT.cpy",
-     "line": 24
-    },
-    {
-     "file": "app/jcl/CBEXPORT.jcl",
-     "line": 32
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 37
     }
    ]
   },
   {
    "wave": 3,
-   "name": "Master refresh",
+   "family": "online-readonly",
+   "name": "Sign-on, menus and read-only screens",
    "units": [
-    "job:CLOSEFIL",
-    "job:OPENFIL",
-    "job:DEFGDGB",
-    "job:DEFGDGD",
-    "job:REPTFILE",
-    "job:ACCTFILE",
-    "job:CARDFILE",
-    "job:XREFFILE",
-    "job:CUSTFILE",
-    "job:DISCGRP",
-    "job:TCATBALF",
-    "job:TRANCATG",
-    "job:TRANTYPE",
-    "job:TRANFILE",
-    "job:DUSRSECJ",
-    "sch:scripts/remote_refresh.sh",
-    "sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL",
-    "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP",
-    "sch:WEEKLY-DisclosureGroupsRefresh/WAITSTEP",
-    "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL"
+    "COACTVWC",
+    "COADM01C",
+    "COCRDSLC",
+    "COMEN01C",
+    "COSGN00C",
+    "COTRN00C",
+    "COTRN01C"
    ],
-   "rationale": "First wave on the must-not-break list. There is no COBOL, but every job deletes and rebuilds a master with key lengths and alternate index offsets typed into the JCL. Waves 1 and 2 read the result back, and that is why this comes third and not first.",
-   "unblocks": "A byte exact master build (KEYS, RECORDSIZE and AIX offsets) that waves 4 to 8 read, and the fenced close and open of the CICS files around a refresh.",
-   "blast_radius": "high",
+   "rationale": "COSGN00C, COMEN01C and COADM01C are one strongly connected component. They move together, and every screen program XCTLs back into them. COTRN00C and COTRN01C are the other component here. The menu options are a table, so the ported menu still has to reach programs that stay on the old side until waves 5, 6 and 7. That makes the menu the facade for the online side. The read-only views (COACTVWC, COCRDSLC, COTRN00C, COTRN01C) are the first screens a user can see on the new platform. CORPT00C and CSUTLDTC left this wave. See deviations.",
+   "unblocks": "The front door. Sign-on and the menu can route to new or legacy screens from this wave on, which lets waves 5 and 6 cut over one screen at a time.",
+   "blast_radius": "medium",
    "confidence": "medium",
    "evidence": [
     {
-     "file": "app/jcl/ACCTFILE.jcl",
-     "line": 40
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 317
     },
     {
-     "file": "app/jcl/CARDFILE.jcl",
-     "line": 85
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 327
     },
     {
-     "file": "app/jcl/XREFFILE.jcl",
-     "line": 74
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 347
     },
     {
-     "file": "scripts/remote_refresh.sh",
-     "line": 17
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 223
+    },
+    {
+     "file": "app/cpy/COMEN02Y.cpy",
+     "line": 21
+    },
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 156
     }
    ]
   },
   {
    "wave": 4,
-   "name": "Transaction report",
+   "family": "batch-data-jobs",
+   "name": "Data load and refresh utilities",
    "units": [
-    "CBTRN03C",
-    "job:TRANREPT",
-    "proc:TRANREPT"
+    "job:CBLDBMS",
+    "job:CICCMP",
+    "job:CIDBCMP",
+    "job:CNJBATMP",
+    "job:CUSTFILE",
+    "job:DEFGDGD",
+    "job:DISCGRP",
+    "job:DUSRSECJ",
+    "job:IMSMQCMP",
+    "job:INTRDRJ1",
+    "job:INTRDRJ2",
+    "job:PRTCATBL",
+    "job:REPRTEST",
+    "job:SORTTEST",
+    "job:TCATBALF",
+    "job:TRANCATG",
+    "job:TRANFILE",
+    "job:TRANTYPE",
+    "job:TXT2PDF1",
+    "job:XREFFILE",
+    "proc:BLDCIDB2",
+    "proc:BUILDBAT",
+    "proc:BUILDBMS",
+    "proc:BUILDONL",
+    "proc:REPROC",
+    "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP"
    ],
-   "rationale": "Second must-not-break item. It reads the transaction master and three reference files, so the new report can run beside the legacy one and be diffed byte for byte. The one write side effect is a new generation of the transaction backup group on every run, which the new report must not repeat against the legacy group. Its output also becomes the oracle that wave 6 uses to prove the transaction master.",
-   "unblocks": "The report diff oracle for wave 6, and one implementation of logic that exists three times today: in the job, in the proc, and in the JCL text inside CORPT00C.",
+   "rationale": "IDCAMS, SORT and IEBGENER jobs that delete, define and reload master and reference files. The extractor infers their modes from DISP only, so the writes are guesses. The wave holds 26 units and I did not cut it: 11 are toolchain build and sample jobs and procs that are not ported (see risks.json do_not_port), which leaves 15. It is the weakest wave. It runs ahead of the programs that own the data (waves 5 and 6), so until those move, each job runs against a replica, not the master. Seven units left because must-not-break items force them into wave 5. CUSTFILE, DISCGRP, TRANTYPE, DUSRSECJ, XREFFILE and TCATBALF have the same shape and stay here, because the client did not name them.",
+   "unblocks": "The reload path for the new platform's master files. It is a chore for the business, and nothing stakeholders name depends on it alone.",
    "blast_radius": "high",
-   "confidence": "medium",
+   "confidence": "low",
    "evidence": [
     {
-     "file": "app/jcl/TRANREPT.jcl",
-     "line": 59
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 58
     },
     {
-     "file": "app/jcl/TRANREPT.jcl",
-     "line": 33
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 72
     },
     {
      "file": "app/jcl/COMBTRAN.jcl",
-     "line": 24
+     "line": 25
     },
     {
-     "file": "app/cbl/CBTRN03C.cbl",
-     "line": 177
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 22
     },
     {
-     "file": "app/proc/TRANREPT.prc",
-     "line": 1
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 35
+    },
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 22
     }
    ]
   },
   {
    "wave": 5,
-   "name": "Online front door and read-only screens",
+   "family": "batch-writers",
+   "name": "Posting cycle, interest, statements and the transaction report",
    "units": [
-    "COSGN00C",
-    "COMEN01C",
-    "COADM01C",
-    "COACTVWC",
-    "COCRDLIC",
-    "COCRDSLC",
-    "COTRN00C",
-    "COTRN01C",
-    "COUSR00C",
+    "CBACT04C",
+    "CBEXPORT",
+    "CBSTM03A",
+    "CBSTM03B",
+    "CBTRN02C",
+    "CBTRN03C",
+    "job:CBEXPORT",
+    "job:CREASTMT",
+    "job:INTCALC",
+    "job:POSTTRAN",
+    "job:TRANREPT",
+    "sch:MONTHLY-InterestCalculation/INTCALC",
+    "sch:scripts/run_full_batch.sh",
+    "sch:scripts/run_interest_calc.sh",
+    "sch:scripts/run_posting.sh",
+    "job:TRANBKP",
+    "sch:DAILY-TransactionBackup/TRANBKP",
+    "job:TRANIDX",
+    "job:COMBTRAN",
+    "sch:MONTHLY-InterestCalculation/COMBTRAN",
+    "job:ACCTFILE",
+    "job:CARDFILE",
+    "sch:scripts/remote_refresh.sh",
     "CORPT00C",
+    "proc:TRANREPT",
     "CSUTLDTC"
    ],
-   "rationale": "The sign-on, menu and admin menu programs are one strongly connected component and every screen transfers back into them, so a screen cannot move without the front door. The wave builds the routing facade that lets later online waves be strangled one screen at a time, and the read-only screens give a second way to inspect the masters.",
-   "unblocks": "The facade that routes each menu option to legacy or new code, which waves 8 and 9 need, and account and transaction screens that cross-check wave 6.",
-   "blast_radius": "high",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/cbl/COSGN00C.cbl",
-     "line": 231
-    },
-    {
-     "file": "app/cbl/COMEN01C.cbl",
-     "line": 156
-    },
-    {
-     "file": "app/cpy/COMEN02Y.cpy",
-     "line": 28
-    }
-   ]
-  },
-  {
-   "wave": 6,
-   "name": "Daily transaction posting",
-   "units": [
-    "CBTRN02C",
-    "job:POSTTRAN",
-    "job:TRANBKP",
-    "job:TRANIDX",
-    "job:DALYREJS",
-    "sch:scripts/run_posting.sh",
-    "sch:DAILY-TransactionBackup/CLOSEFIL",
-    "sch:DAILY-TransactionBackup/TRANBKP",
-    "sch:DAILY-TransactionBackup/WAITSTEP",
-    "sch:DAILY-TransactionBackup/OPENFIL"
-   ],
-   "rationale": "Third must-not-break item and the highest risk batch unit. It is strangled, not ported: the new posting runs in parallel on a copy of the masters against the same daily file, the diff is signed off cycle by cycle, and cutover happens only after the report and screen oracles from waves 4 and 5 agree. TRANBKP and TRANIDX move with it because the posting program opens the transaction file for OUTPUT and only works on a file TRANBKP just emptied.",
-   "unblocks": "The month end wave, which reads the balances and category balances this wave writes, and the online writers, which share the transaction and account masters.",
+   "rationale": "The core financial batch. The seed's family is batch jobs that write shared data. I added the jobs the client's must-not-break list forces in: the account and card refresh, the TRANSACT backup, rebuild and index jobs, and the online report entry with the proc it submits. The wave holds 26 units and is not cut. The only cut with a boundary is at CBTRN02C (an articulation point), which would put the read side (report, statements, export) in a later wave. That leaves the new TRANSACT replicated back to legacy readers for a whole wave, so it costs more than it isolates. CBTRN02C is high-high and a must-not-break item, so it cannot go last: the data facade is what sits in front of it. TRANSACT is also written online by COBIL00C and COTRN02C, and ACCTDATA by COACTUPC and COBIL00C, all in wave 6, so waves 5 and 6 have to agree who owns each master.",
+   "unblocks": "Daily posting, monthly interest, statements and the transaction report on the new platform. The business can name it, and it is the last wave that has to read the masters as legacy-owned.",
    "blast_radius": "high",
    "confidence": "medium",
    "evidence": [
     {
-     "file": "app/cbl/CBTRN02C.cbl",
-     "line": 256
+     "file": "app/cbl/CBACT04C.cbl",
+     "line": 41
+    },
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 65
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 39
     },
     {
      "file": "app/jcl/POSTTRAN.jcl",
      "line": 23
     },
     {
-     "file": "app/jcl/TRANBKP.jcl",
-     "line": 40
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 256
     },
     {
-     "file": "scripts/run_posting.sh",
-     "line": 26
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 59
+    },
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 94
+    },
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 47
     }
    ]
   },
   {
-   "wave": 7,
-   "name": "Month end interest, combine and statements",
-   "units": [
-    "CBACT04C",
-    "job:INTCALC",
-    "job:COMBTRAN",
-    "CBSTM03A",
-    "CBSTM03B",
-    "job:CREASTMT",
-    "job:TXT2PDF1",
-    "sch:scripts/run_interest_calc.sh",
-    "sch:scripts/run_full_batch.sh",
-    "sch:MONTHLY-InterestCalculation/CLOSEFIL",
-    "sch:MONTHLY-InterestCalculation/INTCALC",
-    "sch:MONTHLY-InterestCalculation/COMBTRAN",
-    "sch:MONTHLY-InterestCalculation/WAITSTEP",
-    "sch:MONTHLY-InterestCalculation/OPENFIL"
-   ],
-   "rationale": "Interest rewrites every account balance and feeds the combine job that rebuilds the transaction master, and statements read the result. They run only at cycle end, so a defect can hide for a month. It follows posting because the interest program reads the category balances that posting maintains.",
-   "unblocks": "Retirement of the shell wrappers, since run_full_batch.sh only becomes valid when every job it names has moved, and the end of the fixed pause jobs.",
-   "blast_radius": "high",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/cbl/CBACT04C.cbl",
-     "line": 464
-    },
-    {
-     "file": "app/jcl/INTCALC.jcl",
-     "line": 22
-    },
-    {
-     "file": "app/jcl/COMBTRAN.jcl",
-     "line": 48
-    },
-    {
-     "file": "app/cbl/CBSTM03A.CBL",
-     "line": 300
-    }
-   ]
-  },
-  {
-   "wave": 8,
-   "name": "Online writers",
+   "wave": 6,
+   "family": "online-writers",
+   "name": "Online maintenance of the masters",
    "units": [
     "COACTUPC",
+    "COBIL00C",
+    "COCRDLIC",
     "COCRDUPC",
     "COTRN02C",
-    "COBIL00C",
+    "COUSR00C",
     "COUSR01C",
     "COUSR02C",
     "COUSR03C"
    ],
-   "rationale": "These programs write the account, customer, card, transaction and user masters from a terminal, the same files the batch waves already own. They are last among the core programs because they are the only writers that run while users are on the system, and the largest program in the tree, COACTUPC, is here.",
-   "unblocks": "Retirement of the shared VSAM masters, since after this wave no legacy program writes them.",
+   "rationale": "The online programs that write the account, card, customer, transaction and user masters. COACTUPC is 3,368 lines and the hardest single program in the tree. COBIL00C and COTRN02C allocate the next transaction id as the highest key plus one, a second id source next to the ids in the daily transaction file. This wave is sound as the last owner of the masters: when it moves, the legacy VSAM files can be retired. COCRDLIC sits here because it XCTLs to COCRDUPC, which writes the card master.",
+   "unblocks": "Retirement of the VSAM masters and the CICS file definitions, and the end of the replica between legacy and new.",
    "blast_radius": "high",
-   "confidence": "low",
+   "confidence": "medium",
    "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 573
+    },
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 41
+    },
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 251
+    },
     {
      "file": "app/cbl/COBIL00C.cbl",
      "line": 212
@@ -295,48 +350,60 @@
      "line": 444
     },
     {
-     "file": "app/cbl/COACTUPC.cbl",
-     "line": 858
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 39
     }
    ]
   },
   {
-   "wave": 9,
-   "name": "Optional authorization, transaction type and MQ modules",
+   "wave": 7,
+   "family": "subsystem",
+   "name": "Authorization, DB2 and IMS subsystems",
    "units": [
+    "COACCT01",
+    "CODATE01",
     "COPAUA0C",
     "COPAUS0C",
     "COPAUS1C",
     "COPAUS2C",
-    "CBPAUP0C",
-    "PAUDBLOD",
-    "PAUDBUNL",
-    "DBUNLDGS",
+    "COTRTLIC",
+    "COTRTUPC",
     "job:CBPAUP0J",
     "job:DBPAUTP0",
     "job:LOADPADB",
     "job:UNLDGSAM",
     "job:UNLDPADB",
-    "COTRTLIC",
-    "COTRTUPC",
-    "COBTUPDT",
     "job:MNTTRDB2",
-    "job:TRANEXTR",
-    "job:CREADB2",
     "sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2",
+    "job:TRANEXTR",
     "sch:WEEKLY-TransactionTypesDBRefresh/TRANEXTR",
-    "COACCT01",
-    "CODATE01"
+    "job:CREADB2",
+    "COBTUPDT",
+    "CBPAUP0C",
+    "DBUNLDGS",
+    "PAUDBLOD",
+    "PAUDBUNL"
    ],
-   "rationale": "Three optional modules built on IMS, DB2 and MQ, which this plugin does not analyze. They are one wave here only as a placeholder. Once someone assesses those technologies, cut this into three waves, one per module, and start with the transaction type module because it has the least IMS.",
-   "unblocks": "Removal of IMS, DB2 and MQ from the estate, and the main menu option that already points at COPAUS0C.",
+   "rationale": "Everything that touches DB2, IMS or MQ: the authorization decision program COPAUA0C, its IMS screens and batch load and unload jobs, the transaction-type DB2 screens and the DB2 utility jobs. Five batch programs and three DB2 jobs joined it because the extractor could not see how they are run (DFSRRC00 PARM and DSN RUN PROGRAM). This wave is last on purpose: IMS, DB2 and MQ are outside what the extractor reads, and the DBD, PSB and DDL files are among the files it did not parse. COPAUS0C and COPAUS1C are one strongly connected component and move together.",
+   "unblocks": "Retirement of IMS, DB2 and MQ on the mainframe. It also removes the CBPAUP0J trigger ahead of POSTTRAN in the CA-7 listing.",
    "blast_radius": "high",
    "confidence": "low",
-   "inference": true,
    "evidence": [
     {
-     "file": "app/cpy/COMEN02Y.cpy",
-     "line": 89
+     "file": "app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl",
+     "line": 956
+    },
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/COPAUS2C.cbl",
+     "line": 141
+    },
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl",
+     "line": 24
+    },
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl",
+     "line": 35
     },
     {
      "file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl",
@@ -345,6 +412,14 @@
     {
      "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
      "line": 30
+    },
+    {
+     "file": "app/app-transaction-type-db2/cbl/COBTUPDT.cbl",
+     "line": 137
+    },
+    {
+     "file": "app/scheduler/CardDemo.ca7",
+     "line": 70
     }
    ]
   }
@@ -352,91 +427,397 @@
  "unassigned": [
   {
    "id": "CBTRN01C",
-   "reason": "No job or script in the tree runs it. If the client confirms it is used it is a wave 1 candidate, because it only reads. If not, delete it."
+   "reason": "No JCL step, wrapper or scheduler entry in the tree runs it and its six DDs map to nothing. It stays in the unknown dead-code bucket. Ask the client before it is ported or dropped."
+  }
+ ],
+ "deviations": [
+  {
+   "unit": "job:TRANBKP",
+   "from_wave": 4,
+   "to_wave": 5,
+   "reason": "Must-not-break daily posting. CBTRN02C opens the TRANSACT KSDS for OUTPUT, and TRANBKP is the job that backs the file up to a GDG generation and then deletes and redefines it empty, so POSTTRAN is only correct behind it. The wrappers run TRANBKP before POSTTRAN and again after INTCALC. They cut over together.",
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 256
+    },
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 40
+    },
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 54
+    },
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 23
+    },
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 26
+    },
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 55
+    }
+   ]
   },
   {
-   "id": "COBSWAIT",
-   "reason": "A fixed pause. The new scheduler replaces it with a completion dependency."
+   "unit": "sch:DAILY-TransactionBackup/TRANBKP",
+   "from_wave": 4,
+   "to_wave": 5,
+   "reason": "Follows job:TRANBKP. The Control-M row only runs that job.",
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 8
+    }
+   ]
   },
   {
-   "id": "job:WAITSTEP",
-   "reason": "Runs COBSWAIT for 36 seconds. Replaced by a completion dependency."
+   "unit": "job:TRANIDX",
+   "from_wave": 1,
+   "to_wave": 5,
+   "reason": "The extractor does not read IDCAMS control cards, so it saw a utility with no data. TRANIDX defines and builds an alternate index over the TRANSACT KSDS, which 11 programs read. TRANBKP deletes that index and TRANIDX rebuilds it after POSTTRAN in every wrapper. It belongs with the posting cycle.",
+   "evidence": [
+    {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 25
+    },
+    {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 26
+    },
+    {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 52
+    },
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 43
+    },
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 30
+    }
+   ]
   },
   {
-   "id": "job:DEFCUST",
-   "reason": "Defines a cluster no program reads. Confirm with the client, then retire."
+   "unit": "job:COMBTRAN",
+   "from_wave": 4,
+   "to_wave": 5,
+   "reason": "Part of the posting and interest cycle. COMBTRAN merges the TRANSACT backup with the SYSTRAN file that INTCALC writes, then REPROs the result back into the TRANSACT KSDS. Wave 4 would put it between TRANBKP and TRANIDX, which are both wave 5.",
+   "evidence": [
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 24
+    },
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 26
+    },
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 48
+    },
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 55
+    },
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 58
+    },
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 62
+    }
+   ]
   },
   {
-   "id": "job:ESDSRRDS",
-   "reason": "Builds ESDS and RRDS copies of the user file that nothing reads. Confirm, then retire."
+   "unit": "sch:MONTHLY-InterestCalculation/COMBTRAN",
+   "from_wave": 4,
+   "to_wave": 5,
+   "reason": "Follows job:COMBTRAN.",
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 75
+    }
+   ]
   },
   {
-   "id": "job:FTPJCLS",
-   "reason": "FTP demo with login fields in the JCL stream. Replace with managed transfer and rotate the credential."
+   "unit": "job:ACCTFILE",
+   "from_wave": 4,
+   "to_wave": 5,
+   "reason": "Must-not-break account master refresh. The job deletes and redefines the account master and reloads it from a flat file. run_posting.sh runs it directly before POSTTRAN, so the refreshed master is what CBTRN02C reads and rewrites. The master has four program writers, two in wave 5 and two in wave 6.",
+   "evidence": [
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 25
+    },
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 61
+    },
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 17
+    },
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 26
+    },
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 547
+    }
+   ]
   },
   {
-   "id": "job:INTRDRJ1",
-   "reason": "Internal reader demo. Retire."
+   "unit": "job:CARDFILE",
+   "from_wave": 4,
+   "to_wave": 5,
+   "reason": "Must-not-break card master refresh. Same shape as ACCTFILE: delete, define, reload, rebuild the alternate index, and it closes and opens the CICS files around itself. run_full_batch.sh runs it ahead of POSTTRAN.",
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 36
+    },
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 75
+    },
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 26
+    },
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 20
+    },
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 47
+    }
+   ]
   },
   {
-   "id": "job:INTRDRJ2",
-   "reason": "Internal reader demo. Retire."
+   "unit": "sch:scripts/remote_refresh.sh",
+   "from_wave": 4,
+   "to_wave": 5,
+   "reason": "A wrapper moves with the last family among the jobs it runs. remote_refresh.sh now runs ACCTFILE and CARDFILE, which are wave 5.",
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 17
+    },
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 20
+    }
+   ]
   },
   {
-   "id": "job:LISTFILS",
-   "reason": "Catalog listing. Retire."
+   "unit": "CORPT00C",
+   "from_wave": 3,
+   "to_wave": 5,
+   "reason": "Must-not-break transaction report. The seed calls it read-only because the extractor sees no data edge. The program builds JCL text that runs PROC=TRANREPT and writes it to the JOBS TD queue, which CICS turns into a submitted job. A port cannot come before the report job it submits.",
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 94
+    },
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 518
+    },
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 499
+    }
+   ]
   },
   {
-   "id": "job:REPRTEST",
-   "reason": "Test job. Retire."
+   "unit": "proc:TRANREPT",
+   "from_wave": null,
+   "to_wave": 5,
+   "reason": "Not placed by the seed: the only thing that names it is JCL text inside CORPT00C, so it has no edge. It holds the report steps, including CBTRN03C. It moves with CORPT00C and with the batch job that carries a copy of the same steps.",
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 94
+    },
+    {
+     "file": "app/proc/TRANREPT.prc",
+     "line": 57
+    },
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 59
+    }
+   ]
   },
   {
-   "id": "job:SORTTEST",
-   "reason": "Test job. Retire."
+   "unit": "CSUTLDTC",
+   "from_wave": 3,
+   "to_wave": 5,
+   "reason": "Dependency after CORPT00C moved. Its first caller is now CORPT00C in wave 5, so the seed rule (earliest family that uses it) puts it there. It stays a shared subprogram called by COACTUPC and COTRN02C in wave 6.",
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 392
+    },
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 412
+    },
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 393
+    }
+   ]
   },
   {
-   "id": "job:RACFCMDS",
-   "reason": "Security commands. The target platform's access control replaces them."
+   "unit": "job:MNTTRDB2",
+   "from_wave": 1,
+   "to_wave": 7,
+   "reason": "The extractor does not read the DSN RUN PROGRAM command inside an IKJEFT01 step, so it saw a utility. The step runs COBTUPDT, which writes the DB2 TRANSACTION_TYPE table. That is DB2 work, the seventh family.",
+   "evidence": [
+    {
+     "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
+     "line": 30
+    },
+    {
+     "file": "app/app-transaction-type-db2/cbl/COBTUPDT.cbl",
+     "line": 137
+    }
+   ]
   },
   {
-   "id": "job:CBADMCDJ",
-   "reason": "CICS resource definitions. The target runtime's routing configuration replaces them."
+   "unit": "sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2",
+   "from_wave": 1,
+   "to_wave": 7,
+   "reason": "The extractor does not read the DSN RUN PROGRAM command inside an IKJEFT01 step, so it saw a utility. The step runs COBTUPDT, which writes the DB2 TRANSACTION_TYPE table. That is DB2 work, the seventh family.",
+   "evidence": [
+    {
+     "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
+     "line": 30
+    },
+    {
+     "file": "app/app-transaction-type-db2/cbl/COBTUPDT.cbl",
+     "line": 137
+    }
+   ]
   },
   {
-   "id": "job:CBLDBMS",
-   "reason": "Compile job. The new build pipeline replaces it."
+   "unit": "job:TRANEXTR",
+   "from_wave": 1,
+   "to_wave": 7,
+   "reason": "The job unloads DB2 tables with DSNTIAUL under IKJEFT01. The extractor sees no DB2 access in a JCL step, so it placed the job as a utility.",
+   "evidence": [
+    {
+     "file": "app/app-transaction-type-db2/jcl/TRANEXTR.jcl",
+     "line": 88
+    },
+    {
+     "file": "app/app-transaction-type-db2/jcl/TRANEXTR.jcl",
+     "line": 27
+    }
+   ]
   },
   {
-   "id": "job:CICCMP",
-   "reason": "Compile job. The new build pipeline replaces it."
+   "unit": "sch:WEEKLY-TransactionTypesDBRefresh/TRANEXTR",
+   "from_wave": 1,
+   "to_wave": 7,
+   "reason": "The job unloads DB2 tables with DSNTIAUL under IKJEFT01. The extractor sees no DB2 access in a JCL step, so it placed the job as a utility.",
+   "evidence": [
+    {
+     "file": "app/app-transaction-type-db2/jcl/TRANEXTR.jcl",
+     "line": 88
+    },
+    {
+     "file": "app/app-transaction-type-db2/jcl/TRANEXTR.jcl",
+     "line": 27
+    }
+   ]
   },
   {
-   "id": "job:CIDBCMP",
-   "reason": "Compile job. The new build pipeline replaces it."
+   "unit": "job:CREADB2",
+   "from_wave": 1,
+   "to_wave": 7,
+   "reason": "The job creates and loads the DB2 objects through IKJEFT01 steps. It is DB2 work, and its DDL and control files are among the files the extractor did not read.",
+   "evidence": [
+    {
+     "file": "app/app-transaction-type-db2/jcl/CREADB21.jcl",
+     "line": 52
+    },
+    {
+     "file": "app/app-transaction-type-db2/jcl/CREADB21.jcl",
+     "line": 65
+    }
+   ]
   },
   {
-   "id": "job:CNJBATMP",
-   "reason": "Compile job. The new build pipeline replaces it."
+   "unit": "COBTUPDT",
+   "from_wave": null,
+   "to_wave": 7,
+   "reason": "Not placed by the seed. The extractor does not read the RUN PROGRAM command that MNTTRDB2 uses, so no step calls it. MNTTRDB2 does, and README lists the pair.",
+   "evidence": [
+    {
+     "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
+     "line": 30
+    }
+   ]
   },
   {
-   "id": "job:IMSMQCMP",
-   "reason": "Compile job. The new build pipeline replaces it."
+   "unit": "CBPAUP0C",
+   "from_wave": null,
+   "to_wave": 7,
+   "reason": "Not placed by the seed. The extractor does not read the PARM of a DFSRRC00 step. CBPAUP0J runs this program as an IMS BMP.",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl",
+     "line": 25
+    }
+   ]
   },
   {
-   "id": "proc:BLDCIDB2",
-   "reason": "Compile procedure. The new build pipeline replaces it."
+   "unit": "DBUNLDGS",
+   "from_wave": null,
+   "to_wave": 7,
+   "reason": "Not placed by the seed. UNLDGSAM runs it under DFSRRC00, and the extractor does not read that PARM.",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL",
+     "line": 27
+    }
+   ]
   },
   {
-   "id": "proc:BUILDBAT",
-   "reason": "Compile procedure. The new build pipeline replaces it."
+   "unit": "PAUDBLOD",
+   "from_wave": null,
+   "to_wave": 7,
+   "reason": "Not placed by the seed. LOADPADB runs it as an IMS BMP under DFSRRC00, and the extractor does not read that PARM.",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL",
+     "line": 27
+    }
+   ]
   },
   {
-   "id": "proc:BUILDBMS",
-   "reason": "Compile procedure. The new build pipeline replaces it."
-  },
-  {
-   "id": "proc:BUILDONL",
-   "reason": "Compile procedure. The new build pipeline replaces it."
+   "unit": "PAUDBUNL",
+   "from_wave": null,
+   "to_wave": 7,
+   "reason": "Not placed by the seed. UNLDPADB runs it under DFSRRC00, and the extractor does not read that PARM.",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL",
+     "line": 39
+    }
+   ]
   }
  ]
 }

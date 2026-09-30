@@ -3,9 +3,9 @@
   "unreachable": [],
   "dormant": [],
   "unknown": [
-    {"id": "PROGA", "reason": "The extractor found no entry point in the tree: no JCL, scheduler, CSD or wrapper starts it. It is a batch program, so its starter is probably outside the tree. Nothing can be proven unreachable. Provisional: no telemetry.", "confidence": "low",
+    {"id": "PROGA", "reason": "No JCL job, CSD transaction or scheduler entry point exists in the tree, so nothing can be proven unreachable. It is a batch-type program that calls PROGB, so a job outside the tree may run it. Provisional: no telemetry.", "confidence": "low",
      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 1}]},
-    {"id": "PROGB", "reason": "No entry point in the tree, so the extractor cannot prove it reachable. It has a static caller: PROGA calls it unconditionally, so it runs whenever PROGA runs. Keep it in unknown, not unreachable. Provisional: no telemetry.", "confidence": "low",
+    {"id": "PROGB", "reason": "No entry point in the tree. Its only caller, PROGA, is itself unplaced. If PROGA runs, PROGB runs, because PROGA calls it unconditionally. Provisional: no telemetry.", "confidence": "low",
      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 6}]}
   ]
 }

@@ -1,44 +1,67 @@
 # 00 Summary
 
-Scope: `.` (the whole work folder). The tree holds 3 JCL jobs (`jcl/JOBA.jcl:1`, `jcl/JOBB.jcl:1`, `jcl/JOBC.jcl:1`) and one shell wrapper (`scripts/nightly.sh:1`). It has no COBOL, copybooks, datasets, or computed calls.
+Assessment of `work`, scope `.`. The extractor read 3 JCL members and 1 shell wrapper: 8 nodes and 9
+edges. There is no COBOL, no copybook, no proc and no dataset in the tree.
 
 ## Scoping answers
 
-All three came in as command flags in a non-interactive run, so no defaults were applied and nothing was assumed.
+No defaults applied. All three answers came as flags.
 
 | Question | Answer |
 |---|---|
-| Target state | refactor (`--target refactor`) |
-| What must not break | the nightly batch cycle (`--must-not-break`) |
-| Runtime telemetry | none (`--telemetry none`). Every dead-code claim is provisional |
+| Target state | refactor |
+| What must not break | the nightly batch cycle |
+| Runtime telemetry | none, so every dead-code claim is provisional |
 
 ## Result
 
-- **Wave count: 1.** The live system is one wrapper and two jobs, coupled only by submit order. There is no boundary to cut along. See `03-waves.md` for what would be cut if the system were ten times larger.
-- **Single largest risk.** The order and failure behavior of the nightly cycle lives in a six-line shell wrapper whose `submit` command is not defined in the tree. `scripts/nightly.sh:3` sets `set -e`, and `scripts/nightly.sh:4` and `scripts/nightly.sh:5` fix the JOBA-then-JOBB order. If `submit` only queues jobs, then the order is submission order, and a refactor that moves the ordering into a scheduler can silently change when JOBB runs or what happens when JOBA fails. That is exactly the cycle the client said must not break. Scored `low-high` in `risks.json`: the port is trivial, and the verification is the work.
-- **Dead code.** `job:JOBC` is retired per `scripts/nightly.sh:2` and its submit is commented out (`scripts/nightly.sh:6`). Listed as unreachable, confidence medium, provisional. The extractor left it out of every candidate list because it treats an unscheduled job as an entry point.
-- **Oracle.** The tree has no datasets, so the equivalence oracle has to come from job logs, return codes and output. See `06-test-strategy.md`.
-- **Estimate.** Roughly 5 to 11 person-days for wave 1, low confidence. See `04-estimate.md`.
-
-## Files written
-
-`01-inventory.md`, `02a-edge-tables.md`, `05a-dead-code-candidates.md` (generated). `02-coupling.md`, `03-waves.md`, `04-estimate.md`, `05-dead-code.md`, `06-test-strategy.md` and this file (written). `graph.json` (extractor), `waves.json`, `dead-code.json`, `risks.json`.
+- **Waves: 1.** All four units (job:JOBA, job:JOBB, job:JOBC, sch:scripts/nightly.sh) are one
+  batch-utility family. No deviations from the seed. See `03-waves.md`.
+- **Largest risk.** The one order the nightly cycle depends on, JOBA before JOBB, exists only as line
+  order in a shell wrapper that calls a `submit` command the tree does not define
+  (`scripts/nightly.sh:4`, `scripts/nightly.sh:5`). A port that treats the jobs as independent tasks
+  can reorder or overlap them with no abend. The extractor rates the edge medium confidence.
+- **What the tree cannot show.** All three jobs run only `IEFBR14` with no DD statements
+  (`jcl/JOBA.jcl:2`, `jcl/JOBB.jcl:2`, `jcl/JOBC.jcl:2`). Nothing in the tree says what the nightly cycle
+  does. The work is either elsewhere or these are stubs. Every score in `risks.json` is low
+  confidence for that reason.
+- **Estimate.** 3 to 10 person-days, inference, on the assumption that production matches the tree.
+  See `04-estimate.md`.
+- **Dead code.** None found and none proposed for deletion. JOBC is a retirement candidate on the
+  strength of a comment (`scripts/nightly.sh:2`, `scripts/nightly.sh:6`), which is not proof.
+  See `05-dead-code.md`.
+- **Test strategy.** The oracle has to come from job history and logs, since the tree holds no
+  datasets. See `06-test-strategy.md`.
 
 ## Open Questions for the client's engineers
 
-1. What does the `submit` command do (`scripts/nightly.sh:4`)? Does it return when the job is queued, or when it ends, and does it return the job's return code? The answer decides whether JOBB waits for JOBA.
-2. What starts `scripts/nightly.sh` each night: cron, an enterprise scheduler, or an operator? The trigger is not in the tree, and the extractor reads only Control-M XML and shell wrappers that name JCL files.
-3. Do JOBA and JOBB really run only `IEFBR14` in production (`jcl/JOBA.jcl:2`, `jcl/JOBB.jcl:2`)? If the real work lives in other programs or JCL outside this tree, where is it? Until then this assessment covers a skeleton.
-4. Has JOBC run since it was retired, and does any other scheduler or operator submit it (`scripts/nightly.sh:2`, `scripts/nightly.sh:6`)? May we delete `jcl/JOBC.jcl`?
-5. What consumes the output of JOBA and JOBB, or depends on their order? The tree shows no datasets, so any downstream job, partner feed or report is invisible here.
-6. What should happen when JOBA fails? The wrapper stops (`scripts/nightly.sh:3`), but who is told, and is the cycle rerun by hand?
-7. Can you supply 12 months of job logs or SMF records, including a fiscal year-end, so the parallel-run or replay oracle exists?
+1. What does `submit` do (`scripts/nightly.sh:4`)? Does it wait for the job to end, and what does it
+   return if the job abends? This decides whether JOBB depends on JOBA finishing or only on JOBA being
+   submitted. `set -e` (`scripts/nightly.sh:3`) only sees the submit command's own status.
+2. Are JOBA, JOBB and JOBC really no-op jobs? Each runs only `IEFBR14` with no DD (`jcl/JOBA.jcl:2`,
+   `jcl/JOBB.jcl:2`, `jcl/JOBC.jcl:2`). Where is the JCL, program and data the nightly cycle actually
+   works on? If production differs from the tree, this assessment must be redone.
+3. Is JOBC retired? The wrapper says so and comments out its submit (`scripts/nightly.sh:2`,
+   `scripts/nightly.sh:6`). Does any other scheduler, wrapper or person still submit it? Telemetry is `none`.
+4. Which scheduler starts `scripts/nightly.sh` in production, and are there other chains, such as a
+   month-end, quarter-end or holiday variant? Only shell wrappers and Control-M XML are read as
+   schedulers, and this tree has one wrapper.
+5. What are the restart and failure rules? If JOBA abends after a good submit, what happens to JOBB?
+   The extractor does not model JCL `IF/THEN/ELSE` or `COND=`, and none appears in the members.
+6. What consumes the output of the nightly cycle, and what is the completion deadline? The tree has no
+   dataset, so the downstream dependents of the cycle are invisible.
+7. Can the client supply last-modified dates? The tree is not a git repository, so the dormancy rule was
+   not computed and the dormant bucket is not measured.
+
+## Not parsed
+
+Nothing. The extractor listed no unparsed file.
 
 ## Extractor limits that touch this system
 
-Not parsed: nothing was skipped (`unparsed` is empty). These entries in `meta.limits` do apply:
-
-- IF/THEN/ELSE and `COND=` in JCL are not modeled. The three JCL files have none, but the real jobs might.
-- Nested PROC calls, INCLUDE members and jobs submitted through the internal reader are not followed. The extractor cannot show that a job starts another job.
-- Only Control-M XML and shell wrappers that name JCL files are read as schedulers. A scheduler in another format would be invisible, and would explain what starts the wrapper, or whether JOBC is scheduled elsewhere.
-- The temporal edge from JOBA to JOBB is medium confidence, because it rests on line order in a shell script.
+| Limit | Why it touches this system | Evidence |
+|---|---|---|
+| Only Control-M XML and shell wrappers that name JCL files are read as schedulers | A scheduler in another form would hold ordering this scan cannot see. | analysis (`meta.limits`) |
+| IF/THEN/ELSE and COND= in JCL are not modeled | Failure-dependent job order would not appear as an edge. None is in the three members. | analysis (`meta.limits`) |
+| Shell control flow such as `set -e` is not modeled (this is not written in `meta.limits`, I noticed it while reading) | `set -e` is read by hand and carried as inference. | `scripts/nightly.sh:3` |
+| No last-modified dates | The tree is not a git repository, so dormancy was not computed. | analysis (`warnings`) |

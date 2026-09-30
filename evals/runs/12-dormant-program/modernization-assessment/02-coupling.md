@@ -1,43 +1,46 @@
 # 02 Coupling
 
-The fact tables are in `02a-edge-tables.md`. This file is the argument. The system is small: one job, one step, one main program and two subprograms. There are no open edges. The extractor reports zero computed calls and every edge is `high` confidence, so no work was handed to the `dependency-cartographer` agent (the threshold is about 20 open edges).
+Fact tables are in `02a-edge-tables.md`. This file holds the argument. The tree is small: three COBOL
+programs and one JCL job, with four edges (three `call`, one `include`) and no dataset, copybook,
+scheduler or computed call (`analysis` block of `graph.json`, fields `edge_counts`, `data_hubs`,
+`unresolved_dynamic`). The `dependency-cartographer` agent was not needed: there are no unresolved
+edges to work, so nothing here is inference from that agent.
 
-## The coupling patterns that constrain the sequence
+## The patterns that constrain the sequence
 
-| # | Pattern | What it does to the sequence | Confidence | Evidence |
-|---|---|---|---|---|
-| 1 | Call coupling. PGMMAIN calls OLDPGM, then NEWPGM, both unconditionally and in that order. | The two subprograms cannot be moved without PGMMAIN or a facade in front of them. The call order is the only behavior PGMMAIN has, so a port has to keep it. | high | `app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMMAIN.cbl:5` |
-| 2 | Job to program coupling. The only step of MAINJOB executes PGMMAIN and is the only entry point. | Everything the extractor can reach hangs off one JCL line. Rolling back the wave means rolling back this one step. | high | `app/jcl/MAINJOB.jcl:2` |
-| 3 | Temporal coupling across jobs is unknown. No scheduler export was in the tree. | The requirement is that the nightly batch cycle must not break. The tree cannot show where MAINJOB sits in that cycle, or what runs before or after it. Any wave plan here is provisional until the export arrives. | low | inference |
+| Pattern | What it does to the sequence | Confidence | Evidence |
+|---|---|---|---|
+| Call coupling through one driver. `PGMMAIN` calls `OLDPGM` and then `NEWPGM`, both unconditionally. It is the only caller of either. | The two subprograms cannot move without `PGMMAIN`, and `PGMMAIN` cannot move without the job that runs it. All four units move as one unit. | high | `app/cbl/PGMMAIN.cbl:4-5`, `app/jcl/MAINJOB.jcl:2` |
+| Call order inside the run. `OLDPGM` runs first, `NEWPGM` second. No file or shared field ties them in this tree, so the order is enforced only by statement order. | The port has to keep the order. Whether the order matters is not visible, because a called subprogram could change state that the other reads (EXTERNAL items, files opened elsewhere). | low | `app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMMAIN.cbl:5` |
+| No data coupling is visible, and that is a gap, not a finding. The job has no DD statement and neither COBOL program has a SELECT or an EXEC SQL. | There are no data hubs and no contract edges, so the extractor gives no oracle for the output. Whatever the nightly cycle produces, this tree does not show it. | medium | `app/jcl/MAINJOB.jcl:2`, analysis field `data_hubs` |
 
-## Data and contract coupling
+## Cluster graph
 
-The extractor found no dataset, VSAM file or DB2 table read or written by any unit. The step has no DD statements, and neither subprogram has any file or data statement (`app/jcl/MAINJOB.jcl:2`, `app/cbl/OLDPGM.cbl:3`, `app/cbl/NEWPGM.cbl:3`). There are no data hubs and no contract edges. This is the usual place a migration plan breaks and here it does not apply. The catch: a system that reads and writes nothing has no output a test can compare, which is a problem for the harness, not the port (see `06-test-strategy.md`).
-
-## Clusters
+The whole tree is one cluster. A finer graph would add nothing.
 
 ```mermaid
 graph LR
-  SCHED["Scheduler (not supplied)"] -.-> C1
-  subgraph C1["Cluster 1: MAINJOB batch (job:MAINJOB, PGMMAIN, OLDPGM, NEWPGM)"]
-  end
+  J["job:MAINJOB (entry point)"] --> M["PGMMAIN (driver)"]
+  M --> O["OLDPGM (dormant by date, 2011)"]
+  M --> N["NEWPGM (modified 2026-05-01)"]
 ```
 
-The whole system is one cluster. Drawing the four nodes separately would add nothing.
-
-## Structure computed from the call graph
+## Structure computed from the graph
 
 | Fact | Units | Evidence |
 |---|---|---|
-| Strongly connected components | none, so no wave can split one | inference |
-| Self recursive programs | none | inference |
-| God modules | none. Fan-in is 1 for OLDPGM and NEWPGM, fan-out is 2 for PGMMAIN | `app/cbl/PGMMAIN.cbl:4` |
-| Articulation points (natural wave boundaries) | PGMMAIN. It is the root of the call tree, so the boundary it makes is the whole system | `app/cbl/PGMMAIN.cbl:5` |
+| Strongly connected components | none. Nothing to hold together beyond the call chain. | analysis field `sccs` |
+| God modules | none. Fan-in is 1 for both subprograms, fan-out is 2 for `PGMMAIN`. | analysis fields `god_modules`, `fan_in`, `fan_out` |
+| Articulation points | `PGMMAIN`. It is the natural boundary if the client later splits the tree. Here it needs no cut, because the seed wave holds only 4 units. | analysis field `articulation_points` |
+| Self recursive programs | none | analysis field `self_recursive` |
 
 ## The honest boundary
 
-There are no computed calls, so the static call graph is complete for what is in the tree. That says nothing about what is not in the tree. Limits from the extractor that touch this system:
-
-- IF/THEN/ELSE and COND= in JCL are not modeled. MAINJOB has one step, so none is visible, but the production job may differ from this copy (`app/jcl/MAINJOB.jcl:2`).
-- Only Control-M XML and shell wrappers that name JCL files are read as schedulers. A CA-7, TWS or other scheduler would not appear.
-- Jobs submitted through the internal reader and nested PROC calls are not followed.
+- There are no computed calls (`unresolved_dynamic` is empty) and no JCL text inside a COBOL literal
+  (`embedded_jcl` is empty). Inside this tree the call graph is complete. `graph.json` `meta.limits`
+  still says a call from outside the tree, such as a job in another repository, would not show.
+- No scheduler artifact was parsed, and the extractor warns about it. The order this job runs in relative
+  to other jobs is unknown. Temporal coupling, which lives in the scheduler, is therefore not
+  assessed. This is an open question for the client (see `00-summary.md`).
+- `OLDPGM` and `NEWPGM` contain only `GOBACK`, and `PGMMAIN` only two calls. Either the tree is a
+  fragment, or the logic sits elsewhere. inference
