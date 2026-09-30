@@ -1,0 +1,23 @@
+[
+  {
+    "partition": "O1",
+    "only_in": "B",
+    "key": [
+      "COACTUPC",
+      "CSUTLDTC",
+      "call",
+      null
+    ],
+    "evidence": [
+      [
+        "app/cbl/COACTUPC.cbl",
+        4232
+      ],
+      [
+        "app/cpy/CSUTLDPY.cpy",
+        293
+      ]
+    ],
+    "note": "CALL 'CSUTLDTC' is written in procedure copybook CSUTLDPY (line 293), which COACTUPC copies at line 4232; the call only exists after COPY expansion"
+  }
+]

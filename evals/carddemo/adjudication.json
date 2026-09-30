@@ -1,0 +1,12 @@
+{
+  "decisions": [
+    {
+      "partition": "O1",
+      "key": ["COACTUPC", "CSUTLDTC", "call", null],
+      "decision": "include",
+      "reason": "COPY brings the source of CSUTLDPY into COACTUPC at compile time, so the CALL runs as part of COACTUPC",
+      "evidence": [["app/cbl/COACTUPC.cbl", 4232], ["app/cpy/CSUTLDPY.cpy", 293]]
+    }
+  ],
+  "layout": []
+}
