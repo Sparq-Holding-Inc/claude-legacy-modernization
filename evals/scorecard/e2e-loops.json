@@ -1,5 +1,5 @@
 {
- "note": "Hand-maintained record of the fix loops for the failing wave metrics. Numbers are copied from scorecard/e2e.json at the moment each loop was scored. The bar and the truth never changed.",
+ "note": "Hand-maintained record of the fix loops for the failing wave metrics. Numbers are copied from scorecard/e2e.json at the moment each loop was scored. The bar and the truth never changed. These numbers measure whether runs agree with each other. They do not measure whether a wave plan is good. Agreement that comes from following a deterministic draft is repeatability, not quality.",
  "loops": [
   {
    "loop": 0,
@@ -80,6 +80,36 @@
    "graph_unmodified": "16 of 16",
    "unreachable_on_dynamic": 0,
    "diagnosis": "The pair score fell from 76.7% to 61.6% although the seed got better. One run kept the seed almost whole (4 changes). The other two changed it 17 and 13 times. Every run made the same three changes to the seed (the online report screen that submits JCL, the proc it submits, and the shared date routine). Two runs also moved whole scheduler chains (the jobs that open and close files around the posting cycle, and their Control-M entries) into the batch writers wave, and the third left them where the seed put them. That one disagreement is about 10 to 15 units, which is what the pair score measures. The seed did not know that jobs a scheduler chains together move together."
+  },
+  {
+   "loop": 3,
+   "plugin_commit": "c3df5c5",
+   "what_changed": "The seed keeps jobs a scheduler chains together in one wave and treats a program that submits JCL as batch. The validators were made strict (a reviewer had shown four holes). CardDemo runs only. Runs used private scratch folders.",
+   "carddemo_runs": 3,
+   "wave_counts": [
+    7,
+    7,
+    7
+   ],
+   "wave_count_identical": true,
+   "jaccard": 0.983,
+   "rand_index": 0.997,
+   "unit_overlap": 1.0,
+   "deviations": [
+    2,
+    2,
+    3
+   ],
+   "seed_jaccard": [
+    0.953,
+    0.953,
+    0.937
+   ],
+   "citations_resolve": "11356 of 11356 (16 runs: 13 fixture runs from loop 2, 3 CardDemo runs from loop 3)",
+   "json_valid": "16 of 16",
+   "graph_unmodified": "16 of 16",
+   "unreachable_on_dynamic": 0,
+   "diagnosis": "Both bars are met, and the reason matters. Each run changed the seed only 2 or 3 times, and each run's plan is 94 to 95 percent the same as the seed. The three runs agree because they kept the same deterministic draft. That is repeatability. It says nothing about whether the draft cuts the system in the right places. Two of the three changes were the same in every run (a DB2 job whose control cards sit in unread members), and the third differed by run."
   }
  ]
 }

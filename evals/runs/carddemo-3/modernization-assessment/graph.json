@@ -28838,30 +28838,20 @@
      "description": "Batch jobs that run no application program and touch no dataset another entry point uses",
      "units": [
       "job:CBADMCDJ",
-      "job:CLOSEFIL",
       "job:CREADB2",
       "job:DEFCUST",
       "job:ESDSRRDS",
       "job:FTPJCLS",
       "job:LISTFILS",
-      "job:OPENFIL",
-      "job:RACFCMDS",
-      "sch:DAILY-TransactionBackup/CLOSEFIL",
-      "sch:DAILY-TransactionBackup/OPENFIL",
-      "sch:MONTHLY-InterestCalculation/CLOSEFIL",
-      "sch:MONTHLY-InterestCalculation/OPENFIL",
-      "sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL",
-      "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL"
+      "job:RACFCMDS"
      ],
      "entry_points": [
       "job:CBADMCDJ",
-      "job:CLOSEFIL",
       "job:CREADB2",
       "job:DEFCUST",
       "job:ESDSRRDS",
       "job:FTPJCLS",
       "job:LISTFILS",
-      "job:OPENFIL",
       "job:RACFCMDS"
      ],
      "computed_calls": [],
@@ -28875,7 +28865,7 @@
        "line": 1
       },
       {
-       "file": "app/jcl/CLOSEFIL.jcl",
+       "file": "app/jcl/DEFCUST.jcl",
        "line": 1
       }
      ]
@@ -28890,24 +28880,18 @@
       "CBACT03C",
       "CBCUS01C",
       "CBIMPORT",
-      "COBSWAIT",
       "job:CBIMPORT",
       "job:READACCT",
       "job:READCARD",
       "job:READCUST",
-      "job:READXREF",
-      "job:WAITSTEP",
-      "sch:DAILY-TransactionBackup/WAITSTEP",
-      "sch:MONTHLY-InterestCalculation/WAITSTEP",
-      "sch:WEEKLY-DisclosureGroupsRefresh/WAITSTEP"
+      "job:READXREF"
      ],
      "entry_points": [
       "job:CBIMPORT",
       "job:READACCT",
       "job:READCARD",
       "job:READCUST",
-      "job:READXREF",
-      "job:WAITSTEP"
+      "job:READXREF"
      ],
      "computed_calls": [],
      "evidence": [
@@ -28934,18 +28918,15 @@
       "COADM01C",
       "COCRDSLC",
       "COMEN01C",
-      "CORPT00C",
       "COSGN00C",
       "COTRN00C",
-      "COTRN01C",
-      "CSUTLDTC"
+      "COTRN01C"
      ],
      "entry_points": [
       "COACTVWC",
       "COADM01C",
       "COCRDSLC",
       "COMEN01C",
-      "CORPT00C",
       "COSGN00C",
       "COTRN00C",
       "COTRN01C"
@@ -28955,7 +28936,6 @@
       "COADM01C",
       "COCRDSLC",
       "COMEN01C",
-      "CORPT00C",
       "COTRN00C",
       "COTRN01C"
      ],
@@ -29028,9 +29008,13 @@
       "CBSTM03B",
       "CBTRN02C",
       "CBTRN03C",
+      "COBSWAIT",
+      "CORPT00C",
+      "CSUTLDTC",
       "job:ACCTFILE",
       "job:CARDFILE",
       "job:CBEXPORT",
+      "job:CLOSEFIL",
       "job:COMBTRAN",
       "job:CREASTMT",
       "job:CUSTFILE",
@@ -29039,6 +29023,7 @@
       "job:DISCGRP",
       "job:DUSRSECJ",
       "job:INTCALC",
+      "job:OPENFIL",
       "job:POSTTRAN",
       "job:PRTCATBL",
       "job:REPRTEST",
@@ -29051,21 +29036,34 @@
       "job:TRANIDX",
       "job:TRANREPT",
       "job:TRANTYPE",
+      "job:WAITSTEP",
       "job:XREFFILE",
       "proc:REPROC",
+      "proc:TRANREPT",
+      "sch:DAILY-TransactionBackup/CLOSEFIL",
+      "sch:DAILY-TransactionBackup/OPENFIL",
       "sch:DAILY-TransactionBackup/TRANBKP",
+      "sch:DAILY-TransactionBackup/WAITSTEP",
+      "sch:MONTHLY-InterestCalculation/CLOSEFIL",
       "sch:MONTHLY-InterestCalculation/COMBTRAN",
       "sch:MONTHLY-InterestCalculation/INTCALC",
+      "sch:MONTHLY-InterestCalculation/OPENFIL",
+      "sch:MONTHLY-InterestCalculation/WAITSTEP",
+      "sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL",
       "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP",
+      "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL",
+      "sch:WEEKLY-DisclosureGroupsRefresh/WAITSTEP",
       "sch:scripts/remote_refresh.sh",
       "sch:scripts/run_full_batch.sh",
       "sch:scripts/run_interest_calc.sh",
       "sch:scripts/run_posting.sh"
      ],
      "entry_points": [
+      "CORPT00C",
       "job:ACCTFILE",
       "job:CARDFILE",
       "job:CBEXPORT",
+      "job:CLOSEFIL",
       "job:COMBTRAN",
       "job:CREASTMT",
       "job:CUSTFILE",
@@ -29074,6 +29072,7 @@
       "job:DISCGRP",
       "job:DUSRSECJ",
       "job:INTCALC",
+      "job:OPENFIL",
       "job:POSTTRAN",
       "job:PRTCATBL",
       "job:REPRTEST",
@@ -29086,9 +29085,12 @@
       "job:TRANIDX",
       "job:TRANREPT",
       "job:TRANTYPE",
+      "job:WAITSTEP",
       "job:XREFFILE"
      ],
-     "computed_calls": [],
+     "computed_calls": [
+      "CORPT00C"
+     ],
      "evidence": [
       {
        "file": "app/cbl/CBACT04C.cbl",
@@ -29229,10 +29231,6 @@
     {
      "id": "CBTRN01C",
      "reason": "not reached by any static edge, and 28 reachable computed call(s) could target it, for example at app/cbl/COACTUPC.cbl:956"
-    },
-    {
-     "id": "proc:TRANREPT",
-     "reason": "named in JCL text inside CORPT00C at app/cbl/CORPT00C.cbl:94, which a running program can submit"
     }
    ]
   },

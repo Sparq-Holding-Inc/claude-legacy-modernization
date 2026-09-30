@@ -1,57 +1,73 @@
 # 04 Estimate
 
-This is an estimate by wave, given as a range, with the assumptions it is most sensitive to. It is inference throughout. There is no velocity data for this team, no telemetry, and no client staffing, so I rank waves against each other with more confidence than I state absolute numbers.
+The estimate is a range per wave, in engineer-weeks, for a small team that has at least one person
+who can read COBOL and JCL and that uses Claude Code for the mechanical work. Every figure is
+inference. The counts under it are facts from `graph.json`. Treat the figures as a first bracket and
+replace them with measured velocity after waves 1 and 2.
 
 ## Method
 
-- Unit: engineer weeks, meaning one engineer for one week. A refactor to services in a new language is assumed. Client acceptance testing, infrastructure and platform procurement are not counted.
-- Team assumed: four engineers, at least one who can read COBOL, JCL and VSAM, and a behavioral-equivalence harness that gets built during wave 2 (see `modernization-assessment/06-test-strategy.md`).
-- What moves the estimate, in the order I weighted it: the number and kind of edges that cross the wave boundary (not lines of code), whether an oracle exists, god modules and large programs inside the wave, business logic in databases, and whether anyone on the team reads COBOL. Lines of code are shown only as color.
-- The boundary edges I counted are the data hubs, the contract edges and the scheduler edges in `modernization-assessment/02-coupling.md`. Wave 5 has by far the most, which is why it is the largest even though it has fewer lines than wave 6.
+I did not estimate from lines of code. I weighted, in this order:
 
-## Ranges by wave
+1. Contract and data edges that cross the wave boundary. Of 62 contract edges, 46 cross a boundary,
+   and 26 of those touch wave 5 (`analysis`, computed from `waves.json` and `graph.json`).
+2. Whether an oracle exists. There are sample data files and a catalog listing in the tree, and no
+   archived production output (`app/data/ASCII/dailytran.txt:1`, `app/catlg/LISTCAT.txt:1`).
+3. God modules and near-god programs inside the wave.
+4. Logic held outside the application. Almost none: business rules are in COBOL, and DB2 holds one
+   reference table (`app/app-transaction-type-db2/ctl/DB2CREAT.ctl:35`). Order and layout are held in JCL.
+5. Whether the team can read the source language. Unknown, and it moves every row.
 
-| Wave | Range (engineer weeks) | Main driver | Confidence | Evidence |
-|---|---|---|---|---|
-| 1 Setup utilities and fences | 1 to 3 | Retiring jobs and rotating a credential. No logic. | medium | `app/jcl/FTPJCL.JCL:33` |
-| 2 Read only batch | 4 to 8 | Four record layouts, an assembler date routine, one broken job. | medium | `app/cbl/CBACT01C.cbl:231`, `app/cbl/CBIMPORT.cbl:63` |
-| 3 Sign on, menus, read screens | 8 to 16 | Router facade, screen replay oracle, read path over legacy masters. | low | `app/cpy/COMEN02Y.cpy:21` |
-| 4 Build and demo jobs | 1 to 3 | Retirement. TXT2PDF1 depends on a tool not in the tree. | medium | `app/jcl/TXT2PDF1.JCL:31` |
-| 5 Batch that writes the masters | 24 to 52 | Data facade, three must-not-break items, 51 units, scheduler cut over. | low | `app/cbl/CBTRN02C.cbl:256`, `app/jcl/TRANBKP.jcl:40` |
-| 6 Online writers | 12 to 26 | COACTUPC alone is about 4,200 lines with 43 REDEFINES, and the transaction id scheme must change. | low | `app/cbl/COACTUPC.cbl:3888`, `app/cbl/COBIL00C.cbl:212` |
-| 7 IMS, DB2 and MQ | 20 to 50 | Unread subsystems and an undecided target. The range is a placeholder, not an estimate. | low | inference |
-| Harness and oracle, across waves | 8 to 16 | Capture, normalization spec, replay runner, deviation register. | medium | inference |
-| Total | 78 to 174 | | low | inference |
+The effort per wave is the sum of four parts: the harness and oracle, the port, the boundary
+(facade or data service), and for online waves the screens.
 
-Read the total as "roughly a person-year and a half to about three and a third person-years, with wave 5 and wave 7 deciding which end". If wave 7 is descoped or kept as a mainframe island, the total drops to about 58 to 124.
+## Per wave
 
-## Assumptions the ranges are most sensitive to
+| Wave | Range (engineer-weeks) | What the range is made of | Confidence | Evidence |
+| --- | --- | --- | --- | --- |
+| 1. Utility jobs | 1 to 3 | Pipeline proof. Six jobs, most of them replaced by configuration | medium | `app/jcl/CBADMCDJ.jcl:27` |
+| 2. Read-only batch | 3 to 6 | Five programs, 1,084 lines, plus the decimal and overpunch handling every later wave reuses | medium | `app/data/ASCII/acctdata.txt:1` |
+| 3. Sign-on, menus, views | 8 to 16 | Seven programs, 2,679 lines, seven screens, the router and the COMMAREA back stack | medium | `app/cpy/COMEN02Y.cpy:28` |
+| 4. Build tooling | 0.5 to 2 | Delete and replace with the build pipeline | medium | inference |
+| 5. Nightly cycle | 24 to 48 | Harness and parallel run 8 to 16. Posting, interest and reports 6 to 12. Statements and the control block program 4 to 8. Scheduler and order 3 to 6. Data service 3 to 6 | low | `app/cbl/CBTRN02C.cbl:256` |
+| 6. Online writers | 16 to 32 | `COACTUPC` alone 5 to 10. The other eight programs 6 to 12. Nine screens 3 to 6. Cutover 2 to 4 | low | `app/cbl/COACTUPC.cbl:573` |
+| 7. Subsystem | 16 to 40 | Low confidence. IMS, DB2 and MQ files were not read | low | `app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl:62` |
+| Total | 68 to 147 | About 70 to 150 engineer-weeks | low | inference |
 
-Each is stated so that the client's engineers can say it is false.
+The upper bound of wave 7 is wide on purpose. It is the wave I know least about.
 
-| Wave | Assumption | If it is false | Confidence | Evidence |
-|---|---|---|---|---|
-| 2 | The account, card, cross reference and customer records are zoned decimal with no packed fields, so the four copybooks port with a plain decimal type. | If production files differ from the copybooks (packed fields, other layouts), wave 2 grows by half and every later wave inherits the error. | medium | `app/cpy/CVACT01Y.cpy:7`, `app/cpy/CVCUS01Y.cpy:17` |
-| 2 | The assembler routine COBDATFT is a plain date formatter. | If it uses installation tables, add one to two weeks. | low | `app/cbl/CBACT01C.cbl:231` |
-| 3 | The 17 program names in the two menu tables are the whole routing set, and COMMAREA returns only name the calling program. | If the COMMAREA can carry other names, the router facade needs a real routing table and wave 3 roughly doubles. | medium | `app/cpy/COMEN02Y.cpy:28`, `app/cpy/COADM02Y.cpy:29` |
-| 5 | The run order in `scripts/run_full_batch.sh` and the wrapper scripts is the production order. | If CA-7 is production, POSTTRAN starts behind the IMS purge job CBPAUP0J, and wave 5 needs a bridge to wave 7 that adds four to eight weeks. | medium | `scripts/run_full_batch.sh:47`, `app/scheduler/CardDemo.ca7:70` |
-| 5 | Nothing outside this tree reads the account, transaction and category balance masters. | If extracts, reports or partner feeds also read them, the data facade needs their layouts too, and wave 5 grows by about a third. | low | inference |
-| 5 | A parallel run through at least one month end, and ideally a year end, is possible. | If it is not, wave 5 needs a synthetic oracle built from source, which is the weakest kind, and adds six to ten weeks. | low | inference |
-| 5 | CBSTM03A is rewritten from what it does, not transliterated. | A transliteration that keeps the ALTER and control block code adds work and risk, and wave 5 grows by four to eight weeks. | medium | `app/cbl/CBSTM03A.CBL:300`, `app/cbl/CBSTM03A.CBL:266` |
-| 6 | The wave 5 data facade exists and both stacks write through it. | If the facade does not exist, waves 5 and 6 cannot run apart, and the two roughly merge. | medium | `app/cbl/COBIL00C.cbl:512`, `app/cbl/CBTRN02C.cbl:34` |
-| 7 | The DB2, IMS and MQ objects are documented elsewhere and the target is chosen. | The range is only a placeholder. Without them, wave 7 is not estimable. | low | inference |
+## The assumptions the ranges are most sensitive to
 
-The sentence I would defend in front of a committee is this: wave 5 roughly doubles if there is no way to run legacy and new side by side on real month end input, because the harness is then the work and the port is the easy part.
+Each is stated so that a client engineer can say it is false.
 
-## Where Claude Code can do the mechanical port, and where it cannot
+| Assumption | If it is false | Evidence |
+|---|---|---|
+| Off-mainframe archives cover at least 12 months of daily input and BKUP generations, including one fiscal year end. The catalog shows only five generations kept for the transaction backup base | Wave 5 takes the upper bound, and its parallel run must last through a fiscal close. Replay cannot cover month end | `app/catlg/LISTCAT.txt:1639` |
+| One of the four order sources is the production order, and the client can say which | The 3 to 6 weeks for order and scheduler roughly doubles, because the order has to be reverse engineered from job logs | `scripts/run_full_batch.sh:13`, `app/scheduler/CardDemo.ca7:43` |
+| The legacy VSAM stays the owner of the account and transaction masters through wave 6, behind a data service | Waves 5 and 6 merge, their ranges add, and the parallel run spans both. The facade saving of 3 to 6 weeks goes, and the blast radius of the merged wave is the largest in the plan | `app/jcl/ACCTFILE.jcl:25` |
+| Screens are rebuilt one for one. The tree holds 21 BMS maps: 7 in wave 3, 9 in wave 6, 1 in wave 5 and 4 in wave 7 | If the target UX is new, the screen part drops out and requirements discovery replaces it | `app/bms/COSGN00.bms:1` |
+| The authorization database is a plain hierarchy. A secondary index database appears in the unload job | If it is used at run time, the IMS part of wave 7 roughly doubles | `app/app-authorization-ims-db2-mq/jcl/DBPAUTP0.jcl:32` |
+| The batch report gets its date range from exactly two places, the SORT card and the DATEPARM file, and interest gets its date only from the PARM | If a third source exists, for example an operator who edits DATEPARM by hand, the report work in wave 5 grows by one to two weeks | `app/jcl/TRANREPT.jcl:43`, `app/jcl/TRANREPT.jcl:73`, `app/jcl/INTCALC.jcl:22` |
 
-| Kind of work | Units | Can Claude Code do it | Confidence | Evidence |
-|---|---|---|---|---|
-| Transliterate plain read and print programs and IDCAMS reloads | CBACT02C, CBACT03C, CBCUS01C, ACCTFILE, TCATBALF, TRANTYPE, TRANCATG | Yes, with a golden master test harness | high | `app/cbl/CBCUS01C.cbl:78`, `app/jcl/ACCTFILE.jcl:61` |
-| Generate test cases from copybooks and sample data | All waves | Yes, and label the coverage provisional | high | `app/data/ASCII/dailytran.txt:1` |
-| Port record I/O and arithmetic in the posting program | CBTRN02C | Partly. The port is easy, and the reject rules are not: two checks can both fire and the last one wins, and a failed balance rewrite is not written to the reject file. Someone must decide which is intended. | medium | `app/cbl/CBTRN02C.cbl:410`, `app/cbl/CBTRN02C.cbl:417`, `app/cbl/CBTRN02C.cbl:554` |
-| Reproduce the interest arithmetic | CBACT04C | Partly. It can match the truncation exactly. It cannot tell whether truncation, the empty fee routine, or the fixed run date is intended. | medium | `app/cbl/CBACT04C.cbl:464`, `app/cbl/CBACT04C.cbl:518` |
-| Rewrite statements | CBSTM03A | No, not by transliteration. ALTER, GO TO and control block walking have no target equivalent. It can write the new version from a spec and test it against the golden statements. | medium | `app/cbl/CBSTM03A.CBL:300` |
-| Design the router facade and the data access facade | Waves 3, 5, 6 | No. These are design decisions with consequences for every later wave. It can draft and test them. | medium | inference |
-| Decide the meaning of "master refresh" and the fate of the reload jobs | ACCTFILE, CARDFILE | No. That is the client's answer, not a source fact. | high | `scripts/remote_refresh.sh:16` |
-| IMS, DB2 and MQ semantics | Wave 7 | No, not from this tree. The objects are unread. | high | `app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl:262` |
+## Where Claude Code can do the mechanical port
+
+It is strong at transliteration when there is a harness to check it. In this tree that means:
+
+| Work | Why it suits | Evidence |
+|---|---|---|
+| The three read and print programs | Open, read loop, DISPLAY, about 130 lines each | `app/cbl/CBACT02C.cbl:29`, `app/cbl/CBACT03C.cbl:29`, `app/cbl/CBCUS01C.cbl:29` |
+| The four user screens over one VSAM file | Plain create, read, update and delete against one layout | `app/cbl/COUSR01C.cbl:39`, `app/cbl/COUSR02C.cbl:360` |
+| The reload jobs | Delete, define and load. They become data loaders | `app/jcl/CUSTFILE.jcl:35`, `app/jcl/DISCGRP.jcl:25` |
+| Turning the wrapper order and Control-M conditions into a scheduler graph | The edges are already extracted | `app/scheduler/CardDemo.controlm:3` |
+| The harness itself: log parsers, the normalization spec, the diff tool | It is generated from the job output and reviewed by a person | inference |
+
+It is weak where the code encodes intent that nobody wrote down:
+
+| Work | Why it needs a person | Evidence |
+|---|---|---|
+| `CBSTM03A` | ALTER, GO TO and a walk of the job's own control blocks to read DD names. A port must decide what the intent was | `app/cbl/CBSTM03A.CBL:266`, `app/cbl/CBSTM03A.CBL:300` |
+| `COACTUPC` | 3,368 lines of field edits, with SSN part rules held in REDEFINES | `app/cbl/COACTUPC.cbl:117` |
+| The report quirks | The loop exit at the date filter and the doubled last amount are decisions for the business, not for a translator (inference from the source) | `app/cbl/CBTRN03C.cbl:177`, `app/cbl/CBTRN03C.cbl:200` |
+| The cycle order | Four sources disagree and no source line says which is right | `app/scheduler/CardDemo.controlm:3` |
+| IMS, MQ and the assembler routines | Not modeled, or not parsed | `app/asm/COBDATFT.asm:1`, `app/asm/MVSWAIT.asm:1` |
+| The REXX exec behind the PDF step | Not in the tree | `app/jcl/TXT2PDF1.JCL:31` |

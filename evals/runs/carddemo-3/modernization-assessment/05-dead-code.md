@@ -1,50 +1,71 @@
 # 05 Dead code
 
-Telemetry: none. The client gave no run history for the last 12 months, so every claim in this file is provisional. Nothing here is a deletion order. The extractor's candidate list is in `modernization-assessment/05a-dead-code-candidates.md`, and `modernization-assessment/dead-code.json` holds the three buckets. I did not move anything from unknown toward unreachable.
+Telemetry: none. Every claim below is provisional. Nothing here is a reason to delete a unit
+until someone shows that it did not run in the last twelve months. The register is
+`modernization-assessment/dead-code.json:1` and the extractor's candidates are in
+`05a-dead-code-candidates.md`.
 
-## The three buckets
+## Three buckets
 
-| Unit | Bucket | Confidence | Reason | Evidence |
-|---|---|---|---|---|
-| cpy:UNUSED1Y | Unreachable | medium | No program includes it and no computed call could use it. One gap: the assembler macro library is not read. | `app/cpy/UNUSED1Y.cpy:1` |
-| CBTRN01C | Unknown | low | Named by no JCL, CSD entry or program. A batch verify-only driver: it reads the daily file and looks up each card and account, and never writes. The computed calls cannot be shown to reach it, but only by inference. | `app/cbl/CBTRN01C.cbl:172` |
-| proc:TRANREPT | Unknown | medium | Named only in JCL text inside CORPT00C, which submits it through the JOBS queue. A running program can start it. | `app/cbl/CORPT00C.cbl:94`, `app/csd/CARDDEMO.CSD:499` |
-
-Dormant bucket: empty. See the next section before reading that as good news.
-
-### Why unknown, and not unreachable, for CBTRN01C
-
-The extractor keeps it unknown because 28 computed calls in reachable code could target it (`app/cbl/COACTUPC.cbl:956` is the first). I read those calls (`modernization-assessment/02-coupling.md`). The values come from two menu tables that name 17 programs (`app/cpy/COMEN02Y.cpy:28`, `app/cpy/COADM02Y.cpy:29`), from literal MOVEs, and from the COMMAREA program name of the caller. None names CBTRN01C, and it is a batch program with no CICS commands. I therefore expect it is unused, but the COMMAREA path cannot be proven from source, so it stays in unknown (inference). What would settle it is a search of the client's job logs and SMF records for the program name.
-
-Its header says "Post the records from daily transaction file", yet it posts nothing. Someone may run it by hand as a pre-posting check. Ask.
-
-## Dormant: not measured well
-
-The extractor computed dormancy with a five year threshold as of 2026-09-30. Nothing qualifies, because the oldest last-modified date in the tree is 2022-09-01. The dates are weak input: 99 of the source files share that one date, 83 share 2025-08-03, 5 share 2025-10-16 and one has 2022-10-12. They look like bulk import commits, not real change dates (analysis: node `last_modified` values). An empty dormant list therefore means not measured. It is not evidence that everything was changed recently.
-
-## Jobs that count as entry points and so never show in a bucket
-
-The extractor counts every JCL job as an entry point, so no job can be dead by static analysis. It lists 35 jobs that no parsed scheduler names (analysis: `unscheduled_jobs`). The extractor cannot parse the CA-7 listing (`app/scheduler/CardDemo.ca7:18`), so that count is overstated. The listing names eight of them: CBPAUP0J, CREASTMT, PRTCATBL, READACCT, READCARD, READCUST, READXREF and TXT2PDF1 (inference: `app/scheduler/CardDemo.ca7:43`, `app/scheduler/CardDemo.ca7:340`, `app/scheduler/CardDemo.ca7:468`, `app/scheduler/CardDemo.ca7:537`). Twenty-seven remain that no scheduler artifact in the tree names.
-
-| Jobs still unnamed by any scheduler artifact | Likely nature | Confidence | Evidence |
+| Bucket | Units | Confidence it is dead | Evidence |
 |---|---|---|---|
-| CBADMCDJ, DEFCUST, DEFGDGB, DEFGDGD, DALYREJS, REPTFILE, ESDSRRDS | One time setup and data definition | medium | `app/jcl/CBADMCDJ.jcl:27`, `app/jcl/DEFCUST.jcl:25`, `app/jcl/DEFGDGB.jcl:24` |
-| CBEXPORT, CBIMPORT | Branch migration pair, run on demand | medium | `app/cbl/CBEXPORT.cbl:65`, `app/jcl/CBIMPORT.jcl:43` |
-| TRANREPT | Report, also submitted by CORPT00C, so probably live | medium | `app/jcl/TRANREPT.jcl:59` |
-| CBLDBMS, CICCMP, CIDBCMP, CNJBATMP, IMSMQCMP | Build jobs | high | `samples/jcl/BMSCMP.jcl:1` |
-| CREADB2, DBPAUTP0, LOADPADB, UNLDGSAM, UNLDPADB | DB2 and IMS setup, unload and load | low | `app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL:26` |
-| FTPJCLS, INTRDRJ1, INTRDRJ2, LISTFILS, RACFCMDS, REPRTEST, SORTTEST | Demo and sample jobs | medium | `app/jcl/FTPJCL.JCL:33`, `app/jcl/INTRDRJ1.JCL:18` |
+| Unreachable | `cpy:UNUSED1Y` | medium | `app/cpy/UNUSED1Y.cpy:1` |
+| Reachable but dormant | none | not measured | `analysis` (field `dead_code_candidates`, dormant is empty) |
+| Unknown | `CBTRN01C`, `proc:TRANREPT` | low | `app/cbl/CBTRN01C.cbl:1`, `app/cbl/CORPT00C.cbl:94` |
 
-These are candidates for instrumentation, not deletion. The build and sample jobs are separately on the `do_not_port` list in `modernization-assessment/risks.json`, because a new pipeline replaces them, not because they are unused.
+I did not move any unit toward or away from a bucket. Every extractor candidate is in the same
+bucket the extractor put it in.
 
-## Other places where the tree and the definitions disagree
+## Unreachable
 
-| Finding | Why it matters for dead code | Confidence | Evidence |
-|---|---|---|---|
-| The CSD defines program COCRDSEC and a developer transaction CDV1 that runs it, and no source for COCRDSEC is in the tree. | Either the source is missing from the tree, or a definition points at nothing. Do not treat it as dead until the client says. | medium | `app/csd/CARDDEMO.CSD:211`, `app/csd/CARDDEMO.CSD:390` |
-| The CA-7 listing triggers jobs CLOSEFIL1 and CLOSEFIL2 that have no JCL here. | Either the JCL is elsewhere or the triggers are stale. | medium | `app/scheduler/CardDemo.ca7:216` |
-| Clusters AWS.CCDA.CUSTDATA.CLUSTER and AWS.CUSTDATA.CLUSTER appear only in DEFCUST. | The job builds a dataset no program reads. | medium | `app/jcl/DEFCUST.jcl:25`, `app/jcl/DEFCUST.jcl:35` |
-| Datasets USRSEC.VSAM.ESDS and USRSEC.VSAM.RRDS appear only in ESDSRRDS. | Copies of the user file no program reads. | medium | `app/jcl/ESDSRRDS.jcl:63`, `app/jcl/ESDSRRDS.jcl:97` |
-| CBACT04C has an empty fee routine. | A stub, not dead code by the extractor's rule, but a business rule that may have been removed or never built. | medium | `app/cbl/CBACT04C.cbl:518` |
+`cpy:UNUSED1Y` is a seven line copybook. No program includes it and no other file in the tree
+names it (`app/cpy/UNUSED1Y.cpy:1`). Copybooks cannot run, so this is the safest candidate in the
+tree to propose for deletion. It is still provisional: another repository could include it, and I
+did not have one.
 
-Nothing here is deleted or ranked for deletion. It is a list of questions.
+## Reachable but dormant: the empty list means not measured
+
+The rule is five years without a change, as of 2026-09-30, so the cutoff is 2021-09-30. The oldest
+last-modified date in the tree is 2022-09-01, and 99 files carry it (`analysis`, computed from the
+node dates). One upload date on that many files looks like a bulk import, not a change history.
+So the empty list does not say the code is live. It says the date test could not distinguish
+anything. Dormancy here needs the client's own change history or telemetry.
+
+## Unknown
+
+| Unit | Why it stays unknown | Evidence |
+|---|---|---|
+| `CBTRN01C` | No JCL step runs it, no static call reaches it, and the CSD does not define it. Its header reads the same as the posting program's, and it only reads. My reading of the 28 computed calls (see `02-coupling.md`) finds targets only in the menu tables and the COMMAREA return names, and a batch program cannot be started by an XCTL. So I think it is unreachable in fact. I leave it in unknown because the validator forbids moving it, and because a run by hand would leave no trace in the tree | `app/cbl/CBTRN01C.cbl:154`, `app/cpy/COMEN02Y.cpy:28` |
+| `proc:TRANREPT` | Named only in JCL text inside `CORPT00C`. The program writes that text to the JOBS queue at run time. It is live whenever a user asks for a report on the screen | `app/cbl/CORPT00C.cbl:94`, `app/cbl/CORPT00C.cbl:517` |
+
+The evidence line for `COMEN02Y` is `app/cpy/COMEN02Y.cpy:28`; the table lists eleven programs and
+`CBTRN01C` is not among them.
+
+## Jobs that cannot appear in a bucket
+
+The extractor counts a job as an entry point unless a parsed scheduler names it. Thirty-five jobs
+are not named by Control-M or a wrapper script (`analysis`, field `unscheduled_jobs`). That list is
+overstated, and the dead-code warning says why: the CA-7 listing is not parsed
+(`app/scheduler/CardDemo.ca7:1`). Reading the listing by hand (inference), eight of the 35 are in
+it: `CBPAUP0J`, `CREASTMT`, `PRTCATBL`, `READACCT`, `READCARD`, `READCUST`, `READXREF` and
+`TXT2PDF1` (`app/scheduler/CardDemo.ca7:43`, `app/scheduler/CardDemo.ca7:340`,
+`app/scheduler/CardDemo.ca7:495`, `app/scheduler/CardDemo.ca7:537`).
+
+The other 27 are the ones to ask about. They are the build jobs, the samples, the IMS load and
+unload jobs, and a few application jobs. Candidates for instrumentation, not deletion:
+
+| Unit | Why it looks unused | Confidence | Evidence |
+| --- | --- | --- | --- |
+| `job:DEFCUST` | Deletes one cluster and defines another, and no program reads either | medium | `app/jcl/DEFCUST.jcl:25` |
+| `job:ESDSRRDS` | Defines demo ESDS and RRDS files that no program reads | medium | `app/jcl/ESDSRRDS.jcl:63` |
+| `job:INTRDRJ1`, `job:INTRDRJ2` | Internal reader demo | medium | `app/jcl/INTRDRJ1.JCL:17` |
+| `job:SORTTEST`, `job:REPRTEST` | Sample jobs that write production GDG generations | medium | `samples/jcl/SORTTEST.jcl:35`, `samples/jcl/REPRTEST.jcl:33` |
+| `job:REPTFILE` | Defines the report GDG that `DEFGDGB` also defines | medium | `app/jcl/REPTFILE.jcl:26`, `app/jcl/DEFGDGB.jcl:36` |
+| `job:CBIMPORT` | Cannot run as shipped: its job has no DD for the card output | medium | `app/cbl/CBIMPORT.cbl:233` |
+| Alternate index on the transaction master | No program reads it and no CSD entry defines it (inference from a search of the tree). `TRANIDX` and `TRANFILE` still build it | low | `app/jcl/TRANIDX.jcl:27`, `app/jcl/TRANFILE.jcl:84` |
+
+## What I would ask for
+
+Twelve months of job logs or SMF step records for the 27 jobs above, the CICS transaction statistics
+for the 25 transactions in the four CSD files (`app/csd/CARDDEMO.CSD:306`), and a search of the client's other
+repositories for `UNUSED1Y`. With those three the dormant and unknown buckets become evidence.

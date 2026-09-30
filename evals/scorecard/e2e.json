@@ -2,7 +2,7 @@
  "generated": "2026-09-30",
  "summary": {
   "citations": {
-   "total": 11441,
+   "total": 11356,
    "unresolved": 0,
    "resolve_rate": 1.0
   },
@@ -12,8 +12,8 @@
   "json_all_valid_runs": 16,
   "unreachable_on_dynamic_total": 0,
   "carddemo_waves": {
-   "jaccard": 0.6164772727272727,
-   "rand_index_mean": 0.9280287884846062,
+   "jaccard": 0.9832264430192402,
+   "rand_index_mean": 0.9969789861833044,
    "unit_overlap": 1.0,
    "wave_counts": [
     7,
@@ -23,14 +23,14 @@
    "runs_compared": 3,
    "wave_count_identical": true,
    "deviations": [
-    4,
-    17,
-    13
+    2,
+    2,
+    3
    ],
    "seed_jaccard": [
-    0.8857715430861723,
-    0.5873320537428023,
-    0.6561014263074485
+    0.9529236868186323,
+    0.9529236868186323,
+    0.9368575624082232
    ]
   },
   "cost_usd_total": null
@@ -41,9 +41,9 @@
    "run": "carddemo-1",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 457125,
-    "tool_uses": 105,
-    "duration_ms": 1460965
+    "tokens": 524497,
+    "tool_uses": 104,
+    "duration_ms": 1553236
    },
    "claude": {
     "is_error": null,
@@ -56,7 +56,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 3330,
+    "total": 3313,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -77,9 +77,9 @@
    "run": "carddemo-2",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 489747,
-    "tool_uses": 108,
-    "duration_ms": 1446580
+    "tokens": 505668,
+    "tool_uses": 104,
+    "duration_ms": 1643971
    },
    "claude": {
     "is_error": null,
@@ -92,7 +92,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 3353,
+    "total": 3348,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
@@ -113,9 +113,9 @@
    "run": "carddemo-3",
    "harness": "subagent",
    "subagent_usage": {
-    "tokens": 505085,
-    "tool_uses": 104,
-    "duration_ms": 1415773
+    "tokens": 533788,
+    "tool_uses": 101,
+    "duration_ms": 1482246
    },
    "claude": {
     "is_error": null,
@@ -128,7 +128,7 @@
    },
    "ran": true,
    "citations": {
-    "total": 3287,
+    "total": 3224,
     "unresolved": 0,
     "resolve_rate": 1.0
    },

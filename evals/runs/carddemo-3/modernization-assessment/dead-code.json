@@ -3,10 +3,13 @@
  "unreachable": [
   {
    "id": "cpy:UNUSED1Y",
-   "reason": "No program includes it and no reachable computed call could use it. Copybooks have no run time path. The one gap is the assembler macro library (app/maclib), which the extractor does not read. No telemetry exists, so this is provisional.",
+   "reason": "No program includes it and no path from an entry point reaches it. Provisional, because no telemetry was supplied and other repositories were not searched.",
    "confidence": "medium",
    "evidence": [
-    {"file": "app/cpy/UNUSED1Y.cpy", "line": 1}
+    {
+     "file": "app/cpy/UNUSED1Y.cpy",
+     "line": 1
+    }
    ]
   }
  ],
@@ -14,22 +17,32 @@
  "unknown": [
   {
    "id": "CBTRN01C",
-   "reason": "No JCL step, CSD entry or program names it, and its DDs map to nothing. It is a batch program with no CICS commands, and the menu tables and literal targets that feed the 28 computed calls list 17 names (COMEN02Y.cpy:28-89, COADM02Y.cpy:29-53) that do not include it. That bounds the calls only as inference, because CDEMO-FROM-PROGRAM comes from the COMMAREA, so it stays unknown. It reads the daily transaction file and verifies each card and account, so someone may run it by hand before posting.",
+   "reason": "No JCL step in the tree runs it and no static caller exists. Computed calls in reachable code could target it. It shares CBTRN02C's header comment, so it may be a retired copy, but that is not proven.",
    "confidence": "low",
    "evidence": [
-    {"file": "app/cbl/CBTRN01C.cbl", "line": 1},
-    {"file": "app/cbl/CBTRN01C.cbl", "line": 172}
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 1
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 956
+    }
    ]
   },
   {
    "id": "proc:TRANREPT",
-   "reason": "Named only in JCL text inside CORPT00C, which the online transaction writes to the JOBS transient data queue (an internal reader). A running program can submit it, so it is unknown, never unreachable. It is very likely live: CORPT00C is a menu option (COMEN02Y.cpy:77).",
-   "confidence": "medium",
+   "reason": "Named only in JCL text inside CORPT00C, which a running program writes to the JOBS transaction data queue. It is live whenever the report screen is used.",
+   "confidence": "low",
    "evidence": [
-    {"file": "app/cbl/CORPT00C.cbl", "line": 94},
-    {"file": "app/cbl/CORPT00C.cbl", "line": 517},
-    {"file": "app/csd/CARDDEMO.CSD", "line": 499},
-    {"file": "app/proc/TRANREPT.prc", "line": 1}
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 94
+    },
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 517
+    }
    ]
   }
  ]

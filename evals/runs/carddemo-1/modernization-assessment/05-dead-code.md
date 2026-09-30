@@ -1,49 +1,65 @@
 # 05 Dead code
 
-Telemetry is `none`. Every claim in this file is provisional. Nothing here is a proposal to delete anything except the one copybook in the first table, and even that waits for the client to confirm. The candidate lists are in `modernization-assessment/05a-dead-code-candidates.md` and the JSON is `modernization-assessment/dead-code.json`.
+Telemetry: none. The client gave no run history, so every claim on this page is provisional. `05a-dead-code-candidates.md` is the extractor's list. `dead-code.json` is the register. I kept every extractor candidate in the bucket the extractor put it in. I did not move anything from unknown to unreachable, and I did not add dormant items. I added nothing to unknown either, because nothing I read gave a reason.
 
-## The three buckets
+Three buckets: unreachable, dormant, unknown.
 
-| Bucket | Unit | Confidence | Reason | Evidence |
+## Unreachable
+
+| Unit | Type | Reason | Confidence | Evidence |
 |---|---|---|---|---|
-| Unreachable | cpy:UNUSED1Y | high | No program includes it and no unparsed file names it. Its fields are called UNUSED-ID, UNUSED-PWD and so on. With no telemetry it is provisional, and a program outside this tree could still copy it. Propose it for deletion after confirmation | `app/cpy/UNUSED1Y.cpy:1` |
-| Dormant | none | not measurable | See below. An empty list here is not evidence that nothing is dormant | analysis, `dormant_years` and `git_dates` |
-| Unknown | CBTRN01C | low | No JCL step, scheduler entry or wrapper runs it. Its six DDs map to no JCL. Computed calls do not reach it. It stays unknown | `app/cbl/CBTRN01C.cbl:29` |
-| Unknown | proc:TRANREPT | medium | Named only in JCL text inside CORPT00C, which submits it through the JOBS queue. Treat it as live, because it is the online route to a must-not-break report | `app/cbl/CORPT00C.cbl:94`, `app/cbl/CORPT00C.cbl:517` |
+| cpy:UNUSED1Y | copybook | No program includes it. The extractor found no static path and no reachable computed call. A search of the source finds its name only in its own file. It is 7 lines, last changed 2022-09-01. Safe to propose for deletion after one confirmation. | high | `app/cpy/UNUSED1Y.cpy:1` |
 
-## Unreachable: one copybook
+## Unknown
 
-cpy:UNUSED1Y is seven lines, dated 2022-09-01, and the extractor found no COPY of it (`analysis.dead_code_candidates`). A search of the tree found no other mention of it. The copybook mirrors the sign-on record layout: an 8-character id, two names, an 8-character password and a type (`app/cpy/UNUSED1Y.cpy:2`, `app/cpy/UNUSED1Y.cpy:5`, `app/cpy/CSUSR01Y.cpy:21`). That looks like an earlier copy of the user record. It is the only unreachable unit in the tree.
+Do not delete these on this evidence.
 
-## Dormant: not measurable here
+| Unit | Type | Reason | Confidence | Evidence |
+|---|---|---|---|---|
+| CBTRN01C | batch program | No JCL step runs it and no static edge reaches it, so 28 reachable computed calls could in principle target it. I bounded the menu calls: the option tables do not list it, the CSD defines no program for it, and it opens all six of its files INPUT. It repeats CBTRN02C's header ('Post the records from daily transaction file') and posts nothing. Very likely retired, but a hand run or a member outside the tree would not show here. | low | `app/cbl/CBTRN01C.cbl:254`, `app/cpy/COMEN02Y.cpy:28`, `app/csd/CARDDEMO.CSD:173` |
+| proc:TRANREPT | proc | Named only in JCL text inside CORPT00C, which writes that text to the JOBS queue. The CSD maps that queue to the internal reader. CORPT00C is menu option 9. So this proc very likely runs whenever a user asks for the transaction report online. It is a must-not-break item, not dead code. | low | `app/cbl/CORPT00C.cbl:94`, `app/cbl/CORPT00C.cbl:517`, `app/csd/CARDDEMO.CSD:499`, `app/cpy/COMEN02Y.cpy:77` |
 
-The rule is reachable, not modified for five years, and no telemetry. The extractor ran with git dates on and an as-of date of 2026-09-30 (`analysis.as_of`, `meta.git_dates`), so the cut-off is 2021-09-30. The repository history starts in August 2022, about four years before the as-of date, so no file can be older than the cut-off. The empty dormant list therefore means the test could not fire, not that the code is active. The last-modified date on many files is 2022-09-01, which is the import into this repository (`modernization-assessment/01-inventory.md`), so it says nothing about use.
+What the computed calls could reach, and why that keeps this bucket open: 20 programs make 28 computed XCTL calls. I could bound 11 of them (the two menu tables, the constants in COCRDLIC and COUSR00C, COTRN00C's transfer to the view, and the three authorization calls). The rest return to a caller named in the COMMAREA, so their set is open (`02-coupling.md`). All the targets I found are online programs, and CBTRN01C is a batch program. That lowers the chance and does not remove it.
 
-The 2022 files are the online programs and most JCL, and they are the units a client engineer should check first with run history. The list of programs whose last change is 2022-09-01 is in `modernization-assessment/01-inventory.md`.
+## Reachable but dormant
 
-## Unknown: CBTRN01C
+None. The extractor computed dormancy with a 5 year threshold as of 2026-09-30, and the earliest git date on any unit is 2022-09-01 (`analysis` field `as_of`, and the last modified column of `01-inventory.md`). The repository's history starts in August 2022, so no unit can be five years old. An empty list here means the rule could not fire. It does not mean nothing is dormant. A unit's real age may be older than its commit date, and the ticket footers in the JCL show 2022-07-19 for the oldest JCL (`app/jcl/POSTTRAN.jcl:44`). Treat dormancy as not measured.
 
-CBTRN01C reads the daily transaction file, the cross reference, the card, customer, account and transaction files, and writes nothing (`app/cbl/CBTRN01C.cbl:29`, `app/cbl/CBTRN01C.cbl:58`). No job in the tree runs it, and the JCL that would map its six DDs is missing.
+Reachable but old code worth instrumenting instead: the 1,058 run counts in the CA-7 listing look like template values and are not telemetry (`app/scheduler/CardDemo.ca7:24`). Ask for real job logs or SMF records.
 
-The extractor put it in unknown because 28 computed calls in reachable code could target it. I read each of them (`modernization-assessment/02-coupling.md`). Every target name comes from the two menu tables, `app/cpy/COMEN02Y.cpy:28` and `app/cpy/COADM02Y.cpy:29`, or from literal MOVEs, and all of those are online programs. So the computed calls do not reach a batch program, and I bound them out. It still cannot move to unreachable. A job outside the tree, or a run by hand, could start it, and the validator does not allow the move. Ask the client whether it is a pre-posting check that someone runs before POSTTRAN. If yes, it belongs with the posting cycle in wave 5. Until then it stays unplaced in `modernization-assessment/waves.json`.
+## Jobs no parsed scheduler runs
 
-## Unknown: proc:TRANREPT
+A job that no parsed scheduler names counts as an entry point, so it never shows in a bucket. There are 35. Some of them are scheduled in the CA-7 listing, which the extractor cannot parse. The warning says the list is overstated. Here is what I could see in the listing (inference):
 
-The proc is named in a JCL literal that CORPT00C writes to the JOBS queue (`app/cbl/CORPT00C.cbl:94`, `app/cbl/CORPT00C.cbl:517`). The queue exists (`app/csd/CARDDEMO.CSD:499`). The extractor cannot draw an edge from JCL text inside a COBOL literal, so the proc looks unreferenced. It is the online route to the transaction report, so I placed it in wave 5 and left it in the unknown bucket in the JSON. The bucket only records how sure the extractor was.
-
-## Jobs no parsed scheduler names
-
-35 jobs are named by no parsed Control-M file or shell wrapper (`analysis.unscheduled_jobs`). Each is an entry point, so none of them can appear in a bucket. The extractor warns that its list is overstated because the CA-7 listing is not parsed (`modernization-assessment/05a-dead-code-candidates.md`). I read the CA-7 file by hand. It names eight of the 35: CBPAUP0J, CREASTMT, PRTCATBL, READACCT, READCARD, READCUST, READXREF and TXT2PDF1 (`app/scheduler/CardDemo.ca7:51`, `app/scheduler/CardDemo.ca7:476`, `app/scheduler/CardDemo.ca7:545`, `app/scheduler/CardDemo.ca7:348`, `app/scheduler/CardDemo.ca7:375`, `app/scheduler/CardDemo.ca7:402`, `app/scheduler/CardDemo.ca7:429`, `app/scheduler/CardDemo.ca7:503`). That is `inference`, from a file the extractor did not read.
-
-The other 27 fall into groups. Ask the client whether each still runs.
-
-| Group | Jobs | What it probably is | Evidence |
+| Job | Where CA-7 names it | Confidence | Evidence |
 |---|---|---|---|
-| Report | TRANREPT | The must-not-break report. No scheduler names it, so it is run by hand or through the online screen | `app/jcl/TRANREPT.jcl:1` |
-| Install and definition | CBADMCDJ, CREADB2, DEFCUST, DEFGDGB, DEFGDGD, DALYREJS, REPTFILE, ESDSRRDS, DBPAUTP0, LOADPADB, RACFCMDS | One-time setup. DEFGDGB and DALYREJS define generation groups the posting cycle writes, so they are prerequisites, not dead | `app/jcl/DEFGDGB.jcl:24`, `app/jcl/DALYREJS.jcl:24` |
-| Build | CBLDBMS, CICCMP, CIDBCMP, CNJBATMP, IMSMQCMP | Legacy compile jobs under samples | `samples/jcl/BMSCMP.jcl:1` |
-| Samples | REPRTEST, SORTTEST, LISTFILS | Test jobs under samples | `samples/jcl/SORTTEST.jcl:1` |
-| Demos | FTPJCLS, INTRDRJ1, INTRDRJ2 | An FTP demo with credentials in the JCL and an internal reader demo | `app/jcl/FTPJCL.JCL:33`, `app/jcl/INTRDRJ1.JCL:18` |
-| Export and IMS unload | CBEXPORT, CBIMPORT, UNLDGSAM, UNLDPADB | Data movement for migration or backup. Who runs them is unknown | `app/jcl/CBEXPORT.jcl:1`, `app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL:1` |
+| job:READACCT | Triggered after CLOSEFIL | medium | `app/scheduler/CardDemo.ca7:340` |
+| job:READCARD | Triggered after READACCT | medium | `app/scheduler/CardDemo.ca7:367` |
+| job:READCUST | Triggered after READCARD | medium | `app/scheduler/CardDemo.ca7:394` |
+| job:READXREF | Triggered after READCUST | medium | `app/scheduler/CardDemo.ca7:421` |
+| job:CREASTMT | Triggered after CLOSEFIL | medium | `app/scheduler/CardDemo.ca7:468` |
+| job:TXT2PDF1 | Triggered after CREASTMT | medium | `app/scheduler/CardDemo.ca7:495` |
+| job:PRTCATBL | Triggered after a second CLOSEFIL | medium | `app/scheduler/CardDemo.ca7:537` |
+| job:CBPAUP0J | Triggered after CLOSEFIL, and it triggers POSTTRAN | medium | `app/scheduler/CardDemo.ca7:43` |
 
-None of these is proposed for deletion. The demos and samples are candidates to instrument, and the build jobs go with the legacy build (`modernization-assessment/risks.json`, `do_not_port`).
+The other 27 stay unscheduled as far as I can see. Ask whether they still run. Three of them the client should confirm first, because they are must-not-break or close to it:
+
+| Job | Why it matters | Confidence | Evidence |
+|---|---|---|---|
+| job:TRANREPT | The transaction report job. No scheduler names it. It also exists as the proc that CORPT00C submits. Two copies of the same steps. | medium | `app/jcl/TRANREPT.jcl:59`, `app/proc/TRANREPT.prc:57` |
+| job:CBEXPORT and job:CBIMPORT | A branch migration path. Not scheduled. The import job cannot run as shipped. | medium | `app/jcl/CBEXPORT.jcl:43`, `app/jcl/CBIMPORT.jcl:33` |
+| job:DEFCUST | Deletes a cluster under a different qualifier (AWS.CCDA), so it targets nothing in this system. | medium | `app/jcl/DEFCUST.jcl:25` |
+
+The account and card refresh jobs (ACCTFILE and CARDFILE) are not in the unscheduled list because the wrapper scripts name them. Neither Control-M nor the CA-7 listing runs them, so their cadence is not on record.
+
+## Other things worth asking about
+
+These are not extractor candidates. They are gaps I noticed and I did not put them in a bucket.
+
+| Item | What I saw | Confidence | Evidence |
+|---|---|---|---|
+| Transaction alternate index | TRANIDX and TRANFILE build an alternate index on the transaction master. No program and no CSD file in the tree reads its path. | medium | `app/jcl/TRANIDX.jcl:43`, `app/jcl/TRANFILE.jcl:100` |
+| COCRDSEC | The CSD defines a program and the developer transaction CDV1 for it. There is no source. | high | `app/csd/CARDDEMO.CSD:211`, `app/csd/CARDDEMO.CSD:388` |
+| CLOSEFIL1 and CLOSEFIL2 | The CA-7 listing triggers two jobs with no JCL in the tree. | medium | `app/scheduler/CardDemo.ca7:216` |
+| The two internal reader demos | INTRDRJ1 feeds INTRDRJ2 to the internal reader. Neither is scheduled. | medium | `app/jcl/INTRDRJ1.JCL:17` |
+| FTP job | Holds a clear text address, user and password. Retire and rotate. | high | `app/jcl/FTPJCL.JCL:33` |
