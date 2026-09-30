@@ -1,22 +1,58 @@
 ---
-description: Run a full modernization assessment of a legacy codebase — inventory, coupling map, wave plan, estimate, dead-code register, and test strategy.
-argument-hint: "[path] [--wave N]"
+description: Assess a COBOL, CICS, JCL and VSAM codebase for modernization. Scripts extract the coupling graph. Claude cuts the waves and scores the risk.
+argument-hint: '[path] [--target rehost|replatform|refactor|rewrite] [--must-not-break "text"] [--telemetry none|partial|provided] [--wave N]'
+allowed-tools: 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/*)'
 ---
 
-Run a modernization assessment using the `modernization-assessment` skill, then the
+Assess the codebase with the `modernization-assessment` skill. Then run the
 `behavioral-equivalence` skill.
 
-Scope: $1 (if empty, assess the whole repository).
+Arguments you were given: `$ARGUMENTS`
 
-If `--wave N` was passed, skip phases 1–2 by reading the existing
-`modernization-assessment/01-inventory.md` and `02-coupling.md`, and produce a detailed
-build plan for wave N only: the module-by-module port order, the test harness for that
-wave's boundary, and the rollback procedure.
+## Read the arguments
 
-Before you begin, ask the user the three scoping questions the assessment skill requires —
-target state, what must not break, and whether runtime telemetry is available. Do not
-proceed on assumptions; the answers change the output substantially.
+- The first word that does not start with `--` is the scope. If there is none, assess the current
+  directory.
+- `--target` is the target state: `rehost`, `replatform`, `refactor` or `rewrite`.
+- `--must-not-break` is a quoted list of what must not break.
+- `--telemetry` says whether runtime telemetry exists: `none`, `partial` or `provided`.
+- `--wave N` means: skip the assessment, read the existing `modernization-assessment/` folder, and
+  plan wave N in detail. See the last section.
 
-Write all artifacts to `./modernization-assessment/`. Finish by printing a short summary to
-the conversation: wave count, the single largest risk you found, and the top three open
-questions for the client's engineers.
+## Scoping questions
+
+The assessment needs three answers: target state, what must not break, and whether telemetry
+exists. Ask only for the ones you were not given as flags. If all three came as flags, ask
+nothing. Do not proceed on assumptions in an interactive session. The answers change the output.
+
+In a non-interactive session nobody can answer. Use these defaults and say so in
+`00-summary.md`: target `refactor`, must-not-break `not stated`, telemetry `none`.
+
+## Run
+
+1. Once the scope is settled, start the run marker. It turns on the citation check for this run only.
+
+   ```
+   python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/marker.py" start --target <scope>
+   ```
+
+2. Follow the `modernization-assessment` skill from Step 0 to Finish. Write every artifact to
+   `./modernization-assessment/`. The skill ends by marking the run done. Do not delete the marker
+   yourself. The citation check removes it after it passes.
+
+3. Finish by printing a short summary in the conversation: the wave count, the single largest risk
+   you found, and the top three open questions for the client's engineers.
+
+## With --wave N
+
+The full artifacts must already exist in `./modernization-assessment/`. If `graph.json` is
+missing, say so and stop. Start the marker with `--mode wave`:
+
+```
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/marker.py" start --target <scope> --mode wave
+```
+
+Read `graph.json`, `waves.json` and `risks.json`. Write `07-wave-N-plan.md` for wave N only, with
+citations: the program-by-program port order, the test harness for that wave's boundary (use the
+`behavioral-equivalence` skill), and the rollback procedure. Then run `marker.py done` and print a
+short summary.

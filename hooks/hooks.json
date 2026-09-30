@@ -1,0 +1,16 @@
+{
+  "description": "Blocks the finish of a modernization assessment when a citation does not resolve. Does nothing unless a run marker exists.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/check_citations.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "legacy-modernization",
   "displayName": "Legacy Modernization Assessor",
-  "version": "0.1.0",
-  "description": "Assess a legacy codebase (COBOL, RPG, Oracle ADF, .NET Framework, PL/SQL, monolithic Java) for modernization: dependency cartography, risk-ranked migration waves, and a behavioral-equivalence test strategy you can defend to an auditor.",
+  "version": "0.2.0",
+  "description": "Assess a COBOL, CICS, JCL and VSAM codebase for modernization. Scripts extract the coupling graph with file and line evidence. Claude cuts the migration waves, scores risk, and designs the behavioral-equivalence tests.",
   "author": {
     "name": "Sparq",
     "url": "https://teamsparq.com"
@@ -15,10 +15,11 @@
     "modernization",
     "legacy",
     "cobol",
-    "rpg",
-    "migration",
-    "refactoring",
+    "cics",
+    "jcl",
+    "vsam",
     "mainframe",
-    "assessment"
+    "assessment",
+    "migration"
   ]
 }

@@ -1,5 +1,6 @@
 {
   "name": "sparq",
+  "description": "Open source Claude Code plugins from Sparq.",
   "owner": {
     "name": "Sparq",
     "url": "https://teamsparq.com"
@@ -8,7 +9,7 @@
     {
       "name": "legacy-modernization",
       "source": "./",
-      "description": "Assess a legacy codebase for modernization: dependency cartography, risk-ranked migration waves, and a behavioral-equivalence test strategy."
+      "description": "Assess a COBOL, CICS, JCL and VSAM codebase for modernization: a coupling graph with file and line evidence, migration waves, a dead code register, and a behavioral-equivalence test strategy."
     }
   ]
 }

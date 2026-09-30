@@ -1,6 +1,6 @@
 ---
 name: modernization-assessment
-description: Assess a legacy codebase for modernization and produce a dependency map, risk-ranked migration wave plan, effort estimate, and dead-code register. Use when the user asks to assess, analyze, or plan a migration, rewrite, port, or modernization of an existing system — especially COBOL, RPG, JCL, Oracle ADF, PL/SQL, VB6, .NET Framework, WebForms, Struts, or a monolithic Java/C# application. Also use when the user asks "how hard would it be to rewrite this", "where do we start", "what's coupled to what", or "how do we break up this monolith".
+description: Assess a COBOL, CICS, JCL and VSAM codebase for modernization. Produces a dependency map with file and line evidence, risk-ranked migration waves, an effort estimate, and a dead-code register. Use when the user asks to assess, analyze, or plan a migration, rewrite, port, or modernization of a mainframe system, or asks "how hard would it be to rewrite this", "where do we start", "what is coupled to what", or "how do we break up this monolith".
 ---
 
 # Modernization assessment
@@ -9,58 +9,129 @@ The goal is a document an engineering leader can take into a steering committee 
 Not a summary of the code. An argument about sequence, cost, and risk, with the evidence
 attached.
 
+## How the work is split
+
+**Facts come from scripts. Judgment comes from you.**
+
+A small Python extractor reads the source and writes `graph.json`. Every edge in it cites a file
+and a line. It found the calls, the copybook includes, the dataset reads and writes, the record
+layouts two programs share, and the job order a scheduler enforces. You do not re-derive any of
+that by reading the tree.
+
+You do the things a script cannot: how much business logic a program holds, whether its
+arithmetic is sensitive, where the waves should be cut, what the risk really is, and what to do
+about the edges the script gave up on.
+
+Two rules follow.
+
+1. **Never rebuild the graph by reading source.** Read source to make a judgment, or to settle an
+   edge the extractor could not resolve.
+2. **Every claim carries a `path:line` citation or the word `inference`.** A stop hook checks
+   this. A citation that points at a file or line that does not exist blocks the finish.
+
 ## Before you start
 
-Confirm three things with the user. Do not guess them.
+Confirm three things with the user. Do not guess them. The `/modernize-scan` command can take
+them as flags, so check what you were given before you ask.
 
-1. **Target state.** Rehost, replatform, refactor, or rewrite? These produce completely
-   different wave plans. If the user doesn't know, that's a finding — say so, and assess
-   for refactor as the default, since it's the middle case.
+1. **Target state.** Rehost, replatform, refactor, or rewrite? These give completely different
+   wave plans. If the user does not know, that is a finding. Say so, and assess for refactor as
+   the default, since it is the middle case.
 2. **What must not break.** Regulatory reports, month-end close, EDI partners, a downstream
-   warehouse. Name them. These become the behavioral-equivalence anchors.
-3. **Runtime telemetry availability.** Can they tell you which programs actually ran in the
-   last 12 months? If yes, the dead-code register goes from speculation to evidence. If no,
-   say clearly that every dead-code claim is provisional.
+   warehouse. Name them. They become the behavioral-equivalence anchors.
+3. **Runtime telemetry.** Can they tell you which programs ran in the last 12 months? If yes, the
+   dead-code register goes from speculation to evidence. If no, say clearly that every dead-code
+   claim is provisional.
 
-## Phase 1 — Inventory
+## Step 0. Run the extractor
 
-Walk the tree. Build a table of every compilable/executable unit with:
+```
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/extract.py" <target> --out modernization-assessment
+```
 
-- path, language, LOC, cyclomatic complexity where derivable
-- last modified date (via `git log` if available — age is a strong dormancy signal)
-- unit type (online transaction, batch job, copybook/include, stored procedure, screen/form,
-  scheduler artifact, data definition)
+Flags: `--as-of YYYY-MM-DD` and `--dormant-years N` (default 5) for the dormancy rule, `--no-git` to
+skip git dates. It uses the Python standard library only. It makes no network calls. If `cloc` is
+installed it uses it for line counts.
 
-Do not stop at source. Legacy systems hide behavior in JCL, shell wrappers, cron, scheduler
-definitions (Control-M, Autosys), database triggers, and stored procedures. A modernization
-plan that only counts application source under-scopes by a wide and embarrassing margin.
+Then write the fact tables. These are generated, so their citations are correct by construction:
 
-Write `modernization-assessment/01-inventory.md`.
+```
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py" inventory modernization-assessment/graph.json --out modernization-assessment/01-inventory.md
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py" edges modernization-assessment/graph.json --out modernization-assessment/02a-edge-tables.md
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py" deadcode modernization-assessment/graph.json --out modernization-assessment/05a-dead-code-candidates.md
+```
 
-## Phase 2 — Coupling
+Now read `graph.json`. Start with the `analysis` block. It already holds:
 
-Delegate to the `dependency-cartographer` agent for anything over ~200 units; do it inline
-below that. You are looking for four kinds of coupling, in increasing order of how much
-trouble they cause:
+- `entry_points`, `reachable_count`
+- `dead_code_candidates` (unreachable, dormant, unknown) with `dead_code_reasons`
+- `unresolved_dynamic`: every computed call the script could not resolve
+- `sccs`, `self_recursive`, `articulation_points`, `god_modules`, `fan_in`, `fan_out`
+- `data_hubs`: the datasets with the most programs attached
+- `unscheduled_jobs`, `warnings`
 
-1. **Call coupling** — A invokes B. Easy to find, easy to reason about.
-2. **Data coupling** — A and B both read/write table T or file F. Harder: the dependency is
-   real but invisible in the call graph. This is where most migration plans break.
-3. **Contract coupling** — A writes a fixed-width file that B parses by column offset. The
-   format *is* an API, and nobody wrote it down.
-4. **Temporal coupling** — B is correct only if A ran first, enforced by nothing but the
-   scheduler. Find these in JCL/scheduler definitions, not in code.
+Also read `unparsed` and `meta.limits`. A scheduler or source file the extractor could not parse
+is not a footnote. It goes into Open Questions.
 
-For each, record the evidence (file and line) so a skeptical architect can check you.
+**Edge kinds and what they mean**
 
-Then identify **articulation points**: units whose removal disconnects the graph. These are
-your natural wave boundaries. Also identify **god modules** — high fan-in and high fan-out.
-These cannot be moved in any single wave and need to be strangled, not ported.
+| Kind | Meaning |
+|---|---|
+| `call` | CALL, EXEC CICS LINK or XCTL, JCL EXEC PGM or PROC, a scheduler running a job |
+| `include` | COPY, EXEC SQL INCLUDE, a job holding its steps |
+| `data` | A program reads or writes a dataset, VSAM file, or DB2 table. Mode is read, write, or read_write |
+| `contract` | Writer to reader of the same dataset. The record layout is an undocumented API |
+| `temporal` | Order enforced by JCL step order, Control-M conditions, or a shell wrapper |
 
-Write `modernization-assessment/02-coupling.md` with a Mermaid graph of the top-level
-clusters. Keep the diagram to the cluster level; a 400-node graph communicates nothing.
+Confidence is `high`, `medium` or `low`. A `low` edge, or `resolved: false`, is one a human must
+check. Node ids: programs are bare (`CBTRN02C`). Others carry a prefix: `cpy:`, `job:`, `step:`,
+`proc:`, `ds:`, `sch:`, `map:`, `ext:`. A computed call points to `?dynamic:PROGRAM:LINE`.
 
-## Phase 3 — Waves
+## Phase 1. Inventory
+
+`01-inventory.md` is already written by `render.py`. Do not retype it. Read it for what is
+surprising: an old copybook, a program with no last-modified date, a job no scheduler names.
+
+Legacy systems hide behavior in JCL, shell wrappers, scheduler definitions, and stored procedures.
+An assessment that counts only application source under-scopes by a wide and embarrassing margin.
+The extractor reads COBOL, copybooks, JCL and PROCs, CICS system definitions, Control-M XML, and
+shell wrappers that name JCL files. It does not read anything else. Whatever it lists as not
+parsed, you must ask about.
+
+## Phase 2. Coupling
+
+`02a-edge-tables.md` holds every edge. Your file, `02-coupling.md`, holds the argument.
+
+For anything the extractor left open, work the edges yourself if there are a few. If there are
+more than about 20, hand them to the `dependency-cartographer` agent. Give it the path to
+`graph.json`. What it reports back is inference. Label it that way and cite it.
+
+Then think about what the coupling does to the sequence:
+
+1. **Call coupling** is easy to see and easy to reason about.
+2. **Data coupling** is where most migration plans break. Two programs share a VSAM file. The
+   dependency is real and invisible in the call graph. Use `data_hubs`.
+3. **Contract coupling** matters most. Program A writes a file and program B reads it by column
+   offset. Nobody wrote the format down. `high` means both sides use the same layout copybook.
+   `medium` means they do not, or the extractor could not tell. Every `medium` contract edge is a
+   place a port silently breaks.
+4. **Temporal coupling** lives in the scheduler, not in the code. A plan built without it is not a
+   plan.
+
+Write `02-coupling.md` with:
+
+- the two or three coupling patterns that will most constrain the migration sequence, each
+  with citations
+- a Mermaid graph of the top-level clusters. Keep it at cluster level. A node-per-program graph
+  of a real system communicates nothing and creates a false impression of rigor
+- the strongly connected components (`sccs`). A wave plan that splits one is wrong. They move as a
+  unit or not at all
+- the god modules. They cannot move in one wave. They are strangled behind a facade, never ported
+  wholesale
+- the articulation points. They are the natural wave boundaries
+- the honest boundary: the computed calls (`unresolved_dynamic`), and what they mean for the rest
+
+## Phase 3. Waves
 
 Cut the system into waves. A wave is valid only if all four hold:
 
@@ -69,63 +140,129 @@ Cut the system into waves. A wave is valid only if all four hold:
 - it has a testable boundary (you can assert equivalence at its edge)
 - it delivers something a business stakeholder can name
 
-Order the waves by this rule: **earliest waves should maximize learning per unit of blast
-radius.** Not by business value — that's the instinct, and it's wrong here. The first wave's
-job is to prove the toolchain, the test harness, and the team's port velocity on something
-that won't take down the month-end close. Business value leads in wave three.
+Order the waves by this rule: **earliest waves maximize learning per unit of blast radius.** Not by
+business value. That is the instinct, and it is wrong here. The first wave proves the toolchain,
+the test harness, and the team's port velocity on something that will not take down the month-end
+close. Business value leads in wave three.
 
-For each wave, state explicitly what it *unblocks*. A wave that unblocks nothing and delivers
-nothing is not a wave, it's a chore, and it should be merged into a neighbor.
+For each wave, state what it *unblocks*. A wave that unblocks nothing and delivers nothing is a
+chore. Merge it into a neighbor.
 
-Invoke the `migration-risk-assessor` agent to score modules before finalizing the cut.
+Invoke the `migration-risk-assessor` agent first. Give it the path to `graph.json` and your
+scoping answers. It writes `modernization-assessment/risks.json`. Use its quadrants to order the
+waves.
 
-Write `modernization-assessment/03-waves.md`.
+Write `03-waves.md` and `waves.json`. Every unit in `waves.json` must be a node id in
+`graph.json`. Every wave needs `evidence` or `"inference": true`.
 
-## Phase 4 — Estimate
+```json
+{
+  "target_state": "refactor",
+  "waves": [
+    {
+      "wave": 1,
+      "name": "Reference data batch",
+      "units": ["CBACT01C", "job:READACCT"],
+      "rationale": "Reads the account master, writes nothing shared. Proves the toolchain.",
+      "unblocks": "The date copybook that waves 2 and 3 share.",
+      "blast_radius": "low",
+      "confidence": "medium",
+      "evidence": [{"file": "app/cbl/CBACT01C.cbl", "line": 29}]
+    }
+  ],
+  "unassigned": [{"id": "COSGN00C", "reason": "Part of a call cycle with the menu. Moves with wave 4."}]
+}
+```
+
+`target_state` is one of `rehost`, `replatform`, `refactor`, `rewrite`, `unknown`. Wave numbers run
+1 to N with no gaps. `blast_radius` is `low`, `medium` or `high`. The validator rejects a plan that
+splits a strongly connected component.
+
+## Phase 4. Estimate
 
 Estimate per wave, and be explicit about the method. Do not produce a single number.
 
-Give a range, and give the two or three assumptions the range is most sensitive to. State
-them as falsifiable claims — "assumes the 41 batch jobs in wave 2 share one date-handling
-copybook; if they don't, wave 2 roughly doubles." That sentence is worth more than the number.
+Give a range, and give the two or three assumptions the range is most sensitive to. State them as
+falsifiable claims: "assumes the 41 batch jobs in wave 2 share one date handling copybook. If they
+do not, wave 2 roughly doubles." That sentence is worth more than the number.
 
-Drivers that actually move the estimate, in rough order of weight:
+What moves the estimate, in rough order of weight:
 
 - count and nature of the coupling edges crossing the wave boundary (not LOC)
-- availability of a behavioral oracle (production data to replay? expected outputs on file?)
-- presence of god modules inside the wave
+- availability of a behavioral oracle (production data to replay, expected outputs on file)
+- god modules inside the wave
 - how much business logic lives in the database rather than the application
 - whether the team has anyone who can read the source language
 
-Note where Claude Code can do the mechanical port and where it cannot. It is strong at
-transliteration with a good test harness and weak at inferring intent from undocumented
-business rules. Say which parts are which.
+Say where Claude Code can do the mechanical port and where it cannot. It is strong at
+transliteration with a good test harness. It is weak at inferring intent from undocumented business
+rules. Name which parts are which.
 
-Write `modernization-assessment/04-estimate.md`.
+Write `04-estimate.md`.
 
-## Phase 5 — Dead code
+## Phase 5. Dead code
 
-Three buckets, never two:
+Three buckets, never two. The extractor computed the candidates. Start from `dead_code_candidates`.
 
-- **Unreachable** — no inbound edge from any entry point. Safe to propose for deletion.
-- **Reachable but dormant** — reachable on paper, but no modification in N years and no
-  telemetry. Propose for *instrumentation*, not deletion.
-- **Unknown** — reflection, dynamic call, `EXEC CICS LINK` with a computed program name,
-  `CALL WS-PROGRAM-NAME`. Flag loudly. Dynamic dispatch defeats static analysis, and a
-  confident dead-code claim over a dynamic call is how you delete something that runs once
-  a year at fiscal close.
+- **Unreachable.** No static path from any entry point, and no reachable code makes a computed call.
+  Safe to propose for deletion.
+- **Reachable but dormant.** Reachable on paper, but not modified for N years and no telemetry.
+  Propose for *instrumentation*, not deletion.
+- **Unknown.** Not reached statically, but a computed call in reachable code could target it. Flag
+  it loudly. A confident dead-code claim over a computed call is how you delete something that runs
+  once a year at fiscal close.
 
-Write `modernization-assessment/05-dead-code.md`.
+**You may not move a program from unknown to unreachable.** The validator rejects it. If you can
+bound a computed call (the value comes from a table you can read), say so in the reason, and leave
+the program in unknown.
+
+If the user gave you telemetry, use it to firm up dormant and unknown. If not, every claim is
+provisional and you say so.
+
+Write `05-dead-code.md` and `dead-code.json`.
+
+```json
+{
+  "telemetry": "none",
+  "unreachable": [
+    {"id": "cpy:UNUSED1Y", "reason": "No program includes it.", "confidence": "high",
+     "evidence": [{"file": "app/cpy/UNUSED1Y.cpy", "line": 1}]}
+  ],
+  "dormant": [],
+  "unknown": [
+    {"id": "CBTRN01C", "reason": "No JCL step runs it. Computed calls could reach it.", "confidence": "low",
+     "evidence": [{"file": "app/cbl/CBTRN01C.cbl", "line": 1}]}
+  ]
+}
+```
+
+All three keys must be present, even when a list is empty. `telemetry` is `none`, `partial` or
+`provided`. The ids come from `graph.json`.
 
 ## Output discipline
 
-- Every claim carries a file:line citation or is labeled an inference.
-- Maintain a **Confidence** column. Low-confidence findings are not omitted — they are the
-  ones the humans need to go verify, and hiding them is the worst thing this tool could do.
-- Close the assessment with an **Open Questions** section addressed to the client's own
-  engineers. If it's shorter than five items on a system of any size, you weren't looking
-  hard enough.
+- Every claim carries a `path:line` citation or is labeled `inference`.
+- Any table of findings has an `Evidence` column. A row with no citation says `inference`.
+- Keep a **Confidence** column. Low-confidence findings are not omitted. They are the ones the
+  humans need to go verify.
+- Write `00-summary.md`: the scoping answers, the wave count, the single largest risk, and an
+  **Open Questions** section addressed to the client's own engineers. Fewer than five items on a
+  system of any size means you were not looking hard enough. Include every file the extractor
+  listed as not parsed, and every limit in `meta.limits` that touches this system.
 
-Then hand off to the `behavioral-equivalence` skill to design the test strategy. The
-assessment is not finished without it — a migration plan with no definition of "correct"
-is a wish.
+## Finish
+
+Hand off to the `behavioral-equivalence` skill and write `06-test-strategy.md`. An assessment
+without a definition of "correct" is a wish.
+
+Then check your work:
+
+```
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/schema.py" validate-dir modernization-assessment
+```
+
+Fix every error. Then mark the run done, so the citation check runs when you finish:
+
+```
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/marker.py" done
+```
