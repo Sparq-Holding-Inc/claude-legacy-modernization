@@ -10,12 +10,18 @@ Environment: Python 3.13.3, Claude Code 2.1.241 (Claude Code), CardDemo commit `
 
 | Level | Metric | Bar | Result | Status |
 |---|---|---|---|---|
-| Extractor, fixtures | Precision and recall, every edge kind | 100% | 25 of 25 fixtures pass. Every kind 100% | PASS |
-| End to end | Citations that resolve | 100% | 100.0% (1353 of 1353) | PASS |
+| Extractor, fixtures | Precision and recall, every edge kind | 100% | 29 of 29 fixtures pass. Every kind 100% | PASS |
+| Extractor, CardDemo | call edges, precision and recall vs draft truth | 95%+ | P 100.0%, R 100.0% | PASS (provisional) |
+| Extractor, CardDemo | include edges, precision and recall vs draft truth | 95%+ | P 100.0%, R 100.0% | PASS (provisional) |
+| Extractor, CardDemo | data edges, precision and recall vs draft truth | 95%+ | P 100.0%, R 100.0% | PASS (provisional) |
+| Extractor, CardDemo | contract edges, recall vs draft truth | 75%+, reported as is | R 100.0% (P 100.0%) | PASS (provisional) |
+| Extractor, CardDemo | temporal edges, recall vs draft truth | 75%+, reported as is | R 100.0% (P 100.0%) | PASS (provisional) |
+| End to end | Citations that resolve | 100% | 100.0% (11356 of 11356) | PASS |
 | End to end | Unreachable claims on dynamic call targets | 0 | 0 | PASS |
-| End to end | Wave count and co-assignment across CardDemo runs | Identical, 80%+ | NOT RUN | NOT RUN |
-| End to end | graph.json is what the extractor produces (Claude did not edit the facts) | Integrity check | 0 of 13 runs identical | FAIL |
-| End to end | Every JSON output validates | 100% | 13 of 13 runs have all four files valid | PASS |
+| End to end | Wave count across CardDemo runs (repeatability, not plan quality) | Identical | [7, 7, 7] | PASS |
+| End to end | Pairwise wave co-assignment across CardDemo runs (repeatability, not plan quality) | 80%+ | Jaccard of co-assigned pairs 98.3%. Rand index 99.7%. Unit overlap 100.0%. Deviations from the extractor's wave seed, per run: [2, 2, 3]. Each run's Jaccard with the seed: 95.3%, 95.3%, 93.7% | PASS |
+| End to end | graph.json is what the extractor produces (Claude did not edit the facts) | Integrity check | 16 of 16 runs identical | PASS |
+| End to end | Every JSON output validates | 100% | 16 of 16 runs have all four files valid | PASS |
 | End to end | Cost and wall time per CardDemo run | Published, no bar | See the run table | INFO |
 | End to end | How the runs were produced | | subagent | INFO |
 | Packaging | `claude plugin validate --strict` on the marketplace | Clean | ✔ Validation passed | PASS |
@@ -26,17 +32,17 @@ Environment: Python 3.13.3, Claude Code 2.1.241 (Claude Code), CardDemo commit `
 
 ## Extractor: seeded fixtures
 
-Truth was written by hand before the extractor existed. Each fixture is one trap. Matching is on source, destination, kind and mode. A fixture passes only when confidence, the resolved flag, the evidence lines, node types, entry points, dates and dead code buckets also match.
+Truth for fixtures 1 to 25 was written by hand before the extractor existed. For 26 to 29 the edges were reviewed by hand against the source, and the new expectations (wave seed, dead code, facts) were written before the code that computes them. Each fixture is one trap. Matching is on source, destination, kind and mode. A fixture passes only when confidence, the resolved flag, the evidence lines, node types, entry points, dates and dead code buckets also match.
 
 | Kind | Precision | Recall | TP | FP | FN |
 |---|---|---|---|---|---|
-| call | 100.0% | 100.0% | 47 | 0 | 0 |
-| include | 100.0% | 100.0% | 39 | 0 | 0 |
-| data | 100.0% | 100.0% | 19 | 0 | 0 |
-| contract | 100.0% | 100.0% | 3 | 0 | 0 |
-| temporal | 100.0% | 100.0% | 7 | 0 | 0 |
+| call | 100.0% | 100.0% | 67 | 0 | 0 |
+| include | 100.0% | 100.0% | 51 | 0 | 0 |
+| data | 100.0% | 100.0% | 32 | 0 | 0 |
+| contract | 100.0% | 100.0% | 9 | 0 | 0 |
+| temporal | 100.0% | 100.0% | 9 | 0 | 0 |
 
-Evidence lines that resolve to a real file and line: 155 of 155.
+Evidence lines that resolve to a real file and line: 282 of 282.
 
 | Fixture | Result | Edges in truth |
 |---|---|---|
@@ -65,21 +71,50 @@ Evidence lines that resolve to a real file and line: 155 of 155.
 | 23-subscripted-target | pass | 1 |
 | 24-dsn-forms | pass | 5 |
 | 25-unterminated-exec | pass | 1 |
+| 26-wave-seed-families | pass | 35 |
+| 27-jcl-text-in-cobol | pass | 2 |
+| 28-no-entry-points | pass | 1 |
+| 29-utility-facts | pass | 15 |
+
+## Extractor: AWS CardDemo (draft truth, provisional)
+
+Extraction time: 0.6 seconds (bar: under 60). Graded scope: the core application folders. The three optional IMS, DB2 and MQ extensions are read but not scored, because the plugin does not claim them.
+
+| Kind | Precision | Recall | TP | FP | FN | Evidence overlaps truth |
+|---|---|---|---|---|---|---|
+| call | 100.0% | 100.0% | 234 | 0 | 0 | 234 of 234 |
+| include | 100.0% | 100.0% | 318 | 0 | 0 | 318 of 318 |
+| data | 100.0% | 100.0% | 142 | 0 | 0 | 142 of 142 |
+| contract | 100.0% | 100.0% | 50 | 0 | 0 | 50 of 50 |
+| temporal | 100.0% | 100.0% | 100 | 0 | 0 | 100 of 100 |
+
+- Entry programs from the CSD match the truth: True.
+- CA-7 listing reported as not parsed: True.
+- Every evidence line resolves: 2242 of 2242.
+- Computed calls left unresolved, by design: 28.
+- Dead code candidates over the whole tree: {'unreachable': 1, 'dormant': 0, 'unknown': 2}.
+
+### Read these numbers with care
+
+1. **The labelers and the extractor share definitions.** Both follow `carddemo/LABELING.md`. A high score shows the extractor applies the rules as a careful reader does. It does not show the rules are right.
+2. **The truth was labeled by Claude.** Two independent passes per COBOL partition agreed on nearly every edge. That does not rule out a shared blind spot.
+3. **Contract edges are derived** from labeled data edges and layout copybooks by rule, so contract recall largely tests the join logic.
+4. **The extractor found one real gap on this benchmark**, a `COPY 'MEMBER'` with the name in quotes. It was fixed and fixture 17 was added. No truth file was edited to get here.
 
 ## Can the fixtures fail?
 
-`evals/mutation_check.py` breaks the extractor in 33 ways and lists the fixtures that notice. 32 caught, 1 equivalent (no behavior change), 0 not caught.
+`evals/mutation_check.py` breaks the extractor in 51 ways and lists the fixtures that notice. 50 caught, 1 equivalent (no behavior change), 0 not caught.
 
 | Mutation | Caught by fixtures |
 |---|---|
-| string literals not masked | 01, 03, 05, 11, 12, 15, 17, 18, 20, 22, 25 |
+| string literals not masked | 01, 03, 05, 11, 12, 15, 17, 18, 20, 22, 25, 26, 28, 29 |
 | COPY never expanded | 05, 06 |
 | quoted COPY names unsupported | 17 |
 | columns 73 to 80 read as code | 15 |
 | comment indicator ignored | 15, 25 |
 | dash continuation ignored | 18 |
 | constants not resolved | 03 |
-| OPEN OUTPUT read as read | 06, 07, 16 |
+| OPEN OUTPUT read as read | 06, 07, 16, 26 |
 | layout from READ INTO and WRITE FROM off | 05 |
 | layout from FD COPY off | 06 |
 | PROC DD overrides ignored | 16 |
@@ -88,10 +123,10 @@ Evidence lines that resolve to a real file and line: 155 of 155.
 | Control-M deletions counted as producers | 19 |
 | shell comments read as submits | 10 |
 | step order edges off | 08, 16 |
-| contract edges off | 05, 06, 07 |
-| contract confidence always high | 07 |
+| contract edges off | 05, 06, 07, 26 |
+| contract confidence always high | 07, 26 |
 | computed calls dropped | 02, 03, 13, 18, 23 |
-| CSD entry points off | 05 |
+| CSD entry points off | 05, 26, 27 |
 | git dates off | 12 |
 | byte order mark not stripped | 25 |
 | unterminated EXEC dropped silently | 25 |
@@ -102,46 +137,84 @@ Evidence lines that resolve to a real file and line: 155 of 155.
 | OPEN I-O read as read | 22 |
 | generation and member suffix kept on DSN | 24 |
 | temporary datasets kept (equivalent: a later guard drops any name still holding an ampersand) | equivalent mutant |
+| unread mainframe files not listed | 27 |
+| JCL text in COBOL not noticed | 27 |
+| proc programs not followed from a proc named in COBOL | 27 |
+| wave seed: shared writes not detected | 26 |
+| wave seed: guessed utility modes ignored | 26 |
+| wave seed: shared unit moves with the latest family | 26 |
+| wave seed: scheduler job moves with the first family | 26 |
+| IDCAMS cards not read | 29 |
+| TSO RUN PROGRAM card not read | 29 |
+| IMS PARM not read | 29 |
+| programs a step names at run time not followed for reach | 29 |
+| wave seed: IDCAMS writes ignored | 29 |
+| wave seed: DB2 command marker ignored | 29 |
+| wave seed: guessed reads not their own family | 26 |
+| wave seed: scheduler chains not kept together | 26 |
+| wave seed: a proc named in JCL text not owned by its submitter | 27 |
+| wave seed: a program that submits JCL counted as online | 27 |
+| wave seed: units owned through a submit left unplaced | 27 |
 | dead code: dynamic calls ignored | 13 |
 | dead code: dormancy off | 12 |
-| dead code: no entry point guard | 20 |
+| dead code: no entry point guard | 20, 28 |
 
 ## Tests for the checking code
 
 | Suite | Result |
 |---|---|
-| Citation hook (`test_hook.py`) | 11 of 11 pass |
-| End to end scorer (`test_e2e_metrics.py`) | 11 of 11 pass |
+| Citation hook (`test_hook.py`) | 15 of 15 pass |
+| End to end scorer (`test_e2e_metrics.py`) | 18 of 18 pass |
+| Output validators, wrong assessments must be rejected (`test_validators.py`) | 32 of 32 pass |
 
 ## End to end runs
 
 | Run | Harness | Turns | Wall or model time | Cost or tokens | Citations | JSON | Waves | Hook gave up |
 |---|---|---|---|---|---|---|---|---|
-| 01-static-call | subagent | n/a | n/a | n/a | 78 of 78 resolve | valid | 1 | no |
-| 02-dynamic-call | subagent | n/a | n/a | n/a | 46 of 46 resolve | valid | 1 | no |
-| 03-cics-link-xctl | subagent | n/a | n/a | n/a | 123 of 123 resolve | valid | 1 | no |
-| 04-shared-copybook | subagent | n/a | n/a | n/a | 71 of 71 resolve | valid | 1 | no |
-| 05-vsam-cics-pair | subagent | n/a | n/a | n/a | 110 of 110 resolve | valid | 1 | no |
-| 06-contract-match | subagent | n/a | n/a | n/a | 127 of 127 resolve | valid | 1 | no |
-| 07-contract-mismatch | subagent | n/a | n/a | n/a | 171 of 171 resolve | valid | 1 | no |
-| 08-temporal-steps | subagent | n/a | n/a | n/a | 133 of 133 resolve | valid | 1 | no |
-| 09-temporal-controlm | subagent | n/a | n/a | n/a | 101 of 101 resolve | valid | 1 | no |
-| 10-temporal-shell | subagent | n/a | n/a | n/a | 93 of 93 resolve | valid | 1 | no |
-| 11-dead-program | subagent | n/a | n/a | n/a | 119 of 119 resolve | valid | 1 | no |
-| 12-dormant-program | subagent | n/a | n/a | n/a | 83 of 83 resolve | valid | 1 | no |
-| 13-dynamic-only-reachable | subagent | n/a | n/a | n/a | 98 of 98 resolve | valid | 1 | no |
+| carddemo-1 | subagent | 104 | 1553s (agent) | 524497 tokens | 3313 of 3313 resolve | valid | 7 | no |
+| carddemo-2 | subagent | 104 | 1644s (agent) | 505668 tokens | 3348 of 3348 resolve | valid | 7 | no |
+| carddemo-3 | subagent | 101 | 1482s (agent) | 533788 tokens | 3224 of 3224 resolve | valid | 7 | no |
+| 01-static-call | subagent | 27 | 225s (agent) | 134590 tokens | 48 of 48 resolve | valid | None | no |
+| 02-dynamic-call | subagent | 30 | 201s (agent) | 125470 tokens | 58 of 58 resolve | valid | None | no |
+| 03-cics-link-xctl | subagent | 29 | 256s (agent) | 138307 tokens | 115 of 115 resolve | valid | None | no |
+| 04-shared-copybook | subagent | 25 | 181s (agent) | 116492 tokens | 67 of 67 resolve | valid | None | no |
+| 05-vsam-cics-pair | subagent | 24 | 268s (agent) | 127955 tokens | 125 of 125 resolve | valid | 2 | no |
+| 06-contract-match | subagent | 26 | 292s (agent) | 146169 tokens | 153 of 153 resolve | valid | 2 | no |
+| 07-contract-mismatch | subagent | 28 | 321s (agent) | 138747 tokens | 205 of 205 resolve | valid | 2 | no |
+| 08-temporal-steps | subagent | 28 | 277s (agent) | 142947 tokens | 147 of 147 resolve | valid | 1 | no |
+| 09-temporal-controlm | subagent | 30 | 245s (agent) | 131426 tokens | 153 of 153 resolve | valid | 1 | no |
+| 10-temporal-shell | subagent | 26 | 323s (agent) | 149314 tokens | 150 of 150 resolve | valid | 1 | no |
+| 11-dead-program | subagent | 31 | 289s (agent) | 147049 tokens | 76 of 76 resolve | valid | 1 | no |
+| 12-dormant-program | subagent | 31 | 263s (agent) | 140483 tokens | 83 of 83 resolve | valid | 1 | no |
+| 13-dynamic-only-reachable | subagent | 32 | 243s (agent) | 123255 tokens | 91 of 91 resolve | valid | 1 | no |
+
+## Fix loops for the wave metrics
+
+Hand-maintained record of the fix loops for the failing wave metrics. Numbers are copied from scorecard/e2e.json at the moment each loop was scored. The bar and the truth never changed. These numbers measure whether runs agree with each other. They do not measure whether a wave plan is good. Agreement that comes from following a deterministic draft is repeatability, not quality.
+
+| Loop | Plugin commit | What changed | Wave counts | Jaccard | Rand | Unit overlap | Result |
+|---|---|---|---|---|---|---|---|
+| 0 | `f33744c` | Nothing. First measurement. | [7, 9, 8] | 15.3% | 84.0% | 85.7% | FAIL |
+| 1 | `9ca4dbc` | The extractor computes a wave seed (families in a fixed order). Claude copies the draft, fills in names and reasons, and may change it only for a cited reason. | [7, 7, 7] | 76.7% | 97.2% | 100.0% | FAIL |
+| 2 | `319ddc0` | Facts inside utility steps (IDCAMS cards, IMS PARM, TSO RUN PROGRAM) go into the seed. An empty wave plan is allowed. `apply-waves` fills risks.json. Runs used private scratch folders. | [7, 7, 7] | 61.6% | 92.8% | 100.0% | FAIL |
+| 3 | `c3df5c5` | The seed keeps jobs a scheduler chains together in one wave and treats a program that submits JCL as batch. The validators were made strict (a reviewer had shown four holes). CardDemo runs only. Runs used private scratch folders. | [7, 7, 7] | 98.3% | 99.7% | 100.0% | PASS |
+
+- Loop 0: The skill gave no procedure that yields one answer. Three runs cut three defensible plans, and they did not even agree on which unit kinds to place (scheduler jobs: 19, 19 and 10).
+- Loop 1: Wave count now identical and every run placed the same units. The three runs made 18 to 23 changes each to the seed, and mostly the same ones: three DB2 or IMS jobs the extractor could not see into (the program is named in PARM or in a TSO RUN PROGRAM card), and refresh jobs whose IDCAMS control cards prove they write the masters. Those are facts the extractor does not read. The runs also shared one scratch folder, and two of them reported that a sibling overwrote a helper script, so the agreement figure may be a little high. Fixture runs 01 to 04 showed a defect: the seed has no waves when the tree has no entry point, but the validator demanded at least one.
+- Loop 2: The pair score fell from 76.7% to 61.6% although the seed got better. One run kept the seed almost whole (4 changes). The other two changed it 17 and 13 times. Every run made the same three changes to the seed (the online report screen that submits JCL, the proc it submits, and the shared date routine). Two runs also moved whole scheduler chains (the jobs that open and close files around the posting cycle, and their Control-M entries) into the batch writers wave, and the third left them where the seed put them. That one disagreement is about 10 to 15 units, which is what the pair score measures. The seed did not know that jobs a scheduler chains together move together.
+- Loop 3: Both bars are met, and the reason matters. Each run changed the seed only 2 or 3 times, and each run's plan is 94 to 95 percent the same as the seed. The three runs agree because they kept the same deterministic draft. That is repeatability. It says nothing about whether the draft cuts the system in the right places. Two of the three changes were the same in every run (a DB2 job whose control cards sit in unread members), and the third differed by run.
 
 ## How the end to end runs were produced
 
 Headless `claude -p` could not sign in in the build environment (OAuth login expired). The same command and skill files were run by hand through Claude subagents, then scored by the same scorer.
 
-- Date: 2026-09-30. Plugin commit when the runs started: `f33744c`. Model: Claude Sonnet 5.5 subagents (the plugin's own agents use sonnet at medium effort).
+- Date: 2026-09-30. Plugin commit when the runs started: `319ddc0 for the 13 fixture runs (loop 2), c3df5c5 for the 3 CardDemo runs (loop 3)`. Model: Claude Sonnet 5.5 subagents (the plugin's own agents use sonnet at medium effort).
 - **Not exercised by this harness:**
   - Loading the plugin with --plugin-dir and the namespaced command name
   - The live Stop hook. It was tested with test_hook.py. Each agent ran the same checker by hand before finishing.
   - The plugin's own subagents. The subagents did that work inline.
   - Dollar cost. Tokens and time are reported instead.
   - Interactive scoping questions
-- The extractor gained byte order mark handling and unterminated EXEC reporting after the runs started. Every saved graph.json was re-checked against a fresh extraction and is identical.
+- The plugin changed between rounds (see the fix loops table). Fixture seeds are byte identical between the two commits and all 13 fixture runs pass the current validators, but the fixture runs were not repeated at the later commit. The three CardDemo runs of loop 3 used a private scratch folder each. The three runs of loop 1 shared one, and two agents reported a sibling overwriting a helper script. Every saved graph.json was re-checked against a fresh extraction and is identical.
 - To replace these with real headless runs: `After `claude auth login`: python3 evals/run_e2e_evals.py --cases all`
 

@@ -110,9 +110,9 @@ def main():
           (s["unreachable_on_dynamic_total"], "PASS" if s["unreachable_on_dynamic_total"] == 0 else "FAIL"))
         cw = s.get("carddemo_waves")
         if cw:
-            w("| End to end | Wave count across CardDemo runs | Identical | %s | %s |" %
+            w("| End to end | Wave count across CardDemo runs (repeatability, not plan quality) | Identical | %s | %s |" %
               (cw["wave_counts"], "PASS" if cw["wave_count_identical"] else "FAIL"))
-            w("| End to end | Pairwise wave co-assignment across CardDemo runs | 80%%+ | Jaccard of co-assigned pairs %s. "
+            w("| End to end | Pairwise wave co-assignment across CardDemo runs (repeatability, not plan quality) | 80%%+ | Jaccard of co-assigned pairs %s. "
               "Rand index %s. Unit overlap %s%s | %s |" %
               (pct(cw["jaccard"]), pct(cw["rand_index_mean"]), pct(cw["unit_overlap"]),
                (". Deviations from the extractor's wave seed, per run: %s. Each run's Jaccard with the seed: %s" %
@@ -136,7 +136,7 @@ def main():
     if fx:
         w("## Extractor: seeded fixtures")
         w("")
-        w("Truth was written by hand before the extractor existed. Each fixture is one trap. Matching is on source, "
+        w("Truth for fixtures 1 to 25 was written by hand before the extractor existed. For 26 to 29 the edges were reviewed by hand against the source, and the new expectations (wave seed, dead code, facts) were written before the code that computes them. Each fixture is one trap. Matching is on source, "
           "destination, kind and mode. A fixture passes only when confidence, the resolved flag, the evidence "
           "lines, node types, entry points, dates and dead code buckets also match.")
         w("")

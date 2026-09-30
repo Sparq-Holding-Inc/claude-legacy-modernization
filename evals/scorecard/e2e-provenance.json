@@ -1,7 +1,7 @@
 {
  "harness": "subagents",
  "date": "2026-09-30",
- "plugin_commit_at_start": "f33744c",
+ "plugin_commit_at_start": "319ddc0 for the 13 fixture runs (loop 2), c3df5c5 for the 3 CardDemo runs (loop 3)",
  "why": "Headless `claude -p` could not sign in in the build environment (OAuth login expired). The same command and skill files were run by hand through Claude subagents, then scored by the same scorer.",
  "model": "Claude Sonnet 5.5 subagents (the plugin's own agents use sonnet at medium effort)",
  "not_exercised": [
@@ -11,6 +11,6 @@
   "Dollar cost. Tokens and time are reported instead.",
   "Interactive scoping questions"
  ],
- "changes_during_runs": "The extractor gained byte order mark handling and unterminated EXEC reporting after the runs started. Every saved graph.json was re-checked against a fresh extraction and is identical.",
+ "changes_during_runs": "The plugin changed between rounds (see the fix loops table). Fixture seeds are byte identical between the two commits and all 13 fixture runs pass the current validators, but the fixture runs were not repeated at the later commit. The three CardDemo runs of loop 3 used a private scratch folder each. The three runs of loop 1 shared one, and two agents reported a sibling overwriting a helper script. Every saved graph.json was re-checked against a fresh extraction and is identical.",
  "rerun": "After `claude auth login`: python3 evals/run_e2e_evals.py --cases all"
 }
