@@ -1,0 +1,80 @@
+{
+ "telemetry": "none",
+ "unreachable": [
+  {
+   "id": "cpy:UNUSED1Y",
+   "reason": "No program or copybook includes it, and nothing else in the tree refers to the name. It defines a user record that looks like a copy of the security file layout.",
+   "confidence": "high",
+   "evidence": [{"file": "app/cpy/UNUSED1Y.cpy", "line": 1}]
+  }
+ ],
+ "dormant": [],
+ "unknown": [
+  {
+   "id": "proc:TRANREPT",
+   "reason": "The extractor lists it as unreachable, and that is wrong. CORPT00C builds JCL text that runs EXEC PROC=TRANREPT and writes it to the JOBS TDQ for the internal reader, which the extractor does not follow. Moved out of the deletion list. It is live.",
+   "confidence": "high",
+   "evidence": [{"file": "app/cbl/CORPT00C.cbl", "line": 94}, {"file": "app/proc/TRANREPT.prc", "line": 1}]
+  },
+  {
+   "id": "CBPAUP0C",
+   "reason": "Run as an IMS BMP by CBPAUP0J through the DFSRRC00 PARM, which the extractor does not follow, so it looks unreached. The computed calls can only reach online programs. The CA-7 listing chains CBPAUP0J ahead of POSTTRAN. Likely live.",
+   "confidence": "low",
+   "evidence": [{"file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl", "line": 25}, {"file": "app/scheduler/CardDemo.ca7", "line": 43}]
+  },
+  {
+   "id": "CBTRN01C",
+   "reason": "No job, script or scheduler in the tree runs it, and its six DDs are not mapped by any JCL. The computed calls can only reach online programs, so none of them can be its caller. Its header says it posts daily transactions, the same text as CBTRN02C. It may be run by hand or from a scheduler outside the tree. Instrument it, and do not delete it on this evidence.",
+   "confidence": "low",
+   "evidence": [{"file": "app/cbl/CBTRN01C.cbl", "line": 5}]
+  },
+  {
+   "id": "COBTUPDT",
+   "reason": "Run by MNTTRDB2 through a DSN RUN PROGRAM command that the extractor does not follow. MNTTRDB2 is in the Control-M weekly folder. Likely live once a week.",
+   "confidence": "low",
+   "evidence": [{"file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl", "line": 30}, {"file": "app/scheduler/CardDemo.controlm", "line": 27}]
+  },
+  {
+   "id": "DBUNLDGS",
+   "reason": "Run by UNLDGSAM through a DL/I PARM the extractor does not follow. No scheduler names the job, so it is run by hand or by something outside the tree. Instrument it.",
+   "confidence": "low",
+   "evidence": [{"file": "app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL", "line": 27}]
+  },
+  {
+   "id": "PAUDBLOD",
+   "reason": "Run by LOADPADB as an IMS BMP through a PARM the extractor does not follow. No scheduler names the job. It looks like a one time load. Instrument it.",
+   "confidence": "low",
+   "evidence": [{"file": "app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL", "line": 27}]
+  },
+  {
+   "id": "PAUDBUNL",
+   "reason": "Run by UNLDPADB through a DL/I PARM the extractor does not follow. No scheduler names the job. Instrument it.",
+   "confidence": "low",
+   "evidence": [{"file": "app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL", "line": 39}]
+  },
+  {
+   "id": "cpy:IMSFUNCS",
+   "reason": "Included only by DBUNLDGS, PAUDBLOD and PAUDBUNL, which are themselves in the unknown bucket. Its status follows theirs.",
+   "confidence": "low",
+   "evidence": [{"file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL", "line": 136}, {"file": "app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL", "line": 142}]
+  },
+  {
+   "id": "cpy:PADFLPCB",
+   "reason": "Included only by DBUNLDGS, which is in the unknown bucket. Its status follows DBUNLDGS.",
+   "confidence": "low",
+   "evidence": [{"file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL", "line": 156}]
+  },
+  {
+   "id": "cpy:PASFLPCB",
+   "reason": "Included only by DBUNLDGS, which is in the unknown bucket. Its status follows DBUNLDGS.",
+   "confidence": "low",
+   "evidence": [{"file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL", "line": 155}]
+  },
+  {
+   "id": "cpy:PAUTBPCB",
+   "reason": "Included only by DBUNLDGS, PAUDBLOD and PAUDBUNL, which are in the unknown bucket. Its status follows theirs.",
+   "confidence": "low",
+   "evidence": [{"file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL", "line": 154}, {"file": "app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL", "line": 161}]
+  }
+ ]
+}

@@ -1,0 +1,2413 @@
+{
+ "units": [
+  {
+   "id": "CBACT01C",
+   "port_difficulty": {
+    "score": 4,
+    "why": "Writes three record shapes with packed decimal, an OCCURS 5 array, hard-coded literals and an assembler date call."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Reads the account master and writes flat extracts that no program in the tree reads."
+   },
+   "quadrant": "high-low",
+   "wave": 2,
+   "driving_fact": "Replaces a zero cycle debit with the literal 2525.00 and fills an OCCURS array with fixed amounts, so the output is not a plain copy of the master.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT01C.cbl",
+     "line": 236
+    },
+    {
+     "file": "app/cbl/CBACT01C.cbl",
+     "line": 256
+    },
+    {
+     "file": "app/cbl/CBACT01C.cbl",
+     "line": 231
+    }
+   ]
+  },
+  {
+   "id": "CBACT02C",
+   "port_difficulty": {
+    "score": 1,
+    "why": "About 130 lines that read the card master in key order and DISPLAY each record."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Read-only, and no program consumes its output."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "Reads AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS with copybook CVACT02Y and prints it.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT02C.cbl",
+     "line": 29
+    }
+   ]
+  },
+  {
+   "id": "CBACT03C",
+   "port_difficulty": {
+    "score": 1,
+    "why": "About 130 lines that read the card cross reference in key order and DISPLAY it."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Read-only, and no program consumes its output."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "Reads AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS, the file CBTRN02C uses to validate every card number.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT03C.cbl",
+     "line": 29
+    }
+   ]
+  },
+  {
+   "id": "CBCUS01C",
+   "port_difficulty": {
+    "score": 1,
+    "why": "About 130 lines that read the customer master in key order and DISPLAY it."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Read-only, and no program consumes its output."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "Reads AWS.M2.CARDDEMO.CUSTDATA.VSAM.KSDS with copybook CVCUS01Y.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/CBCUS01C.cbl",
+     "line": 29
+    }
+   ]
+  },
+  {
+   "id": "CBACT04C",
+   "port_difficulty": {
+    "score": 4,
+    "why": "Interest is a truncated COMPUTE per account and category, with a DEFAULT disclosure group fallback and a date passed by PARM."
+   },
+   "blast_radius": {
+    "score": 5,
+    "why": "Rewrites every account balance and writes system transactions once a month, and a wrong rate stays silent until statements."
+   },
+   "quadrant": "high-high",
+   "wave": 7,
+   "driving_fact": "WS-MONTHLY-INT is computed with no ROUNDED at line 464 and added to ACCT-CURR-BAL at line 352.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT04C.cbl",
+     "line": 464
+    },
+    {
+     "file": "app/cbl/CBACT04C.cbl",
+     "line": 352
+    }
+   ]
+  },
+  {
+   "id": "CBEXPORT",
+   "port_difficulty": {
+    "score": 4,
+    "why": "Multi-record export using REDEFINES, OCCURS and COMP-3 fields."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Reads five masters and writes one export file. No master is written."
+   },
+   "quadrant": "high-low",
+   "wave": 2,
+   "driving_fact": "Writes AWS.M2.CARDDEMO.EXPORT.DATA, which only CBIMPORT reads, under the CVEXPORT layout.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 65
+    },
+    {
+     "file": "app/cpy/CVEXPORT.cpy",
+     "line": 24
+    }
+   ]
+  },
+  {
+   "id": "CBIMPORT",
+   "port_difficulty": {
+    "score": 4,
+    "why": "Splits a REDEFINES export into five outputs, and one output DD has no JCL mapping in the tree."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Writes flat files and an error file, not the VSAM masters."
+   },
+   "quadrant": "high-low",
+   "wave": 2,
+   "driving_fact": "DD CARDOUT is written at line 233 but no JCL in the tree maps it.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 63
+    },
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 233
+    }
+   ]
+  },
+  {
+   "id": "CBPAUP0C",
+   "port_difficulty": {
+    "score": 4,
+    "why": "IMS DL/I calls that delete expired authorization messages. IMS is outside what this plugin analyzes."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Deletes from an IMS database, and the CA-7 listing chains its job ahead of POSTTRAN."
+   },
+   "quadrant": "high-high",
+   "wave": 9,
+   "driving_fact": "CBPAUP0J runs it as an IMS BMP through DFSRRC00 PARM, which the extractor does not follow.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl",
+     "line": 25
+    },
+    {
+     "file": "app/scheduler/CardDemo.ca7",
+     "line": 43
+    }
+   ]
+  },
+  {
+   "id": "CBSTM03A",
+   "port_difficulty": {
+    "score": 5,
+    "why": "Uses ALTER and walks PSA, TCB and TIOT control blocks with POINTER and SET ADDRESS. There is no clean target equivalent."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Customer-facing statements. A wrong figure is silent, but a rerun regenerates the output."
+   },
+   "quadrant": "high-high",
+   "wave": 7,
+   "driving_fact": "Reads job and DD names out of z/OS control blocks at lines 266-284 and retargets a paragraph with ALTER at lines 300-309.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 266
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 300
+    }
+   ]
+  },
+  {
+   "id": "CBSTM03B",
+   "port_difficulty": {
+    "score": 3,
+    "why": "Called subprogram that performs the file I/O for CBSTM03A on a request code."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Same customer-facing output as CBSTM03A."
+   },
+   "quadrant": "high-high",
+   "wave": 7,
+   "driving_fact": "Its four DDs are not mapped by any JCL because the calling step serves them.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/CBSTM03B.CBL",
+     "line": 31
+    },
+    {
+     "file": "app/cbl/CBSTM03B.CBL",
+     "line": 136
+    }
+   ]
+  },
+  {
+   "id": "CBTRN01C",
+   "port_difficulty": {
+    "score": 2,
+    "why": "Read-only lookups over six files, about 415 lines of mostly file handling."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "The graph shows reads only, and no job or script in the tree runs it."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "Its header says it posts daily transactions, but no JCL maps its six DDs.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 29
+    },
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 254
+    }
+   ]
+  },
+  {
+   "id": "CBTRN02C",
+   "port_difficulty": {
+    "score": 4,
+    "why": "Validates against the xref and account, then updates three files without a unit of work, and rejects carry a last-writer-wins reason code."
+   },
+   "blast_radius": {
+    "score": 5,
+    "why": "Writes the account master and the transaction master that 11 programs read, in the daily close window."
+   },
+   "quadrant": "high-high",
+   "wave": 6,
+   "driving_fact": "OPEN OUTPUT on the transaction KSDS at line 256 assumes TRANBKP just emptied it, and balances are rewritten at lines 528 and 554.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 256
+    },
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 403
+    },
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 554
+    }
+   ]
+  },
+  {
+   "id": "CBTRN03C",
+   "port_difficulty": {
+    "score": 2,
+    "why": "About 545 lines, mostly file plumbing, with one card-number control break and edited-picture output."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "On the must-not-break list, wrong totals are silent, and the report can be rerun."
+   },
+   "quadrant": "low-high",
+   "wave": 4,
+   "driving_fact": "NEXT SENTENCE at line 177 leaves the loop at the first out-of-range record, and the EOF branch at lines 197-203 adds the last amount again.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN03C.cbl",
+     "line": 177
+    },
+    {
+     "file": "app/cbl/CBTRN03C.cbl",
+     "line": 197
+    }
+   ]
+  },
+  {
+   "id": "COBSWAIT",
+   "port_difficulty": {
+    "score": 1,
+    "why": "13 lines that call an assembler wait routine."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "A fixed pause between scheduler jobs. Nothing reads its output."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "WAITSTEP passes 00003600 centiseconds, a 36 second sleep used as a substitute for a completion dependency.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/COBSWAIT.cbl",
+     "line": 38
+    },
+    {
+     "file": "app/jcl/WAITSTEP.jcl",
+     "line": 26
+    }
+   ]
+  },
+  {
+   "id": "COSGN00C",
+   "port_difficulty": {
+    "score": 2,
+    "why": "172 lines. Reads the user file, compares a password and transfers to a menu."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Front door of every online session. Twelve programs return to it and a failure locks everyone out."
+   },
+   "quadrant": "low-high",
+   "wave": 5,
+   "driving_fact": "Compares the password as plain text at line 223 and transfers to COADM01C or COMEN01C at lines 231 and 236.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 223
+    },
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 231
+    }
+   ]
+  },
+  {
+   "id": "COMEN01C",
+   "port_difficulty": {
+    "score": 2,
+    "why": "213 lines of table-driven menu logic over an 11 entry table."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Every regular user path passes through it, and twelve programs transfer back to it."
+   },
+   "quadrant": "low-high",
+   "wave": 5,
+   "driving_fact": "Transfers to a program name read from the COMEN02Y table at lines 156 and 184, which is a computed call.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 156
+    },
+    {
+     "file": "app/cpy/COMEN02Y.cpy",
+     "line": 28
+    }
+   ]
+  },
+  {
+   "id": "COADM01C",
+   "port_difficulty": {
+    "score": 2,
+    "why": "189 lines of table-driven menu logic over a 6 entry table."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Front door for admin functions, with seven programs returning to it."
+   },
+   "quadrant": "low-high",
+   "wave": 5,
+   "driving_fact": "Transfers to a program name read from the COADM02Y table at line 145, and skips names that start with DUMMY at line 141.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/COADM01C.cbl",
+     "line": 145
+    },
+    {
+     "file": "app/cpy/COADM02Y.cpy",
+     "line": 29
+    }
+   ]
+  },
+  {
+   "id": "COACTVWC",
+   "port_difficulty": {
+    "score": 3,
+    "why": "Pseudo-conversational CICS screen with a BMS map and COMMAREA state, joining account, customer and xref."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Read-only view, and failures are loud."
+   },
+   "quadrant": "high-low",
+   "wave": 5,
+   "driving_fact": "Reads the account, customer and xref AIX path with layouts CVACT01Y, CVCUS01Y and CVACT03Y.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 184
+    },
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 349
+    }
+   ]
+  },
+  {
+   "id": "COACTUPC",
+   "port_difficulty": {
+    "score": 5,
+    "why": "3368 lines, the largest program, with field-level validation, a shared date routine and writes to two masters."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Rewrites the account and customer masters, and a validation slip becomes a silent bad master."
+   },
+   "quadrant": "high-high",
+   "wave": 8,
+   "driving_fact": "It includes CVACT01Y, which 13 other programs include, so a layout change reaches it first.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 858
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 573
+    }
+   ]
+  },
+  {
+   "id": "COBIL00C",
+   "port_difficulty": {
+    "score": 4,
+    "why": "Online write path that derives the next TRAN-ID from the highest key, then updates the account and writes the transaction."
+   },
+   "blast_radius": {
+    "score": 5,
+    "why": "Writes the account master and the transaction master from an online session, the same files CBTRN02C writes in batch."
+   },
+   "quadrant": "high-high",
+   "wave": 8,
+   "driving_fact": "The next TRAN-ID is the highest key plus one at lines 212-219, so it depends on what TRANBKP and POSTTRAN left in the file.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 212
+    },
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 217
+    }
+   ]
+  },
+  {
+   "id": "COCRDLIC",
+   "port_difficulty": {
+    "score": 3,
+    "why": "1093 lines of paged card list, and the extractor marks it self-recursive."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Read-only list."
+   },
+   "quadrant": "high-low",
+   "wave": 5,
+   "driving_fact": "The extractor records a call from COCRDLIC to itself through CCARD-NEXT-PROG at line 538.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 538
+    },
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 297
+    }
+   ]
+  },
+  {
+   "id": "COCRDSLC",
+   "port_difficulty": {
+    "score": 3,
+    "why": "642 lines of single card view reached through the card AIX path."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Read-only view."
+   },
+   "quadrant": "high-low",
+   "wave": 5,
+   "driving_fact": "Reads the card master through CARDDATA.VSAM.AIX.PATH, whose key offset is hard-coded in CARDFILE.jcl.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 331
+    },
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 247
+    }
+   ]
+  },
+  {
+   "id": "COCRDUPC",
+   "port_difficulty": {
+    "score": 4,
+    "why": "1194 lines of card update with field validation."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Rewrites the card master that the card views and the AIX depend on."
+   },
+   "quadrant": "high-high",
+   "wave": 8,
+   "driving_fact": "It is the only program the extractor sees writing AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 366
+    },
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 473
+    }
+   ]
+  },
+  {
+   "id": "COTRN00C",
+   "port_difficulty": {
+    "score": 3,
+    "why": "Paged transaction list with PF key navigation, in a cycle with COTRN01C."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Read-only list."
+   },
+   "quadrant": "high-low",
+   "wave": 5,
+   "driving_fact": "Transfers to COTRN01C for the selected row at lines 188-192.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 188
+    },
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 192
+    }
+   ]
+  },
+  {
+   "id": "COTRN01C",
+   "port_difficulty": {
+    "score": 2,
+    "why": "231 lines that read and show one transaction, in a cycle with COTRN00C."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Read-only view."
+   },
+   "quadrant": "low-low",
+   "wave": 5,
+   "driving_fact": "Transfers back to COTRN00C at line 126.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 126
+    },
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 205
+    }
+   ]
+  },
+  {
+   "id": "COTRN02C",
+   "port_difficulty": {
+    "score": 4,
+    "why": "Adds a transaction with amount and date validation through CSUTLDTC and a highest key plus one TRAN-ID."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Writes the transaction master read by 11 programs, from an online session."
+   },
+   "quadrant": "high-high",
+   "wave": 8,
+   "driving_fact": "The next TRAN-ID is the highest key plus one at lines 444-451.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 444
+    },
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 393
+    }
+   ]
+  },
+  {
+   "id": "CORPT00C",
+   "port_difficulty": {
+    "score": 3,
+    "why": "Builds JCL text in COBOL strings and writes it to the JOBS extra partition TDQ."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Submits a read-only report job, and a failed TDQ write is loud."
+   },
+   "quadrant": "high-low",
+   "wave": 5,
+   "driving_fact": "It embeds the SORT offsets 263 and 305 at lines 100-102 and runs EXEC PROC=TRANREPT at line 94.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 94
+    },
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 517
+    }
+   ]
+  },
+  {
+   "id": "COUSR00C",
+   "port_difficulty": {
+    "score": 3,
+    "why": "Paged user list over the security file."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Read-only list."
+   },
+   "quadrant": "high-low",
+   "wave": 5,
+   "driving_fact": "Transfers to COUSR02C or COUSR03C per selected row at lines 192 and 202.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 192
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 202
+    }
+   ]
+  },
+  {
+   "id": "COUSR01C",
+   "port_difficulty": {
+    "score": 2,
+    "why": "198 lines that add a user record."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Writes the credential store, and passwords are plain text in the record."
+   },
+   "quadrant": "low-high",
+   "wave": 8,
+   "driving_fact": "SEC-USR-PWD is PIC X(08) in CSUSR01Y.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cpy/CSUSR01Y.cpy",
+     "line": 21
+    },
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 175
+    }
+   ]
+  },
+  {
+   "id": "COUSR02C",
+   "port_difficulty": {
+    "score": 2,
+    "why": "303 lines that update a user record."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Rewrites the credential store."
+   },
+   "quadrant": "low-high",
+   "wave": 8,
+   "driving_fact": "Shares the CSUSR01Y layout with COSGN00C and three other user programs.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cpy/CSUSR01Y.cpy",
+     "line": 21
+    },
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 258
+    }
+   ]
+  },
+  {
+   "id": "COUSR03C",
+   "port_difficulty": {
+    "score": 2,
+    "why": "251 lines that delete a user record."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Deletes from the credential store, which cannot be undone from the tree."
+   },
+   "quadrant": "low-high",
+   "wave": 8,
+   "driving_fact": "Shares the CSUSR01Y layout with COSGN00C and three other user programs.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cpy/CSUSR01Y.cpy",
+     "line": 21
+    },
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 205
+    }
+   ]
+  },
+  {
+   "id": "CSUTLDTC",
+   "port_difficulty": {
+    "score": 3,
+    "why": "Date validation through the Language Environment service CEEDAYS, so acceptance rules come from the runtime."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Three programs rely on it for date acceptance, and a wrong acceptance is silent."
+   },
+   "quadrant": "high-high",
+   "wave": 5,
+   "driving_fact": "Called from COACTUPC, CORPT00C and COTRN02C through CSUTLDPY and direct CALLs.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 4232
+    },
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 392
+    },
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 393
+    }
+   ]
+  },
+  {
+   "id": "COPAUA0C",
+   "port_difficulty": {
+    "score": 5,
+    "why": "MQ driven authorization decision that also reads IMS and DB2. All three are outside this plugin's analysis."
+   },
+   "blast_radius": {
+    "score": 5,
+    "why": "Approves or declines card authorizations, and it reads the account, customer and xref masters."
+   },
+   "quadrant": "high-high",
+   "wave": 9,
+   "driving_fact": "Includes the shared account layout CVACT01Y and reads the account master at line 525.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl",
+     "line": 35
+    },
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl",
+     "line": 525
+    }
+   ]
+  },
+  {
+   "id": "COPAUS0C",
+   "port_difficulty": {
+    "score": 4,
+    "why": "IMS summary screen that is self-recursive and in a cycle with COPAUS1C."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "View of pending authorizations, reachable from main menu option 11."
+   },
+   "quadrant": "high-high",
+   "wave": 9,
+   "driving_fact": "COMEN02Y lists COPAUS0C as menu option 11, so the core menu already points into this module.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cpy/COMEN02Y.cpy",
+     "line": 89
+    },
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/COPAUS0C.cbl",
+     "line": 322
+    }
+   ]
+  },
+  {
+   "id": "COPAUS1C",
+   "port_difficulty": {
+    "score": 4,
+    "why": "IMS detail screen in a cycle with COPAUS0C."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "View of one authorization, and it links to the fraud flag program."
+   },
+   "quadrant": "high-high",
+   "wave": 9,
+   "driving_fact": "Calls COPAUS2C through the constant WS-PGM-AUTH-FRAUD at line 248.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/COPAUS1C.cbl",
+     "line": 35
+    },
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/COPAUS1C.cbl",
+     "line": 248
+    }
+   ]
+  },
+  {
+   "id": "COPAUS2C",
+   "port_difficulty": {
+    "score": 3,
+    "why": "201 lines that write a fraud flag through EXEC SQL."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Writes the AUTHFRDS DB2 table."
+   },
+   "quadrant": "high-high",
+   "wave": 9,
+   "driving_fact": "It is the only program the extractor sees writing db2:CARDDEMO.AUTHFRDS.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/COPAUS2C.cbl",
+     "line": 88
+    }
+   ]
+  },
+  {
+   "id": "COTRTLIC",
+   "port_difficulty": {
+    "score": 4,
+    "why": "1597 lines of DB2 cursor paging over the transaction type table."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Reads and maintains a reference table, not balances."
+   },
+   "quadrant": "high-low",
+   "wave": 9,
+   "driving_fact": "Reads DB2 TRANSACTION_TYPE through EXEC SQL.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-transaction-type-db2/cbl/COTRTLIC.cbl",
+     "line": 620
+    },
+    {
+     "file": "app/app-transaction-type-db2/cbl/COTRTLIC.cbl",
+     "line": 497
+    }
+   ]
+  },
+  {
+   "id": "COTRTUPC",
+   "port_difficulty": {
+    "score": 4,
+    "why": "1241 lines of DB2 transaction type update."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Writes the transaction type table that the weekly Control-M folder refreshes."
+   },
+   "quadrant": "high-high",
+   "wave": 9,
+   "driving_fact": "Includes the DB2 host variable copybooks DCLTRTYP and DCLTRCAT.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-transaction-type-db2/cbl/COTRTUPC.cbl",
+     "line": 286
+    },
+    {
+     "file": "app/app-transaction-type-db2/cbl/COTRTUPC.cbl",
+     "line": 457
+    }
+   ]
+  },
+  {
+   "id": "COBTUPDT",
+   "port_difficulty": {
+    "score": 3,
+    "why": "177 lines of batch DB2 maintenance driven by an input file."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Writes the DB2 transaction type table weekly."
+   },
+   "quadrant": "high-high",
+   "wave": 9,
+   "driving_fact": "Run by MNTTRDB2 through RUN PROGRAM(COBTUPDT), which the extractor does not follow.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
+     "line": 30
+    },
+    {
+     "file": "app/app-transaction-type-db2/cbl/COBTUPDT.cbl",
+     "line": 80
+    }
+   ]
+  },
+  {
+   "id": "COACCT01",
+   "port_difficulty": {
+    "score": 4,
+    "why": "MQ request and reply program over the account file."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "An external MQ consumer sees its replies."
+   },
+   "quadrant": "high-high",
+   "wave": 9,
+   "driving_fact": "Reads AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS with CVACT01Y and answers on MQ.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-vsam-mq/cbl/COACCT01.cbl",
+     "line": 115
+    },
+    {
+     "file": "app/app-vsam-mq/cbl/COACCT01.cbl",
+     "line": 396
+    }
+   ]
+  },
+  {
+   "id": "CODATE01",
+   "port_difficulty": {
+    "score": 3,
+    "why": "MQ date service program driven through MQOPEN and MQGET calls."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Returns a date to a caller, with no master written."
+   },
+   "quadrant": "high-low",
+   "wave": 9,
+   "driving_fact": "It opens its MQ queues with MQOPEN at line 182 and 216.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-vsam-mq/cbl/CODATE01.cbl",
+     "line": 182
+    },
+    {
+     "file": "app/app-vsam-mq/cbl/CODATE01.cbl",
+     "line": 125
+    }
+   ]
+  },
+  {
+   "id": "DBUNLDGS",
+   "port_difficulty": {
+    "score": 4,
+    "why": "DL/I GSAM unload of the authorization database."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Unloads only, and it is run by hand as far as the tree shows."
+   },
+   "quadrant": "high-low",
+   "wave": 9,
+   "driving_fact": "UNLDGSAM.JCL runs it with PARM DLI,DBUNLDGS,DLIGSAMP.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL",
+     "line": 27
+    },
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
+     "line": 159
+    }
+   ]
+  },
+  {
+   "id": "PAUDBLOD",
+   "port_difficulty": {
+    "score": 4,
+    "why": "Loads root and child segments into IMS through CBLTDLI ISRT calls."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Writes an IMS database."
+   },
+   "quadrant": "high-high",
+   "wave": 9,
+   "driving_fact": "LOADPADB.JCL runs it as BMP,PAUDBLOD,PSBPAUTB.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL",
+     "line": 27
+    },
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL",
+     "line": 244
+    }
+   ]
+  },
+  {
+   "id": "PAUDBUNL",
+   "port_difficulty": {
+    "score": 4,
+    "why": "Unloads IMS root and child segments to two files."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Unloads only."
+   },
+   "quadrant": "high-low",
+   "wave": 9,
+   "driving_fact": "UNLDPADB.JCL runs it with PARM DLI,PAUDBUNL,PAUTBUNL.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL",
+     "line": 39
+    },
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/PAUDBUNL.CBL",
+     "line": 153
+    }
+   ]
+  },
+  {
+   "id": "job:ACCTFILE",
+   "port_difficulty": {
+    "score": 2,
+    "why": "IDCAMS delete, define and REPRO with fixed KEYS and RECORDSIZE."
+   },
+   "blast_radius": {
+    "score": 5,
+    "why": "Deletes and rebuilds the account master from a flat file, which resets balances CBTRN02C updated."
+   },
+   "quadrant": "low-high",
+   "wave": 3,
+   "driving_fact": "KEYS(11 0) and RECORDSIZE(300 300) must match CVACT01Y, and the job has no CICS close step of its own.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 40
+    },
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 61
+    }
+   ]
+  },
+  {
+   "id": "job:CARDFILE",
+   "port_difficulty": {
+    "score": 2,
+    "why": "Declarative IDCAMS steps, plus an alternate index and path, and its own CICS close and open steps."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Rebuilds the card master and its AIX that the online card programs use."
+   },
+   "quadrant": "low-high",
+   "wave": 3,
+   "driving_fact": "The AIX is defined KEYS(11 16), an offset into CVACT02Y.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 85
+    },
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 26
+    }
+   ]
+  },
+  {
+   "id": "job:XREFFILE",
+   "port_difficulty": {
+    "score": 2,
+    "why": "Declarative IDCAMS steps, plus an alternate index and path."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Rebuilds the xref that every posted transaction is validated against."
+   },
+   "quadrant": "low-high",
+   "wave": 3,
+   "driving_fact": "The AIX is defined KEYS(11,25), an offset into CVACT03Y.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 74
+    },
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 43
+    }
+   ]
+  },
+  {
+   "id": "job:CUSTFILE",
+   "port_difficulty": {
+    "score": 2,
+    "why": "Delete, define and REPRO with its own CICS close and open steps."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Rebuilds the customer master read by 7 programs."
+   },
+   "quadrant": "low-high",
+   "wave": 3,
+   "driving_fact": "KEYS(9 0) matches CUST-ID PIC 9(09) in CVCUS01Y.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 50
+    },
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 26
+    }
+   ]
+  },
+  {
+   "id": "job:DISCGRP",
+   "port_difficulty": {
+    "score": 2,
+    "why": "IDCAMS delete, define and REPRO."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Rebuilds the disclosure group rates that CBACT04C uses for interest."
+   },
+   "quadrant": "low-high",
+   "wave": 3,
+   "driving_fact": "A wrong reload changes interest silently.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 22
+    }
+   ]
+  },
+  {
+   "id": "job:TCATBALF",
+   "port_difficulty": {
+    "score": 2,
+    "why": "IDCAMS delete, define and REPRO with a 17 byte key."
+   },
+   "blast_radius": {
+    "score": 5,
+    "why": "Reloads the category balances that CBTRN02C updates and CBACT04C reads."
+   },
+   "quadrant": "low-high",
+   "wave": 3,
+   "driving_fact": "KEYS(17 0) is account 11 plus type 2 plus category 4 from CVTRA01Y.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 40
+    },
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 41
+    }
+   ]
+  },
+  {
+   "id": "job:TRANCATG",
+   "port_difficulty": {
+    "score": 1,
+    "why": "IDCAMS delete, define and REPRO of a small reference table."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Reference table read by the report and the online screens."
+   },
+   "quadrant": "low-high",
+   "wave": 3,
+   "driving_fact": "KEYS(6 0).",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 40
+    }
+   ]
+  },
+  {
+   "id": "job:TRANTYPE",
+   "port_difficulty": {
+    "score": 1,
+    "why": "IDCAMS delete, define and REPRO of a small reference table."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Reference table read by the report and the online screens."
+   },
+   "quadrant": "low-high",
+   "wave": 3,
+   "driving_fact": "KEYS(2 0).",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 40
+    }
+   ]
+  },
+  {
+   "id": "job:TRANFILE",
+   "port_difficulty": {
+    "score": 2,
+    "why": "Declarative IDCAMS steps, plus an alternate index and path, and its own CICS close and open steps."
+   },
+   "blast_radius": {
+    "score": 5,
+    "why": "Rebuilds the transaction master and deletes its history."
+   },
+   "quadrant": "low-high",
+   "wave": 3,
+   "driving_fact": "The AIX is defined KEYS(26 304), the position of TRAN-PROC-TS in CVTRA05Y.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 84
+    },
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 35
+    }
+   ]
+  },
+  {
+   "id": "job:DUSRSECJ",
+   "port_difficulty": {
+    "score": 2,
+    "why": "IDCAMS and IEBGENER steps that reload the user file."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Reloads the credential store."
+   },
+   "quadrant": "low-high",
+   "wave": 3,
+   "driving_fact": "Copies USRSEC.PS, which holds user IDs and passwords, into the KSDS.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 65
+    }
+   ]
+  },
+  {
+   "id": "job:CLOSEFIL",
+   "port_difficulty": {
+    "score": 2,
+    "why": "SDSF console commands to CICS region CICSAWSA."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "If it is missed, batch collides with CICS on the shared files."
+   },
+   "quadrant": "low-high",
+   "wave": 3,
+   "driving_fact": "It closes only TRANSACT, CCXREF, ACCTDAT, CXACAIX and USRSEC. CARDDAT and CUSTDAT are not in the list.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/CLOSEFIL.jcl",
+     "line": 26
+    },
+    {
+     "file": "app/jcl/CLOSEFIL.jcl",
+     "line": 30
+    }
+   ]
+  },
+  {
+   "id": "job:OPENFIL",
+   "port_difficulty": {
+    "score": 2,
+    "why": "SDSF console commands to CICS region CICSAWSA."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "If it is missed, the online files stay closed."
+   },
+   "quadrant": "low-high",
+   "wave": 3,
+   "driving_fact": "It reopens the same five files CLOSEFIL closes.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/OPENFIL.jcl",
+     "line": 26
+    },
+    {
+     "file": "app/jcl/OPENFIL.jcl",
+     "line": 30
+    }
+   ]
+  },
+  {
+   "id": "job:WAITSTEP",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Runs COBSWAIT with a centisecond PARM."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "A fixed 36 second pause."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "It stands in for a completion condition between scheduler jobs.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/WAITSTEP.jcl",
+     "line": 26
+    }
+   ]
+  },
+  {
+   "id": "job:POSTTRAN",
+   "port_difficulty": {
+    "score": 3,
+    "why": "One step, but GDG(+1) rejects and a DISP=SHR DD on a file the program opens OUTPUT."
+   },
+   "blast_radius": {
+    "score": 5,
+    "why": "Posts the day's transactions to the account, category balance and transaction masters."
+   },
+   "quadrant": "high-high",
+   "wave": 6,
+   "driving_fact": "STEP15 runs CBTRN02C, and DALYTRAN.PS has no writer in the tree.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/jcl/POSTTRAN.jcl",
+     "line": 23
+    },
+    {
+     "file": "app/jcl/POSTTRAN.jcl",
+     "line": 38
+    }
+   ]
+  },
+  {
+   "id": "job:TRANBKP",
+   "port_difficulty": {
+    "score": 3,
+    "why": "REPRO backup, then DELETE and DEFINE of the transaction master and its AIX."
+   },
+   "blast_radius": {
+    "score": 5,
+    "why": "Empties the transaction master on every run."
+   },
+   "quadrant": "high-high",
+   "wave": 6,
+   "driving_fact": "It deletes AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS at line 40 after backing it up.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 40
+    },
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 43
+    }
+   ]
+  },
+  {
+   "id": "job:TRANIDX",
+   "port_difficulty": {
+    "score": 2,
+    "why": "Three IDCAMS steps that define an AIX, a path and build the index."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Without the AIX, alternate index lookups fail loudly."
+   },
+   "quadrant": "low-high",
+   "wave": 6,
+   "driving_fact": "KEYS(26 304) points at TRAN-PROC-TS.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 27
+    }
+   ]
+  },
+  {
+   "id": "job:COMBTRAN",
+   "port_difficulty": {
+    "score": 3,
+    "why": "SORT by TRAN-ID of the backup plus system transactions, then REPRO into the master."
+   },
+   "blast_radius": {
+    "score": 5,
+    "why": "Rebuilds the transaction master from two generations."
+   },
+   "quadrant": "high-high",
+   "wave": 7,
+   "driving_fact": "Reads TRANSACT.BKUP(0) and SYSTRAN(0) and sorts on the first 16 bytes.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 28
+    },
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 48
+    }
+   ]
+  },
+  {
+   "id": "job:INTCALC",
+   "port_difficulty": {
+    "score": 2,
+    "why": "One CBACT04C step with a hard-coded PARM."
+   },
+   "blast_radius": {
+    "score": 5,
+    "why": "Drives the monthly interest that changes every account balance."
+   },
+   "quadrant": "low-high",
+   "wave": 7,
+   "driving_fact": "PARM='2022071800' is fixed in the JCL.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/jcl/INTCALC.jcl",
+     "line": 22
+    }
+   ]
+  },
+  {
+   "id": "job:DALYREJS",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Defines a GDG base."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Without it, the POSTTRAN reject DD fails at allocation."
+   },
+   "quadrant": "low-low",
+   "wave": 6,
+   "driving_fact": "LIMIT(5) SCRATCH keeps five generations.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/DALYREJS.jcl",
+     "line": 26
+    }
+   ]
+  },
+  {
+   "id": "job:DEFGDGB",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Defines six GDG bases."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Without the bases, TRANBKP and TRANREPT fail at allocation."
+   },
+   "quadrant": "low-low",
+   "wave": 3,
+   "driving_fact": "Each base keeps five generations with SCRATCH.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGB.jcl",
+     "line": 26
+    }
+   ]
+  },
+  {
+   "id": "job:DEFGDGD",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Defines three GDG bases and copies reference data into them."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Backup copies of reference tables."
+   },
+   "quadrant": "low-low",
+   "wave": 3,
+   "driving_fact": "Three bases with LIMIT(5).",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 29
+    }
+   ]
+  },
+  {
+   "id": "job:REPTFILE",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Defines the TRANREPT GDG base."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Conflicts with DEFGDGB, which defines the same base with a different limit."
+   },
+   "quadrant": "low-low",
+   "wave": 3,
+   "driving_fact": "LIMIT(10) here against LIMIT(5) in DEFGDGB.jcl.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/REPTFILE.jcl",
+     "line": 27
+    },
+    {
+     "file": "app/jcl/DEFGDGB.jcl",
+     "line": 38
+    }
+   ]
+  },
+  {
+   "id": "job:TRANREPT",
+   "port_difficulty": {
+    "score": 2,
+    "why": "Three steps of REPRO, SORT and a report program, with a duplicate step name and a fixed SORT date window."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "On the must-not-break list, and each run adds a generation to the transaction backup group that COMBTRAN reads as generation 0."
+   },
+   "quadrant": "low-high",
+   "wave": 4,
+   "driving_fact": "STEP05R writes AWS.M2.CARDDEMO.TRANSACT.BKUP(+1), the group TRANBKP writes and COMBTRAN reads, and the SORT window is fixed at 2022-01-01 to 2022-07-06.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 33
+    },
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 24
+    },
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 43
+    }
+   ]
+  },
+  {
+   "id": "job:READCARD",
+   "port_difficulty": {
+    "score": 1,
+    "why": "One step that runs CBACT02C."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Read-only listing."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "The CA-7 listing chains it after a refresh.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/READCARD.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:READXREF",
+   "port_difficulty": {
+    "score": 1,
+    "why": "One step that runs CBACT03C."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Read-only listing."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "The CA-7 listing chains it after a refresh.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/READXREF.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:READCUST",
+   "port_difficulty": {
+    "score": 1,
+    "why": "One step that runs CBCUS01C."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Read-only listing."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "The CA-7 listing chains it after a refresh.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/READCUST.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:READACCT",
+   "port_difficulty": {
+    "score": 3,
+    "why": "Runs CBACT01C and writes three output datasets with different record shapes."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Writes only extract files."
+   },
+   "quadrant": "high-low",
+   "wave": 2,
+   "driving_fact": "Outputs ACCTDATA.PSCOMP, ACCTDATA.VBPS and ACCTDATA.ARRYPS, which nothing in the tree reads.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/READACCT.jcl",
+     "line": 22
+    }
+   ]
+  },
+  {
+   "id": "job:PRTCATBL",
+   "port_difficulty": {
+    "score": 2,
+    "why": "REPRO backup, then a SORT with fixed symbol offsets."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Prints category balances and reads a copy of the master."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "SORT symbol TRANCAT-ACCT-ID is 1,11 in the JCL rather than in a copybook.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 47
+    }
+   ]
+  },
+  {
+   "id": "job:CREASTMT",
+   "port_difficulty": {
+    "score": 4,
+    "why": "SORT with OUTREC offsets, IDCAMS steps and COND=(0,NE) chaining into CBSTM03A."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Statement generation with silent numeric risk."
+   },
+   "quadrant": "high-high",
+   "wave": 7,
+   "driving_fact": "SORT FIELDS=(263,16,CH,A,1,16,CH,A) at line 53 repeats the card number offset.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 53
+    },
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 54
+    }
+   ]
+  },
+  {
+   "id": "job:TXT2PDF1",
+   "port_difficulty": {
+    "score": 3,
+    "why": "Runs an external TXT2PDF tool from datasets outside the tree."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Converts statements to PDF."
+   },
+   "quadrant": "high-low",
+   "wave": 7,
+   "driving_fact": "The load library AWS.M2.LBD.TXT2PDF.LOAD is not in the tree.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/TXT2PDF1.JCL",
+     "line": 24
+    }
+   ]
+  },
+  {
+   "id": "job:CBEXPORT",
+   "port_difficulty": {
+    "score": 2,
+    "why": "IDCAMS define of an export KSDS with KEYS(4 28), then CBEXPORT."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Writes a new export file only."
+   },
+   "quadrant": "low-low",
+   "wave": 2,
+   "driving_fact": "KEYS(4 28) is an offset into the CVEXPORT layout.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/CBEXPORT.jcl",
+     "line": 32
+    }
+   ]
+  },
+  {
+   "id": "job:CBIMPORT",
+   "port_difficulty": {
+    "score": 2,
+    "why": "One CBIMPORT step."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Writes flat files only."
+   },
+   "quadrant": "low-low",
+   "wave": 2,
+   "driving_fact": "CARDOUT has no DD in the job.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/CBIMPORT.jcl",
+     "line": 22
+    }
+   ]
+  },
+  {
+   "id": "job:CBADMCDJ",
+   "port_difficulty": {
+    "score": 2,
+    "why": "DFHCSDUP define of CICS resources."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Wrong definitions make transactions unavailable, which is loud."
+   },
+   "quadrant": "low-high",
+   "wave": null,
+   "driving_fact": "It writes to the CICS system definition file.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/CBADMCDJ.jcl",
+     "line": 27
+    }
+   ]
+  },
+  {
+   "id": "job:CBPAUP0J",
+   "port_difficulty": {
+    "score": 3,
+    "why": "IMS BMP invocation through DFSRRC00."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Deletes expired authorizations."
+   },
+   "quadrant": "high-high",
+   "wave": 9,
+   "driving_fact": "The CA-7 listing places it between CLOSEFIL and POSTTRAN.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl",
+     "line": 25
+    },
+    {
+     "file": "app/scheduler/CardDemo.ca7",
+     "line": 43
+    }
+   ]
+  },
+  {
+   "id": "job:DBPAUTP0",
+   "port_difficulty": {
+    "score": 3,
+    "why": "IEFBR14 and DFSRRC00 steps that define IMS resources."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Defines the authorization database."
+   },
+   "quadrant": "high-high",
+   "wave": 9,
+   "driving_fact": "Reads IMS library and RECON datasets that are not in the tree.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/DBPAUTP0.jcl",
+     "line": 7
+    }
+   ]
+  },
+  {
+   "id": "job:LOADPADB",
+   "port_difficulty": {
+    "score": 3,
+    "why": "IMS BMP load through DFSRRC00."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Loads the IMS authorization database."
+   },
+   "quadrant": "high-high",
+   "wave": 9,
+   "driving_fact": "PARM is BMP,PAUDBLOD,PSBPAUTB.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL",
+     "line": 27
+    }
+   ]
+  },
+  {
+   "id": "job:UNLDGSAM",
+   "port_difficulty": {
+    "score": 3,
+    "why": "DL/I GSAM unload."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Unload only."
+   },
+   "quadrant": "high-low",
+   "wave": 9,
+   "driving_fact": "PARM is DLI,DBUNLDGS,DLIGSAMP.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL",
+     "line": 27
+    }
+   ]
+  },
+  {
+   "id": "job:UNLDPADB",
+   "port_difficulty": {
+    "score": 3,
+    "why": "DL/I unload of root and child segments."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Unload only."
+   },
+   "quadrant": "high-low",
+   "wave": 9,
+   "driving_fact": "PARM is DLI,PAUDBUNL,PAUTBUNL.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL",
+     "line": 39
+    }
+   ]
+  },
+  {
+   "id": "job:MNTTRDB2",
+   "port_difficulty": {
+    "score": 3,
+    "why": "DSN RUN PROGRAM(COBTUPDT) under IKJEFT01."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Weekly maintenance of a DB2 reference table."
+   },
+   "quadrant": "high-high",
+   "wave": 9,
+   "driving_fact": "Scheduled in Control-M folder WEEKLY-TransactionTypesDBRefresh.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
+     "line": 30
+    }
+   ]
+  },
+  {
+   "id": "job:TRANEXTR",
+   "port_difficulty": {
+    "score": 3,
+    "why": "DB2 unload steps plus IEBGENER copies."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Weekly extract from DB2."
+   },
+   "quadrant": "high-high",
+   "wave": 9,
+   "driving_fact": "Scheduled after MNTTRDB2 in Control-M.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-transaction-type-db2/jcl/TRANEXTR.jcl",
+     "line": 31
+    }
+   ]
+  },
+  {
+   "id": "job:CREADB2",
+   "port_difficulty": {
+    "score": 3,
+    "why": "Four IKJEFT01 DB2 steps and an IEFBR14."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "Creates the DB2 objects for the transaction type module."
+   },
+   "quadrant": "high-high",
+   "wave": 9,
+   "driving_fact": "One-off DDL run.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-transaction-type-db2/jcl/CREADB21.jcl",
+     "line": 40
+    }
+   ]
+  },
+  {
+   "id": "job:DEFCUST",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Two IDCAMS steps that define a cluster nobody reads."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Defines AWS.CUSTDATA.CLUSTER, not the customer master."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "KEYS(10 0) disagrees with CUST-ID PIC 9(09) and CUSTFILE.jcl KEYS(9 0).",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/DEFCUST.jcl",
+     "line": 37
+    },
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 50
+    }
+   ]
+  },
+  {
+   "id": "job:ESDSRRDS",
+   "port_difficulty": {
+    "score": 2,
+    "why": "Defines ESDS and RRDS variants of the user file."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "No program in the tree reads them."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "Only this job touches USRSEC.VSAM.ESDS and USRSEC.VSAM.RRDS.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 24
+    }
+   ]
+  },
+  {
+   "id": "job:FTPJCLS",
+   "port_difficulty": {
+    "score": 1,
+    "why": "One FTP step."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "Embeds a host, user ID and password in the JCL stream."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "The login fields are in-stream at lines 33-35.",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/FTPJCL.JCL",
+     "line": 34
+    }
+   ]
+  },
+  {
+   "id": "job:INTRDRJ1",
+   "port_difficulty": {
+    "score": 1,
+    "why": "IDCAMS copy and an IEBGENER submit to the internal reader."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "A demo of internal reader submission."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "It submits INTRDRJ2 through SYSOUT=(A,INTRDR).",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/INTRDRJ1.JCL",
+     "line": 6
+    }
+   ]
+  },
+  {
+   "id": "job:INTRDRJ2",
+   "port_difficulty": {
+    "score": 1,
+    "why": "One IDCAMS copy."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Demo job."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "Copies a test dataset only.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/jcl/INTRDRJ2.JCL",
+     "line": 7
+    }
+   ]
+  },
+  {
+   "id": "job:LISTFILS",
+   "port_difficulty": {
+    "score": 1,
+    "why": "IEFBR14 and IDCAMS LISTCAT."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Catalog listing."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "Writes AWS.M2.CARDDEMO.LISTCAT.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "samples/jcl/LISTCAT.jcl",
+     "line": 21
+    }
+   ]
+  },
+  {
+   "id": "job:REPRTEST",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Calls the REPROC proc."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Test job."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "Exercises REPROC only.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "samples/jcl/REPRTEST.jcl",
+     "line": 23
+    }
+   ]
+  },
+  {
+   "id": "job:SORTTEST",
+   "port_difficulty": {
+    "score": 1,
+    "why": "One SORT step."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Test job."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "Writes TRANSACT.DALY from TRANSACT.BKUP.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "samples/jcl/SORTTEST.jcl",
+     "line": 19
+    }
+   ]
+  },
+  {
+   "id": "job:RACFCMDS",
+   "port_difficulty": {
+    "score": 2,
+    "why": "TSO RACF commands."
+   },
+   "blast_radius": {
+    "score": 4,
+    "why": "Changes security definitions."
+   },
+   "quadrant": "low-high",
+   "wave": null,
+   "driving_fact": "Adds a member to a CICS transaction group and connects a user to a group.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "samples/jcl/RACFCMDS.jcl",
+     "line": 19
+    }
+   ]
+  },
+  {
+   "id": "job:CBLDBMS",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Calls a BMS build proc."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Build step."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "Compile job that the new build pipeline replaces.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "samples/jcl/BMSCMP.jcl",
+     "line": 38
+    }
+   ]
+  },
+  {
+   "id": "job:CICCMP",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Calls the online COBOL build proc."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Build step."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "Compile job that the new build pipeline replaces.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "samples/jcl/CICCMP.jcl",
+     "line": 41
+    }
+   ]
+  },
+  {
+   "id": "job:CIDBCMP",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Calls the DB2 online build proc."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Build step."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "Compile job that the new build pipeline replaces.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "samples/jcl/CICDBCMP.jcl",
+     "line": 54
+    }
+   ]
+  },
+  {
+   "id": "job:CNJBATMP",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Calls the batch build proc."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Build step."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "Compile job that the new build pipeline replaces.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "samples/jcl/BATCMP.jcl",
+     "line": 42
+    }
+   ]
+  },
+  {
+   "id": "job:IMSMQCMP",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Compile and link steps for the IMS and MQ module."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Build step."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "Compile job that the new build pipeline replaces.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "samples/jcl/IMSMQCMP.jcl",
+     "line": 28
+    }
+   ]
+  }
+ ],
+ "do_not_port": [
+  {
+   "id": "cpy:UNUSED1Y",
+   "reason": "No program includes it. Delete it after the client confirms."
+  },
+  {
+   "id": "proc:BLDCIDB2",
+   "reason": "Compile procedure. The new build pipeline replaces it."
+  },
+  {
+   "id": "proc:BUILDBAT",
+   "reason": "Compile procedure. The new build pipeline replaces it."
+  },
+  {
+   "id": "proc:BUILDBMS",
+   "reason": "Compile procedure. The new build pipeline replaces it."
+  },
+  {
+   "id": "proc:BUILDONL",
+   "reason": "Compile procedure. The new build pipeline replaces it."
+  },
+  {
+   "id": "job:CBLDBMS",
+   "reason": "Compile job. Replaced by the new build pipeline, not ported."
+  },
+  {
+   "id": "job:CICCMP",
+   "reason": "Compile job. Replaced by the new build pipeline, not ported."
+  },
+  {
+   "id": "job:CIDBCMP",
+   "reason": "Compile job. Replaced by the new build pipeline, not ported."
+  },
+  {
+   "id": "job:CNJBATMP",
+   "reason": "Compile job. Replaced by the new build pipeline, not ported."
+  },
+  {
+   "id": "job:IMSMQCMP",
+   "reason": "Compile job. Replaced by the new build pipeline, not ported."
+  },
+  {
+   "id": "job:CBADMCDJ",
+   "reason": "Defines CICS resources in the CSD. The target runtime's routing configuration replaces it."
+  },
+  {
+   "id": "job:RACFCMDS",
+   "reason": "RACF commands. The target platform's access control replaces them."
+  },
+  {
+   "id": "job:DEFCUST",
+   "reason": "Defines AWS.CUSTDATA.CLUSTER, which no program reads. Its key length of 10 disagrees with CUST-ID. Confirm with the client, then retire."
+  },
+  {
+   "id": "job:ESDSRRDS",
+   "reason": "Builds ESDS and RRDS copies of the user file that nothing in the tree reads. Confirm, then retire."
+  },
+  {
+   "id": "job:FTPJCLS",
+   "reason": "FTP demo with login fields in the JCL stream. Replace with managed file transfer and rotate the credential."
+  },
+  {
+   "id": "job:INTRDRJ1",
+   "reason": "Internal reader demo. Retire."
+  },
+  {
+   "id": "job:INTRDRJ2",
+   "reason": "Internal reader demo. Retire."
+  },
+  {
+   "id": "job:LISTFILS",
+   "reason": "Catalog listing utility. Retire."
+  },
+  {
+   "id": "job:REPRTEST",
+   "reason": "Test job for REPROC. Retire."
+  },
+  {
+   "id": "job:SORTTEST",
+   "reason": "Test job for SORT. Retire."
+  },
+  {
+   "id": "COBSWAIT",
+   "reason": "A fixed pause. Replace with a real completion dependency in the new scheduler."
+  },
+  {
+   "id": "job:WAITSTEP",
+   "reason": "A fixed 36 second pause. Replace with a real completion dependency in the new scheduler."
+  }
+ ]
+}

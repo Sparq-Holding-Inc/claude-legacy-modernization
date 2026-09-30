@@ -1,0 +1,401 @@
+{
+ "target_state": "refactor",
+ "waves": [
+  {
+   "wave": 1,
+   "name": "Read-only batch extracts and setup",
+   "units": [
+    "CBACT01C",
+    "CBACT02C",
+    "CBACT03C",
+    "CBCUS01C",
+    "CBEXPORT",
+    "CBIMPORT",
+    "job:READACCT",
+    "job:READCARD",
+    "job:READCUST",
+    "job:READXREF",
+    "job:PRTCATBL",
+    "job:CBEXPORT",
+    "job:CBIMPORT",
+    "job:DEFGDGB",
+    "job:DALYREJS",
+    "job:REPTFILE",
+    "proc:REPROC"
+   ],
+   "rationale": "Every unit here reads the masters or writes a dataset nothing else reads. It proves the toolchain, the KSDS access layer and the decimal type mapping where a mistake cannot reach a master.",
+   "unblocks": "The COBOL toolchain, the record layouts CVACT01Y, CVACT02Y, CVACT03Y and CVCUS01Y, the replacement for the assembler date routine COBDATFT, the GDG replacement that stores golden-master generations, and a CBEXPORT snapshot to seed the oracle for waves 2 to 4.",
+   "blast_radius": "low",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/READACCT.jcl",
+     "line": 32
+    },
+    {
+     "file": "app/jcl/CBEXPORT.jcl",
+     "line": 43
+    },
+    {
+     "file": "app/cbl/CBACT01C.cbl",
+     "line": 231
+    }
+   ]
+  },
+  {
+   "wave": 2,
+   "name": "Transaction report",
+   "units": [
+    "CBTRN03C",
+    "job:TRANREPT",
+    "proc:TRANREPT"
+   ],
+   "rationale": "A must-not-break output that writes nothing to a master and can be diffed byte for byte. It is high-high by score. It sits here because it is the only high-high unit that changes no system of record.",
+   "unblocks": "The first byte-level comparison against a must-not-break output, and the SORT offset contract on the transaction layout (card number at 263, processing date at 305).",
+   "blast_radius": "medium",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 59
+    },
+    {
+     "file": "app/proc/TRANREPT.prc",
+     "line": 57
+    },
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 94
+    }
+   ]
+  },
+  {
+   "wave": 3,
+   "name": "Master and reference data refresh",
+   "units": [
+    "job:ACCTFILE",
+    "job:CARDFILE",
+    "job:CUSTFILE",
+    "job:XREFFILE",
+    "job:DISCGRP",
+    "job:TCATBALF",
+    "job:TRANCATG",
+    "job:TRANTYPE",
+    "job:DUSRSECJ",
+    "job:ESDSRRDS",
+    "job:DEFGDGD",
+    "job:DEFCUST",
+    "sch:scripts/remote_refresh.sh",
+    "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP"
+   ],
+   "rationale": "Delete, define and reload jobs with no COBOL. The port is a data-store load, and the check is a state diff of the loaded files. The account and card master refresh is a must-not-break item.",
+   "unblocks": "Masters in a known state to seed the wave 4 harness, and the load path the posting harness needs to reset between runs.",
+   "blast_radius": "high",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 25
+    },
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 75
+    },
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 20
+    }
+   ]
+  },
+  {
+   "wave": 4,
+   "name": "Daily transaction posting",
+   "units": [
+    "CBTRN02C",
+    "job:POSTTRAN",
+    "job:TRANBKP",
+    "job:TRANIDX",
+    "job:TRANFILE",
+    "sch:scripts/run_posting.sh",
+    "sch:DAILY-TransactionBackup/TRANBKP"
+   ],
+   "rationale": "The hardest must-not-break item. It is high-high, so it is strangled: the new posting runs in shadow beside the legacy run and is compared, and it does not replace it until the diff is clean.",
+   "unblocks": "Nothing later depends on it being ported, but the account master and transaction master are settled for waves 5 to 7.",
+   "blast_radius": "high",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/jcl/POSTTRAN.jcl",
+     "line": 23
+    },
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 40
+    },
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 26
+    }
+   ]
+  },
+  {
+   "wave": 5,
+   "name": "Online sign-on, menus and inquiry",
+   "units": [
+    "COSGN00C",
+    "COMEN01C",
+    "COADM01C",
+    "COACTVWC",
+    "COTRN00C",
+    "COTRN01C",
+    "CORPT00C",
+    "CSUTLDTC",
+    "job:CBADMCDJ"
+   ],
+   "rationale": "The sign-on and menu programs form one strongly connected component and every screen returns to them, so they move first among the online units. The inquiry screens are read only.",
+   "unblocks": "The screen layer, the menu tables COMEN02Y and COADM02Y, the authentication redesign, and the online launch of the transaction report.",
+   "blast_radius": "medium",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 149
+    },
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 223
+    }
+   ]
+  },
+  {
+   "wave": 6,
+   "name": "Online maintenance and payment",
+   "units": [
+    "COACTUPC",
+    "COCRDLIC",
+    "COCRDSLC",
+    "COCRDUPC",
+    "COBIL00C",
+    "COTRN02C",
+    "COUSR00C",
+    "COUSR01C",
+    "COUSR02C",
+    "COUSR03C"
+   ],
+   "rationale": "These screens write the masters. Batch posting must already be settled so there is one writer model for the account and transaction masters.",
+   "unblocks": "Retirement of the CICS file close and open jobs, and one lock and id-generation scheme for all writers.",
+   "blast_radius": "high",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 212
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 925
+    }
+   ]
+  },
+  {
+   "wave": 7,
+   "name": "Month-end interest and statements",
+   "units": [
+    "CBACT04C",
+    "CBSTM03A",
+    "CBSTM03B",
+    "job:INTCALC",
+    "job:COMBTRAN",
+    "job:CREASTMT",
+    "job:TXT2PDF1",
+    "sch:MONTHLY-InterestCalculation/INTCALC",
+    "sch:MONTHLY-InterestCalculation/COMBTRAN",
+    "sch:scripts/run_interest_calc.sh",
+    "sch:scripts/run_full_batch.sh"
+   ],
+   "rationale": "The hardest code and the paths that only run at month end. They go last among the core waves and are strangled behind a facade.",
+   "unblocks": "Closes the batch estate. The full-batch script and the monthly Control-M folder can be retired.",
+   "blast_radius": "high",
+   "confidence": "medium",
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT04C.cbl",
+     "line": 464
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 300
+    },
+    {
+     "file": "app/jcl/INTCALC.jcl",
+     "line": 22
+    }
+   ]
+  },
+  {
+   "wave": 8,
+   "name": "Authorization (IMS, DB2, MQ) and transaction-type (DB2) modules",
+   "units": [
+    "COPAUA0C",
+    "COPAUS0C",
+    "COPAUS1C",
+    "COPAUS2C",
+    "CBPAUP0C",
+    "DBUNLDGS",
+    "PAUDBLOD",
+    "PAUDBUNL",
+    "COBTUPDT",
+    "COTRTLIC",
+    "COTRTUPC",
+    "COACCT01",
+    "CODATE01",
+    "job:CBPAUP0J",
+    "job:DBPAUTP0",
+    "job:LOADPADB",
+    "job:UNLDGSAM",
+    "job:UNLDPADB",
+    "job:CREADB2",
+    "job:MNTTRDB2",
+    "job:TRANEXTR",
+    "sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2",
+    "sch:WEEKLY-TransactionTypesDBRefresh/TRANEXTR"
+   ],
+   "rationale": "Optional modules on IMS, DB2 and MQ, which this plugin does not analyze. They stay last, and their sequence is a guess until an IMS and DB2 specialist reviews them.",
+   "unblocks": "Nothing in the core depends on them, except that COPAUA0C reads the account balance that wave 4 posts.",
+   "blast_radius": "medium",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl",
+     "line": 25
+    },
+    {
+     "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
+     "line": 30
+    }
+   ]
+  }
+ ],
+ "unassigned": [
+  {
+   "id": "CBTRN01C",
+   "reason": "No JCL runs it and its six DDs are unmapped. Ask the client. If it is live, it moves with wave 4."
+  },
+  {
+   "id": "COBSWAIT",
+   "reason": "Replaced by a scheduler dependency. Retire with WAITSTEP."
+  },
+  {
+   "id": "job:WAITSTEP",
+   "reason": "A 36 second sleep between jobs. Replace it with a scheduler dependency."
+  },
+  {
+   "id": "job:CLOSEFIL",
+   "reason": "Closes CICS files by console command. It stays on the legacy region until wave 6 ends, then it is retired."
+  },
+  {
+   "id": "job:OPENFIL",
+   "reason": "Reopens the CICS files. Same lifetime as CLOSEFIL."
+  },
+  {
+   "id": "job:CBLDBMS",
+   "reason": "Mainframe build job. The new toolchain replaces it."
+  },
+  {
+   "id": "job:CICCMP",
+   "reason": "Mainframe build job. The new toolchain replaces it."
+  },
+  {
+   "id": "job:CIDBCMP",
+   "reason": "Mainframe build job. The new toolchain replaces it."
+  },
+  {
+   "id": "job:CNJBATMP",
+   "reason": "Mainframe build job. The new toolchain replaces it."
+  },
+  {
+   "id": "job:IMSMQCMP",
+   "reason": "Mainframe build job. The new toolchain replaces it."
+  },
+  {
+   "id": "job:LISTFILS",
+   "reason": "Sample catalog listing. Not part of the business flow."
+  },
+  {
+   "id": "job:RACFCMDS",
+   "reason": "Security setup for the source platform. Redo it on the target, do not port it."
+  },
+  {
+   "id": "job:REPRTEST",
+   "reason": "Sample test job."
+  },
+  {
+   "id": "job:SORTTEST",
+   "reason": "Sample test job."
+  },
+  {
+   "id": "job:INTRDRJ1",
+   "reason": "Internal reader test scaffolding."
+  },
+  {
+   "id": "job:INTRDRJ2",
+   "reason": "Internal reader test scaffolding."
+  },
+  {
+   "id": "job:FTPJCLS",
+   "reason": "FTP test job with a clear-text password. Replace with managed file transfer."
+  },
+  {
+   "id": "proc:BUILDBAT",
+   "reason": "Build proc used only by the build jobs."
+  },
+  {
+   "id": "proc:BUILDBMS",
+   "reason": "Build proc used only by the build jobs."
+  },
+  {
+   "id": "proc:BUILDONL",
+   "reason": "Build proc used only by the build jobs."
+  },
+  {
+   "id": "proc:BLDCIDB2",
+   "reason": "Build proc used only by the build jobs."
+  },
+  {
+   "id": "sch:DAILY-TransactionBackup/CLOSEFIL",
+   "reason": "Scheduler entry for CLOSEFIL. Retires with the job it runs."
+  },
+  {
+   "id": "sch:DAILY-TransactionBackup/OPENFIL",
+   "reason": "Scheduler entry for OPENFIL. Retires with the job it runs."
+  },
+  {
+   "id": "sch:DAILY-TransactionBackup/WAITSTEP",
+   "reason": "Scheduler entry for WAITSTEP. Retires with the job it runs."
+  },
+  {
+   "id": "sch:MONTHLY-InterestCalculation/CLOSEFIL",
+   "reason": "Scheduler entry for CLOSEFIL. Retires with the job it runs."
+  },
+  {
+   "id": "sch:MONTHLY-InterestCalculation/OPENFIL",
+   "reason": "Scheduler entry for OPENFIL. Retires with the job it runs."
+  },
+  {
+   "id": "sch:MONTHLY-InterestCalculation/WAITSTEP",
+   "reason": "Scheduler entry for WAITSTEP. Retires with the job it runs."
+  },
+  {
+   "id": "sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL",
+   "reason": "Scheduler entry for CLOSEFIL. Retires with the job it runs."
+  },
+  {
+   "id": "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL",
+   "reason": "Scheduler entry for OPENFIL. Retires with the job it runs."
+  },
+  {
+   "id": "sch:WEEKLY-DisclosureGroupsRefresh/WAITSTEP",
+   "reason": "Scheduler entry for WAITSTEP. Retires with the job it runs."
+  }
+ ]
+}

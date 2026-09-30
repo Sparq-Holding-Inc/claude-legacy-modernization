@@ -1,0 +1,158 @@
+{
+ "telemetry": "none",
+ "unreachable": [
+  {
+   "id": "cpy:UNUSED1Y",
+   "reason": "No program includes it and a text search of the tree finds no other file that names it. Provisional, because telemetry is none, but a copybook that nothing includes cannot execute.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/cpy/UNUSED1Y.cpy",
+     "line": 1
+    }
+   ]
+  }
+ ],
+ "dormant": [],
+ "unknown": [
+  {
+   "id": "CBTRN01C",
+   "reason": "No JCL step and no scheduler entry runs it. All 28 computed calls in reachable code are bounded to online programs and none names it, but a bounded call does not prove absence and telemetry is none, so it stays here. Its header says it posts the daily file, and the code only looks records up.",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 5
+    },
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 23
+    }
+   ]
+  }
+ ],
+ "reachable_by_a_route_the_extractor_cannot_read": [
+  {
+   "id": "proc:TRANREPT",
+   "reason": "CORPT00C builds a job that runs PROC=TRANREPT and writes it to the JOBS queue for the internal reader. Do not delete it.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 94
+    },
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 517
+    }
+   ]
+  },
+  {
+   "id": "CBPAUP0C",
+   "reason": "Named in the PARM of a DFSRRC00 step in job CBPAUP0J, which CA-7 runs before POSTTRAN.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/CBPAUP0J.jcl",
+     "line": 25
+    },
+    {
+     "file": "app/scheduler/CardDemo.ca7",
+     "line": 43
+    }
+   ]
+  },
+  {
+   "id": "PAUDBLOD",
+   "reason": "Named in the PARM of a DFSRRC00 step in job LOADPADB.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/LOADPADB.JCL",
+     "line": 27
+    }
+   ]
+  },
+  {
+   "id": "PAUDBUNL",
+   "reason": "Named in the PARM of a DFSRRC00 step in job UNLDPADB.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDPADB.JCL",
+     "line": 39
+    }
+   ]
+  },
+  {
+   "id": "DBUNLDGS",
+   "reason": "Named in the PARM of a DFSRRC00 step in job UNLDGSAM.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/jcl/UNLDGSAM.JCL",
+     "line": 27
+    }
+   ]
+  },
+  {
+   "id": "COBTUPDT",
+   "reason": "Run by RUN PROGRAM(COBTUPDT) in job MNTTRDB2, which Control-M runs weekly.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/app-transaction-type-db2/jcl/MNTTRDB2.jcl",
+     "line": 30
+    },
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 27
+    }
+   ]
+  },
+  {
+   "id": "cpy:IMSFUNCS",
+   "reason": "Included by PAUDBLOD, PAUDBUNL and DBUNLDGS, which JCL runs.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
+     "line": 136
+    }
+   ]
+  },
+  {
+   "id": "cpy:PADFLPCB",
+   "reason": "Included by DBUNLDGS, which JCL runs.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
+     "line": 156
+    }
+   ]
+  },
+  {
+   "id": "cpy:PASFLPCB",
+   "reason": "Included by DBUNLDGS, which JCL runs.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
+     "line": 155
+    }
+   ]
+  },
+  {
+   "id": "cpy:PAUTBPCB",
+   "reason": "Included by PAUDBLOD, PAUDBUNL and DBUNLDGS, which JCL runs.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL",
+     "line": 161
+    }
+   ]
+  }
+ ]
+}
