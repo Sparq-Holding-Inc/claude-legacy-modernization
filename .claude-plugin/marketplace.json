@@ -1,0 +1,14 @@
+{
+  "name": "sparq",
+  "owner": {
+    "name": "Sparq",
+    "url": "https://teamsparq.com"
+  },
+  "plugins": [
+    {
+      "name": "legacy-modernization",
+      "source": "./",
+      "description": "Assess a legacy codebase for modernization: dependency cartography, risk-ranked migration waves, and a behavioral-equivalence test strategy."
+    }
+  ]
+}

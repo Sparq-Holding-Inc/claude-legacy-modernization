@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "legacy-modernization",
+  "displayName": "Legacy Modernization Assessor",
+  "version": "0.1.0",
+  "description": "Assess a legacy codebase (COBOL, RPG, Oracle ADF, .NET Framework, PL/SQL, monolithic Java) for modernization: dependency cartography, risk-ranked migration waves, and a behavioral-equivalence test strategy you can defend to an auditor.",
+  "author": {
+    "name": "Sparq",
+    "url": "https://teamsparq.com"
+  },
+  "homepage": "https://teamsparq.com",
+  "repository": "https://github.com/teamsparq/claude-legacy-modernization",
+  "license": "Apache-2.0",
+  "keywords": [
+    "modernization",
+    "legacy",
+    "cobol",
+    "rpg",
+    "migration",
+    "refactoring",
+    "mainframe",
+    "assessment"
+  ]
+}
