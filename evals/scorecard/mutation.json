@@ -12,7 +12,8 @@
     "17",
     "18",
     "20",
-    "22"
+    "22",
+    "25"
    ],
    "equivalent": false
   },
@@ -41,7 +42,8 @@
   {
    "mutation": "comment indicator ignored",
    "caught_by": [
-    "15"
+    "15",
+    "25"
    ],
    "equivalent": false
   },
@@ -163,6 +165,20 @@
    "mutation": "git dates off",
    "caught_by": [
     "12"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "byte order mark not stripped",
+   "caught_by": [
+    "25"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "unterminated EXEC dropped silently",
+   "caught_by": [
+    "25"
    ],
    "equivalent": false
   },

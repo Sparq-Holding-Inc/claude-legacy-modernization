@@ -152,7 +152,8 @@ def statements(text):
 def parse_file(root, rel):
     """Return a list of Unit (jobs and procs) found in a JCL or PROC file."""
     with open(os.path.join(root, rel), "rb") as fh:
-        text = fh.read().decode("latin-1")
+        raw = fh.read()
+    text = (raw[3:] if raw.startswith(b"\xef\xbb\xbf") else raw).decode("latin-1")
     ext = os.path.splitext(rel)[1].lower()
     stem = os.path.splitext(os.path.basename(rel))[0].upper()
     units, cur, cur_step = [], None, None

@@ -1,0 +1,28 @@
+{
+  "case": "25-unterminated-exec",
+  "status": "hand-written after a hostile input test found a silent drop",
+  "description": "A byte order mark then a comment line. An EXEC CICS with no END-EXEC. The extractor must not treat the comment as code, and must report the unterminated statement as not parsed with its line, never drop it silently.",
+  "edges": [
+    {
+      "src": "PROGE",
+      "dst": "PROGF",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGE.cbl:5"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "PROGE",
+      "unit_type": "batch",
+      "entry_point": false
+    }
+  ],
+  "unparsed": [
+    "app/cbl/PROGE.cbl: line 6"
+  ]
+}

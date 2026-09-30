@@ -63,9 +63,7 @@ def case(name, ok, detail=""):
 
 # 1 unrelated session: no marker, even with a bad citation lying around
 p = project()
-write(p, "02-coupling.md", BAD)
-os.remove(os.path.join(p, "modernization-assessment", "02-coupling.md")) if False else None
-os.remove(os.path.join(p, "modernization-assessment", ".in-progress")) if exists_marker(p) else None
+write(p, "02-coupling.md", BAD)          # a bad citation is lying around, but no run is in progress
 rc, out, err = run_hook(p)
 case("no marker: hook is silent and does nothing", rc == 0 and out == "" and err == "")
 

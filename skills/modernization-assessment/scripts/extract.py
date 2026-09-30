@@ -96,8 +96,7 @@ def loc_plain(text, comment=()):
 
 
 def read(root, rel):
-    with open(os.path.join(root, rel), "rb") as fh:
-        return fh.read().decode("latin-1")
+    return cobol.read_text(os.path.join(root, rel))
 
 
 def _merge_modes(modes):
@@ -180,6 +179,8 @@ def build(root, as_of, dormant_years=5, use_git=True):
                      (res.program_id, facts[res.program_id].path))
             continue
         facts[res.program_id] = res
+        for pf, pl, why in res.problems:
+            unparsed("cobol", pf, "line %d: %s" % (pl, why))
         text = read(root, rel)
         g.node(res.program_id, "batch", "cobol", rel, cloc.get(rel, cobol.count_loc(text)), dates.get(rel))
     prog_set = set(facts)

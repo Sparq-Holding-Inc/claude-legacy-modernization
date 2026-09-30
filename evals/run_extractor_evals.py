@@ -133,6 +133,9 @@ def compare_fixture(truth, graph):
         for b in ("unreachable", "dormant", "unknown"):
             if sorted(truth["dead_code"][b]) != sorted(got[b]):
                 problems.append("dead code %s: truth %s got %s" % (b, sorted(truth["dead_code"][b]), sorted(got[b])))
+    for want in truth.get("unparsed", []):
+        if not any(want in "%s: %s" % (u["file"], u["reason"]) for u in graph["unparsed"]):
+            problems.append("expected an unparsed entry containing %r" % want)
     for bad in truth.get("must_not_unreachable", []):
         if bad in graph["analysis"]["dead_code_candidates"]["unreachable"]:
             problems.append("%s was called unreachable" % bad)

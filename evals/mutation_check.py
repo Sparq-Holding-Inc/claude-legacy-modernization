@@ -56,6 +56,8 @@ MUTATIONS = [
     ("CSD entry points off", "extract", '        n["entry_point"] = True\n        n.setdefault',
      '        n.setdefault'),
     ("git dates off", "extract", "dates = git_dates(root) if use_git else {}", "dates = {}"),
+    ("byte order mark not stripped", "cobol", 'if raw.startswith(b"\\xef\\xbb\\xbf"):', 'if False:'),
+    ("unterminated EXEC dropped silently", "cobol", "        if m.start() not in closed:", "        if False:"),
     ("subscripted names resolved like plain names", "cobol", 'if subscripted:\n            return "dynamic", []',
      'if False:\n            return "dynamic", []'),
     ("EXEC SQL text visible to CALL scan", "cobol", 'nonexec = "".join(nonexec)', 'nonexec = masked'),

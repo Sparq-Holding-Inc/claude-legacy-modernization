@@ -97,7 +97,10 @@ SQL_INCLUDE = re.compile(_NB + r"INCLUDE\s+(" + NAME + r")", I)
 
 def read_text(path):
     with open(path, "rb") as fh:
-        return fh.read().decode("latin-1")
+        raw = fh.read()
+    if raw.startswith(b"\xef\xbb\xbf"):      # a UTF-8 byte order mark would shift column 7 on line 1
+        raw = raw[3:]
+    return raw.decode("latin-1")
 
 
 def is_free_format(text):
@@ -317,6 +320,7 @@ class Facts:
         self.moves_from_name = []  # (source NAME, receiver NAME, (file,line))
         self.receivers = set()   # names that can receive a non literal value
         self.used_copybooks = []
+        self.problems = []       # things seen but not parsed: (file, line, reason)
         self.local_records = set()
         self.cpy_records = {}
 
@@ -505,6 +509,13 @@ def parse_program(root, rel, lib):
         lit, var, sub = _slice(orig, m, 1, 2, 3, 4)
         f.calls.append({"verb": "CALL", "literal": lit.strip().upper() if lit is not None else None,
                         "var": var, "subscripted": sub, "at": at(m.start())})
+
+    # ---- an EXEC with no END-EXEC cannot be parsed. Say so, never drop it silently.
+    closed = [m.start() for m in EXEC_BLOCK.finditer(masked)]
+    for m in re.finditer(_NB + r"EXEC\s+(CICS|SQL|SQLIMS|DLI)\b", masked, I):
+        if m.start() not in closed:
+            where = at(m.start())
+            f.problems.append((where.file, where.line, "EXEC %s has no END-EXEC, statement not parsed" % m.group(1).upper()))
 
     # ---- EXEC blocks
     for m in EXEC_BLOCK.finditer(masked):
