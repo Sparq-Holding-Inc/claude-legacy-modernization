@@ -1,0 +1,22 @@
+{
+  "telemetry": "none",
+  "unreachable": [
+    {
+      "id": "PGMDEAD",
+      "reason": "No JCL step runs it, no program in the tree calls it, and the tree has no computed calls. It calls PGMLIVE, which is live through PGMMAIN, so deleting it leaves PGMLIVE working. Provisional: telemetry is none, no scheduler was parsed, and it is a batch main program that a job outside the tree could start.",
+      "confidence": "medium",
+      "evidence": [
+        {"file": "app/cbl/PGMDEAD.cbl", "line": 2},
+        {"file": "app/cbl/PGMDEAD.cbl", "line": 4}
+      ]
+    },
+    {
+      "id": "cpy:UNUSED",
+      "reason": "No program in the tree has a COPY of it. It holds one 10 byte field. Provisional until the client confirms no out-of-tree program includes it.",
+      "confidence": "high",
+      "evidence": [{"file": "app/cpy/UNUSED.cpy", "line": 1}]
+    }
+  ],
+  "dormant": [],
+  "unknown": []
+}

@@ -1,6 +1,6 @@
 __pycache__/
 *.pyc
 .DS_Store
-modernization-assessment/
+/modernization-assessment/
 # Anthropic's own eval runner writes here. Ours writes to evals/scorecard/ and evals/runs/.
 evals/results/

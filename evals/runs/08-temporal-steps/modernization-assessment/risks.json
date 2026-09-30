@@ -1,0 +1,114 @@
+{
+  "units": [
+    {
+      "id": "PGMA",
+      "port_difficulty": {
+        "score": 1,
+        "why": "Four lines, GOBACK only. No logic, no files, no arithmetic."
+      },
+      "blast_radius": {
+        "score": 2,
+        "why": "Empty body and no shared data, so nothing it could silently corrupt in this tree. Its place in the nightly cycle is inference."
+      },
+      "quadrant": "low-low",
+      "wave": 1,
+      "driving_fact": "Runs as STEP1, the first step of SEQJOB, and is ordered before PGMB's step.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/cbl/PGMA.cbl",
+          "line": 4
+        },
+        {
+          "file": "app/jcl/SEQJOB.jcl",
+          "line": 2
+        }
+      ]
+    },
+    {
+      "id": "PGMB",
+      "port_difficulty": {
+        "score": 1,
+        "why": "Four lines, GOBACK only. No logic, no files, no arithmetic."
+      },
+      "blast_radius": {
+        "score": 2,
+        "why": "Empty body and no shared data. Only its position between PGMA and PGMC matters, and that is a property of the job."
+      },
+      "quadrant": "low-low",
+      "wave": 1,
+      "driving_fact": "Runs as STEP2, after PGMA and before PGMC, by JCL step order alone. No dataset ties them.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/cbl/PGMB.cbl",
+          "line": 4
+        },
+        {
+          "file": "app/jcl/SEQJOB.jcl",
+          "line": 3
+        }
+      ]
+    },
+    {
+      "id": "PGMC",
+      "port_difficulty": {
+        "score": 1,
+        "why": "Four lines, GOBACK only. No logic, no files, no arithmetic."
+      },
+      "blast_radius": {
+        "score": 2,
+        "why": "Empty body and no shared data. It runs after PGMB by step order only."
+      },
+      "quadrant": "low-low",
+      "wave": 1,
+      "driving_fact": "Runs as STEP3, after PGMB, and is followed by a second step that reuses the name STEP2.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/cbl/PGMC.cbl",
+          "line": 4
+        },
+        {
+          "file": "app/jcl/SEQJOB.jcl",
+          "line": 4
+        }
+      ]
+    },
+    {
+      "id": "job:SEQJOB",
+      "port_difficulty": {
+        "score": 2,
+        "why": "Five lines and no DDs, but the step order is the only behavior in the tree and it must be carried into the target scheduler. Step name STEP2 is used twice."
+      },
+      "blast_radius": {
+        "score": 3,
+        "why": "The only job and the only entry point, so it is very likely the nightly batch cycle the client named. A reordered or dropped step would be silent. No scheduler file confirms the membership."
+      },
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "Four EXEC steps in fixed order, with STEP2 declared twice (lines 3 and 5).",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "app/jcl/SEQJOB.jcl",
+          "line": 1
+        },
+        {
+          "file": "app/jcl/SEQJOB.jcl",
+          "line": 3
+        },
+        {
+          "file": "app/jcl/SEQJOB.jcl",
+          "line": 5
+        }
+      ]
+    }
+  ],
+  "do_not_port": [
+    {
+      "id": "step:SEQJOB.STEP2#2",
+      "reason": "Provisional. Runs IEFBR14, a system null program, with no DD statements, and reuses the name STEP2. It appears to do nothing. Confirm with the client that no restart or scheduler rule names it, then drop it."
+    }
+  ]
+}

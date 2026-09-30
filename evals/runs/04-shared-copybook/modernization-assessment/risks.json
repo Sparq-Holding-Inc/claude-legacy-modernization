@@ -1,0 +1,55 @@
+{
+  "units": [
+    {
+      "id": "PROGA",
+      "port_difficulty": {
+        "score": 1,
+        "why": "Eight lines: one MOVE of the literal 1 to SH-CUST-ID and GOBACK. No I/O, no arithmetic, no branches."
+      },
+      "blast_radius": {
+        "score": 2,
+        "why": "Touches no dataset and nothing in the tree calls it, but the tree holds no JCL or scheduler, so its place in the nightly batch cycle is unverified."
+      },
+      "quadrant": "low-low",
+      "wave": 1,
+      "driving_fact": "Includes SHARED01, the same layout copybook PROGB includes, so both programs change together whenever SH-CUST-ID or the COMP-3 SH-BALANCE field changes.",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "app/cbl/PROGA.cbl",
+          "line": 5
+        },
+        {
+          "file": "app/cbl/PROGA.cbl",
+          "line": 7
+        }
+      ]
+    },
+    {
+      "id": "PROGB",
+      "port_difficulty": {
+        "score": 1,
+        "why": "Eight lines: one MOVE of the literal 2 to SH-CUST-ID and GOBACK. No I/O, no arithmetic, no branches."
+      },
+      "blast_radius": {
+        "score": 2,
+        "why": "Touches no dataset and nothing in the tree calls it, but the tree holds no JCL or scheduler, so its place in the nightly batch cycle is unverified."
+      },
+      "quadrant": "low-low",
+      "wave": 1,
+      "driving_fact": "Includes SHARED01, the same layout copybook PROGA includes, so both programs change together whenever SH-CUST-ID or the COMP-3 SH-BALANCE field changes.",
+      "confidence": "low",
+      "evidence": [
+        {
+          "file": "app/cbl/PROGB.cbl",
+          "line": 5
+        },
+        {
+          "file": "app/cbl/PROGB.cbl",
+          "line": 7
+        }
+      ]
+    }
+  ],
+  "do_not_port": []
+}

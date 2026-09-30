@@ -1,0 +1,18 @@
+{
+  "target_state": "refactor",
+  "waves": [
+    {
+      "wave": 1,
+      "name": "SEQJOB step chain",
+      "units": ["job:SEQJOB", "PGMA", "PGMB", "PGMC"],
+      "rationale": "One job and three empty programs. The only behavior in the tree is the order the steps run in, and step order is temporal coupling that no wave cut can honor. It is deployable behind one scheduler entry, roll-backable by switching that entry back, and testable at the job boundary by comparing step order and return codes.",
+      "unblocks": "The port toolchain, the comparison harness and the scheduler translation for anything larger. If SEQJOB is the nightly batch cycle, it also moves the cycle the client named.",
+      "blast_radius": "medium",
+      "confidence": "low",
+      "evidence": [{"file": "app/jcl/SEQJOB.jcl", "line": 2}, {"file": "app/jcl/SEQJOB.jcl", "line": 3}, {"file": "app/jcl/SEQJOB.jcl", "line": 4}, {"file": "app/jcl/SEQJOB.jcl", "line": 5}]
+    }
+  ],
+  "unassigned": [
+    {"id": "step:SEQJOB.STEP2#2", "reason": "Runs IEFBR14 with no DDs and reuses the name STEP2. Not a unit. It moves with SEQJOB, or is dropped once the client confirms nothing names it."}
+  ]
+}

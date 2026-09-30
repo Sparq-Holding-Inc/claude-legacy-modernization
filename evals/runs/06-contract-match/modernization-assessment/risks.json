@@ -1,0 +1,101 @@
+{
+  "units": [
+    {
+      "id": "PGMR",
+      "port_difficulty": {
+        "score": 2,
+        "why": "16 lines: open, one READ, close. No arithmetic on the record; it only inherits the COMP-3 layout from LAYOUTX."
+      },
+      "blast_radius": {
+        "score": 2,
+        "why": "Consumer only. It writes nothing, and a missing or misformatted dataset fails loudly at open."
+      },
+      "quadrant": "low-low",
+      "wave": 1,
+      "driving_fact": "Reads SPARQ.TEST.MASTER through the same LAYOUTX copybook the writer uses, so the contract edge into it is high confidence.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/cbl/PGMR.cbl",
+          "line": 11
+        },
+        {
+          "file": "app/cbl/PGMR.cbl",
+          "line": 14
+        }
+      ]
+    },
+    {
+      "id": "PGMW",
+      "port_difficulty": {
+        "score": 2,
+        "why": "16 lines with no computation. The work is reproducing a 15 byte record with a packed decimal field byte for byte."
+      },
+      "blast_radius": {
+        "score": 3,
+        "why": "Only producer of SPARQ.TEST.MASTER. A byte level difference is silent to the reader, and it likely sits on the nightly cycle (inference)."
+      },
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "Writes LAYOUT-REC with no MOVE or INITIALIZE, so the bytes written depend on storage defaults that a port must decide on purpose.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/cbl/PGMW.cbl",
+          "line": 11
+        },
+        {
+          "file": "app/cbl/PGMW.cbl",
+          "line": 14
+        }
+      ]
+    },
+    {
+      "id": "job:READJOB",
+      "port_difficulty": {
+        "score": 1,
+        "why": "One step running PGMR with one DD and no COND, IF or PROC."
+      },
+      "blast_radius": {
+        "score": 2,
+        "why": "Reads with DISP=SHR and writes only SYSOUT. Failure is loud, and order against the writer is not enforced in the tree."
+      },
+      "quadrant": "low-low",
+      "wave": 1,
+      "driving_fact": "Its INFILE DD names SPARQ.TEST.MASTER with no DCB, so the physical record format comes from the catalog, not from this job.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/jcl/READJOB.jcl",
+          "line": 3
+        }
+      ]
+    },
+    {
+      "id": "job:WRITEJOB",
+      "port_difficulty": {
+        "score": 2,
+        "why": "One step, but the DD carries the physical format (FB, LRECL=80) and NEW,CATLG,DELETE allocation that a replacement must reproduce."
+      },
+      "blast_radius": {
+        "score": 3,
+        "why": "Creates the dataset the reader consumes. LRECL=80 against a 15 byte layout is a silent format question, and NEW fails loudly on a rerun."
+      },
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "The DD declares LRECL=80 while LAYOUTX defines a 15 byte record, so the physical contract lives in JCL and not in the copybook.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/jcl/WRITEJOB.jcl",
+          "line": 3
+        },
+        {
+          "file": "app/jcl/WRITEJOB.jcl",
+          "line": 4
+        }
+      ]
+    }
+  ],
+  "do_not_port": []
+}

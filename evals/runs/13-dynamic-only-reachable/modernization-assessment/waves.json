@@ -1,0 +1,19 @@
+{
+  "target_state": "refactor",
+  "waves": [
+    {
+      "wave": 1,
+      "name": "Main job and its dispatcher",
+      "units": ["job:MAINJOB", "PGMMAIN", "HIDDEN01"],
+      "rationale": "The tree is one job, one step and two programs, so it is one wave. HIDDEN01 rides with PGMMAIN because the computed call at line 9 may name it, and a port that drops it could break a call nobody can see. This is not a low-risk first wave: PGMMAIN is high-high, so the wave is ported behind a facade and only after the target set is known.",
+      "unblocks": "Running the main job off the legacy platform, and a bounded list of the programs PGMMAIN can dispatch to, which the client does not have today.",
+      "blast_radius": "high",
+      "confidence": "low",
+      "evidence": [
+        {"file": "app/jcl/MAINJOB.jcl", "line": 2},
+        {"file": "app/cbl/PGMMAIN.cbl", "line": 9}
+      ]
+    }
+  ],
+  "unassigned": []
+}

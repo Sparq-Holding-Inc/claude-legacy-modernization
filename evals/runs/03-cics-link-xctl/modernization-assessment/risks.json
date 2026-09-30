@@ -1,0 +1,62 @@
+{
+  "units": [
+    {
+      "id": "PROGA",
+      "port_difficulty": {"score": 3, "why": "Dynamic dispatch with no clean target equivalent: LINK to a program name taken from the caller's COMMAREA, plus one-way XCTL and no RESP handling on any command."},
+      "blast_radius": {"score": 3, "why": "Front door of the only call chain in the tree, and the computed LINK can reach any program the caller names, so a wrong port mis-routes silently for callers the tree does not show."},
+      "quadrant": "high-high",
+      "wave": 1,
+      "driving_fact": "EXEC CICS LINK PROGRAM(WS-ANY-PGM) at line 16 takes its target from DFHCOMMAREA (MOVE at line 15), so the set of programs it can reach cannot be bounded from the source.",
+      "confidence": "low",
+      "evidence": [
+        {"file": "app/cbl/PROGA.cbl", "line": 15},
+        {"file": "app/cbl/PROGA.cbl", "line": 16},
+        {"file": "app/cbl/PROGA.cbl", "line": 20}
+      ]
+    },
+    {
+      "id": "PROGB",
+      "port_difficulty": {"score": 1, "why": "Four lines: one EXEC CICS RETURN and nothing else, no data, no arithmetic."},
+      "blast_radius": {"score": 2, "why": "PROGA LINKs to it unconditionally as its first statement, so a broken port abends the chain loudly, but it holds no data and writes nothing."},
+      "quadrant": "low-low",
+      "wave": 1,
+      "driving_fact": "Called by PROGA at line 12 before any other statement; the source in the tree is a bare RETURN, so it may be a stub.",
+      "confidence": "medium",
+      "evidence": [
+        {"file": "app/cbl/PROGB.cbl", "line": 4},
+        {"file": "app/cbl/PROGA.cbl", "line": 12}
+      ]
+    },
+    {
+      "id": "PROGC",
+      "port_difficulty": {"score": 1, "why": "Four lines: one EXEC CICS RETURN, no data, no arithmetic."},
+      "blast_radius": {"score": 2, "why": "Target of the XCTL at line 20, so it ends every pass through PROGA; a wrong port fails loudly and it writes nothing."},
+      "quadrant": "low-low",
+      "wave": 1,
+      "driving_fact": "WS-NEXT-PGM is set only by MOVE 'PROGC' at line 19, so the XCTL at line 20 always transfers here.",
+      "confidence": "medium",
+      "inference": true,
+      "evidence": [
+        {"file": "app/cbl/PROGC.cbl", "line": 4},
+        {"file": "app/cbl/PROGA.cbl", "line": 19},
+        {"file": "app/cbl/PROGA.cbl", "line": 20}
+      ]
+    },
+    {
+      "id": "PROGD",
+      "port_difficulty": {"score": 1, "why": "Four lines: one EXEC CICS RETURN, no data, no arithmetic."},
+      "blast_radius": {"score": 1, "why": "Named only by the XCTL at line 23, which follows an XCTL that does not return, so it looks unreachable by that path; it writes nothing."},
+      "quadrant": "low-low",
+      "wave": 1,
+      "driving_fact": "The only static reference is the XCTL at line 23, after the unconditional XCTL at line 20. The computed LINK at line 16 could still target it.",
+      "confidence": "low",
+      "inference": true,
+      "evidence": [
+        {"file": "app/cbl/PROGD.cbl", "line": 4},
+        {"file": "app/cbl/PROGA.cbl", "line": 20},
+        {"file": "app/cbl/PROGA.cbl", "line": 23}
+      ]
+    }
+  ],
+  "do_not_port": []
+}

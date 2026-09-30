@@ -1,0 +1,20 @@
+{
+  "target_state": "refactor",
+  "waves": [
+    {
+      "wave": 1,
+      "name": "Shared customer-area pair",
+      "units": ["PROGA", "PROGB"],
+      "rationale": "The whole tree is two 8-line programs that both COPY SHARED01. A layout change hits both, so they move as one unit. Nothing else in the tree is coupled to them, so a second wave would be invented.",
+      "unblocks": "A single target-language definition of SHARED-AREA, including the packed decimal SH-BALANCE, for any other program outside this tree that includes SHARED01.",
+      "blast_radius": "low",
+      "confidence": "low",
+      "evidence": [
+        {"file": "app/cbl/PROGA.cbl", "line": 5},
+        {"file": "app/cbl/PROGB.cbl", "line": 5},
+        {"file": "app/cpy/SHARED01.cpy", "line": 1}
+      ]
+    }
+  ],
+  "unassigned": []
+}

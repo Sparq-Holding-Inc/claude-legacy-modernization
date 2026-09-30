@@ -1,0 +1,23 @@
+{
+  "target_state": "refactor",
+  "waves": [
+    {
+      "wave": 1,
+      "name": "Nightly chain JOBA to JOBB",
+      "units": ["job:JOBA", "job:JOBB", "sch:NIGHTLY/JOBA", "sch:NIGHTLY/JOBB"],
+      "rationale": "Two jobs whose only coupling is a Control-M condition. Splitting them would put a scheduler condition across a wave boundary, so they move as one deployable unit. Everything in the tree is one nightly cycle.",
+      "unblocks": "The nightly batch cycle with its ordering proven and a shadow-run harness that any larger tree can reuse. Nothing else in this tree depends on it.",
+      "blast_radius": "medium",
+      "confidence": "medium",
+      "evidence": [
+        {"file": "app/scheduler/nightly.xml", "line": 4},
+        {"file": "app/scheduler/nightly.xml", "line": 6},
+        {"file": "app/scheduler/nightly.xml", "line": 8},
+        {"file": "app/scheduler/nightly.xml", "line": 9},
+        {"file": "app/jcl/JOBA.jcl", "line": 2},
+        {"file": "app/jcl/JOBB.jcl", "line": 2}
+      ]
+    }
+  ],
+  "unassigned": []
+}

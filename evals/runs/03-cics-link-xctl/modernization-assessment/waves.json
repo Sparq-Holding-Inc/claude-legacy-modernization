@@ -1,0 +1,21 @@
+{
+  "target_state": "refactor",
+  "waves": [
+    {
+      "wave": 1,
+      "name": "CICS routing chain (PROGA and its callees)",
+      "units": ["PROGB", "PROGC", "PROGD", "PROGA"],
+      "rationale": "Four programs and one call chain, with no JCL, datasets, copybooks or scheduler in the tree. PROGA is the only program that calls anything, and its computed LINK can reach any of the others, so no boundary inside the tree can be proven safe. It is one wave. Inside the wave, port the leaf callees first, then PROGA last, behind a routing facade, because PROGA scores high-high.",
+      "unblocks": "Proves the toolchain and the test harness on the CICS LINK and XCTL dispatch pattern. It does not unblock the nightly batch cycle, which has no artifact in this tree.",
+      "blast_radius": "medium",
+      "confidence": "low",
+      "evidence": [
+        {"file": "app/cbl/PROGA.cbl", "line": 12},
+        {"file": "app/cbl/PROGA.cbl", "line": 16},
+        {"file": "app/cbl/PROGA.cbl", "line": 20},
+        {"file": "app/cbl/PROGA.cbl", "line": 23}
+      ]
+    }
+  ],
+  "unassigned": []
+}

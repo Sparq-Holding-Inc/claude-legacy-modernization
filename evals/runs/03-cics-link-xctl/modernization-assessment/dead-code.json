@@ -1,0 +1,40 @@
+{
+  "telemetry": "none",
+  "unreachable": [],
+  "dormant": [],
+  "unknown": [
+    {
+      "id": "PROGA",
+      "reason": "No entry point in the tree: there is no CSD, JCL or scheduler to name a transaction that starts it. It has no static caller, so it is probably a transaction entry. Provisional, no telemetry.",
+      "confidence": "low",
+      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 1}]
+    },
+    {
+      "id": "PROGB",
+      "reason": "No entry point in the tree. PROGA LINKs to it unconditionally at its first statement, so it runs whenever PROGA runs. Likely live, but liveness of PROGA is not shown. Provisional, no telemetry.",
+      "confidence": "medium",
+      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 12}]
+    },
+    {
+      "id": "PROGC",
+      "reason": "No entry point in the tree. PROGA reaches it through the XCTL at line 20, and WS-NEXT-PGM is set only at line 19, so it runs whenever PROGA gets that far. Likely live. Provisional, no telemetry.",
+      "confidence": "medium",
+      "inference": true,
+      "evidence": [
+        {"file": "app/cbl/PROGA.cbl", "line": 19},
+        {"file": "app/cbl/PROGA.cbl", "line": 20}
+      ]
+    },
+    {
+      "id": "PROGD",
+      "reason": "Named only by the XCTL at line 23, which follows an unconditional XCTL at line 20 that does not return, so that path looks unreachable. The computed LINK at line 16 could still target it, and a CSD outside the tree could name it as a transaction program. Keep as unknown, instrument, do not delete. Provisional, no telemetry.",
+      "confidence": "low",
+      "inference": true,
+      "evidence": [
+        {"file": "app/cbl/PROGA.cbl", "line": 16},
+        {"file": "app/cbl/PROGA.cbl", "line": 20},
+        {"file": "app/cbl/PROGA.cbl", "line": 23}
+      ]
+    }
+  ]
+}

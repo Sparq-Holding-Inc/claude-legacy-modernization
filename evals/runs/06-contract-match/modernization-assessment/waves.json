@@ -1,0 +1,21 @@
+{
+  "target_state": "refactor",
+  "waves": [
+    {
+      "wave": 1,
+      "name": "Master file writer and reader pair",
+      "units": ["PGMR", "PGMW", "job:READJOB", "job:WRITEJOB"],
+      "rationale": "The whole tree is two single step jobs and two programs coupled only through SPARQ.TEST.MASTER and the LAYOUTX copybook. There is no call, no cycle and no second cluster to cut. Inside the wave, port the reader first (low-low), prove the harness on it, then port the writer (low-high).",
+      "unblocks": "A tested byte level definition of the SPARQ.TEST.MASTER record and the equivalence harness that any further nightly-cycle jobs outside this tree would reuse.",
+      "blast_radius": "medium",
+      "confidence": "medium",
+      "evidence": [
+        {"file": "app/cbl/PGMW.cbl", "line": 11},
+        {"file": "app/cbl/PGMR.cbl", "line": 11},
+        {"file": "app/jcl/WRITEJOB.jcl", "line": 3},
+        {"file": "app/jcl/READJOB.jcl", "line": 3}
+      ]
+    }
+  ],
+  "unassigned": []
+}

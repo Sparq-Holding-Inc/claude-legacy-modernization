@@ -1,0 +1,25 @@
+{
+  "units": [
+    {
+      "id": "PROGA",
+      "port_difficulty": {"score": 1, "why": "Seven lines: one DISPLAY, one static CALL, STOP RUN. No files, no arithmetic, no REDEFINES, no CICS."},
+      "blast_radius": {"score": 2, "why": "Touches no dataset and has no callers in the tree. Scored low on evidence only: nothing in the tree ties it to the nightly batch cycle, so the true blast radius is unknown."},
+      "quadrant": "low-low",
+      "wave": 1,
+      "driving_fact": "Unconditionally calls PROGB after printing a message, and no scheduler or JCL in the tree starts it.",
+      "confidence": "low",
+      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 6}]
+    },
+    {
+      "id": "PROGB",
+      "port_difficulty": {"score": 1, "why": "Four lines, a bare GOBACK. No LINKAGE SECTION, no parameters, no logic."},
+      "blast_radius": {"score": 2, "why": "One caller (PROGA), no datasets, no side effects visible in this source. The source may not match the load module that runs in production."},
+      "quadrant": "low-low",
+      "wave": 1,
+      "driving_fact": "Has exactly one caller, PROGA, through a static literal CALL, and does nothing.",
+      "confidence": "medium",
+      "evidence": [{"file": "app/cbl/PROGB.cbl", "line": 4}]
+    }
+  ],
+  "do_not_port": []
+}

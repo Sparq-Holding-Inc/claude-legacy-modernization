@@ -1,0 +1,101 @@
+{
+  "units": [
+    {
+      "id": "job:JOBA",
+      "port_difficulty": {
+        "score": 1,
+        "why": "The only step runs IEFBR14, a utility that does nothing, so the tree holds no logic to port."
+      },
+      "blast_radius": {
+        "score": 3,
+        "why": "It is the head of the nightly chain, so if it fails or is skipped JOBB never gets its condition."
+      },
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "JOBA is a two line job whose only step is EXEC PGM=IEFBR14 with no DD statements, so its real behavior cannot be seen in this tree.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/jcl/JOBA.jcl",
+          "line": 2
+        }
+      ]
+    },
+    {
+      "id": "job:JOBB",
+      "port_difficulty": {
+        "score": 1,
+        "why": "The only step runs IEFBR14, a utility that does nothing, so the tree holds no logic to port."
+      },
+      "blast_radius": {
+        "score": 3,
+        "why": "It runs after JOBA on the nightly path, and nothing in the tree shows what consumes JOBB-DONE."
+      },
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "JOBB is a two line job whose only step is EXEC PGM=IEFBR14 with no DD statements, so the ordering is enforced entirely outside the JCL.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/jcl/JOBB.jcl",
+          "line": 2
+        }
+      ]
+    },
+    {
+      "id": "sch:NIGHTLY/JOBA",
+      "port_difficulty": {
+        "score": 2,
+        "why": "One external input condition and one output condition, but the target scheduler must reproduce condition semantics and the ODAT date scoping."
+      },
+      "blast_radius": {
+        "score": 4,
+        "why": "If the EXTERNAL-FEED gate is lost JOBA can run on a missing feed and nothing abends, so the failure is silent."
+      },
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "JOBA waits on the condition EXTERNAL-FEED, which no job in the tree produces, then posts JOBA-DONE.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/scheduler/nightly.xml",
+          "line": 5
+        },
+        {
+          "file": "app/scheduler/nightly.xml",
+          "line": 6
+        }
+      ]
+    },
+    {
+      "id": "sch:NIGHTLY/JOBB",
+      "port_difficulty": {
+        "score": 2,
+        "why": "Three conditions, one of them a delete, that a target scheduler must reproduce exactly."
+      },
+      "blast_radius": {
+        "score": 4,
+        "why": "If the delete of JOBA-DONE is not ported, JOBB can rerun on a stale condition without JOBA rerunning, and no job abends."
+      },
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "JOBB requires JOBA-DONE, then deletes it (SIGN minus) and posts JOBB-DONE, so each JOBB run consumes one JOBA run.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/scheduler/nightly.xml",
+          "line": 9
+        },
+        {
+          "file": "app/scheduler/nightly.xml",
+          "line": 10
+        },
+        {
+          "file": "app/scheduler/nightly.xml",
+          "line": 11
+        }
+      ]
+    }
+  ],
+  "do_not_port": []
+}

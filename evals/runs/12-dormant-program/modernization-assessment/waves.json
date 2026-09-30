@@ -1,0 +1,20 @@
+{
+  "target_state": "refactor",
+  "waves": [
+    {
+      "wave": 1,
+      "name": "MAINJOB and its three programs",
+      "units": ["job:MAINJOB", "PGMMAIN", "OLDPGM", "NEWPGM"],
+      "rationale": "The whole system is one job with one step that runs one program, which calls two empty subprograms. Splitting it gives waves that deliver nothing a stakeholder can name and have no testable boundary of their own.",
+      "unblocks": "Proves the toolchain and the test harness on a system with no data coupling. It also turns the OLDPGM dormancy question into an answered one, because wave 1 instruments it.",
+      "blast_radius": "medium",
+      "confidence": "medium",
+      "evidence": [
+        {"file": "app/jcl/MAINJOB.jcl", "line": 2},
+        {"file": "app/cbl/PGMMAIN.cbl", "line": 4},
+        {"file": "app/cbl/PGMMAIN.cbl", "line": 5}
+      ]
+    }
+  ],
+  "unassigned": []
+}

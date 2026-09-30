@@ -1,0 +1,25 @@
+{
+  "units": [
+    {
+      "id": "PROGR",
+      "port_difficulty": {"score": 1, "why": "Eleven lines: one EXEC CICS READ INTO the ACCTREC copybook record, then RETURN. No computation, no branching, no arithmetic."},
+      "blast_radius": {"score": 2, "why": "Read only against ACCTDAT, so it cannot corrupt the file. A failed READ with no RESP handling abends loudly. Any consumer outside the tree is unseen."},
+      "quadrant": "low-low",
+      "wave": 1,
+      "driving_fact": "Reads the ACCTDAT KSDS that PROGW writes, through the same ACCTREC layout copybook (contract edge, high confidence).",
+      "confidence": "medium",
+      "evidence": [{"file": "app/cbl/PROGR.cbl", "line": 7}]
+    },
+    {
+      "id": "PROGW",
+      "port_difficulty": {"score": 2, "why": "Eleven lines and no arithmetic, but it writes a COMP-3 balance (S9(9)V99) into a fixed layout, so the port must encode packed decimal byte for byte, including the sign nibble."},
+      "blast_radius": {"score": 4, "why": "Only writer of the ACCTDAT account file in the tree. A wrong record or a wrong packed sign would be silent and would reach every reader, including the nightly batch cycle, which is not in the tree. The CSD points at a TEST dataset, so real exposure is unconfirmed."},
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "Writes the ACCTDAT KSDS with a money field in COMP-3. The nightly batch cycle, the stated must-not-break item, has no artifact in the tree, so its dependence on this record layout cannot be checked.",
+      "confidence": "low",
+      "evidence": [{"file": "app/cbl/PROGW.cbl", "line": 7}, {"file": "app/cpy/ACCTREC.cpy", "line": 3}]
+    }
+  ],
+  "do_not_port": []
+}

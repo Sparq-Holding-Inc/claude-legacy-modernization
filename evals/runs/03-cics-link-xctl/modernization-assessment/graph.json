@@ -1,0 +1,243 @@
+{
+ "schema_version": "0.2",
+ "meta": {
+  "tool": "extract.py",
+  "version": "0.2.0",
+  "target": "work",
+  "git_dates": false,
+  "cloc": false,
+  "limits": [
+   "COBOL is read as fixed format. Free format files are listed as not parsed.",
+   "COPY REPLACING is not applied. A copybook is expanded as written.",
+   "A variable call target is resolved only from VALUE clauses and literal MOVEs in the same program.",
+   "A called subprogram gets no DDs from its caller's JCL step.",
+   "IDCAMS, SORT and other in-stream control cards are not read. Dataset modes on utility steps come from DISP only.",
+   "IF/THEN/ELSE and COND= in JCL are not modeled. Step order is file order.",
+   "Nested PROC calls, INCLUDE members and jobs submitted through the internal reader are not followed.",
+   "EXEC CICS RETURN TRANSID, START and SEND MAP are not edges.",
+   "Only Control-M XML and shell wrappers that name JCL files are read as schedulers."
+  ],
+  "files_seen": {
+   "bms": 0,
+   "cobol": 4,
+   "controlm": 0,
+   "copy": 0,
+   "csd": 0,
+   "jcl": 0,
+   "proc": 0,
+   "shell": 0
+  }
+ },
+ "nodes": [
+  {
+   "id": "?dynamic:PROGA:16",
+   "path": null,
+   "unit_type": "external",
+   "lang": null,
+   "loc": 0,
+   "last_modified": null,
+   "entry_point": false,
+   "note": "computed target, cannot be resolved statically"
+  },
+  {
+   "id": "?dynamic:PROGA:20",
+   "path": null,
+   "unit_type": "external",
+   "lang": null,
+   "loc": 0,
+   "last_modified": null,
+   "entry_point": false,
+   "note": "computed target, cannot be resolved statically"
+  },
+  {
+   "id": "PROGA",
+   "path": "app/cbl/PROGA.cbl",
+   "unit_type": "online_txn",
+   "lang": "cobol",
+   "loc": 26,
+   "last_modified": null,
+   "entry_point": false
+  },
+  {
+   "id": "PROGB",
+   "path": "app/cbl/PROGB.cbl",
+   "unit_type": "online_txn",
+   "lang": "cobol",
+   "loc": 4,
+   "last_modified": null,
+   "entry_point": false
+  },
+  {
+   "id": "PROGC",
+   "path": "app/cbl/PROGC.cbl",
+   "unit_type": "online_txn",
+   "lang": "cobol",
+   "loc": 4,
+   "last_modified": null,
+   "entry_point": false
+  },
+  {
+   "id": "PROGD",
+   "path": "app/cbl/PROGD.cbl",
+   "unit_type": "online_txn",
+   "lang": "cobol",
+   "loc": 4,
+   "last_modified": null,
+   "entry_point": false
+  }
+ ],
+ "edges": [
+  {
+   "src": "PROGA",
+   "dst": "?dynamic:PROGA:16",
+   "kind": "call",
+   "mode": null,
+   "evidence": [
+    {
+     "file": "app/cbl/PROGA.cbl",
+     "line": 16
+    }
+   ],
+   "resolved": false,
+   "confidence": "low",
+   "note": "target WS-ANY-PGM is computed"
+  },
+  {
+   "src": "PROGA",
+   "dst": "?dynamic:PROGA:20",
+   "kind": "call",
+   "mode": null,
+   "evidence": [
+    {
+     "file": "app/cbl/PROGA.cbl",
+     "line": 20
+    }
+   ],
+   "resolved": false,
+   "confidence": "low",
+   "note": "target WS-NEXT-PGM is computed; the literals found may not be all of them"
+  },
+  {
+   "src": "PROGA",
+   "dst": "PROGB",
+   "kind": "call",
+   "mode": null,
+   "evidence": [
+    {
+     "file": "app/cbl/PROGA.cbl",
+     "line": 12
+    }
+   ],
+   "resolved": true,
+   "confidence": "high",
+   "note": ""
+  },
+  {
+   "src": "PROGA",
+   "dst": "PROGC",
+   "kind": "call",
+   "mode": null,
+   "evidence": [
+    {
+     "file": "app/cbl/PROGA.cbl",
+     "line": 19
+    },
+    {
+     "file": "app/cbl/PROGA.cbl",
+     "line": 20
+    }
+   ],
+   "resolved": true,
+   "confidence": "medium",
+   "note": "via WS-NEXT-PGM, a literal is moved to it"
+  },
+  {
+   "src": "PROGA",
+   "dst": "PROGD",
+   "kind": "call",
+   "mode": null,
+   "evidence": [
+    {
+     "file": "app/cbl/PROGA.cbl",
+     "line": 5
+    },
+    {
+     "file": "app/cbl/PROGA.cbl",
+     "line": 23
+    }
+   ],
+   "resolved": true,
+   "confidence": "high",
+   "note": "via constant LIT-PGM-D"
+  }
+ ],
+ "unparsed": [],
+ "analysis": {
+  "as_of": "2026-09-30",
+  "dormant_years": 5,
+  "entry_points": [],
+  "reachable_count": 0,
+  "dead_code_candidates": {
+   "unreachable": [],
+   "dormant": [],
+   "unknown": [
+    "PROGA",
+    "PROGB",
+    "PROGC",
+    "PROGD"
+   ]
+  },
+  "dead_code_reasons": {
+   "PROGA": "no entry points in the tree",
+   "PROGB": "no entry points in the tree",
+   "PROGC": "no entry points in the tree",
+   "PROGD": "no entry points in the tree"
+  },
+  "unresolved_dynamic": [
+   {
+    "src": "PROGA",
+    "dst": "?dynamic:PROGA:16",
+    "evidence": {
+     "file": "app/cbl/PROGA.cbl",
+     "line": 16
+    }
+   },
+   {
+    "src": "PROGA",
+    "dst": "?dynamic:PROGA:20",
+    "evidence": {
+     "file": "app/cbl/PROGA.cbl",
+     "line": 20
+    }
+   }
+  ],
+  "structure_basis": "all programs (no entry points were found)",
+  "fan_in": {
+   "PROGB": 1,
+   "PROGC": 1,
+   "PROGD": 1
+  },
+  "fan_out": {
+   "PROGA": 3
+  },
+  "god_modules": [],
+  "sccs": [],
+  "self_recursive": [],
+  "articulation_points": [
+   "PROGA"
+  ],
+  "articulation_basis": "call edges between programs plus data edges from programs to datasets",
+  "data_hubs": [],
+  "unscheduled_jobs": [],
+  "edge_counts": {
+   "call": 5
+  },
+  "node_counts": {
+   "external": 2,
+   "online_txn": 4
+  },
+  "warnings": [
+   "No entry points were found (no CSD transaction, JCL job, scheduler job or wrapper). Nothing can be proven unreachable, so every candidate is unknown."
+  ]
+ }
+}

@@ -1,0 +1,17 @@
+{
+  "target_state": "refactor",
+  "waves": [
+    {
+      "wave": 1,
+      "name": "Dispatcher and its in-tree target",
+      "units": ["PROGA", "PROGB"],
+      "rationale": "The whole tree is two programs, 14 lines, no JCL, no scheduler, no datasets. PROGA is a dispatcher that CALLs a program named at run time, and PROGB is the only other program here. There is nothing to cut, so this is one wave. If the system were ten times larger I would cut it by dispatch target: the dispatcher first, then one wave per family of programs it can reach, ordered by the risk scores.",
+      "unblocks": "The dispatch pattern itself. Every program PROGA can call must be reachable through whatever mechanism replaces the computed CALL, so this wave fixes that mechanism for the programs outside this tree.",
+      "blast_radius": "medium",
+      "confidence": "low",
+      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 9}],
+      "inference": true
+    }
+  ],
+  "unassigned": []
+}

@@ -1,0 +1,105 @@
+{
+  "units": [
+    {
+      "id": "job:MAINJOB",
+      "port_difficulty": {
+        "score": 1,
+        "why": "Two lines of JCL: a JOB card and one EXEC PGM=PGMMAIN step, with no DD statements, PROC or COND."
+      },
+      "blast_radius": {
+        "score": 3,
+        "why": "Only entry point in the tree and, by inference, the nightly cycle the client named; nothing in the tree shows what it writes, so a silent failure cannot be ruled out."
+      },
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "The only JCL job runs one step, EXEC PGM=PGMMAIN, and no scheduler artifact was parsed, so its place in the nightly cycle is unproven.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/jcl/MAINJOB.jcl",
+          "line": 1
+        },
+        {
+          "file": "app/jcl/MAINJOB.jcl",
+          "line": 2
+        }
+      ]
+    },
+    {
+      "id": "PGMMAIN",
+      "port_difficulty": {
+        "score": 1,
+        "why": "One literal CALL of PGMLIVE and GOBACK; no files, no arithmetic, no copybooks."
+      },
+      "blast_radius": {
+        "score": 3,
+        "why": "Sole program the only job runs, so it sits on the must-not-break nightly cycle by inference; its outputs, if any, are not visible in the tree."
+      },
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "Only program started by a JCL step, and it calls PGMLIVE with a literal name.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/cbl/PGMMAIN.cbl",
+          "line": 4
+        },
+        {
+          "file": "app/jcl/MAINJOB.jcl",
+          "line": 2
+        }
+      ]
+    },
+    {
+      "id": "PGMLIVE",
+      "port_difficulty": {
+        "score": 1,
+        "why": "The whole procedure division is GOBACK; nothing to translate."
+      },
+      "blast_radius": {
+        "score": 2,
+        "why": "Leaf with one live caller and no I/O, so a fault would surface as an abend in PGMMAIN, not as a wrong number."
+      },
+      "quadrant": "low-low",
+      "wave": 1,
+      "driving_fact": "Called with a literal name by PGMMAIN, and also by the unreachable PGMDEAD; it calls nothing and touches no dataset.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/cbl/PGMLIVE.cbl",
+          "line": 4
+        },
+        {
+          "file": "app/cbl/PGMMAIN.cbl",
+          "line": 4
+        }
+      ]
+    }
+  ],
+  "do_not_port": [
+    {
+      "id": "PGMDEAD",
+      "reason": "No JCL step, scheduler or in-tree program reaches it, and there are no computed calls. Propose it for deletion, but the claim is provisional: telemetry is none and only the tree was searched.",
+      "evidence": [
+        {
+          "file": "app/cbl/PGMDEAD.cbl",
+          "line": 2
+        },
+        {
+          "file": "app/cbl/PGMDEAD.cbl",
+          "line": 4
+        }
+      ]
+    },
+    {
+      "id": "cpy:UNUSED",
+      "reason": "No program in the tree has a COPY of it. Propose it for deletion after the client confirms no out-of-tree program includes it.",
+      "evidence": [
+        {
+          "file": "app/cpy/UNUSED.cpy",
+          "line": 1
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "target_state": "refactor",
+  "waves": [
+    {
+      "wave": 1,
+      "name": "Nightly batch cycle, whole tree",
+      "units": ["job:MAINJOB", "PGMMAIN", "PGMLIVE"],
+      "rationale": "The live tree is one job, one step and a two-program call chain with no dataset, contract or temporal edges. There is no boundary inside it to cut, so it is one wave.",
+      "unblocks": "Retiring the COBOL runtime for this cycle, and a proven toolchain and equivalence harness for whatever else the client has outside this tree.",
+      "blast_radius": "medium",
+      "confidence": "medium",
+      "evidence": [
+        {"file": "app/jcl/MAINJOB.jcl", "line": 2},
+        {"file": "app/cbl/PGMMAIN.cbl", "line": 4},
+        {"file": "app/cbl/PGMLIVE.cbl", "line": 4}
+      ]
+    }
+  ],
+  "unassigned": [
+    {"id": "PGMDEAD", "reason": "Unreachable from any entry point. Propose deletion, provisional until telemetry or out-of-tree JCL confirms it. It is not ported."},
+    {"id": "cpy:UNUSED", "reason": "No program includes it. Propose deletion. It is not ported."}
+  ]
+}

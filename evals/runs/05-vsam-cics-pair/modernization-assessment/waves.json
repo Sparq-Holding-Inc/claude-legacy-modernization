@@ -1,0 +1,21 @@
+{
+  "target_state": "refactor",
+  "waves": [
+    {
+      "wave": 1,
+      "name": "ACCTDAT online pair",
+      "units": ["PROGR", "PROGW"],
+      "rationale": "The whole system is two online transactions (TRNR, TRNW) over one keyed file with one shared layout copybook. There is no call edge, no cycle, no JCL and no scheduler. It is one wave. Inside the wave, port and prove PROGR first, then PROGW.",
+      "unblocks": "The decision on where the ACCTDAT KSDS lives after refactor, and a proven byte-level harness for the 17-byte ACCTREC record that any later batch wave can reuse once its JCL is supplied.",
+      "blast_radius": "high",
+      "confidence": "low",
+      "evidence": [
+        {"file": "app/csd/DEMO.CSD", "line": 4},
+        {"file": "app/csd/DEMO.CSD", "line": 6},
+        {"file": "app/cbl/PROGW.cbl", "line": 7},
+        {"file": "app/cbl/PROGR.cbl", "line": 7}
+      ]
+    }
+  ],
+  "unassigned": []
+}

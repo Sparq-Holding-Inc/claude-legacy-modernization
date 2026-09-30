@@ -2,17 +2,399 @@
  "generated": "2026-09-30",
  "summary": {
   "citations": {
-   "total": 67,
+   "total": 1353,
    "unresolved": 0,
    "resolve_rate": 1.0
   },
-  "runs_scored": 1,
-  "runs_expected": 1,
-  "json_all_valid_runs": 0,
+  "runs_scored": 13,
+  "runs_expected": 13,
+  "json_all_valid_runs": 13,
   "unreachable_on_dynamic_total": 0,
   "cost_usd_total": null
  },
  "runs": [
+  {
+   "case": "01-static-call",
+   "run": "01-static-call",
+   "harness": "subagent",
+   "subagent_usage": null,
+   "claude": {
+    "is_error": null,
+    "num_turns": null,
+    "duration_ms": null,
+    "wall_seconds": null,
+    "total_cost_usd": null,
+    "terminal_reason": null,
+    "error_text": null
+   },
+   "ran": true,
+   "citations": {
+    "total": 78,
+    "unresolved": 0,
+    "resolve_rate": 1.0
+   },
+   "hook_gave_up": false,
+   "json": {
+    "graph.json": "valid",
+    "waves.json": "valid",
+    "dead-code.json": "valid",
+    "risks.json": "valid"
+   },
+   "json_all_valid": true,
+   "unreachable_on_dynamic": [],
+   "wave_count": 1
+  },
+  {
+   "case": "02-dynamic-call",
+   "run": "02-dynamic-call",
+   "harness": "subagent",
+   "subagent_usage": null,
+   "claude": {
+    "is_error": null,
+    "num_turns": null,
+    "duration_ms": null,
+    "wall_seconds": null,
+    "total_cost_usd": null,
+    "terminal_reason": null,
+    "error_text": null
+   },
+   "ran": true,
+   "citations": {
+    "total": 46,
+    "unresolved": 0,
+    "resolve_rate": 1.0
+   },
+   "hook_gave_up": false,
+   "json": {
+    "graph.json": "valid",
+    "waves.json": "valid",
+    "dead-code.json": "valid",
+    "risks.json": "valid"
+   },
+   "json_all_valid": true,
+   "unreachable_on_dynamic": [],
+   "wave_count": 1
+  },
+  {
+   "case": "03-cics-link-xctl",
+   "run": "03-cics-link-xctl",
+   "harness": "subagent",
+   "subagent_usage": null,
+   "claude": {
+    "is_error": null,
+    "num_turns": null,
+    "duration_ms": null,
+    "wall_seconds": null,
+    "total_cost_usd": null,
+    "terminal_reason": null,
+    "error_text": null
+   },
+   "ran": true,
+   "citations": {
+    "total": 123,
+    "unresolved": 0,
+    "resolve_rate": 1.0
+   },
+   "hook_gave_up": false,
+   "json": {
+    "graph.json": "valid",
+    "waves.json": "valid",
+    "dead-code.json": "valid",
+    "risks.json": "valid"
+   },
+   "json_all_valid": true,
+   "unreachable_on_dynamic": [],
+   "wave_count": 1
+  },
+  {
+   "case": "04-shared-copybook",
+   "run": "04-shared-copybook",
+   "harness": "subagent",
+   "subagent_usage": null,
+   "claude": {
+    "is_error": null,
+    "num_turns": null,
+    "duration_ms": null,
+    "wall_seconds": null,
+    "total_cost_usd": null,
+    "terminal_reason": null,
+    "error_text": null
+   },
+   "ran": true,
+   "citations": {
+    "total": 71,
+    "unresolved": 0,
+    "resolve_rate": 1.0
+   },
+   "hook_gave_up": false,
+   "json": {
+    "graph.json": "valid",
+    "waves.json": "valid",
+    "dead-code.json": "valid",
+    "risks.json": "valid"
+   },
+   "json_all_valid": true,
+   "unreachable_on_dynamic": [],
+   "wave_count": 1
+  },
+  {
+   "case": "05-vsam-cics-pair",
+   "run": "05-vsam-cics-pair",
+   "harness": "subagent",
+   "subagent_usage": null,
+   "claude": {
+    "is_error": null,
+    "num_turns": null,
+    "duration_ms": null,
+    "wall_seconds": null,
+    "total_cost_usd": null,
+    "terminal_reason": null,
+    "error_text": null
+   },
+   "ran": true,
+   "citations": {
+    "total": 110,
+    "unresolved": 0,
+    "resolve_rate": 1.0
+   },
+   "hook_gave_up": false,
+   "json": {
+    "graph.json": "valid",
+    "waves.json": "valid",
+    "dead-code.json": "valid",
+    "risks.json": "valid"
+   },
+   "json_all_valid": true,
+   "unreachable_on_dynamic": [],
+   "wave_count": 1
+  },
+  {
+   "case": "06-contract-match",
+   "run": "06-contract-match",
+   "harness": "subagent",
+   "subagent_usage": null,
+   "claude": {
+    "is_error": null,
+    "num_turns": null,
+    "duration_ms": null,
+    "wall_seconds": null,
+    "total_cost_usd": null,
+    "terminal_reason": null,
+    "error_text": null
+   },
+   "ran": true,
+   "citations": {
+    "total": 127,
+    "unresolved": 0,
+    "resolve_rate": 1.0
+   },
+   "hook_gave_up": false,
+   "json": {
+    "graph.json": "valid",
+    "waves.json": "valid",
+    "dead-code.json": "valid",
+    "risks.json": "valid"
+   },
+   "json_all_valid": true,
+   "unreachable_on_dynamic": [],
+   "wave_count": 1
+  },
+  {
+   "case": "07-contract-mismatch",
+   "run": "07-contract-mismatch",
+   "harness": "subagent",
+   "subagent_usage": null,
+   "claude": {
+    "is_error": null,
+    "num_turns": null,
+    "duration_ms": null,
+    "wall_seconds": null,
+    "total_cost_usd": null,
+    "terminal_reason": null,
+    "error_text": null
+   },
+   "ran": true,
+   "citations": {
+    "total": 171,
+    "unresolved": 0,
+    "resolve_rate": 1.0
+   },
+   "hook_gave_up": false,
+   "json": {
+    "graph.json": "valid",
+    "waves.json": "valid",
+    "dead-code.json": "valid",
+    "risks.json": "valid"
+   },
+   "json_all_valid": true,
+   "unreachable_on_dynamic": [],
+   "wave_count": 1
+  },
+  {
+   "case": "08-temporal-steps",
+   "run": "08-temporal-steps",
+   "harness": "subagent",
+   "subagent_usage": null,
+   "claude": {
+    "is_error": null,
+    "num_turns": null,
+    "duration_ms": null,
+    "wall_seconds": null,
+    "total_cost_usd": null,
+    "terminal_reason": null,
+    "error_text": null
+   },
+   "ran": true,
+   "citations": {
+    "total": 133,
+    "unresolved": 0,
+    "resolve_rate": 1.0
+   },
+   "hook_gave_up": false,
+   "json": {
+    "graph.json": "valid",
+    "waves.json": "valid",
+    "dead-code.json": "valid",
+    "risks.json": "valid"
+   },
+   "json_all_valid": true,
+   "unreachable_on_dynamic": [],
+   "wave_count": 1
+  },
+  {
+   "case": "09-temporal-controlm",
+   "run": "09-temporal-controlm",
+   "harness": "subagent",
+   "subagent_usage": null,
+   "claude": {
+    "is_error": null,
+    "num_turns": null,
+    "duration_ms": null,
+    "wall_seconds": null,
+    "total_cost_usd": null,
+    "terminal_reason": null,
+    "error_text": null
+   },
+   "ran": true,
+   "citations": {
+    "total": 101,
+    "unresolved": 0,
+    "resolve_rate": 1.0
+   },
+   "hook_gave_up": false,
+   "json": {
+    "graph.json": "valid",
+    "waves.json": "valid",
+    "dead-code.json": "valid",
+    "risks.json": "valid"
+   },
+   "json_all_valid": true,
+   "unreachable_on_dynamic": [],
+   "wave_count": 1
+  },
+  {
+   "case": "10-temporal-shell",
+   "run": "10-temporal-shell",
+   "harness": "subagent",
+   "subagent_usage": null,
+   "claude": {
+    "is_error": null,
+    "num_turns": null,
+    "duration_ms": null,
+    "wall_seconds": null,
+    "total_cost_usd": null,
+    "terminal_reason": null,
+    "error_text": null
+   },
+   "ran": true,
+   "citations": {
+    "total": 93,
+    "unresolved": 0,
+    "resolve_rate": 1.0
+   },
+   "hook_gave_up": false,
+   "json": {
+    "graph.json": "valid",
+    "waves.json": "valid",
+    "dead-code.json": "valid",
+    "risks.json": "valid"
+   },
+   "json_all_valid": true,
+   "unreachable_on_dynamic": [],
+   "wave_count": 1
+  },
+  {
+   "case": "11-dead-program",
+   "run": "11-dead-program",
+   "harness": "subagent",
+   "subagent_usage": null,
+   "claude": {
+    "is_error": null,
+    "num_turns": null,
+    "duration_ms": null,
+    "wall_seconds": null,
+    "total_cost_usd": null,
+    "terminal_reason": null,
+    "error_text": null
+   },
+   "ran": true,
+   "citations": {
+    "total": 119,
+    "unresolved": 0,
+    "resolve_rate": 1.0
+   },
+   "hook_gave_up": false,
+   "json": {
+    "graph.json": "valid",
+    "waves.json": "valid",
+    "dead-code.json": "valid",
+    "risks.json": "valid"
+   },
+   "json_all_valid": true,
+   "dead_code_matches_truth": {
+    "unreachable": true,
+    "dormant": true,
+    "unknown": true
+   },
+   "unreachable_on_dynamic": [],
+   "wave_count": 1
+  },
+  {
+   "case": "12-dormant-program",
+   "run": "12-dormant-program",
+   "harness": "subagent",
+   "subagent_usage": null,
+   "claude": {
+    "is_error": null,
+    "num_turns": null,
+    "duration_ms": null,
+    "wall_seconds": null,
+    "total_cost_usd": null,
+    "terminal_reason": null,
+    "error_text": null
+   },
+   "ran": true,
+   "citations": {
+    "total": 83,
+    "unresolved": 0,
+    "resolve_rate": 1.0
+   },
+   "hook_gave_up": false,
+   "json": {
+    "graph.json": "valid",
+    "waves.json": "valid",
+    "dead-code.json": "valid",
+    "risks.json": "valid"
+   },
+   "json_all_valid": true,
+   "dead_code_matches_truth": {
+    "unreachable": true,
+    "dormant": true,
+    "unknown": true
+   },
+   "unreachable_on_dynamic": [],
+   "wave_count": 1
+  },
   {
    "case": "13-dynamic-only-reachable",
    "run": "13-dynamic-only-reachable",
@@ -29,18 +411,18 @@
    },
    "ran": true,
    "citations": {
-    "total": 67,
+    "total": 98,
     "unresolved": 0,
     "resolve_rate": 1.0
    },
    "hook_gave_up": false,
    "json": {
     "graph.json": "valid",
-    "waves.json": "1 errors: waves: unit step:MAINJOB.S1 is a jcl_step. A wave holds programs, JCL jobs, procs or scheduler jobs. Steps, copybooks and datasets move with their owner.",
+    "waves.json": "valid",
     "dead-code.json": "valid",
     "risks.json": "valid"
    },
-   "json_all_valid": false,
+   "json_all_valid": true,
    "dead_code_matches_truth": {
     "unreachable": true,
     "dormant": true,

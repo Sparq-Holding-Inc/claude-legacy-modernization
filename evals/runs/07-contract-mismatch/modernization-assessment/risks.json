@@ -1,0 +1,101 @@
+{
+  "units": [
+    {
+      "id": "PGMW",
+      "port_difficulty": {
+        "score": 2,
+        "why": "Sixteen lines of file plumbing, but it writes a packed decimal record it never fills, so the legacy output is not reproducible from the source alone."
+      },
+      "blast_radius": {
+        "score": 3,
+        "why": "Sole writer of SPARQ.TEST.MASTER, and the reader takes the layout from a second copybook, so a changed length or amount encoding breaks the read silently."
+      },
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "PGMW writes SPARQ.TEST.MASTER through cpy:LAYOUTX and PGMR reads it through cpy:LAYOUTY. The contract edge is medium confidence because the two copybooks are different files.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/cbl/PGMW.cbl",
+          "line": 14
+        },
+        {
+          "file": "app/cpy/LAYOUTX.cpy",
+          "line": 3
+        }
+      ]
+    },
+    {
+      "id": "PGMR",
+      "port_difficulty": {
+        "score": 1,
+        "why": "Opens, reads one record, closes. It never touches a field, so there is nothing to transliterate."
+      },
+      "blast_radius": {
+        "score": 3,
+        "why": "Takes its layout from cpy:LAYOUTY, a copy of the writer's layout. A port that starts unpacking the amount could fail on data the legacy read never looked at."
+      },
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "PGMR reads SPARQ.TEST.MASTER as cpy:LAYOUTY but the writer used cpy:LAYOUTX. Both define 15 bytes today. Nothing keeps them equal.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/cbl/PGMR.cbl",
+          "line": 14
+        },
+        {
+          "file": "app/cpy/LAYOUTY.cpy",
+          "line": 3
+        }
+      ]
+    },
+    {
+      "id": "job:WRITEJOB",
+      "port_difficulty": {
+        "score": 2,
+        "why": "One step, but the allocation (NEW,CATLG,DELETE, one track, LRECL 80) has to be reproduced in the target, and LRECL 80 does not match the 15 byte record."
+      },
+      "blast_radius": {
+        "score": 3,
+        "why": "It creates the dataset the other job reads. A NEW disposition fails on a re-run unless something earlier removes the dataset, and no scheduler was supplied to show what does."
+      },
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "WRITEJOB allocates SPARQ.TEST.MASTER with DISP=(NEW,CATLG,DELETE) and LRECL=80 while its program record is 15 bytes.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/jcl/WRITEJOB.jcl",
+          "line": 3
+        },
+        {
+          "file": "app/jcl/WRITEJOB.jcl",
+          "line": 4
+        }
+      ]
+    },
+    {
+      "id": "job:READJOB",
+      "port_difficulty": {
+        "score": 1,
+        "why": "One step, one shared read of an existing dataset, no DCB of its own."
+      },
+      "blast_radius": {
+        "score": 2,
+        "why": "Reads only, and it fails loudly if the dataset does not exist yet. The risk is order, and the order is not written down anywhere in the tree."
+      },
+      "quadrant": "low-low",
+      "wave": 1,
+      "driving_fact": "READJOB reads SPARQ.TEST.MASTER with DISP=SHR and is correct only after WRITEJOB has run. No scheduler artifact states that order.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "file": "app/jcl/READJOB.jcl",
+          "line": 3
+        }
+      ]
+    }
+  ],
+  "do_not_port": []
+}

@@ -1,0 +1,21 @@
+{
+  "target_state": "refactor",
+  "waves": [
+    {
+      "wave": 1,
+      "name": "Writer, reader and the shared master file",
+      "units": ["job:WRITEJOB", "PGMW", "job:READJOB", "PGMR"],
+      "rationale": "Two jobs, two programs and one dataset. The dataset is the only edge between the halves and it is a medium confidence contract, so the halves move together. No cycle, no god module and no computed call splits them any further.",
+      "unblocks": "One shared record layout that neither program owns, and a byte-level comparison harness for SPARQ.TEST.MASTER that any later job touching the file can reuse.",
+      "blast_radius": "medium",
+      "confidence": "medium",
+      "evidence": [
+        {"file": "app/jcl/WRITEJOB.jcl", "line": 2},
+        {"file": "app/jcl/READJOB.jcl", "line": 2},
+        {"file": "app/cbl/PGMW.cbl", "line": 11},
+        {"file": "app/cbl/PGMR.cbl", "line": 11}
+      ]
+    }
+  ],
+  "unassigned": []
+}

@@ -1,0 +1,19 @@
+{
+  "target_state": "refactor",
+  "waves": [
+    {
+      "wave": 1,
+      "name": "Whole system: PROGA and PROGB",
+      "units": ["PROGA", "PROGB"],
+      "rationale": "The whole tree is one batch driver and the one subprogram it calls. There are no shared datasets, no cycles and no articulation points, so there is no seam to cut. One wave.",
+      "unblocks": "Proves the toolchain, the test harness and the CALL boundary end to end. Once the missing JCL and scheduler are supplied, it is the first cut of the nightly batch cycle.",
+      "blast_radius": "low",
+      "confidence": "low",
+      "evidence": [
+        {"file": "app/cbl/PROGA.cbl", "line": 6},
+        {"file": "app/cbl/PROGB.cbl", "line": 4}
+      ]
+    }
+  ],
+  "unassigned": []
+}

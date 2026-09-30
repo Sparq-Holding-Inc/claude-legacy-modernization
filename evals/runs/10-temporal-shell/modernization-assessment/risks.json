@@ -1,0 +1,47 @@
+{
+  "units": [
+    {
+      "id": "job:JOBA",
+      "port_difficulty": {"score": 1, "why": "One step that runs the IEFBR14 no-op utility, with no DD statements, no datasets and no application program in the tree."},
+      "blast_radius": {"score": 3, "why": "First job on the nightly chain the client says must not break, and JOBB is ordered after it, but the tree shows no data written and the effect is reversible."},
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "Submitted first by the nightly wrapper, and the temporal edge job:JOBA to job:JOBB is enforced only by submit order.",
+      "confidence": "medium",
+      "evidence": [{"file": "jcl/JOBA.jcl", "line": 2}, {"file": "scripts/nightly.sh", "line": 4}]
+    },
+    {
+      "id": "job:JOBB",
+      "port_difficulty": {"score": 1, "why": "One step that runs the IEFBR14 no-op utility, identical in shape to JOBA, with no datasets and no application program in the tree."},
+      "blast_radius": {"score": 3, "why": "On the named must-not-break nightly chain and ordered after JOBA, so a missed or early submit would break the cycle, but no writes to a system of record are visible."},
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "Submitted second by the nightly wrapper, so it depends on JOBA having been submitted first and on set -e not having aborted the chain.",
+      "confidence": "medium",
+      "evidence": [{"file": "jcl/JOBB.jcl", "line": 2}, {"file": "scripts/nightly.sh", "line": 5}]
+    },
+    {
+      "id": "job:JOBC",
+      "port_difficulty": {"score": 1, "why": "One step that runs the IEFBR14 no-op utility, with nothing to port and nothing to test."},
+      "blast_radius": {"score": 1, "why": "The wrapper comment says it is retired and its submit line is commented out, so no scheduled cycle depends on it."},
+      "quadrant": "low-low",
+      "wave": null,
+      "driving_fact": "The wrapper calls JOBC retired and comments out its submit, yet jcl/JOBC.jcl is still in the tree.",
+      "confidence": "medium",
+      "evidence": [{"file": "scripts/nightly.sh", "line": 2}, {"file": "scripts/nightly.sh", "line": 6}]
+    },
+    {
+      "id": "sch:scripts/nightly.sh",
+      "port_difficulty": {"score": 2, "why": "Six lines of shell, but the meaning of the undefined submit command (synchronous or not) and the set -e abort behavior must be reproduced exactly."},
+      "blast_radius": {"score": 4, "why": "It is the only carrier of the nightly job order, and if submit returns before the job finishes a wrong order or a failed JOBA would go unnoticed until a downstream consumer looks."},
+      "quadrant": "low-high",
+      "wave": 1,
+      "driving_fact": "The only place the JOBA-before-JOBB order lives, guarded by set -e, with the trigger that starts the wrapper outside the tree.",
+      "confidence": "medium",
+      "evidence": [{"file": "scripts/nightly.sh", "line": 3}, {"file": "scripts/nightly.sh", "line": 4}, {"file": "scripts/nightly.sh", "line": 5}]
+    }
+  ],
+  "do_not_port": [
+    {"id": "job:JOBC", "reason": "Retired per the wrapper comment and not submitted. Confirm with the client that nothing else submits it, then delete it instead of porting it."}
+  ]
+}

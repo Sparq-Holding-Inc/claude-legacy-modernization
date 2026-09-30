@@ -1,0 +1,13 @@
+{
+  "telemetry": "none",
+  "unreachable": [],
+  "dormant": [
+    {
+      "id": "OLDPGM",
+      "reason": "Reachable and last modified 2011-03-04, more than 5 years before 2026-09-30. PGMMAIN calls it unconditionally at line 4, so it very likely runs on every execution. Instrument it, do not delete it. There is no telemetry, so this is provisional.",
+      "confidence": "medium",
+      "evidence": [{"file": "app/cbl/OLDPGM.cbl", "line": 1}, {"file": "app/cbl/PGMMAIN.cbl", "line": 4}]
+    }
+  ],
+  "unknown": []
+}

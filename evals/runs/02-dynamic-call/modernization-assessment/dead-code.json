@@ -1,0 +1,19 @@
+{
+  "telemetry": "none",
+  "unreachable": [],
+  "dormant": [],
+  "unknown": [
+    {
+      "id": "PROGA",
+      "reason": "No JCL step, scheduler job or CSD transaction in the tree runs it, so the extractor found no entry point. It reads its target name at run time and ends with STOP RUN, which is the shape of a main program. It is probably started by a job outside this tree. No telemetry was given, so this is provisional.",
+      "confidence": "low",
+      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 8}]
+    },
+    {
+      "id": "PROGB",
+      "reason": "No static caller. PROGA makes a computed call and PROGB is the only other program in the tree, so it could be the target. The value is ACCEPTed at run time, so the set of reachable programs cannot be bounded from the source. It stays in unknown. No telemetry was given, so this is provisional.",
+      "confidence": "low",
+      "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 9}]
+    }
+  ]
+}
