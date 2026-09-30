@@ -94,7 +94,11 @@ Read this before you trust it.
 - **A called subprogram gets no DDs from its caller.** In a real run its files belong to the calling
   step. The extractor does not model that.
 - **Utility steps take their dataset mode from `DISP`.** An IDCAMS `REPRO` target is `DISP=SHR` and
-  is read as a read. In-stream control cards are not parsed.
+  is read as a read on the edge. The IDCAMS `DELETE`, `DEFINE` and `REPRO` cards are read as separate
+  facts (`utility_writes`), and the wave seed uses them. SORT cards and other in-stream input are not
+  parsed. A card that uses a symbol such as `&HLQ` is skipped.
+- **A program named at run time is a fact, not an edge.** IMS `PARM` and TSO `RUN PROGRAM` cards are
+  read, so the program counts as reachable. Other drivers that start a program by name are not.
 - **JCL `IF/THEN/ELSE` and `COND=` are not modeled.** Step order is file order.
 - **`RETURN TRANSID`, `START`, `SEND MAP`, IMS and MQ are not edges.**
 - **COPY `REPLACING` is not applied.**

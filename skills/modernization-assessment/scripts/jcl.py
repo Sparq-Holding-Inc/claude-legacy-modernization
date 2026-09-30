@@ -5,14 +5,16 @@ Reads jobs, steps, DD statements, in-stream and cataloged PROCs.
 
 * Statements end at column 71. Text after the operand field is a comment.
 * An operand field ending in a comma continues on the next // line.
-* Data after DD * or DD DATA is skipped until the next // or /* line.
+* Data after DD * or DD DATA is kept on the DD. Only three kinds of step have it read: IDCAMS
+  (which datasets a step deletes, defines or loads), IKJEFT01 (the program a RUN PROGRAM card names,
+  and a DSN command), and DFSRRC00 (the program named in PARM). Anything else is skipped.
 * PROCs are expanded under the calling step. Symbolic parameters come from
   the EXEC statement first, then the PROC defaults. A DD named
   PROCSTEP.DDNAME on the calling job overrides that DD parameter by parameter.
 * A repeated step name in one job gets a #2, #3 suffix.
 * A PROC is known by its member name (the file stem), as z/OS resolves it.
 
-Not read: IDCAMS and other in-stream control cards, IF/THEN/ELSE logic,
+Not read: SORT and other in-stream control cards, IF/THEN/ELSE logic,
 COND=, nested PROC calls, INCLUDE members, and jobs submitted through the
 internal reader. Those are reported as limits, not guessed.
 """
@@ -33,6 +35,7 @@ class Dd:
     def __init__(self, name, params, line, file):
         self.name, self.params, self.line, self.file = name, params, line, file
         self.inline = False
+        self.data = []        # (file, line, text) of in-stream data
 
 
 class Step:
@@ -43,6 +46,7 @@ class Step:
         self.symbols = {k: v for k, v in params.items() if k not in RESERVED and "." not in k}
         self.dds = []
         self.overrides = []   # (procstep, ddname, params, line)
+        self.override_data = {}   # (procstep, ddname) -> [(file, line, text)]
 
 
 class Unit:
@@ -111,7 +115,7 @@ def param_dict(ops):
 
 
 def statements(text):
-    """Yield dicts: name, op, ops, line. Comments and in-stream data are skipped."""
+    """Yield dicts: name, op, ops, line. Comments are skipped. In-stream data comes as op DATA."""
     lines = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
     i, n, in_data = 0, len(lines), False
     while i < n:
@@ -121,6 +125,7 @@ def statements(text):
             if raw.startswith("/*") or raw.startswith("//"):
                 in_data = False
             else:
+                yield {"name": "", "op": "DATA", "ops": raw.rstrip(), "line": ln}
                 i += 1
                 continue
         if raw.startswith("//*") or raw.startswith("/*") or not raw.startswith("//"):
@@ -156,13 +161,19 @@ def parse_file(root, rel):
     text = (raw[3:] if raw.startswith(b"\xef\xbb\xbf") else raw).decode("latin-1")
     ext = os.path.splitext(rel)[1].lower()
     stem = os.path.splitext(os.path.basename(rel))[0].upper()
-    units, cur, cur_step = [], None, None
+    units, cur, cur_step, last_dd, last_key = [], None, None, None, None
     for st in statements(text):
         op, name, ops, line = st["op"], st["name"], st["ops"], st["line"]
         if op == "JOB":
             cur = Unit("job", name or stem, rel, line)
             units.append(cur)
             cur_step = None
+            last_dd = last_key = None
+        elif op == "DATA":
+            if last_dd is not None and last_dd.inline:
+                last_dd.data.append((rel, line, ops))
+                if last_key is not None and cur_step is not None:
+                    cur_step.override_data.setdefault(last_key, []).append((rel, line, ops))
         elif op == "PROC":
             pu = Unit("proc", stem if ext in PROC_EXT else (name or stem), rel, line)
             pu.defaults = {k: v for k, v in param_dict(ops).items() if k != "_pos"}
@@ -183,12 +194,14 @@ def parse_file(root, rel):
                 params["PROC"] = pos[0]
             cur_step = Step(name, params, line, rel, cur)
             cur.steps.append(cur_step)
+            last_dd = last_key = None
         elif op == "DD":
             if cur is None:
                 continue
             params = param_dict(ops)
             pos = params.pop("_pos", [])
             dd = Dd(name, params, line, rel)
+            last_dd, last_key = dd, None
             if pos and pos[0] == "*" or pos and pos[0].upper() == "DATA":
                 dd.inline = True
             if "DUMMY" in [p.upper() for p in pos]:
@@ -198,6 +211,7 @@ def parse_file(root, rel):
             if "." in name and cur_step.proc:
                 ps, dn = name.split(".", 1)
                 cur_step.overrides.append((ps, dn, params, line))
+                last_key = (ps.upper(), dn.upper())
             else:
                 if not name and cur_step.dds:
                     dd.name = cur_step.dds[-1].name
@@ -250,8 +264,8 @@ def disp_mode(dd):
 def expand_job(unit, procs):
     """Flat list of executable and container steps with ids, DDs and evidence.
 
-    Each item: id, name, parent, container, pgm, proc, file, line, dds.
-    Each dd: name, dsn, disp_mode, skip, lines, concat.
+    Each item: id, name, parent, container, pgm, proc, parm, file, line, dds.
+    Each dd: name, dsn, disp_mode, skip, lines, concat, data.
     """
     out, seen = [], {}
     for idx, st in enumerate(unit.steps, start=1):
@@ -261,7 +275,8 @@ def expand_job(unit, procs):
         proc = procs.get(st.proc.upper()) if st.proc else None
         top = {"id": sid, "name": name, "parent": None, "container": bool(st.proc),
                "pgm": (st.pgm or "").upper() or None, "proc": (st.proc or "").upper() or None,
-               "proc_found": proc is not None, "file": st.file, "line": st.line, "dds": []}
+               "proc_found": proc is not None, "file": st.file, "line": st.line, "dds": [],
+               "parm": st.params.get("PARM")}
         if not st.proc:
             top["dds"] = _dds(st.dds, {}, {}, st.file)
         out.append(top)
@@ -288,15 +303,21 @@ def expand_job(unit, procs):
                 target = next((d for d in dds if d.name == dname.upper()), None)
                 if target is None:
                     nd = Dd(dname.upper(), dict(params), line, st.file)
+                    key = (pstep.upper(), dname.upper())
+                    if key in st.override_data:
+                        nd.inline, nd.data = True, list(st.override_data[key])
                     extra.append(nd)
                 else:
                     merged = Dd(target.name, dict(target.params), line, st.file)
                     merged.params.update(params)
                     merged.overridden = True
+                    key = (pstep.upper(), dname.upper())
+                    if key in st.override_data:
+                        merged.inline, merged.data = True, list(st.override_data[key])
                     dds[dds.index(target)] = merged
             out.append({"id": pid, "name": pname, "parent": sid, "container": False,
                         "pgm": (pgm or "").upper() or None, "proc": None, "proc_found": False,
-                        "file": proc.file, "line": ps.line,
+                        "file": proc.file, "line": ps.line, "parm": ps.params.get("PARM"),
                         "dds": _dds(dds + extra, symbols, sources, proc.file)})
     return out
 
@@ -318,5 +339,85 @@ def _dds(dds, symbols, sources, default_file):
             skip = why
         lines = [(d.file, d.line)] + used
         res.append({"name": d.name, "dsn": dsn, "mode": disp_mode(d), "skip": skip, "lines": lines,
-                    "concat": getattr(d, "concat", False)})
+                    "concat": getattr(d, "concat", False), "data": list(d.data)})
     return res
+
+
+# ------------------------------------------------- facts inside utility steps
+
+FACT_PGMS = {"IDCAMS", "IKJEFT01", "IKJEFT1A", "IKJEFT1B", "DFSRRC00"}
+TSO_PGMS = {"IKJEFT01", "IKJEFT1A", "IKJEFT1B"}
+IMS_REGIONS = {"DLI", "DBB", "BMP"}
+_TOKEN = r"([A-Z0-9#@$][A-Z0-9#@$.\-]*)"
+RUN_PROGRAM = re.compile(r"\bRUN\s+PROG(?:RAM)?\s*\(\s*([A-Z0-9#@$]{1,8})\s*\)", re.I)
+DSN_COMMAND = re.compile(r"^\s*DSN\s+SYSTEM\s*\(", re.I)
+_IDC_DELETE = re.compile(r"^\s*(DELETE|ALTER)\s*\(?\s*" + _TOKEN, re.I)
+_IDC_DEFINE = re.compile(r"^\s*DEFINE\s+\w+.*?\bNAME\s*\(\s*" + _TOKEN, re.I)
+_IDC_COPY = re.compile(r"^\s*(REPRO|BLDINDEX|IMPORT|EXPORT)\b", re.I)
+_OUTFILE = re.compile(r"\bOUTFILE\s*\(\s*([A-Z0-9#@$]+)", re.I)
+_OUTDATASET = re.compile(r"\bOUTDATASET\s*\(\s*" + _TOKEN, re.I)
+
+
+def _cards(data):
+    """Join in-stream lines that end in - or + into one command. Yield (file, line, text)."""
+    cur = None
+    for f, ln, raw in data:
+        t = re.sub(r"/\*.*?\*/", " ", raw[:72]).rstrip()
+        if not t.strip():
+            continue
+        cont = t.endswith("-") or t.endswith("+")
+        piece = (t[:-1] if cont else t).strip()
+        if cur is None:
+            cur = [f, ln, piece]
+        else:
+            cur[2] += " " + piece
+        if not cont:
+            yield tuple(cur)
+            cur = None
+    if cur:
+        yield tuple(cur)
+
+
+def utility_facts(step):
+    """Facts a step holds in its PARM and in-stream cards. step is an expand_job item.
+
+    Returns (runtime, writes). runtime: programs and subsystems the step starts by name, each with
+    dst, how, file, line. writes: datasets an IDCAMS card changes, each with dsn, verb, file, line.
+    Nothing here becomes an edge. A name with an ampersand (a symbol) is skipped.
+    """
+    pgm = step.get("pgm") or ""
+    runtime, writes = [], []
+    if pgm == "DFSRRC00":
+        toks = [t.strip().upper() for t in (step.get("parm") or "").strip().strip("'\"()").split(",")]
+        if len(toks) >= 2 and toks[0] in IMS_REGIONS and re.match(r"^[A-Z0-9#@$]{1,8}$", toks[1]):
+            runtime.append({"dst": toks[1], "how": "IMS region PARM", "file": step["file"], "line": step["line"]})
+    dd_dsn = {d["name"]: d["dsn"] for d in step["dds"] if d.get("dsn")}
+    for dd in step["dds"]:
+        if not dd.get("data"):
+            continue
+        for f, ln, text in _cards(dd["data"]):
+            if pgm in TSO_PGMS:
+                m = RUN_PROGRAM.search(text)
+                if m:
+                    runtime.append({"dst": m.group(1).upper(), "how": "TSO RUN PROGRAM", "file": f, "line": ln})
+                if DSN_COMMAND.match(text):
+                    runtime.append({"dst": "DSN", "how": "DB2 command processor", "file": f, "line": ln})
+            elif pgm == "IDCAMS":
+                m = _IDC_DELETE.match(text)
+                if m:
+                    writes.append({"dsn": m.group(2).upper(), "verb": m.group(1).upper(), "file": f, "line": ln})
+                    continue
+                m = _IDC_DEFINE.match(text)
+                if m:
+                    writes.append({"dsn": m.group(1).upper(), "verb": "DEFINE", "file": f, "line": ln})
+                    continue
+                m = _IDC_COPY.match(text)
+                if m:
+                    out = _OUTFILE.search(text)
+                    dsn = dd_dsn.get(out.group(1).upper()) if out else None
+                    if not dsn:
+                        od = _OUTDATASET.search(text)
+                        dsn = od.group(1).upper() if od else None
+                    if dsn:
+                        writes.append({"dsn": dsn, "verb": m.group(1).upper(), "file": f, "line": ln})
+    return runtime, writes

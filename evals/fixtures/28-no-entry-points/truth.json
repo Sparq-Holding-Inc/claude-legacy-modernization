@@ -1,0 +1,53 @@
+{
+ "case": "28-no-entry-points",
+ "status": "hand-written before the code that computes it",
+ "description": "Two programs and no JCL, CSD or scheduler. Nothing can be sequenced, so the wave seed is empty and both programs are unknown, never unreachable.",
+ "edges": [
+  {
+   "src": "PROGA",
+   "dst": "PROGB",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PROGA.cbl:4"
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "id": "PROGA",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "PROGB",
+   "unit_type": "subprogram",
+   "entry_point": false
+  }
+ ],
+ "dead_code": {
+  "unreachable": [],
+  "dormant": [],
+  "unknown": [
+   "PROGA",
+   "PROGB"
+  ]
+ },
+ "must_not_unreachable": [
+  "PROGA",
+  "PROGB"
+ ],
+ "wave_seed": {
+  "waves": [],
+  "unassigned": [
+   {
+    "id": "PROGA"
+   },
+   {
+    "id": "PROGB"
+   }
+  ]
+ }
+}

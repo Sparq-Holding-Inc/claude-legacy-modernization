@@ -113,5 +113,16 @@ bad2 = dict(base, deviations=[{"unit": "A", "from_wave": 1, "to_wave": 2, "reaso
 case("a deviation with no evidence and no inference is rejected", bool(schema.validate_waves(bad2)),
      str(schema.validate_waves(bad2)))
 
+empty = {"target_state": "refactor", "waves": [], "unassigned": [{"id": "A", "reason": "no entry point"}]}
+case("an empty plan is valid when every unit is unassigned", not schema.validate_waves(empty),
+     str(schema.validate_waves(empty)))
+case("an empty plan with nothing unassigned is rejected", bool(schema.validate_waves(dict(empty, unassigned=[]))))
+with tempfile.TemporaryDirectory() as td:
+    json.dump({"target_state": "refactor", "waves": [{"wave": 2, "units": ["A"]}]}, open(os.path.join(td, "waves.json"), "w"))
+    json.dump({"units": [{"id": "A", "wave": None}, {"id": "B", "wave": 7}]}, open(os.path.join(td, "risks.json"), "w"))
+    schema.apply_waves(td)
+    got = {u["id"]: u["wave"] for u in json.load(open(os.path.join(td, "risks.json")))["units"]}
+case("apply-waves fills wave and clears units no wave holds", got == {"A": 2, "B": None}, str(got))
+
 print("\n%d of %d passed" % (sum(results), len(results)))
 sys.exit(0 if all(results) else 1)

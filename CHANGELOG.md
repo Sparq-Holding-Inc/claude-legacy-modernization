@@ -17,6 +17,9 @@ Added
   (read-only batch, batch writers, online writers, DB2 or IMS or MQ, and so on) in a fixed order.
   It writes `03a-wave-seed.md` and a draft `03a-waves-draft.json`. Claude names the waves and may
   change them only for a cited reason. Each change goes in `deviations`.
+- Facts inside utility steps: the datasets an IDCAMS card deletes, defines or loads, and the program
+  an IMS `PARM` or a TSO `RUN PROGRAM` card names. They are not edges. They keep those programs out
+  of the unreachable bucket and tell the wave seed which jobs write shared data.
 - JCL text inside a COBOL literal (a job that submits itself through the internal reader) is
   noticed. What it names is called unknown, never unreachable.
 - Assembler, DB2 DDL, IMS DBD and PSB, DCLGEN and control card files are listed as not read.

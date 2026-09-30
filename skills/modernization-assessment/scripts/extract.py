@@ -41,7 +41,11 @@ LIMITS = [
     "COPY REPLACING is not applied. A copybook is expanded as written.",
     "A variable call target is resolved only from VALUE clauses and literal MOVEs in the same program.",
     "A called subprogram gets no DDs from its caller's JCL step.",
-    "IDCAMS, SORT and other in-stream control cards are not read. Dataset modes on utility steps come from DISP only.",
+    "SORT and most in-stream control cards are not read. IDCAMS DELETE, DEFINE, ALTER, REPRO, BLDINDEX, IMPORT and "
+    "EXPORT cards are read for the datasets they change, but only as facts. The dataset mode on a utility "
+    "step's edge still comes from DISP. A card that uses a symbol (&HLQ) is skipped.",
+    "The program a step runs is read from PARM for DFSRRC00 and from a RUN PROGRAM card for IKJEFT01. "
+    "Other drivers that start a program by name are not read.",
     "IF/THEN/ELSE and COND= in JCL are not modeled. Step order is file order.",
     "Nested PROC calls and INCLUDE members are not followed. JCL text inside a COBOL literal is noticed, "
     "but it makes no edge. A proc or program it names is called unknown, never unreachable.",
@@ -229,6 +233,7 @@ def build(root, as_of, dormant_years=5, use_git=True):
 
     # ---------------------------------------------------------------- JCL
     procs, job_units = {}, []
+    runtime_named, utility_writes = [], []
     for rel in buckets["proc"] + buckets["jcl"]:
         try:
             units = jcl.parse_file(root, rel)
@@ -260,6 +265,15 @@ def build(root, as_of, dormant_years=5, use_git=True):
             if s["parent"] is None and "#" in s["id"]:
                 notices.append("%s:%d: job %s repeats a step name. The extractor calls this one %s." % (s["file"], s["line"], u.name, s["id"].split(".", 1)[1]))
         by_id = {s["id"]: s for s in steps}
+        for s in steps:
+            if s["pgm"] in jcl.FACT_PGMS:
+                found_rt, found_uw = jcl.utility_facts(s)
+                for r in found_rt:
+                    runtime_named.append({"src": "step:" + s["id"], "dst": r["dst"] if r["dst"] in prog_set else "ext:" + r["dst"],
+                                          "how": r["how"], "evidence": {"file": r["file"], "line": r["line"]}})
+                for w in found_uw:
+                    utility_writes.append({"src": "step:" + s["id"], "dst": schema.ds_id(w["dsn"]), "verb": w["verb"],
+                                           "evidence": {"file": w["file"], "line": w["line"]}})
         execs = []
         for s in steps:
             sid = "step:" + s["id"]
@@ -498,6 +512,15 @@ def build(root, as_of, dormant_years=5, use_git=True):
     proc_programs = {schema.proc_id(n): sorted({st.pgm for st in u.steps if st.pgm in prog_set})
                      for n, u in procs.items() if any(st.pgm in prog_set for st in u.steps)}
 
+    def uniq(items):
+        seen, out = set(), []
+        for it in sorted(items, key=lambda x: (x["src"], x["dst"], x["evidence"]["file"], x["evidence"]["line"])):
+            k = (it["src"], it["dst"], it["evidence"]["file"], it["evidence"]["line"])
+            if k not in seen:
+                seen.add(k)
+                out.append(it)
+        return out
+
     nodes, edges = g.finalize()
     return {
         "schema_version": schema.SCHEMA_VERSION,
@@ -509,7 +532,8 @@ def build(root, as_of, dormant_years=5, use_git=True):
         "nodes": nodes,
         "edges": edges,
         "unparsed": sorted(g.unparsed, key=lambda u: (u["file"], u["reason"])),
-        "analysis": analyze.analyze(nodes, edges, as_of, dormant_years, notices, embedded, proc_programs),
+        "analysis": analyze.analyze(nodes, edges, as_of, dormant_years, notices, embedded, proc_programs,
+                                    uniq(runtime_named), uniq(utility_writes)),
     }
 
 

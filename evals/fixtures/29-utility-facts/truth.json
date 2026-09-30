@@ -1,0 +1,277 @@
+{
+ "case": "29-utility-facts",
+ "status": "edges reviewed by hand against the source; runtime_named, utility_writes, dead_code and wave_seed hand-written before the code that computes them",
+ "description": "Facts that live inside utility steps. An IDCAMS step deletes, defines and reloads the master (the DD says DISP=OLD, which reads as a read). A TSO step names the program it runs in an in-stream card, and opens with a DSN command. An IMS step names its program in PARM. None of it makes an edge, but it decides which programs are live and which jobs write shared data.",
+ "edges": [
+  {
+   "src": "PGMIMS",
+   "dst": "ext:CBLTDLI",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMIMS.cbl:4"
+   ]
+  },
+  {
+   "src": "step:DB2JOB.S1",
+   "dst": "ext:IKJEFT01",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/DB2JOB.jcl:2"
+   ]
+  },
+  {
+   "src": "step:IMSJOB.S1",
+   "dst": "ext:DFSRRC00",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/IMSJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "step:LOADMAST.S1",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/LOADMAST.jcl:2"
+   ]
+  },
+  {
+   "src": "step:RDJOB.S1",
+   "dst": "PGMRD",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/RDJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "PGMRD",
+   "dst": "ds:SPARQ.TEST.MASTER",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMRD.cbl:6",
+    "app/cbl/PGMRD.cbl:12",
+    "app/jcl/RDJOB.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMSQL",
+   "dst": "ds:db2:ACCOUNTS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMSQL.cbl:4"
+   ]
+  },
+  {
+   "src": "step:LOADMAST.S1",
+   "dst": "ds:SPARQ.TEST.FLAT",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/jcl/LOADMAST.jcl:4"
+   ]
+  },
+  {
+   "src": "step:LOADMAST.S1",
+   "dst": "ds:SPARQ.TEST.MASTER",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/jcl/LOADMAST.jcl:5"
+   ]
+  },
+  {
+   "src": "job:DB2JOB",
+   "dst": "step:DB2JOB.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/DB2JOB.jcl:2"
+   ]
+  },
+  {
+   "src": "job:IMSJOB",
+   "dst": "step:IMSJOB.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/IMSJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "job:LOADMAST",
+   "dst": "step:LOADMAST.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/LOADMAST.jcl:2"
+   ]
+  },
+  {
+   "src": "job:RDJOB",
+   "dst": "step:RDJOB.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/RDJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "job:BINDJOB",
+   "dst": "step:BINDJOB.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/BINDJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "step:BINDJOB.S1",
+   "dst": "ext:IKJEFT01",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/BINDJOB.jcl:2"
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "id": "job:LOADMAST",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "PGMSQL",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "PGMIMS",
+   "unit_type": "batch",
+   "entry_point": false
+  }
+ ],
+ "runtime_named": [
+  {
+   "src": "step:DB2JOB.S1",
+   "dst": "ext:DSN",
+   "file": "app/jcl/DB2JOB.jcl",
+   "line": 5
+  },
+  {
+   "src": "step:DB2JOB.S1",
+   "dst": "PGMSQL",
+   "file": "app/jcl/DB2JOB.jcl",
+   "line": 6
+  },
+  {
+   "src": "step:IMSJOB.S1",
+   "dst": "PGMIMS",
+   "file": "app/jcl/IMSJOB.jcl",
+   "line": 2
+  },
+  {
+   "src": "step:BINDJOB.S1",
+   "dst": "ext:DSN",
+   "file": "app/jcl/BINDJOB.jcl",
+   "line": 4
+  }
+ ],
+ "utility_writes": [
+  {
+   "src": "step:LOADMAST.S1",
+   "dst": "ds:SPARQ.TEST.MASTER",
+   "verb": "DELETE",
+   "file": "app/jcl/LOADMAST.jcl",
+   "line": 7
+  },
+  {
+   "src": "step:LOADMAST.S1",
+   "dst": "ds:SPARQ.TEST.MASTER",
+   "verb": "DEFINE",
+   "file": "app/jcl/LOADMAST.jcl",
+   "line": 9
+  },
+  {
+   "src": "step:LOADMAST.S1",
+   "dst": "ds:SPARQ.TEST.MASTER",
+   "verb": "REPRO",
+   "file": "app/jcl/LOADMAST.jcl",
+   "line": 11
+  }
+ ],
+ "dead_code": {
+  "unreachable": [],
+  "dormant": [],
+  "unknown": []
+ },
+ "must_not_unreachable": [
+  "PGMSQL",
+  "PGMIMS"
+ ],
+ "wave_seed": {
+  "waves": [
+   {
+    "family": "batch-readonly",
+    "units": [
+     "PGMRD",
+     "job:RDJOB"
+    ]
+   },
+   {
+    "family": "batch-writers",
+    "units": [
+     "job:LOADMAST"
+    ]
+   },
+   {
+    "family": "subsystem",
+    "units": [
+     "PGMIMS",
+     "PGMSQL",
+     "job:BINDJOB",
+     "job:DB2JOB",
+     "job:IMSJOB"
+    ]
+   }
+  ],
+  "unassigned": []
+ }
+}

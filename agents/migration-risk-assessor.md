@@ -60,7 +60,7 @@ difficulty first. The validator checks it.
 
 ## What to write
 
-Score every program that is reachable or in the unknown bucket, and every JCL job, in `graph.json`. Do not score JCL steps, copybooks or datasets. Set `wave` to null. The main assessment fills it in once the plan exists. Read the source only as
+Score every program that is reachable or in the unknown bucket, and every JCL job, in `graph.json`. Do not score JCL steps, copybooks or datasets. Set `wave` to null. The main assessment fills it in with `schema.py apply-waves` once the plan exists. Read the source only as
 far as you need to justify a score. A program you scored without reading it gets `"confidence":
 "low"`.
 

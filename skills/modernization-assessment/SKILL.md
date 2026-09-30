@@ -31,7 +31,8 @@ Two rules follow.
 
 ## Before you start
 
-Confirm three things with the user. Do not guess them. The `/modernize-scan` command can take
+Confirm three things with the user. Do not guess them. In a non-interactive run, when the command
+was given its flags, use the flags and the defaults and ask nothing. The `/modernize-scan` command can take
 them as flags, so check what you were given before you ask.
 
 1. **Target state.** Rehost, replatform, refactor, or rewrite? These give completely different
@@ -41,7 +42,8 @@ them as flags, so check what you were given before you ask.
    Refactor: the same behavior in restructured code, usually as services, in the same or a new language.
    Rewrite: new code written from the behavior, not from the source.
 2. **What must not break.** Regulatory reports, month-end close, EDI partners, a downstream
-   warehouse. Name them. They become the behavioral-equivalence anchors.
+   warehouse. Name them. They become the behavioral-equivalence anchors. If an item maps to no unit
+   in the tree, say so in Open Questions. Do not invent a mapping.
 3. **Runtime telemetry.** Can they tell you which programs ran in the last 12 months? If yes, the
    dead-code register goes from speculation to evidence. If no, say clearly that every dead-code
    claim is provisional.
@@ -73,6 +75,11 @@ Now read `graph.json`. Start with the `analysis` block. It already holds:
 - `unresolved_dynamic`: every computed call the script could not resolve
 - `embedded_jcl`: JCL text found inside a COBOL literal. The program can submit it at run time. The
   proc or program it names has no edge, so it is unknown, never unreachable
+- `runtime_named`: programs a step starts by name inside PARM or an in-stream card (IMS regions, TSO
+  RUN PROGRAM), and steps that open a DB2 command processor. No edge exists for them, but the programs
+  count as reachable
+- `utility_writes`: datasets an IDCAMS card deletes, defines or loads. The DD says DISP=SHR or OLD, which
+  reads as a read, so these are the only sign that the step writes
 - `wave_seed`: a first cut of the waves, from facts alone (Phase 3)
 - `sccs`, `self_recursive`, `articulation_points`, `god_modules`, `fan_in`, `fan_out`
 - `data_hubs`: the datasets with the most programs attached
@@ -149,14 +156,19 @@ The extractor already cut a first plan from facts. Read `03a-wave-seed.md`. Star
 1. batch jobs that touch no shared data and run no application program
 2. read-only batch jobs
 3. read-only online transactions
-4. batch jobs with no application program that touch shared data (their writes are guesses)
-5. batch jobs that write shared data
+4. batch jobs that read shared data through a utility (the mode comes from DISP alone, so they may write it)
+5. batch jobs that write shared data, including IDCAMS jobs that delete, define or load it
 6. online transactions that write shared data
 7. anything that touches DB2, IMS or MQ
 
 A unit that several entry points use moves with the earliest family that uses it. A scheduler job
 moves with the last family among the jobs it runs. A call cycle always moves whole.
 Every unit is placed, or listed as not placed with a reason. Some families may be empty.
+
+If the tree has no entry point (no JCL job, no CSD transaction, no scheduler), the seed has no waves and
+every unit is unknown. Write `waves.json` with `"waves": []` and every unit in `unassigned`. Do not
+invent a wave. Say in `00-summary.md` that nothing can be sequenced until the client supplies JCL, a
+CSD or a scheduler export.
 
 A wave is valid only if all four hold:
 
@@ -170,15 +182,19 @@ scoping answers. It writes `modernization-assessment/risks.json`.
 
 Copy the draft to `waves.json`. Fill in what only you can: `target_state`, and for each wave its
 `name`, `rationale`, `unblocks`, `blast_radius` and `confidence`. Keep the units, the wave order and
-the `evidence` as they are. Say in the rationale why the family is a sound wave, or why it is not.
+the `evidence` as they are. If you move a unit, add your own evidence to the wave it joins. Say in the rationale why the family is a sound wave, or why it is not.
 For each wave, say what it *unblocks*. A wave that unblocks nothing is a chore: say so.
+
+A wave that `03a-wave-seed.md` lists computed calls for cannot have `high` confidence. Say what the
+calls could reach.
 
 Change the plan only for a reason you can cite. These are the reasons that count:
 
 1. A must-not-break item, a strongly connected component or a facade dependency forces a unit
    into another wave. Dependency wins over risk quadrant. A high-high unit that everything else
    depends on cannot go last, so say what you would put behind a facade to make it movable.
-2. A wave holds more than 25 units and one argument needs it cut. Cut it at an articulation point
+2. A wave holds more than 25 units and one argument needs it cut. A wave of 26 units that one sentence
+   describes needs no cut. Cut it at an articulation point
    from `analysis.articulation_points`, and name the point.
 3. Something the extractor could not see changes what a unit is: a computed call, a file listed as
    not parsed, JCL text inside COBOL. Cite it.
@@ -192,7 +208,8 @@ and the evidence. A plan with no deviations is a fine answer.
 Write `03-waves.md` and `waves.json`. A unit is a program, a JCL job (`job:`), a proc, or a scheduler
 job. Steps, copybooks and datasets move with their owner, so do not list them. Every unit must be a
 node id in `graph.json`. Every wave needs `evidence` or `"inference": true`. Once the plan exists, set
-the `wave` field on each unit in `risks.json`.
+the `wave` field on each unit in `risks.json` with
+`python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/schema.py" apply-waves modernization-assessment`.
 
 ```json
 {

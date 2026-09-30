@@ -136,21 +136,31 @@
     "pass": true,
     "problems": [],
     "edges": 2
+   },
+   "28-no-entry-points": {
+    "pass": true,
+    "problems": [],
+    "edges": 1
+   },
+   "29-utility-facts": {
+    "pass": true,
+    "problems": [],
+    "edges": 15
    }
   },
   "per_kind": {
    "call": {
-    "tp": 58,
+    "tp": 65,
     "fp": 0,
     "fn": 0
    },
    "include": {
-    "tp": 45,
+    "tp": 50,
     "fp": 0,
     "fn": 0
    },
    "data": {
-    "tp": 27,
+    "tp": 31,
     "fp": 0,
     "fn": 0
    },
@@ -167,12 +177,12 @@
   },
   "all_pass": true,
   "evidence_resolves": [
-   231,
-   231
+   261,
+   261
   ]
  },
  "carddemo": {
-  "seconds": 0.6,
+  "seconds": 0.5,
   "stats": {
    "call": {
     "tp": 234,
@@ -276,8 +286,8 @@
   },
   "ca7_reported_unparsed": true,
   "evidence_resolves": [
-   2156,
-   2156
+   2242,
+   2242
   ],
   "evidence_overlap_with_truth": {
    "call:total": 234,
@@ -295,7 +305,7 @@
   "dead_code_counts": {
    "unreachable": 1,
    "dormant": 0,
-   "unknown": 11
+   "unknown": 2
   },
   "unparsed": [
    {

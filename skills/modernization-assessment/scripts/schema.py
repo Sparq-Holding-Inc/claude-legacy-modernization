@@ -300,8 +300,9 @@ def validate_waves(w, graph=None):
     if w.get("target_state") not in TARGET_STATES:
         errs.append("waves: target_state not in %s" % list(TARGET_STATES))
     waves = w.get("waves")
-    if not isinstance(waves, list) or not waves:
-        return errs + ["waves: waves must be a non-empty list"]
+    if not isinstance(waves, list) or (not waves and not w.get("unassigned")):
+        return errs + ["waves: waves must be a non-empty list. It may be empty only when every unit is listed "
+                       "in unassigned, as in a tree with no entry point."]
     numbers = []
     placed = {}
     for i, wave in enumerate(waves):
@@ -496,9 +497,29 @@ def _load(path):
         return json.load(fh)
 
 
+def apply_waves(base):
+    """Set the wave field of every unit in risks.json from waves.json. A unit no wave holds gets null."""
+    import os
+    rp = os.path.join(base, "risks.json")
+    waves, risks = _load(os.path.join(base, "waves.json")), _load(rp)
+    placed = {u: wv["wave"] for wv in waves.get("waves", []) for u in wv.get("units", [])}
+    hit = 0
+    for u in risks.get("units", []):
+        u["wave"] = placed.get(u.get("id"))
+        hit += u["wave"] is not None
+    with open(rp, "w", encoding="utf-8") as fh:
+        json.dump(risks, fh, indent=1)
+        fh.write("\n")
+    print("set wave on %d of %d units in %s" % (hit, len(risks.get("units", [])), rp))
+    return 0
+
+
 def main(argv):
     usage = ("usage: schema.py validate {graph|waves|dead-code|risks} FILE [--graph graph.json]\n"
-             "       schema.py validate-dir DIR    (checks every output that exists)")
+             "       schema.py validate-dir DIR    (checks every output that exists)\n"
+             "       schema.py apply-waves DIR     (fills risks.json wave from waves.json)")
+    if len(argv) == 3 and argv[1] == "apply-waves":
+        return apply_waves(argv[2])
     if len(argv) >= 4 and argv[1] == "validate" and argv[2] in VALIDATORS:
         graph = None
         if "--graph" in argv:

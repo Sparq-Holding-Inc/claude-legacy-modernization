@@ -14,7 +14,9 @@
     "20",
     "22",
     "25",
-    "26"
+    "26",
+    "28",
+    "29"
    ],
    "equivalent": false
   },
@@ -284,6 +286,55 @@
    "equivalent": false
   },
   {
+   "mutation": "IDCAMS cards not read",
+   "caught_by": [
+    "29"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "TSO RUN PROGRAM card not read",
+   "caught_by": [
+    "29"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "IMS PARM not read",
+   "caught_by": [
+    "29"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "programs a step names at run time not followed for reach",
+   "caught_by": [
+    "29"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "wave seed: IDCAMS writes ignored",
+   "caught_by": [
+    "29"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "wave seed: DB2 command marker ignored",
+   "caught_by": [
+    "29"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "wave seed: guessed reads not their own family",
+   "caught_by": [
+    "26"
+   ],
+   "equivalent": false
+  },
+  {
    "mutation": "dead code: dynamic calls ignored",
    "caught_by": [
     "13"
@@ -300,7 +351,8 @@
   {
    "mutation": "dead code: no entry point guard",
    "caught_by": [
-    "20"
+    "20",
+    "28"
    ],
    "equivalent": false
   }

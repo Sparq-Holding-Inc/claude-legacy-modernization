@@ -83,7 +83,8 @@ def evidence_resolves(root, graph):
     """Fraction of evidence entries that point at a real file and a line inside it."""
     cache, ok, total = {}, 0, 0
     seed = [x for w in graph["analysis"].get("wave_seed", {}).get("waves", []) for x in w["evidence"]]
-    embedded = [r["evidence"] for r in graph["analysis"].get("embedded_jcl", [])]
+    embedded = [r["evidence"] for r in graph["analysis"].get("embedded_jcl", []) +
+                graph["analysis"].get("runtime_named", []) + graph["analysis"].get("utility_writes", [])]
     for x in [x for e in graph["edges"] for x in e["evidence"]] + seed + embedded:
         if True:
             total += 1
@@ -147,6 +148,18 @@ def compare_fixture(truth, graph):
             problems.append("wave seed unassigned: truth %s got %s" % (want_u, have_u))
         if any(not w["evidence"] for w in got["waves"]):
             problems.append("wave seed: a wave has no evidence")
+    if "runtime_named" in truth:
+        want_r = sorted((x["src"], x["dst"], x["file"], x["line"]) for x in truth["runtime_named"])
+        have_r = sorted((x["src"], x["dst"], x["evidence"]["file"], x["evidence"]["line"])
+                        for x in graph["analysis"]["runtime_named"])
+        if want_r != have_r:
+            problems.append("runtime named: truth %s got %s" % (want_r, have_r))
+    if "utility_writes" in truth:
+        want_w = sorted((x["src"], x["dst"], x["verb"], x["file"], x["line"]) for x in truth["utility_writes"])
+        have_w = sorted((x["src"], x["dst"], x["verb"], x["evidence"]["file"], x["evidence"]["line"])
+                        for x in graph["analysis"]["utility_writes"])
+        if want_w != have_w:
+            problems.append("utility writes: truth %s got %s" % (want_w, have_w))
     if "embedded_jcl" in truth:
         want_e = sorted((x["src"], x["dst"], x["file"], x["line"]) for x in truth["embedded_jcl"])
         have_e = sorted((x["src"], x["dst"], x["evidence"]["file"], x["evidence"]["line"])

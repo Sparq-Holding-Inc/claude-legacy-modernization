@@ -146,13 +146,13 @@ FAMILIES = (
     ("batch-utility", "Batch jobs that run no application program and touch no dataset another entry point uses"),
     ("batch-readonly", "Batch jobs that run application programs and write nothing another entry point uses"),
     ("online-readonly", "Online transactions that write nothing another entry point uses"),
-    ("batch-data-jobs", "Batch jobs that run no application program but touch a dataset another entry point uses. "
-                        "The mode is inferred from DISP, so they may write it"),
-    ("batch-writers", "Batch jobs that run application programs and write a dataset another entry point also uses"),
+    ("batch-data-jobs", "Batch jobs that read a dataset another entry point uses through a utility. "
+                        "The mode comes from DISP alone, so they may write it"),
+    ("batch-writers", "Batch jobs that write a dataset another entry point also uses"),
     ("online-writers", "Online transactions that write a dataset another entry point also uses"),
     ("subsystem", "Entry points that touch DB2, IMS or MQ"),
 )
-SUBSYSTEM_EXT = re.compile(r"^ext:(MQ[A-Z]{2,}|CBLTDLI|AIBTDLI|DFSRRC00|DSNTEP2|DSNTIAD|DSNUTILB|DSN)$")
+SUBSYSTEM_EXT = re.compile(r"^ext:(MQ[A-Z]{2,}|CBLTDLI|AIBTDLI|DFSRRC00|DSNTEP2|DSNTEP4|DSNTIAD|DSNTIAUL|DSNUTILB|DSN)$")
 MOVABLE = set(schema.PROGRAM_TYPES) | {"jcl_job", "proc", "scheduler_job"}
 
 
@@ -170,7 +170,8 @@ def _spread(seeds, succ, by_id, reach, extra):
     return {k: v for k, v in origin.items() if by_id[k]["unit_type"] in BUCKET_TYPES}
 
 
-def wave_seed(nodes, edges, entries, unknown, unreachable):
+def wave_seed(nodes, edges, entries, unknown, unreachable, reasons=None, dynamic=None, runtime_named=None,
+              utility_writes=None):
     by_id = {n["id"]: n for n in nodes}
     succ, edges_from, sched_of = collections.defaultdict(list), collections.defaultdict(list), collections.defaultdict(list)
     for e in edges:
@@ -180,6 +181,13 @@ def wave_seed(nodes, edges, entries, unknown, unreachable):
             edges_from[e["src"]].append(e)
         if e["kind"] == "call" and e["src"].startswith("sch:") and e["dst"].startswith("job:"):
             sched_of[e["src"]].append(e["dst"])
+    rt_from, uw_from = collections.defaultdict(list), collections.defaultdict(list)
+    for r in runtime_named or []:
+        rt_from[r["src"]].append(r)
+        if r["dst"] in by_id:
+            succ[r["src"]].append(r["dst"])
+    for w in utility_writes or []:
+        uw_from[w["src"]].append(w)
     roots = sorted(i for i in entries if i in by_id and i not in sched_of
                    and (by_id[i]["unit_type"] == "jcl_job" or by_id[i]["unit_type"] in schema.PROGRAM_TYPES))
     owned, roots_of = {}, collections.defaultdict(set)
@@ -198,6 +206,8 @@ def wave_seed(nodes, edges, entries, unknown, unreachable):
     for e in edges:
         if e["kind"] == "data":
             touch[e["dst"]] |= roots_of.get(e["src"], set())
+    for w in utility_writes or []:
+        touch[w["dst"]] |= roots_of.get(w["src"], set())
 
     def ev_of(e):
         return dict(e["evidence"][0])
@@ -205,7 +215,7 @@ def wave_seed(nodes, edges, entries, unknown, unreachable):
     def classify(r):
         n = by_id[r]
         online = n["unit_type"] == "online_txn"
-        sub = shared = None
+        sub = shared = guess = None
         has_prog = False
         for v in sorted(owned[r]):
             if v in by_id and by_id[v]["unit_type"] in schema.PROGRAM_TYPES:
@@ -214,15 +224,23 @@ def wave_seed(nodes, edges, entries, unknown, unreachable):
                 if e["kind"] == "data" and e["dst"].startswith("ds:db2:") or \
                         e["kind"] == "call" and SUBSYSTEM_EXT.match(e["dst"]):
                     sub = sub or ev_of(e)
-                elif (e["kind"] == "data" and not e["dst"].startswith("ds:dd:") and len(touch[e["dst"]]) > 1
-                      and (e.get("mode") in ("write", "read_write") or "inferred from DISP" in (e.get("note") or ""))):
-                    shared = shared or ev_of(e)
+                elif e["kind"] == "data" and not e["dst"].startswith("ds:dd:") and len(touch[e["dst"]]) > 1:
+                    if e.get("mode") in ("write", "read_write"):
+                        shared = shared or ev_of(e)
+                    elif "inferred from DISP" in (e.get("note") or ""):
+                        guess = guess or ev_of(e)
+            for w in uw_from.get(v, ()):
+                if len(touch[w["dst"]]) > 1:
+                    shared = shared or dict(w["evidence"])
+            for q in rt_from.get(v, ()):
+                if SUBSYSTEM_EXT.match(q["dst"]):
+                    sub = sub or dict(q["evidence"])
         if sub:
             return "subsystem", sub
         if shared:
-            if online:
-                return "online-writers", shared
-            return ("batch-writers" if has_prog else "batch-data-jobs"), shared
+            return ("online-writers" if online else "batch-writers"), shared
+        if guess and not online:
+            return "batch-data-jobs", guess
         own = None
         for e in edges_from.get(r, ()):
             own = own or ev_of(e)
@@ -252,10 +270,9 @@ def wave_seed(nodes, edges, entries, unknown, unreachable):
         if n["unit_type"] not in MOVABLE:
             continue
         if u in dead:
-            unassigned.append({"id": u, "reason": "dead code candidate, unreachable. See dead-code.json."})
+            unassigned.append({"id": u, "reason": (reasons or {}).get(u) or "dead code candidate, unreachable"})
         elif u in hidden:
-            unassigned.append({"id": u, "reason": "no static path, but a computed call or a submit inside COBOL "
-                                                  "could reach it. See dead-code.json."})
+            unassigned.append({"id": u, "reason": (reasons or {}).get(u) or "reachability unknown"})
         elif u.startswith("sch:") and u not in sched_of:
             unassigned.append({"id": u, "reason": "scheduler job that names no JCL job in the tree"})
         else:
@@ -273,17 +290,23 @@ def wave_seed(nodes, edges, entries, unknown, unreachable):
         evs = {(b["file"], b["line"]) for r in fam_roots for b in [basis_of[r]] if b}
         waves.append({"wave": len(waves) + 1, "family": name, "description": text, "units": units,
                       "entry_points": fam_roots,
+                      "computed_calls": sorted({d["src"] for d in (dynamic or [])} & set(units)),
                       "evidence": [{"file": f, "line": l} for f, l in sorted(evs)[:3]]})
     return {"basis": "family of the entry points that use a unit, in a fixed order. Facts only, no risk judgment.",
             "waves": waves, "unassigned": sorted(unassigned, key=lambda x: x["id"])}
 
 
-def analyze(nodes, edges, as_of, dormant_years=5, notices=None, embedded=None, proc_programs=None):
+def analyze(nodes, edges, as_of, dormant_years=5, notices=None, embedded=None, proc_programs=None,
+            runtime_named=None, utility_writes=None):
     by_id = {n["id"]: n for n in nodes}
     succ = collections.defaultdict(list)
     for e in edges:
         if e["kind"] in WALK_KINDS:
             succ[e["src"]].append(e["dst"])
+
+    for r in runtime_named or []:
+        if r["dst"] in by_id:
+            succ[r["src"]].append(r["dst"])
 
     entries = sorted(n["id"] for n in nodes if n.get("entry_point"))
     reach, work = set(entries), list(entries)
@@ -436,6 +459,8 @@ def analyze(nodes, edges, as_of, dormant_years=5, notices=None, embedded=None, p
         "dead_code_reasons": reasons,
         "unresolved_dynamic": dynamic,
         "embedded_jcl": list(embedded or []),
+        "runtime_named": list(runtime_named or []),
+        "utility_writes": list(utility_writes or []),
         "structure_basis": basis,
         "fan_in": {k: v for k, v in fi.items() if v},
         "fan_out": {k: v for k, v in fo.items() if v},
@@ -448,6 +473,6 @@ def analyze(nodes, edges, as_of, dormant_years=5, notices=None, embedded=None, p
         "unscheduled_jobs": unscheduled,
         "edge_counts": dict(sorted(kinds.items())),
         "node_counts": dict(sorted(types.items())),
-        "wave_seed": wave_seed(nodes, edges, entries, unknown, unreachable),
+        "wave_seed": wave_seed(nodes, edges, entries, unknown, unreachable, reasons, dynamic, runtime_named, utility_writes),
         "warnings": warnings,
     }

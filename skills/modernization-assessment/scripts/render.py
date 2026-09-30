@@ -221,6 +221,9 @@ def waveseed(g):
         more = " (+%d more in the draft)" % (len(w["units"]) - 80) if len(w["units"]) > 80 else ""
         out += ["## Wave %d. %s" % (w["wave"], w["family"]), "", w["description"] + ".", "",
                 ", ".join("`%s`" % u for u in shown) + more, ""]
+        if w.get("computed_calls"):
+            out += ["Computed calls in this wave, so its confidence cannot be high: " +
+                    ", ".join("`%s`" % u for u in w["computed_calls"]) + ".", ""]
     out += ["## Not placed", ""]
     if seed["unassigned"]:
         out += table(["Unit", "Reason"], [[u["id"], u["reason"]] for u in seed["unassigned"]])
