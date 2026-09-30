@@ -369,8 +369,8 @@ def main():
     ap.add_argument("--prepare", action="store_true", help="create work folders and print them, run nothing")
     ap.add_argument("--collect", default=None, metavar="HARNESS",
                     help="copy finished work folders into evals/runs and label how they were produced")
-    ap.add_argument("--budget-usd", type=float, default=8.0, help="cap per run")
-    ap.add_argument("--fixture-budget-usd", type=float, default=2.0)
+    ap.add_argument("--budget-usd", type=float, default=30.0, help="cap per CardDemo run. One fixture cost 2.69, a CardDemo run was not measured")
+    ap.add_argument("--fixture-budget-usd", type=float, default=6.0, help="cap per fixture run. A $2 cap stopped a six file tree at 32 turns")
     ap.add_argument("--model", default=None)
     ap.add_argument("--only", default=None, help="run one case name, for example carddemo or 11-dead-program")
     ap.add_argument("--carddemo-runs", type=int, default=CARDDEMO_RUNS)

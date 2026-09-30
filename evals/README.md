@@ -15,6 +15,7 @@ Everything here exists to answer one question: how good is this plugin, and how 
 | `mutation_check.py` | Breaks the extractor on purpose and shows which fixtures notice. |
 | `test_hook.py` | Tests for the citation hook. |
 | `test_e2e_metrics.py` | Tests for the end to end scorer. |
+| `wave_quality.py`, `test_wave_quality.py` | Wave quality checks (coupling cut, misplaced units, ordering) and planted bad plans that must score worse. Separate from repeatability. |
 | `test_validators.py` | Plants wrong assessments (an entry point called unreachable, a plan with a made-up unit, a risk in wave 999) and checks that validation rejects them. |
 | `run_e2e_evals.py` | Runs full assessments headless and scores them. |
 | `scorecard/` | JSON written by the runners. `RESULTS.md` is built from it. |

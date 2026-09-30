@@ -66,6 +66,7 @@ def main():
     hook_rc, hook_out = run([sys.executable, os.path.join(HERE, "test_hook.py")])
     sc_rc, sc_out = run([sys.executable, os.path.join(HERE, "test_e2e_metrics.py")])
     va_rc, va_out = run([sys.executable, os.path.join(HERE, "test_validators.py")])
+    wq_rc, wq_out = run([sys.executable, os.path.join(HERE, "test_wave_quality.py")])
     val = validate_all()
     L = []
     w = L.append
@@ -203,6 +204,7 @@ def main():
     a, b = passed_of(hook_out)
     c, d = passed_of(sc_out)
     e_, f_ = passed_of(va_out)
+    g_, h_ = passed_of(wq_out)
     w("## Tests for the checking code")
     w("")
     w("| Suite | Result |")
@@ -210,6 +212,7 @@ def main():
     w("| Citation hook (`test_hook.py`) | %d of %d pass |" % (a, b))
     w("| End to end scorer (`test_e2e_metrics.py`) | %d of %d pass |" % (c, d))
     w("| Output validators, wrong assessments must be rejected (`test_validators.py`) | %d of %d pass |" % (e_, f_))
+    w("| Wave quality checks, bad plans must score worse (`test_wave_quality.py`) | %d of %d pass |" % (g_, h_))
     w("")
     if s and s["runs_scored"]:
         w("## End to end runs")
@@ -249,6 +252,50 @@ def main():
         w("")
         for lo in lp["loops"]:
             w("- Loop %d: %s" % (lo["loop"], lo["diagnosis"]))
+        w("")
+    wq = load("wave-quality.json")
+    if wq and wq.get("rows"):
+        w("## Wave quality (separate from repeatability)")
+        w("")
+        w("Repeatability asks whether runs make the same plan. These ask whether the plan cuts the coupling the "
+          "extractor found in sensible places. All of it is computed from the extracted graph, so it checks a plan "
+          "against the facts. It does not check the facts, and it does not prove a wave is safe to ship. "
+          "`evals/wave_quality.py` explains each metric.")
+        w("")
+        w("| Loop | Cut better than random plans (lowest of 3 runs) | Units with more links elsewhere (mean) | Order vs blast radius (mean rank correlation) | Waves |")
+        w("|---|---|---|---|---|")
+        for lp_ in sorted({r_["loop"] for r_ in wq["rows"]}):
+            rs = [r_ for r_ in wq["rows"] if r_["loop"] == lp_]
+            cp = [r_["cut_percentile"] for r_ in rs if r_["cut_percentile"] is not None]
+            mis = [r_["misplaced_share"] for r_ in rs]
+            od = [r_["order_spearman"] for r_ in rs if r_["order_spearman"] is not None]
+            w("| %d | %s | %s | %s | %s |" % (lp_, pct(min(cp)) if cp else "n/a", pct(sum(mis) / len(mis)),
+                                            "%.2f" % (sum(od) / len(od)) if od else "n/a", [r_["waves"] for r_ in rs]))
+        w("")
+        w("- The cut bar (better than 95% of random plans) was written before any plan was scored. Every plan passes it, "
+          "including loop 0, where the runs agreed only 15%. It is a sanity floor. It cannot tell a good cut from a "
+          "mediocre one, so I added the misplaced unit count, which can.")
+        w("- Units with more links into another wave than into their own fell from about 21% in loop 0 to about 11% in "
+          "loop 3. Some of that is real. Some is the seed following its own rules. Wave order against blast radius "
+          "improved a little and stays weak.")
+        w("- In CardDemo the scheduler chain and medium confidence contract checks have almost nothing to measure "
+          "(one giant chain, no medium contract between units), so they say nothing here.")
+        w("")
+    rh = load("real-harness-trials.json")
+    if rh:
+        w("## The real headless harness, one fixture")
+        w("")
+        w(rh["note"])
+        w("")
+        w("| Cap | Outcome | Cost | Turns | Permission denials |")
+        w("|---|---|---|---|---|")
+        for t_ in rh["trials"]:
+            w("| $%.0f | %s | $%.2f | %d | %d |" % (t_["cap_usd"], t_["outcome"], t_["cost_usd"], t_["turns"], t_["permission_denials"]))
+        w("")
+        for t_ in rh["trials"]:
+            for v_ in t_["verified"]:
+                w("- Verified live: " + v_ + ".")
+        w("- " + rh["cost_lesson"])
         w("")
     prov = load("e2e-provenance.json")
     if prov and s and s["runs_scored"]:

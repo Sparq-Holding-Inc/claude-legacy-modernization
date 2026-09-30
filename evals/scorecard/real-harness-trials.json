@@ -1,0 +1,39 @@
+{
+ "note": "Runs through the real headless harness (claude -p with --plugin-dir). Only one fixture was run, to check the harness and measure cost. The full set was not run, to save usage. These trials are not part of the scorecard, which is built from the subagent runs.",
+ "trials": [
+  {
+   "case": "11-dead-program",
+   "cap_usd": 2.0,
+   "outcome": "stopped at the cost cap after 32 turns, before finishing",
+   "cost_usd": 2.05,
+   "turns": 32,
+   "permission_denials": 8,
+   "verified": [
+    "the plugin loaded through --plugin-dir",
+    "the namespaced command /legacy-modernization:modernize-scan ran",
+    "the plugin's own agent ran as legacy-modernization:migration-risk-assessor"
+   ],
+   "note": "Partial output. The stricter validators rejected it (a copybook listed as a wave unit, risk waves not yet applied)."
+  },
+  {
+   "case": "11-dead-program",
+   "cap_usd": 8.0,
+   "outcome": "completed",
+   "cost_usd": 2.69,
+   "turns": 37,
+   "wall_seconds": 379,
+   "permission_denials": 2,
+   "citations": "143 of 143 resolve",
+   "json_valid": true,
+   "graph_unmodified": true,
+   "unreachable_on_dynamic": 0,
+   "verified": [
+    "the live Stop hook ran and removed the marker after a clean check",
+    "no 'Unresolved citations' section was needed",
+    "the plugin's own agent ran as legacy-modernization:migration-risk-assessor"
+   ],
+   "output": "evals/real-harness/11-dead-program"
+  }
+ ],
+ "cost_lesson": "A six-file tree cost about $2.70 and 6 minutes through the real harness. The default cap of $2 per fixture is too low and $8 per CardDemo run is probably too low. A full run of 13 fixtures and 3 CardDemo runs is likely to cost tens of dollars and to eat a large share of a usage window."
+}

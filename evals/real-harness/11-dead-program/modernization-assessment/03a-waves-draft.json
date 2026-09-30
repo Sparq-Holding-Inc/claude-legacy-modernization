@@ -1,0 +1,31 @@
+{
+ "target_state": null,
+ "waves": [
+  {
+   "wave": 1,
+   "family": "batch-readonly",
+   "name": null,
+   "units": [
+    "PGMLIVE",
+    "PGMMAIN",
+    "job:MAINJOB"
+   ],
+   "rationale": null,
+   "unblocks": null,
+   "blast_radius": null,
+   "confidence": null,
+   "evidence": [
+    {
+     "file": "app/jcl/MAINJOB.jcl",
+     "line": 1
+    }
+   ]
+  }
+ ],
+ "unassigned": [
+  {
+   "id": "PGMDEAD",
+   "reason": "no static path from any entry point and no reachable computed call in the tree"
+  }
+ ]
+}

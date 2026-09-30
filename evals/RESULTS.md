@@ -166,6 +166,7 @@ Extraction time: 0.6 seconds (bar: under 60). Graded scope: the core application
 | Citation hook (`test_hook.py`) | 15 of 15 pass |
 | End to end scorer (`test_e2e_metrics.py`) | 18 of 18 pass |
 | Output validators, wrong assessments must be rejected (`test_validators.py`) | 32 of 32 pass |
+| Wave quality checks, bad plans must score worse (`test_wave_quality.py`) | 8 of 8 pass |
 
 ## End to end runs
 
@@ -203,6 +204,38 @@ Hand-maintained record of the fix loops for the failing wave metrics. Numbers ar
 - Loop 1: Wave count now identical and every run placed the same units. The three runs made 18 to 23 changes each to the seed, and mostly the same ones: three DB2 or IMS jobs the extractor could not see into (the program is named in PARM or in a TSO RUN PROGRAM card), and refresh jobs whose IDCAMS control cards prove they write the masters. Those are facts the extractor does not read. The runs also shared one scratch folder, and two of them reported that a sibling overwrote a helper script, so the agreement figure may be a little high. Fixture runs 01 to 04 showed a defect: the seed has no waves when the tree has no entry point, but the validator demanded at least one.
 - Loop 2: The pair score fell from 76.7% to 61.6% although the seed got better. One run kept the seed almost whole (4 changes). The other two changed it 17 and 13 times. Every run made the same three changes to the seed (the online report screen that submits JCL, the proc it submits, and the shared date routine). Two runs also moved whole scheduler chains (the jobs that open and close files around the posting cycle, and their Control-M entries) into the batch writers wave, and the third left them where the seed put them. That one disagreement is about 10 to 15 units, which is what the pair score measures. The seed did not know that jobs a scheduler chains together move together.
 - Loop 3: Both bars are met, and the reason matters. Each run changed the seed only 2 or 3 times, and each run's plan is 94 to 95 percent the same as the seed. The three runs agree because they kept the same deterministic draft. That is repeatability. It says nothing about whether the draft cuts the system in the right places. Two of the three changes were the same in every run (a DB2 job whose control cards sit in unread members), and the third differed by run.
+
+## Wave quality (separate from repeatability)
+
+Repeatability asks whether runs make the same plan. These ask whether the plan cuts the coupling the extractor found in sensible places. All of it is computed from the extracted graph, so it checks a plan against the facts. It does not check the facts, and it does not prove a wave is safe to ship. `evals/wave_quality.py` explains each metric.
+
+| Loop | Cut better than random plans (lowest of 3 runs) | Units with more links elsewhere (mean) | Order vs blast radius (mean rank correlation) | Waves |
+|---|---|---|---|---|
+| 0 | 100.0% | 20.8% | 0.24 | [7, 9, 8] |
+| 1 | 100.0% | 16.0% | 0.35 | [7, 7, 7] |
+| 2 | 100.0% | 12.7% | 0.32 | [7, 7, 7] |
+| 3 | 100.0% | 11.4% | 0.34 | [7, 7, 7] |
+
+- The cut bar (better than 95% of random plans) was written before any plan was scored. Every plan passes it, including loop 0, where the runs agreed only 15%. It is a sanity floor. It cannot tell a good cut from a mediocre one, so I added the misplaced unit count, which can.
+- Units with more links into another wave than into their own fell from about 21% in loop 0 to about 11% in loop 3. Some of that is real. Some is the seed following its own rules. Wave order against blast radius improved a little and stays weak.
+- In CardDemo the scheduler chain and medium confidence contract checks have almost nothing to measure (one giant chain, no medium contract between units), so they say nothing here.
+
+## The real headless harness, one fixture
+
+Runs through the real headless harness (claude -p with --plugin-dir). Only one fixture was run, to check the harness and measure cost. The full set was not run, to save usage. These trials are not part of the scorecard, which is built from the subagent runs.
+
+| Cap | Outcome | Cost | Turns | Permission denials |
+|---|---|---|---|---|
+| $2 | stopped at the cost cap after 32 turns, before finishing | $2.05 | 32 | 8 |
+| $8 | completed | $2.69 | 37 | 2 |
+
+- Verified live: the plugin loaded through --plugin-dir.
+- Verified live: the namespaced command /legacy-modernization:modernize-scan ran.
+- Verified live: the plugin's own agent ran as legacy-modernization:migration-risk-assessor.
+- Verified live: the live Stop hook ran and removed the marker after a clean check.
+- Verified live: no 'Unresolved citations' section was needed.
+- Verified live: the plugin's own agent ran as legacy-modernization:migration-risk-assessor.
+- A six-file tree cost about $2.70 and 6 minutes through the real harness. The default cap of $2 per fixture is too low and $8 per CardDemo run is probably too low. A full run of 13 fixtures and 3 CardDemo runs is likely to cost tens of dollars and to eat a large share of a usage window.
 
 ## How the end to end runs were produced
 

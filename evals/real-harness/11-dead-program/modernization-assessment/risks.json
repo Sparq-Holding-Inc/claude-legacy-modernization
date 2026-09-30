@@ -1,0 +1,98 @@
+{
+ "units": [
+  {
+   "id": "job:MAINJOB",
+   "port_difficulty": {
+    "score": 1,
+    "why": "One step running one program, no COND logic, no other steps to sequence."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "It is the entry point for the nightly batch cycle the user said must not break, but the program it runs does nothing."
+   },
+   "quadrant": "low-high",
+   "wave": 1,
+   "driving_fact": "Single-step JCL job (EXEC PGM=PGMMAIN) that is the only entry point into this tree and therefore the one thing standing between 'refactor' and 'break the nightly batch cycle'.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/jcl/MAINJOB.jcl",
+     "line": 2
+    }
+   ]
+  },
+  {
+   "id": "PGMMAIN",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Five lines: IDENTIFICATION DIVISION plus a single CALL to PGMLIVE and GOBACK. No business logic, no I/O, no arithmetic."
+   },
+   "blast_radius": {
+    "score": 2,
+    "why": "It is the program the nightly job runs, but it performs no work of its own beyond calling PGMLIVE, which itself does nothing; a break here is loud (job abends immediately) and trivially reversible."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "Entire PROCEDURE DIVISION is CALL 'PGMLIVE' followed by GOBACK; no data division, no file I/O, no computation.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/cbl/PGMMAIN.cbl",
+     "line": 4
+    }
+   ]
+  },
+  {
+   "id": "PGMLIVE",
+   "port_difficulty": {
+    "score": 1,
+    "why": "PROCEDURE DIVISION is a bare GOBACK; nothing to port."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "Highest fan-in in the tree (called by both PGMMAIN and the unreachable PGMDEAD) but it has no observable behavior to break -- it returns immediately."
+   },
+   "quadrant": "low-low",
+   "wave": 1,
+   "driving_fact": "Four-line program whose only statement is GOBACK; called by PGMMAIN on the live path, so it must stay callable, but there is no logic that could be wrong.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/cbl/PGMLIVE.cbl",
+     "line": 4
+    }
+   ]
+  },
+  {
+   "id": "PGMDEAD",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Identical shape to PGMMAIN -- a single CALL and GOBACK -- if it were ever ported."
+   },
+   "blast_radius": {
+    "score": 1,
+    "why": "graph.json analysis confirms no static path from the only entry point (job:MAINJOB) reaches PGMDEAD; nothing in production depends on it."
+   },
+   "quadrant": "low-low",
+   "wave": null,
+   "driving_fact": "Unreachable from job:MAINJOB, the tree's sole entry point; graph.json's dead_code_reasons says 'no static path from any entry point and no reachable computed call in the tree'.",
+   "confidence": "high",
+   "evidence": [
+    {
+     "file": "app/cbl/PGMDEAD.cbl",
+     "line": 4
+    }
+   ]
+  }
+ ],
+ "do_not_port": [
+  {
+   "id": "PGMDEAD",
+   "reason": "Unreachable from the only entry point (job:MAINJOB); graph.json analysis lists it under dead_code_candidates.unreachable with no static call path. No JCL step or program in the tree invokes it. Confirm with the team it is truly retired (no external/dynamic caller outside this tree) and then delete rather than port."
+  },
+  {
+   "id": "cpy:UNUSED",
+   "reason": "No program in the tree includes this copybook via COPY. graph.json lists it under dead_code_candidates.unreachable. Delete it rather than carry it into the target state."
+  }
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "case": "11-dead-program",
+ "wall_seconds": 379.1,
+ "returncode": 0,
+ "command": [
+  "claude",
+  "-p",
+  "/legacy-modernization:modernize-scan --target refactor --must-not-break \"the nightly batch cycle\" --telemetry none",
+  "--plugin-dir",
+  "/Users/phillipmorehead/Legacy Modernization Assessor Plugin/sparq-legacy-modernization",
+  "--permission-mode",
+  "acceptEdits",
+  "--output-format",
+  "json",
+  "--max-budget-usd",
+  "8.0",
+  "--max-turns",
+  "120",
+  "--no-session-persistence"
+ ],
+ "work": "/Users/phillipmorehead/Legacy Modernization Assessor Plugin/bench/runs/11-dead-program/work"
+}
