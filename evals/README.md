@@ -33,6 +33,15 @@ python3 evals/run_e2e_evals.py --score-only      # score runs that already exist
 python3 evals/render_results.py                  # rebuild RESULTS.md
 ```
 
+Two ways to run the end to end evals:
+
+- **Headless.** `run_e2e_evals.py --cases all` calls `claude -p` with the plugin loaded. This is the real
+  harness. It needs Claude Code signed in, and it captures dollar cost.
+- **By hand.** `run_e2e_evals.py --prepare` makes clean work folders. Run the command and the skill files
+  by hand in each (for example through subagents), then `--collect <label>` and `--score-only`. The saved runs
+  in `runs/` were made this way, because headless sign-in was not available. `scorecard/e2e-provenance.json`
+  says what that harness did not exercise.
+
 The CardDemo checkout is expected at `../bench/carddemo`. See `carddemo/SOURCE.md` for the pinned
 commit. The end to end runner calls `claude -p` with `--plugin-dir` pointing at this folder. It
 needs Claude Code signed in. Every run is a real model call. Cap it with `--budget-usd`.
