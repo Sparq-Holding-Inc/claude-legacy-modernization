@@ -169,7 +169,8 @@ Jobs that a scheduler chains together (temporal edges from a wrapper script, Con
 a Control-M folder) move together, in the latest of their families, except a job that touches DB2,
 IMS or MQ. A program that submits JCL through the internal reader counts as batch, and it owns the
 proc or program it submits.
-Every unit is placed, or listed as not placed with a reason. Some families may be empty.
+Every unit is placed, or listed as not placed with a reason. The validator checks that no program, job,
+proc or scheduler job is missing, listed twice, or both placed and unplaced. Some families may be empty.
 
 If the tree has no entry point (no JCL job, no CSD transaction, no scheduler), the seed has no waves and
 every unit is unknown. Write `waves.json` with `"waves": []` and every unit in `unassigned`. Do not
@@ -279,6 +280,9 @@ Three buckets, never two. The extractor computed the candidates. Start from `dea
 - **Unknown.** Not reached statically, but a computed call in reachable code could target it. Flag
   it loudly. A confident dead-code claim over a computed call is how you delete something that runs
   once a year at fiscal close.
+
+Every extractor candidate stays in one of the three buckets. Unreachable is only for what the extractor
+called unreachable, and dormant only for what it called dormant. The validator rejects anything else.
 
 **You may not move a program from unknown to unreachable.** The validator rejects it. If you find
 evidence that an extractor bucket is wrong, for example a run-time submit it could not see, move the
