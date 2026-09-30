@@ -28,7 +28,7 @@ Added
 - Assembler, DB2 DDL, IMS DBD and PSB, DCLGEN and control card files are listed as not read.
 - Three machine readable outputs next to the markdown: `waves.json`, `dead-code.json`,
   `risks.json`. One schema file checks all four JSON files.
-- A Stop hook that blocks the finish of an assessment when a citation does not resolve. It runs
+- A Stop hook that blocks the first finish of an assessment when a citation does not resolve. It runs
   only while an assessment is in progress. On a second failure it lets the stop through and
   writes the problems into the summary.
 - `/modernize-scan` takes `--target`, `--must-not-break` and `--telemetry`, so it can run

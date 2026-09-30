@@ -65,6 +65,7 @@ def main():
     _, ver = run(["claude", "--version"])
     hook_rc, hook_out = run([sys.executable, os.path.join(HERE, "test_hook.py")])
     sc_rc, sc_out = run([sys.executable, os.path.join(HERE, "test_e2e_metrics.py")])
+    va_rc, va_out = run([sys.executable, os.path.join(HERE, "test_validators.py")])
     val = validate_all()
     L = []
     w = L.append
@@ -201,12 +202,14 @@ def main():
         w("")
     a, b = passed_of(hook_out)
     c, d = passed_of(sc_out)
+    e_, f_ = passed_of(va_out)
     w("## Tests for the checking code")
     w("")
     w("| Suite | Result |")
     w("|---|---|")
     w("| Citation hook (`test_hook.py`) | %d of %d pass |" % (a, b))
     w("| End to end scorer (`test_e2e_metrics.py`) | %d of %d pass |" % (c, d))
+    w("| Output validators, wrong assessments must be rejected (`test_validators.py`) | %d of %d pass |" % (e_, f_))
     w("")
     if s and s["runs_scored"]:
         w("## End to end runs")

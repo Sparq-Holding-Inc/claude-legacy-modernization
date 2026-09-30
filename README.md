@@ -31,8 +31,10 @@ fluent text and no way to check it. So this plugin splits the work:
 - **Scripts find the facts.** A small Python extractor reads the source and builds the graph.
 - **Claude makes the judgments.** How much business logic a program holds, where to cut the waves,
   what the real risk is, what to do about the edges the scripts could not resolve.
-- **A hook holds Claude to its citations.** A finished assessment cannot leave with a file and line
-  that do not exist.
+- **A hook checks the citations.** When the assessment finishes, a Stop hook checks that every cited
+  file and line exists. It blocks the first stop and lists the bad ones. If they are still wrong on
+  the second try, it lets the run end and adds an "Unresolved citations" section to the summary.
+  A bad citation is made visible. It is not made impossible.
 
 ## Install
 
@@ -105,6 +107,10 @@ Read this before you trust it.
 - **The wave seed is crude.** It sorts entry points by what they write and where they run. It does
   not know your business. It puts a compile job and a posting job in neighboring families if both
   write shared data. Claude and you are expected to argue with it.
+- **A citation proves a line exists, not that it says what the claim says.** The hook and the
+  validators check structure: the file and line are real, the plan covers every unit, the dead code
+  buckets agree with the extractor, and a risk's wave matches the plan. Whether the cited line
+  supports the sentence is for a person to check.
 - **The judgment is Claude's.** Risk scores and every change to the wave seed are opinions with
   cited reasons. Two runs on the same graph can differ. `evals/RESULTS.md` says by how much.
 

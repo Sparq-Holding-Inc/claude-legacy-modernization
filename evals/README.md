@@ -15,6 +15,7 @@ Everything here exists to answer one question: how good is this plugin, and how 
 | `mutation_check.py` | Breaks the extractor on purpose and shows which fixtures notice. |
 | `test_hook.py` | Tests for the citation hook. |
 | `test_e2e_metrics.py` | Tests for the end to end scorer. |
+| `test_validators.py` | Plants wrong assessments (an entry point called unreachable, a plan with a made-up unit, a risk in wave 999) and checks that validation rejects them. |
 | `run_e2e_evals.py` | Runs full assessments headless and scores them. |
 | `scorecard/` | JSON written by the runners. `RESULTS.md` is built from it. |
 | `runs/` | The saved output of every end to end run. |
@@ -28,6 +29,7 @@ python3 evals/run_extractor_evals.py             # fixtures and CardDemo
 python3 evals/mutation_check.py                  # can the fixtures fail?
 python3 evals/test_hook.py                       # citation hook
 python3 evals/test_e2e_metrics.py                # scorer
+python3 evals/test_validators.py                 # validators reject wrong assessments
 python3 evals/run_e2e_evals.py --cases all       # headless runs, then score (calls the model)
 python3 evals/run_e2e_evals.py --score-only      # score runs that already exist
 python3 evals/render_results.py                  # rebuild RESULTS.md

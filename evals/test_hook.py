@@ -99,6 +99,22 @@ run_hook(p)
 rc, out, _ = run_hook(p, active=False)
 case("attempt counter alone stops a loop", rc == 0 and out == "" and not exists_marker(p))
 
+# 6b a final newline does not start a new line: a one line file has no line 2, an empty file has no line 1
+def line_case(name, content, cite, want_blocked):
+    q = project(); marker(q)
+    with open(os.path.join(q, "app", "cbl", "SHORT.txt"), "w") as fh:
+        fh.write(content)
+    write(q, "02-coupling.md", "# Coupling\n\nA claim (`app/cbl/SHORT.txt:%d`).\n" % cite)
+    rc_, out_, _ = run_hook(q)
+    got = out_.startswith("{") and json.loads(out_).get("decision") == "block"
+    case(name, rc_ == 0 and got == want_blocked, out_[:80])
+
+
+line_case("one line file with a newline: line 2 does not exist", "only line\n", 2, True)
+line_case("one line file with a newline: line 1 exists", "only line\n", 1, False)
+line_case("one line file with no newline: line 1 exists", "only line", 1, False)
+line_case("empty file: line 1 does not exist", "", 1, True)
+
 # 7 findings tables need a citation or the word inference
 p = project(); marker(p)
 write(p, "03-waves.md", "| Wave | Rationale | Evidence |\n|---|---|---|\n| 1 | easy | `app/cbl/PROGA.cbl:6` |\n"

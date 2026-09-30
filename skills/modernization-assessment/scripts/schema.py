@@ -345,24 +345,60 @@ def validate_waves(w, graph=None):
                     errs.append("%s: needs a unit and a reason" % dh)
                     continue
                 errs += _citation_or_inference(d, dh)
+    unassigned = w.get("unassigned", [])
+    un_ids = []
+    if not isinstance(unassigned, list):
+        errs.append("waves: unassigned must be a list")
+        unassigned = []
+    for i, u in enumerate(unassigned):
+        uh = "unassigned[%d]" % i
+        if not isinstance(u, dict) or not isinstance(u.get("id"), str):
+            errs.append("%s: needs a string id and a reason" % uh)
+            continue
+        if not isinstance(u.get("reason"), str) or not u["reason"].strip():
+            errs.append("unassigned %s: reason must be a non-empty string" % u["id"])
+        if u["id"] in un_ids:
+            errs.append("unassigned %s: listed twice" % u["id"])
+        if u["id"] in placed:
+            errs.append("unassigned %s: is also in wave %s" % (u["id"], placed[u["id"]]))
+        un_ids.append(u["id"])
     if graph is not None:
         kinds = {n["id"]: n.get("unit_type") for n in graph.get("nodes", [])}
         movable = set(PROGRAM_TYPES) | {"jcl_job", "proc", "scheduler_job"}
-        for u in placed:
+        for u in list(placed) + un_ids:
             if u not in kinds:
                 errs.append("waves: unit %s is not a node in graph.json" % u)
             elif kinds[u] not in movable:
                 errs.append("waves: unit %s is a %s. A wave holds programs, JCL jobs, procs or scheduler jobs. "
                             "Steps, copybooks and datasets move with their owner." % (u, kinds[u]))
+        missing = sorted(k for k, t in kinds.items() if t in movable and k not in placed and k not in un_ids)
+        if missing:
+            errs.append("waves: %d unit(s) are in no wave and not in unassigned, for example %s. Every program, "
+                        "job, proc and scheduler job is placed or listed with a reason." % (len(missing), missing[:5]))
+        seed = graph.get("analysis", {}).get("wave_seed")
+        if not waves and seed is not None and seed.get("waves"):
+            errs.append("waves: the plan is empty but the extractor placed %d unit(s) in %d wave(s). "
+                        "An empty plan is only for a tree with no entry point." %
+                        (sum(len(x["units"]) for x in seed["waves"]), len(seed["waves"])))
+        for i, d in enumerate(devs if isinstance(devs, list) else []):
+            if isinstance(d, dict) and isinstance(d.get("unit"), str) and d["unit"] not in kinds:
+                errs.append("deviation[%d]: unit %s is not a node in graph.json" % (i, d["unit"]))
+            tw = d.get("to_wave") if isinstance(d, dict) else None
+            if tw is not None and tw not in numbers:
+                errs.append("deviation[%d]: to_wave %r is not a wave in this plan" % (i, tw))
         comp = _scc_of(graph)
         by_comp = {}
         for u, n in placed.items():
             if u in comp:
                 by_comp.setdefault(comp[u], set()).add(n)
+        for u in un_ids:
+            if u in comp:
+                by_comp.setdefault(comp[u], set()).add("unassigned")
         for c, ns in by_comp.items():
             if len(ns) > 1:
-                errs.append("waves: strongly connected component %d is split across waves %s"
-                            % (c, sorted(ns)))
+                errs.append("waves: strongly connected component %d is split across %s"
+                            % (c, ", ".join(str(x) if x == "unassigned" else "wave %s" % x
+                                            for x in sorted(ns, key=str))))
     return errs
 
 
@@ -398,16 +434,32 @@ def validate_dead_code(d, graph=None):
                 errs.append("%s: last_modified must be an ISO date or null" % wh)
     if graph is not None:
         known = {n["id"] for n in graph.get("nodes", [])}
-        cand = graph.get("analysis", {}).get("dead_code_candidates", {})
-        dyn = set(cand.get("unknown", []))
-        for i, it in enumerate(d.get("unreachable", []) or []):
-            if isinstance(it, dict) and it.get("id") in dyn:
-                errs.append("unreachable %s: could be the target of an unresolved dynamic "
-                            "call. It belongs in the unknown bucket." % it["id"])
+        cand = graph.get("analysis", {}).get("dead_code_candidates")
         for b, items in ((b, d.get(b) or []) for b in ("unreachable", "dormant", "unknown")):
             for it in items:
                 if isinstance(it, dict) and it.get("id") not in known:
                     errs.append("%s %s: not a node in graph.json" % (b, it.get("id")))
+        if cand is not None:
+            ext = {b: set(cand.get(b, [])) for b in ("unreachable", "dormant", "unknown")}
+            claimed = {b: {it.get("id") for it in (d.get(b) or []) if isinstance(it, dict)}
+                       for b in ("unreachable", "dormant", "unknown")}
+            for i in sorted(claimed["unreachable"] - ext["unreachable"]):
+                why = ("the extractor put it in %s" % next(b for b in ("unknown", "dormant") if i in ext[b])
+                       if any(i in ext[b] for b in ("unknown", "dormant")) else
+                       "the extractor found a path to it from an entry point")
+                errs.append("unreachable %s: %s. A claim of unreachable must match the extractor's unreachable "
+                            "bucket. If you have evidence it is live, move it toward unknown." % (i, why))
+            for i in sorted(claimed["dormant"] - ext["dormant"]):
+                errs.append("dormant %s: the extractor did not put it in the dormant bucket. Dormancy is "
+                            "computed from dates, not judged." % i)
+            for i in sorted(claimed["unknown"] - (ext["unknown"] | ext["unreachable"] | ext["dormant"])):
+                errs.append("unknown %s: not an extractor candidate. It is reachable by a static path, so it "
+                            "belongs in no dead code bucket." % i)
+            every = ext["unreachable"] | ext["dormant"] | ext["unknown"]
+            gone = sorted(every - claimed["unreachable"] - claimed["dormant"] - claimed["unknown"])
+            if gone:
+                errs.append("dead-code: %d extractor candidate(s) are in no bucket, for example %s. Start from "
+                            "dead_code_candidates and keep every one." % (len(gone), gone[:5]))
     return errs
 
 
@@ -421,7 +473,7 @@ def quadrant_for(difficulty, blast):
                       "high" if blast >= 3 else "low")
 
 
-def validate_risks(r, graph=None):
+def validate_risks(r, graph=None, waves=None):
     errs = []
     if not isinstance(r, dict):
         return ["risks: top level must be an object"]
@@ -470,6 +522,22 @@ def validate_risks(r, graph=None):
         errs += _citation_or_inference(u, wh)
     if not isinstance(r.get("do_not_port", []), list):
         errs.append("risks: do_not_port must be a list")
+    if isinstance(waves, dict):
+        placed = {}
+        for wv in waves.get("waves", []) or []:
+            if isinstance(wv, dict):
+                for x in wv.get("units", []) or []:
+                    placed[x] = wv.get("wave")
+        numbers = set(placed.values())
+        for u in units:
+            if not isinstance(u, dict) or not isinstance(u.get("id"), str):
+                continue
+            wv = u.get("wave")
+            if wv is not None and _is_int(wv) and wv not in numbers:
+                errs.append("unit %s: wave %s is not a wave in waves.json" % (u["id"], wv))
+            elif placed.get(u["id"]) != wv and (wv is None or _is_int(wv)):
+                errs.append("unit %s: wave is %r but waves.json puts it in %r. Run schema.py apply-waves."
+                            % (u["id"], wv, placed.get(u["id"])))
     if graph is not None:
         known = {n["id"] for n in graph.get("nodes", [])}
         for u in units:
@@ -486,10 +554,12 @@ VALIDATORS = {
 }
 
 
-def validate(kind, obj, graph=None):
-    """validate("graph", obj) or validate("waves", obj, graph=graph_obj)."""
+def validate(kind, obj, graph=None, waves=None):
+    """validate("graph", obj), validate("waves", obj, graph=g) or validate("risks", obj, graph=g, waves=w)."""
     fn = VALIDATORS[kind]
-    return fn(obj) if kind == "graph" else fn(obj, graph)
+    if kind == "graph":
+        return fn(obj)
+    return fn(obj, graph, waves) if kind == "risks" else fn(obj, graph)
 
 
 def _load(path):
@@ -515,7 +585,7 @@ def apply_waves(base):
 
 
 def main(argv):
-    usage = ("usage: schema.py validate {graph|waves|dead-code|risks} FILE [--graph graph.json]\n"
+    usage = ("usage: schema.py validate {graph|waves|dead-code|risks} FILE [--graph graph.json] [--waves waves.json]\n"
              "       schema.py validate-dir DIR    (checks every output that exists)\n"
              "       schema.py apply-waves DIR     (fills risks.json wave from waves.json)")
     if len(argv) == 3 and argv[1] == "apply-waves":
@@ -524,17 +594,24 @@ def main(argv):
         graph = None
         if "--graph" in argv:
             graph = _load(argv[argv.index("--graph") + 1])
-        errs = validate(argv[2], _load(argv[3]), graph)
+        waves = _load(argv[argv.index("--waves") + 1]) if "--waves" in argv else None
+        errs = validate(argv[2], _load(argv[3]), graph, waves)
         for e in errs:
             print("ERROR", e)
         print("%s: %s" % (argv[3], "INVALID (%d errors)" % len(errs) if errs else "valid"))
         return 1 if errs else 0
     if len(argv) == 3 and argv[1] == "validate-dir":
         import os
-        base, bad, graph = argv[2], 0, None
+        base, bad, graph, waves = argv[2], 0, None, None
         gp = os.path.join(base, "graph.json")
         if os.path.exists(gp):
             graph = _load(gp)
+        wp = os.path.join(base, "waves.json")
+        if os.path.exists(wp):
+            try:
+                waves = _load(wp)
+            except (ValueError, OSError):
+                waves = None
         for name, kind in (("graph.json", "graph"), ("waves.json", "waves"),
                            ("dead-code.json", "dead-code"), ("risks.json", "risks")):
             p = os.path.join(base, name)
@@ -543,7 +620,7 @@ def main(argv):
                 bad += 1
                 continue
             try:
-                errs = validate(kind, _load(p), graph)
+                errs = validate(kind, _load(p), graph, waves)
             except (ValueError, OSError) as exc:
                 errs = ["cannot read: %s" % exc]
             for e in errs:

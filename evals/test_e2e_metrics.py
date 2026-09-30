@@ -29,7 +29,7 @@ def case(name, ok, detail=""):
     print("%-66s %s %s" % (name, "PASS" if ok else "FAIL", "" if ok else detail))
 
 
-def synthetic_run(fixture, waves, dead, risks_ok=True, bad_citation=False):
+def synthetic_run(fixture, waves, dead, risks_ok=True, bad_citation=False, unassigned=None):
     d = tempfile.mkdtemp()
     repo = os.path.join(d, "work")
     shutil.copytree(os.path.join(HERE, "fixtures", fixture, "repo"), repo)
@@ -39,7 +39,8 @@ def synthetic_run(fixture, waves, dead, risks_ok=True, bad_citation=False):
     graph = extract.build(repo, datetime.date(2026, 9, 30), 5, use_git=False)
     json.dump(graph, open(os.path.join(out, "graph.json"), "w"))
     ev = [{"file": "app/jcl/MAINJOB.jcl", "line": 2}]
-    json.dump({"target_state": "refactor", "waves": waves}, open(os.path.join(out, "waves.json"), "w"))
+    json.dump({"target_state": "refactor", "waves": waves, "unassigned": unassigned or []},
+              open(os.path.join(out, "waves.json"), "w"))
     json.dump(dead, open(os.path.join(out, "dead-code.json"), "w"))
     units = [{"id": "PGMMAIN", "port_difficulty": {"score": 1, "why": "x"}, "blast_radius": {"score": 1, "why": "y"},
               "quadrant": "low-low", "wave": 1, "driving_fact": "f", "confidence": "high", "evidence": ev}]
@@ -62,7 +63,9 @@ DEAD_OK = {"telemetry": "none", "unreachable": [{"id": "PGMDEAD", "reason": "r",
            "dormant": [], "unknown": []}
 
 # clean run
-r = E.score_run(synthetic_run("11-dead-program", WAVES, DEAD_OK), "11-dead-program")
+CLEAN_WAVES = [dict(WAVES[0], units=["PGMMAIN", "PGMLIVE", "job:MAINJOB"])]
+CLEAN_UNASSIGNED = [{"id": "PGMDEAD", "reason": "No path from an entry point (dead code candidate)"}]
+r = E.score_run(synthetic_run("11-dead-program", CLEAN_WAVES, DEAD_OK, unassigned=CLEAN_UNASSIGNED), "11-dead-program")
 case("clean run: every citation resolves", r["citations"]["unresolved"] == 0 and r["citations"]["total"] >= 3,
      str(r["citations"]))
 case("clean run: all four JSON files validate", r["json_all_valid"], str(r["json"]))

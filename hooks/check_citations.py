@@ -72,7 +72,9 @@ class Resolver:
             for c in cands:
                 if os.path.isfile(c):
                     with open(c, "rb") as fh:
-                        n = fh.read().count(b"\n") + 1
+                        data = fh.read()
+                    # a final newline ends the last line. It does not start another one
+                    n = data.count(b"\n") + (1 if data and not data.endswith(b"\n") else 0)
                     break
             self.lines[path] = n
         return self.lines[path]
@@ -168,7 +170,7 @@ def check_json(out_dir, marker, res):
             problems.append("%s is not valid JSON: %s" % (name, exc))
     graph = docs.get("graph.json")
     for name, doc in docs.items():
-        errs = schema.validate(kinds[name], doc, graph if name != "graph.json" else None)
+        errs = schema.validate(kinds[name], doc, graph if name != "graph.json" else None, docs.get("waves.json"))
         for e in errs[:10]:
             problems.append("%s does not validate: %s" % (name, e))
         if len(errs) > 10:

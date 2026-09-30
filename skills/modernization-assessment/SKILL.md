@@ -27,7 +27,8 @@ Two rules follow.
 1. **Never rebuild the graph by reading source.** Read source to make a judgment, or to settle an
    edge the extractor could not resolve.
 2. **Every claim carries a `path:line` citation or the word `inference`.** A stop hook checks
-   this. A citation that points at a file or line that does not exist blocks the finish.
+   this. A citation that points at a file or line that does not exist blocks the first finish and is
+   listed in the summary if it is still wrong on the second.
 
 ## Before you start
 

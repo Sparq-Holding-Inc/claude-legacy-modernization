@@ -91,7 +91,8 @@ def evidence_resolves(root, graph):
             if x["file"] not in cache:
                 try:
                     with open(os.path.join(root, x["file"]), "rb") as fh:
-                        cache[x["file"]] = fh.read().count(b"\n") + 1
+                        data = fh.read()
+                    cache[x["file"]] = data.count(b"\n") + (1 if data and not data.endswith(b"\n") else 0)
                 except OSError:
                     cache[x["file"]] = 0
             if 1 <= x["line"] <= cache[x["file"]]:
