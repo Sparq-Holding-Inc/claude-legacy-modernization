@@ -1,0 +1,159 @@
+{
+ "as_of": "2026-09-30",
+ "fixtures": {
+  "cases": {
+   "01-static-call": {
+    "pass": true,
+    "problems": [],
+    "edges": 1
+   },
+   "02-dynamic-call": {
+    "pass": true,
+    "problems": [],
+    "edges": 1
+   },
+   "03-cics-link-xctl": {
+    "pass": true,
+    "problems": [],
+    "edges": 5
+   },
+   "04-shared-copybook": {
+    "pass": true,
+    "problems": [],
+    "edges": 2
+   },
+   "05-vsam-cics-pair": {
+    "pass": true,
+    "problems": [],
+    "edges": 5
+   },
+   "06-contract-match": {
+    "pass": true,
+    "problems": [],
+    "edges": 9
+   },
+   "07-contract-mismatch": {
+    "pass": true,
+    "problems": [],
+    "edges": 9
+   },
+   "08-temporal-steps": {
+    "pass": true,
+    "problems": [],
+    "edges": 11
+   },
+   "09-temporal-controlm": {
+    "pass": true,
+    "problems": [],
+    "edges": 7
+   },
+   "10-temporal-shell": {
+    "pass": true,
+    "problems": [],
+    "edges": 9
+   },
+   "11-dead-program": {
+    "pass": true,
+    "problems": [],
+    "edges": 4
+   },
+   "12-dormant-program": {
+    "pass": true,
+    "problems": [],
+    "edges": 4
+   },
+   "13-dynamic-only-reachable": {
+    "pass": true,
+    "problems": [],
+    "edges": 3
+   },
+   "14-exec-sql": {
+    "pass": true,
+    "problems": [],
+    "edges": 6
+   },
+   "15-fixed-format": {
+    "pass": true,
+    "problems": [],
+    "edges": 7
+   },
+   "16-proc-expansion": {
+    "pass": true,
+    "problems": [],
+    "edges": 9
+   },
+   "17-quoted-copy": {
+    "pass": true,
+    "problems": [],
+    "edges": 3
+   },
+   "18-continued-literal": {
+    "pass": true,
+    "problems": [],
+    "edges": 2
+   },
+   "19-controlm-delete": {
+    "pass": true,
+    "problems": [],
+    "edges": 4
+   },
+   "20-no-entry-points": {
+    "pass": true,
+    "problems": [],
+    "edges": 1
+   },
+   "21-exec-sql-call": {
+    "pass": true,
+    "problems": [],
+    "edges": 0
+   },
+   "22-rw-modes": {
+    "pass": true,
+    "problems": [],
+    "edges": 6
+   },
+   "23-subscripted-target": {
+    "pass": true,
+    "problems": [],
+    "edges": 1
+   },
+   "24-dsn-forms": {
+    "pass": true,
+    "problems": [],
+    "edges": 5
+   }
+  },
+  "per_kind": {
+   "call": {
+    "tp": 46,
+    "fp": 0,
+    "fn": 0
+   },
+   "include": {
+    "tp": 39,
+    "fp": 0,
+    "fn": 0
+   },
+   "data": {
+    "tp": 19,
+    "fp": 0,
+    "fn": 0
+   },
+   "contract": {
+    "tp": 3,
+    "fp": 0,
+    "fn": 0
+   },
+   "temporal": {
+    "tp": 7,
+    "fp": 0,
+    "fn": 0
+   }
+  },
+  "all_pass": true,
+  "evidence_resolves": [
+   154,
+   154
+  ]
+ }
+}

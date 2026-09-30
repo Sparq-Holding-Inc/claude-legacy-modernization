@@ -210,6 +210,17 @@ def cmd_build():
     for c in contracts:
         c["labeled_by"] = "derived by rule from data edges"
     edges += contracts
+    merged = {}
+    for e in edges:
+        k = key(e)
+        if k in merged:
+            merged[k]["evidence"] += e["evidence"]
+            merged[k]["note"] = (merged[k].get("note", "") + "; " + e.get("note", "")).strip("; ")
+            if e.get("confidence") == "high":
+                merged[k]["confidence"] = "high"
+        else:
+            merged[k] = e
+    edges = list(merged.values())
 
     out_edges = []
     for e in sorted(edges, key=lambda e: (e["kind"], e["src"], e["dst"], str(e.get("mode")))):

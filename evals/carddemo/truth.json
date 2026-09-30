@@ -3102,21 +3102,9 @@
    "resolved": true,
    "confidence": "high",
    "evidence": [
-    "app/cbl/CBACT04C.cbl:41",
-    "app/cbl/CBTRN02C.cbl:51"
-   ],
-   "status": "draft",
-   "labeled_by": "derived by rule from data edges"
-  },
-  {
-   "src": "CBTRN02C",
-   "dst": "CBACT04C",
-   "kind": "contract",
-   "mode": null,
-   "resolved": true,
-   "confidence": "high",
-   "evidence": [
     "app/cbl/CBACT04C.cbl:28",
+    "app/cbl/CBACT04C.cbl:41",
+    "app/cbl/CBTRN02C.cbl:51",
     "app/cbl/CBTRN02C.cbl:57"
    ],
    "status": "draft",
@@ -3131,21 +3119,9 @@
    "confidence": "high",
    "evidence": [
     "app/cbl/CBEXPORT.cbl:41",
-    "app/cbl/CBTRN02C.cbl:51"
-   ],
-   "status": "draft",
-   "labeled_by": "derived by rule from data edges"
-  },
-  {
-   "src": "CBTRN02C",
-   "dst": "CBEXPORT",
-   "kind": "contract",
-   "mode": null,
-   "resolved": true,
-   "confidence": "high",
-   "evidence": [
     "app/cbl/CBEXPORT.cbl:53",
-    "app/cbl/CBTRN02C.cbl:34"
+    "app/cbl/CBTRN02C.cbl:34",
+    "app/cbl/CBTRN02C.cbl:51"
    ],
    "status": "draft",
    "labeled_by": "derived by rule from data edges"
@@ -3188,22 +3164,10 @@
    "resolved": true,
    "confidence": "high",
    "evidence": [
+    "app/cbl/CBTRN02C.cbl:34",
     "app/cbl/CBTRN02C.cbl:51",
     "app/cbl/COBIL00C.cbl:345",
-    "app/cbl/COBIL00C.cbl:379"
-   ],
-   "status": "draft",
-   "labeled_by": "derived by rule from data edges"
-  },
-  {
-   "src": "CBTRN02C",
-   "dst": "COBIL00C",
-   "kind": "contract",
-   "mode": null,
-   "resolved": true,
-   "confidence": "high",
-   "evidence": [
-    "app/cbl/CBTRN02C.cbl:34",
+    "app/cbl/COBIL00C.cbl:379",
     "app/cbl/COBIL00C.cbl:443",
     "app/cbl/COBIL00C.cbl:474",
     "app/cbl/COBIL00C.cbl:503",
@@ -3316,25 +3280,13 @@
    "resolved": true,
    "confidence": "high",
    "evidence": [
+    "app/cbl/CBEXPORT.cbl:35",
     "app/cbl/CBEXPORT.cbl:41",
     "app/cbl/COACTUPC.cbl:3703",
-    "app/cbl/COACTUPC.cbl:3894",
-    "app/cbl/COACTUPC.cbl:4065"
-   ],
-   "status": "draft",
-   "labeled_by": "derived by rule from data edges"
-  },
-  {
-   "src": "COACTUPC",
-   "dst": "CBEXPORT",
-   "kind": "contract",
-   "mode": null,
-   "resolved": true,
-   "confidence": "high",
-   "evidence": [
-    "app/cbl/CBEXPORT.cbl:35",
     "app/cbl/COACTUPC.cbl:3753",
+    "app/cbl/COACTUPC.cbl:3894",
     "app/cbl/COACTUPC.cbl:3921",
+    "app/cbl/COACTUPC.cbl:4065",
     "app/cbl/COACTUPC.cbl:4085"
    ],
    "status": "draft",
@@ -3365,24 +3317,12 @@
    "confidence": "high",
    "evidence": [
     "app/cbl/COACTUPC.cbl:3703",
-    "app/cbl/COACTUPC.cbl:3894",
-    "app/cbl/COACTUPC.cbl:4065",
-    "app/cbl/COACTVWC.cbl:776"
-   ],
-   "status": "draft",
-   "labeled_by": "derived by rule from data edges"
-  },
-  {
-   "src": "COACTUPC",
-   "dst": "COACTVWC",
-   "kind": "contract",
-   "mode": null,
-   "resolved": true,
-   "confidence": "high",
-   "evidence": [
     "app/cbl/COACTUPC.cbl:3753",
+    "app/cbl/COACTUPC.cbl:3894",
     "app/cbl/COACTUPC.cbl:3921",
+    "app/cbl/COACTUPC.cbl:4065",
     "app/cbl/COACTUPC.cbl:4085",
+    "app/cbl/COACTVWC.cbl:776",
     "app/cbl/COACTVWC.cbl:826"
    ],
    "status": "draft",
@@ -3444,21 +3384,9 @@
    "confidence": "high",
    "evidence": [
     "app/cbl/CBEXPORT.cbl:41",
-    "app/cbl/COBIL00C.cbl:345",
-    "app/cbl/COBIL00C.cbl:379"
-   ],
-   "status": "draft",
-   "labeled_by": "derived by rule from data edges"
-  },
-  {
-   "src": "COBIL00C",
-   "dst": "CBEXPORT",
-   "kind": "contract",
-   "mode": null,
-   "resolved": true,
-   "confidence": "high",
-   "evidence": [
     "app/cbl/CBEXPORT.cbl:53",
+    "app/cbl/COBIL00C.cbl:345",
+    "app/cbl/COBIL00C.cbl:379",
     "app/cbl/COBIL00C.cbl:443",
     "app/cbl/COBIL00C.cbl:474",
     "app/cbl/COBIL00C.cbl:503",

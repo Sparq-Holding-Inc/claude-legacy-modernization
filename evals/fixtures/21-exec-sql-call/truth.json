@@ -1,0 +1,13 @@
+{
+  "case": "21-exec-sql-call",
+  "status": "hand-written after the mutation check found a blind spot in fixtures 01 to 17",
+  "description": "CALL inside EXEC SQL is a stored procedure call. It is not a COBOL call and not a computed call target.",
+  "edges": [],
+  "nodes": [
+    {
+      "id": "PROGS",
+      "unit_type": "batch",
+      "entry_point": false
+    }
+  ]
+}

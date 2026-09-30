@@ -1,0 +1,38 @@
+{
+  "case": "20-no-entry-points",
+  "status": "hand-written after the mutation check found a blind spot in fixtures 01 to 17",
+  "description": "No CSD, JCL or scheduler in the tree. Nothing can be proven unreachable, so every program is unknown.",
+  "edges": [
+    {
+      "src": "PROGA",
+      "dst": "PROGB",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGA.cbl:4"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "PROGA",
+      "unit_type": "batch",
+      "entry_point": false
+    },
+    {
+      "id": "PROGB",
+      "unit_type": "subprogram",
+      "entry_point": false
+    }
+  ],
+  "dead_code": {
+    "unreachable": [],
+    "dormant": [],
+    "unknown": [
+      "PROGA",
+      "PROGB"
+    ]
+  }
+}

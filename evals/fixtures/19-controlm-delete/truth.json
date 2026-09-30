@@ -1,0 +1,64 @@
+{
+  "case": "19-controlm-delete",
+  "status": "hand-written after the mutation check found a blind spot in fixtures 01 to 17",
+  "description": "JOBY deletes condition X-DONE (SIGN -). Only JOBX creates it, so JOBZ waits on JOBX and not on JOBY. The JCL for all three jobs is not in the tree.",
+  "edges": [
+    {
+      "src": "sch:F/JOBX",
+      "dst": "job:JOBX",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/scheduler/f.xml:4"
+      ]
+    },
+    {
+      "src": "sch:F/JOBY",
+      "dst": "job:JOBY",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/scheduler/f.xml:7"
+      ]
+    },
+    {
+      "src": "sch:F/JOBZ",
+      "dst": "job:JOBZ",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/scheduler/f.xml:10"
+      ]
+    },
+    {
+      "src": "sch:F/JOBX",
+      "dst": "sch:F/JOBZ",
+      "kind": "temporal",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/scheduler/f.xml:5",
+        "app/scheduler/f.xml:11"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "sch:F/JOBX",
+      "unit_type": "scheduler_job",
+      "entry_point": true
+    },
+    {
+      "id": "job:JOBX",
+      "unit_type": "jcl_job",
+      "entry_point": false
+    }
+  ]
+}

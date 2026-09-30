@@ -1,0 +1,25 @@
+{
+  "case": "23-subscripted-target",
+  "status": "hand-written after the mutation check found a blind spot in fixtures 01 to 17",
+  "description": "PROGRAM(TBL-PGM(WS-IDX)) is a subscripted name. A literal moved to one element does not make a candidate. Dynamic only.",
+  "edges": [
+    {
+      "src": "PROGA",
+      "dst": "?dynamic:PROGA:10",
+      "kind": "call",
+      "mode": null,
+      "resolved": false,
+      "confidence": "low",
+      "evidence": [
+        "app/cbl/PROGA.cbl:10"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "PROGA",
+      "unit_type": "online_txn",
+      "entry_point": false
+    }
+  ]
+}

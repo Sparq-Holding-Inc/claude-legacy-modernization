@@ -1,0 +1,19 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. PROGBAT.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT MAST-FILE ASSIGN TO MASTDD
+               ORGANIZATION IS INDEXED
+               RECORD KEY IS MAST-KEY.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  MAST-FILE.
+       01  MAST-REC.
+           05  MAST-KEY        PIC X(8).
+       PROCEDURE DIVISION.
+           OPEN I-O MAST-FILE.
+           READ MAST-FILE.
+           REWRITE MAST-REC.
+           CLOSE MAST-FILE.
+           GOBACK.

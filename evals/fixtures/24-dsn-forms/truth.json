@@ -1,0 +1,69 @@
+{
+  "case": "24-dsn-forms",
+  "status": "hand-written after the mutation check found a blind spot in fixtures 01 to 17",
+  "description": "A utility step. A generation suffix (0) and (+1) and a member suffix are dropped. Temporary, DUMMY, NULLFILE and SYSOUT DDs make no edge. Mode comes from DISP.",
+  "edges": [
+    {
+      "src": "job:DSNJOB",
+      "dst": "step:DSNJOB.S1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/DSNJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "step:DSNJOB.S1",
+      "dst": "ext:SORT",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/DSNJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "step:DSNJOB.S1",
+      "dst": "ds:SPARQ.GDG.BASE",
+      "kind": "data",
+      "mode": "read",
+      "resolved": true,
+      "confidence": "medium",
+      "evidence": [
+        "app/jcl/DSNJOB.jcl:3"
+      ]
+    },
+    {
+      "src": "step:DSNJOB.S1",
+      "dst": "ds:SPARQ.GDG.BASE",
+      "kind": "data",
+      "mode": "write",
+      "resolved": true,
+      "confidence": "medium",
+      "evidence": [
+        "app/jcl/DSNJOB.jcl:4"
+      ]
+    },
+    {
+      "src": "step:DSNJOB.S1",
+      "dst": "ds:SPARQ.CNTL",
+      "kind": "data",
+      "mode": "read",
+      "resolved": true,
+      "confidence": "medium",
+      "evidence": [
+        "app/jcl/DSNJOB.jcl:5"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "job:DSNJOB",
+      "unit_type": "jcl_job",
+      "entry_point": true
+    }
+  ]
+}

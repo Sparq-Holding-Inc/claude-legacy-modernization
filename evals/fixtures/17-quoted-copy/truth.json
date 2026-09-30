@@ -1,0 +1,47 @@
+{
+  "case": "17-quoted-copy",
+  "status": "hand-written after the CardDemo run showed the extractor missed COPY 'MEMBER'",
+  "description": "COPY with the member name in single quotes and the period on the next line, in double quotes, and unquoted with OF library.",
+  "edges": [
+    {
+      "src": "PROGQ",
+      "dst": "cpy:QUOTED1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGQ.cbl:5"
+      ]
+    },
+    {
+      "src": "PROGQ",
+      "dst": "cpy:QUOTED2",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGQ.cbl:7"
+      ]
+    },
+    {
+      "src": "PROGQ",
+      "dst": "cpy:QUOTED3",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGQ.cbl:8"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "PROGQ",
+      "unit_type": "batch",
+      "entry_point": false
+    }
+  ]
+}

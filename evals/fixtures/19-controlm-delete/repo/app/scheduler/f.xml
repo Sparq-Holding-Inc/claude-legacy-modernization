@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DEFTABLE>
+  <FOLDER FOLDER_NAME="F">
+    <JOB JOBNAME="JOBX" MEMNAME="JOBX">
+      <OUTCOND NAME="X-DONE" ODATE="ODAT" SIGN="+" />
+    </JOB>
+    <JOB JOBNAME="JOBY" MEMNAME="JOBY">
+      <OUTCOND NAME="X-DONE" ODATE="ODAT" SIGN="-" />
+    </JOB>
+    <JOB JOBNAME="JOBZ" MEMNAME="JOBZ">
+      <INCOND NAME="X-DONE" ODATE="ODAT" AND_OR="A" />
+    </JOB>
+  </FOLDER>
+</DEFTABLE>

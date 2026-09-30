@@ -1,0 +1,91 @@
+{
+  "case": "22-rw-modes",
+  "status": "hand-written after the mutation check found a blind spot in fixtures 01 to 17",
+  "description": "OPEN I-O gives read_write. CICS READ UPDATE plus REWRITE gives read_write. STARTBR, READNEXT and ENDBR give read. DELETE gives write.",
+  "edges": [
+    {
+      "src": "job:RWJOB",
+      "dst": "step:RWJOB.S1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/RWJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "step:RWJOB.S1",
+      "dst": "PROGBAT",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/RWJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "PROGBAT",
+      "dst": "ds:SPARQ.RW.MASTER",
+      "kind": "data",
+      "mode": "read_write",
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGBAT.cbl:6",
+        "app/cbl/PROGBAT.cbl:15",
+        "app/jcl/RWJOB.jcl:3"
+      ]
+    },
+    {
+      "src": "PROGCICS",
+      "dst": "ds:RWFILE",
+      "kind": "data",
+      "mode": "read_write",
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGCICS.cbl:4",
+        "app/cbl/PROGCICS.cbl:5"
+      ]
+    },
+    {
+      "src": "PROGCICS",
+      "dst": "ds:BRFILE",
+      "kind": "data",
+      "mode": "read",
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGCICS.cbl:6",
+        "app/cbl/PROGCICS.cbl:7",
+        "app/cbl/PROGCICS.cbl:9"
+      ]
+    },
+    {
+      "src": "PROGCICS",
+      "dst": "ds:DELFILE",
+      "kind": "data",
+      "mode": "write",
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGCICS.cbl:10"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "PROGBAT",
+      "unit_type": "batch",
+      "entry_point": false
+    },
+    {
+      "id": "PROGCICS",
+      "unit_type": "online_txn",
+      "entry_point": false
+    }
+  ],
+  "fixture_note": "Source corrected after the first run: one CICS line ran past column 72, so END-EXEC was in the sequence area. The extractor was right. Lines after 7 moved down by one."
+}
