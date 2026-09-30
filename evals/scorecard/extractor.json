@@ -126,39 +126,49 @@
     "pass": true,
     "problems": [],
     "edges": 1
+   },
+   "26-wave-seed-families": {
+    "pass": true,
+    "problems": [],
+    "edges": 28
+   },
+   "27-jcl-text-in-cobol": {
+    "pass": true,
+    "problems": [],
+    "edges": 2
    }
   },
   "per_kind": {
    "call": {
-    "tp": 47,
+    "tp": 58,
     "fp": 0,
     "fn": 0
    },
    "include": {
-    "tp": 39,
+    "tp": 45,
     "fp": 0,
     "fn": 0
    },
    "data": {
-    "tp": 19,
+    "tp": 27,
     "fp": 0,
     "fn": 0
    },
    "contract": {
-    "tp": 3,
+    "tp": 7,
     "fp": 0,
     "fn": 0
    },
    "temporal": {
-    "tp": 7,
+    "tp": 8,
     "fp": 0,
     "fn": 0
    }
   },
   "all_pass": true,
   "evidence_resolves": [
-   155,
-   155
+   231,
+   231
   ]
  },
  "carddemo": {
@@ -266,8 +276,8 @@
   },
   "ca7_reported_unparsed": true,
   "evidence_resolves": [
-   2134,
-   2134
+   2156,
+   2156
   ],
   "evidence_overlap_with_truth": {
    "call:total": 234,
@@ -283,11 +293,46 @@
   },
   "unresolved_dynamic": 28,
   "dead_code_counts": {
-   "unreachable": 2,
+   "unreachable": 1,
    "dormant": 0,
-   "unknown": 10
+   "unknown": 11
   },
   "unparsed": [
+   {
+    "kind": "unread",
+    "file": "app/app-authorization-ims-db2-mq/dcl/AUTHFRDS.dcl",
+    "reason": "3 file(s) of type .dcl (DB2 DCLGEN) are not read. Also: app/app-transaction-type-db2/dcl/DCLTRCAT.dcl, app/app-transaction-type-db2/dcl/DCLTRTYP.dcl"
+   },
+   {
+    "kind": "unread",
+    "file": "app/app-authorization-ims-db2-mq/ddl/AUTHFRDS.ddl",
+    "reason": "6 file(s) of type .ddl (DB2 DDL) are not read. Also: app/app-authorization-ims-db2-mq/ddl/XAUTHFRD.ddl, app/app-transaction-type-db2/ddl/TRNTYCAT.ddl"
+   },
+   {
+    "kind": "unread",
+    "file": "app/app-authorization-ims-db2-mq/ims/DBPAUTP0.dbd",
+    "reason": "4 file(s) of type .dbd (IMS DBD) are not read. Also: app/app-authorization-ims-db2-mq/ims/DBPAUTX0.dbd, app/app-authorization-ims-db2-mq/ims/PADFLDBD.DBD"
+   },
+   {
+    "kind": "unread",
+    "file": "app/app-authorization-ims-db2-mq/ims/DLIGSAMP.PSB",
+    "reason": "4 file(s) of type .psb (IMS PSB) are not read. Also: app/app-authorization-ims-db2-mq/ims/PAUTBUNL.PSB, app/app-authorization-ims-db2-mq/ims/PSBPAUTB.psb"
+   },
+   {
+    "kind": "unread",
+    "file": "app/app-transaction-type-db2/ctl/DB2CREAT.ctl",
+    "reason": "8 file(s) of type .ctl (control cards) are not read. Also: app/app-transaction-type-db2/ctl/DB2FREE.ctl, app/app-transaction-type-db2/ctl/DB2LTCAT.ctl"
+   },
+   {
+    "kind": "unread",
+    "file": "app/asm/COBDATFT.asm",
+    "reason": "2 file(s) of type .asm (assembler source) are not read. Also: app/asm/MVSWAIT.asm"
+   },
+   {
+    "kind": "unread",
+    "file": "app/maclib/ASMWAIT.mac",
+    "reason": "2 file(s) of type .mac (assembler macro) are not read. Also: app/maclib/COCDATFT.mac"
+   },
    {
     "kind": "scheduler",
     "file": "app/scheduler/CardDemo.ca7",

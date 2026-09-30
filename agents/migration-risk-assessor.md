@@ -53,8 +53,10 @@ difficulty first. The validator checks it.
 - **high-low**: wave two. Learn the hard patterns somewhere they cannot hurt you.
 - **low-high**: safe to do relatively early, but only once the behavioral-equivalence harness is
   proven. The port is easy. The verification is the work.
-- **high-high**: last, and strangled incrementally behind a facade rather than ported. If a plan puts
-  one in the first half, say so plainly.
+- **high-high**: as late as the dependencies allow, and strangled incrementally behind a facade
+  rather than ported. If a plan puts one in the first half, say so plainly. If a high-high unit is a
+  must-not-break item or something every other unit depends on, it cannot go last. Say what would
+  have to sit behind a facade first.
 
 ## What to write
 

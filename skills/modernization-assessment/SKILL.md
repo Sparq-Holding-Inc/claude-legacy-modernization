@@ -36,7 +36,10 @@ them as flags, so check what you were given before you ask.
 
 1. **Target state.** Rehost, replatform, refactor, or rewrite? These give completely different
    wave plans. If the user does not know, that is a finding. Say so, and assess for refactor as
-   the default, since it is the middle case.
+   the default, since it is the middle case. The words mean this. Rehost: the same code on new
+   infrastructure or an emulator. Replatform: the same code and language, a new runtime or database.
+   Refactor: the same behavior in restructured code, usually as services, in the same or a new language.
+   Rewrite: new code written from the behavior, not from the source.
 2. **What must not break.** Regulatory reports, month-end close, EDI partners, a downstream
    warehouse. Name them. They become the behavioral-equivalence anchors.
 3. **Runtime telemetry.** Can they tell you which programs ran in the last 12 months? If yes, the
@@ -59,6 +62,8 @@ Then write the fact tables. These are generated, so their citations are correct 
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py" inventory modernization-assessment/graph.json --out modernization-assessment/01-inventory.md
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py" edges modernization-assessment/graph.json --out modernization-assessment/02a-edge-tables.md
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py" deadcode modernization-assessment/graph.json --out modernization-assessment/05a-dead-code-candidates.md
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py" waveseed modernization-assessment/graph.json --out modernization-assessment/03a-wave-seed.md
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py" wavedraft modernization-assessment/graph.json --out modernization-assessment/03a-waves-draft.json
 ```
 
 Now read `graph.json`. Start with the `analysis` block. It already holds:
@@ -66,6 +71,9 @@ Now read `graph.json`. Start with the `analysis` block. It already holds:
 - `entry_points`, `reachable_nodes`, `reachable_programs`
 - `dead_code_candidates` (unreachable, dormant, unknown) with `dead_code_reasons`
 - `unresolved_dynamic`: every computed call the script could not resolve
+- `embedded_jcl`: JCL text found inside a COBOL literal. The program can submit it at run time. The
+  proc or program it names has no edge, so it is unknown, never unreachable
+- `wave_seed`: a first cut of the waves, from facts alone (Phase 3)
 - `sccs`, `self_recursive`, `articulation_points`, `god_modules`, `fan_in`, `fan_out`
 - `data_hubs`: the datasets with the most programs attached
 - `unscheduled_jobs`, `warnings` (read the warnings: a missing scheduler is a gap, not a detail)
@@ -135,30 +143,51 @@ Write `02-coupling.md` with:
 
 ## Phase 3. Waves
 
-Cut the system into waves. A wave is valid only if all four hold:
+The extractor already cut a first plan from facts. Read `03a-wave-seed.md`. Start from
+`03a-waves-draft.json`. It puts every entry point in one family, in this fixed order:
+
+1. batch jobs that touch no shared data and run no application program
+2. read-only batch jobs
+3. read-only online transactions
+4. batch jobs with no application program that touch shared data (their writes are guesses)
+5. batch jobs that write shared data
+6. online transactions that write shared data
+7. anything that touches DB2, IMS or MQ
+
+A unit that several entry points use moves with the earliest family that uses it. A scheduler job
+moves with the last family among the jobs it runs. A call cycle always moves whole.
+Every unit is placed, or listed as not placed with a reason. Some families may be empty.
+
+A wave is valid only if all four hold:
 
 - it can be deployed independently, behind a flag or a facade
 - it can be rolled back independently
 - it has a testable boundary (you can assert equivalence at its edge)
 - it delivers something a business stakeholder can name
 
-Do not invent waves. A system that is one job and a handful of programs is one wave. Say so, and
-say what you would cut if it were ten times larger. If the tree has no entry point and no scheduler,
-say the plan is provisional and list what you would need. If one wave holds a high-high unit, say
-plainly that the first-wave rule cannot hold at this size. A program in the unknown bucket goes in
-the wave of the code that might call it, and you say why.
-
-Order the waves by this rule: **earliest waves maximize learning per unit of blast radius.** Not by
-business value. That is the instinct, and it is wrong here. The first wave proves the toolchain,
-the test harness, and the team's port velocity on something that will not take down the month-end
-close. Business value leads in wave three.
-
-For each wave, state what it *unblocks*. A wave that unblocks nothing and delivers nothing is a
-chore. Merge it into a neighbor.
-
 Invoke the `migration-risk-assessor` agent first. Give it the path to `graph.json` and your
-scoping answers. It writes `modernization-assessment/risks.json`. Use its quadrants to order the
-waves.
+scoping answers. It writes `modernization-assessment/risks.json`.
+
+Copy the draft to `waves.json`. Fill in what only you can: `target_state`, and for each wave its
+`name`, `rationale`, `unblocks`, `blast_radius` and `confidence`. Keep the units, the wave order and
+the `evidence` as they are. Say in the rationale why the family is a sound wave, or why it is not.
+For each wave, say what it *unblocks*. A wave that unblocks nothing is a chore: say so.
+
+Change the plan only for a reason you can cite. These are the reasons that count:
+
+1. A must-not-break item, a strongly connected component or a facade dependency forces a unit
+   into another wave. Dependency wins over risk quadrant. A high-high unit that everything else
+   depends on cannot go last, so say what you would put behind a facade to make it movable.
+2. A wave holds more than 25 units and one argument needs it cut. Cut it at an articulation point
+   from `analysis.articulation_points`, and name the point.
+3. Something the extractor could not see changes what a unit is: a computed call, a file listed as
+   not parsed, JCL text inside COBOL. Cite it.
+4. `risks.json` puts a unit in high-high and its family puts it early. Move it to the last wave
+   that does not break a dependency.
+
+Do not invent waves. Do not merge waves for tidiness. Do not move a unit because of its name.
+Record every change in `deviations`, with the unit, the wave it left, the wave it joined, the reason
+and the evidence. A plan with no deviations is a fine answer.
 
 Write `03-waves.md` and `waves.json`. A unit is a program, a JCL job (`job:`), a proc, or a scheduler
 job. Steps, copybooks and datasets move with their owner, so do not list them. Every unit must be a
@@ -171,6 +200,7 @@ the `wave` field on each unit in `risks.json`.
   "waves": [
     {
       "wave": 1,
+      "family": "batch-readonly",
       "name": "Reference data batch",
       "units": ["CBACT01C", "job:READACCT"],
       "rationale": "Reads the account master, writes nothing shared. Proves the toolchain.",
@@ -180,13 +210,18 @@ the `wave` field on each unit in `risks.json`.
       "evidence": [{"file": "app/cbl/CBACT01C.cbl", "line": 29}]
     }
   ],
-  "unassigned": [{"id": "COSGN00C", "reason": "Part of a call cycle with the menu. Moves with wave 4."}]
+  "unassigned": [{"id": "COSGN00C", "reason": "Part of a call cycle with the menu. Moves with wave 4."}],
+  "deviations": [
+    {"unit": "COBIL00C", "from_wave": 6, "to_wave": 4, "reason": "Facade dependency: COBIL00C feeds the posting cycle.",
+     "evidence": [{"file": "app/cbl/COBIL00C.cbl", "line": 40}]}
+  ]
 }
 ```
 
 `target_state` is one of `rehost`, `replatform`, `refactor`, `rewrite`, `unknown`. Wave numbers run
 1 to N with no gaps. `blast_radius` is `low`, `medium` or `high`. The validator rejects a plan that
-splits a strongly connected component.
+splits a strongly connected component. Units the seed did not place stay in `unassigned` with its
+reason, unless a deviation places them.
 
 ## Phase 4. Estimate
 
@@ -222,7 +257,9 @@ Three buckets, never two. The extractor computed the candidates. Start from `dea
   it loudly. A confident dead-code claim over a computed call is how you delete something that runs
   once a year at fiscal close.
 
-**You may not move a program from unknown to unreachable.** The validator rejects it. If you can
+**You may not move a program from unknown to unreachable.** The validator rejects it. If you find
+evidence that an extractor bucket is wrong, for example a run-time submit it could not see, move the
+item toward unknown, never away from it, cite the evidence, and add no keys to `dead-code.json`. If you can
 bound a computed call (the value comes from a table you can read), say so in the reason, and leave
 the program in unknown.
 

@@ -13,6 +13,13 @@ Added
 - Computed calls are kept as unresolved edges. They are never dropped.
 - Graph facts computed by script: entry points, reachability, call cycles, articulation points,
   god modules, dataset hubs, and dead code candidates in three buckets.
+- A wave seed. The extractor cuts a first plan from facts alone: every entry point goes in a family
+  (read-only batch, batch writers, online writers, DB2 or IMS or MQ, and so on) in a fixed order.
+  It writes `03a-wave-seed.md` and a draft `03a-waves-draft.json`. Claude names the waves and may
+  change them only for a cited reason. Each change goes in `deviations`.
+- JCL text inside a COBOL literal (a job that submits itself through the internal reader) is
+  noticed. What it names is called unknown, never unreachable.
+- Assembler, DB2 DDL, IMS DBD and PSB, DCLGEN and control card files are listed as not read.
 - Three machine readable outputs next to the markdown: `waves.json`, `dead-code.json`,
   `risks.json`. One schema file checks all four JSON files.
 - A Stop hook that blocks the finish of an assessment when a citation does not resolve. It runs

@@ -343,6 +343,19 @@ def score_all(cases, n_runs=CARDDEMO_RUNS):
         c = coassignment(maps)
         c["runs_compared"] = len(maps)
         c["wave_count_identical"] = len(set(c["wave_counts"])) == 1
+        dev, seedj = [], []
+        for r in cd:
+            od = os.path.join(RUNS, r["run"], "modernization-assessment")
+            doc = load_json(os.path.join(od, "waves.json")) or {}
+            dev.append(len(doc.get("deviations") or []))
+            gr = load_json(os.path.join(od, "graph.json")) or {}
+            seed = {u: w["wave"] for w in gr.get("analysis", {}).get("wave_seed", {}).get("waves", [])
+                    for u in w["units"]}
+            m = wave_map(od)
+            if seed and m:
+                seedj.append(coassignment([m, seed])["jaccard"])
+        c["deviations"] = dev
+        c["seed_jaccard"] = seedj
         summary["carddemo_waves"] = c
     costs = [s["claude"].get("total_cost_usd") for s in ran if s["claude"].get("total_cost_usd") is not None]
     summary["cost_usd_total"] = round(sum(costs), 2) if costs else None

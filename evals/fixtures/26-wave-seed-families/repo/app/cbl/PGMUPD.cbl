@@ -1,0 +1,15 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. PGMUPD.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT OUT-FILE ASSIGN TO OUTFILE.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  OUT-FILE.
+       01  OUT-REC             PIC X(80).
+       PROCEDURE DIVISION.
+           OPEN OUTPUT OUT-FILE.
+           WRITE OUT-REC.
+           CLOSE OUT-FILE.
+           GOBACK.

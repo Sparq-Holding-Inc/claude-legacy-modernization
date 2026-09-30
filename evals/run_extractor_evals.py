@@ -82,8 +82,10 @@ def make_git_history(repo, history):
 def evidence_resolves(root, graph):
     """Fraction of evidence entries that point at a real file and a line inside it."""
     cache, ok, total = {}, 0, 0
-    for e in graph["edges"]:
-        for x in e["evidence"]:
+    seed = [x for w in graph["analysis"].get("wave_seed", {}).get("waves", []) for x in w["evidence"]]
+    embedded = [r["evidence"] for r in graph["analysis"].get("embedded_jcl", [])]
+    for x in [x for e in graph["edges"] for x in e["evidence"]] + seed + embedded:
+        if True:
             total += 1
             if x["file"] not in cache:
                 try:
@@ -133,6 +135,24 @@ def compare_fixture(truth, graph):
         for b in ("unreachable", "dormant", "unknown"):
             if sorted(truth["dead_code"][b]) != sorted(got[b]):
                 problems.append("dead code %s: truth %s got %s" % (b, sorted(truth["dead_code"][b]), sorted(got[b])))
+    if "wave_seed" in truth:
+        got = graph["analysis"]["wave_seed"]
+        want_w = [(w["family"], sorted(w["units"])) for w in truth["wave_seed"]["waves"]]
+        have_w = [(w["family"], sorted(w["units"])) for w in got["waves"]]
+        if want_w != have_w:
+            problems.append("wave seed: truth %s got %s" % (want_w, have_w))
+        want_u = sorted(x["id"] for x in truth["wave_seed"]["unassigned"])
+        have_u = sorted(x["id"] for x in got["unassigned"])
+        if want_u != have_u:
+            problems.append("wave seed unassigned: truth %s got %s" % (want_u, have_u))
+        if any(not w["evidence"] for w in got["waves"]):
+            problems.append("wave seed: a wave has no evidence")
+    if "embedded_jcl" in truth:
+        want_e = sorted((x["src"], x["dst"], x["file"], x["line"]) for x in truth["embedded_jcl"])
+        have_e = sorted((x["src"], x["dst"], x["evidence"]["file"], x["evidence"]["line"])
+                        for x in graph["analysis"]["embedded_jcl"])
+        if want_e != have_e:
+            problems.append("embedded jcl: truth %s got %s" % (want_e, have_e))
     for want in truth.get("unparsed", []):
         if not any(want in "%s: %s" % (u["file"], u["reason"]) for u in graph["unparsed"]):
             problems.append("expected an unparsed entry containing %r" % want)

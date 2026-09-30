@@ -10,7 +10,8 @@ into a steering meeting:
    together by a file layout nobody wrote down, and which jobs must run in order. Every edge cites a
    file and a line.
 2. **A risk-ranked wave plan.** The system cut into waves that can ship on their own. Cheap,
-   low-blast-radius work goes first, so it pays for the rest and teaches the team.
+   low-blast-radius work goes first, so it pays for the rest and teaches the team. The extractor
+   proposes the cut from the graph. Claude explains it and can change it, with a cited reason.
 3. **A dead code register.** Three buckets: unreachable, dormant, and unknown. Unknown is where a
    computed call could reach the code. Nothing is called dead over a call it cannot see.
 4. **A behavioral-equivalence test strategy.** How you prove the new system does what the old one did,
@@ -97,8 +98,11 @@ Read this before you trust it.
 - **JCL `IF/THEN/ELSE` and `COND=` are not modeled.** Step order is file order.
 - **`RETURN TRANSID`, `START`, `SEND MAP`, IMS and MQ are not edges.**
 - **COPY `REPLACING` is not applied.**
-- **The judgment is Claude's.** Wave cuts and risk scores are opinions with cited reasons. Two runs
-  on the same graph can differ. `evals/RESULTS.md` says by how much.
+- **The wave seed is crude.** It sorts entry points by what they write and where they run. It does
+  not know your business. It puts a compile job and a posting job in neighboring families if both
+  write shared data. Claude and you are expected to argue with it.
+- **The judgment is Claude's.** Risk scores and every change to the wave seed are opinions with
+  cited reasons. Two runs on the same graph can differ. `evals/RESULTS.md` says by how much.
 
 ## Privacy
 

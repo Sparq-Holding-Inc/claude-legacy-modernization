@@ -98,5 +98,20 @@ case("a pair that never stays together scores 0", c["jaccard"] == 0.0, str(c))
 c = E.coassignment([{"A": 1, "B": 2, "C": 3}, {"A": 1, "B": 2, "C": 3}])
 case("wave counts are reported per run", c["wave_counts"] == [3, 3], str(c))
 
+# deviations from the wave seed
+import schema  # noqa: E402
+base = {"target_state": "refactor", "waves": [{"wave": 1, "name": "n", "units": ["A"], "rationale": "r", "unblocks": "u",
+                                               "blast_radius": "low", "confidence": "high", "inference": True}]}
+case("no deviations is valid", not schema.validate_waves(base), str(schema.validate_waves(base)))
+good = dict(base, deviations=[{"unit": "A", "from_wave": 1, "to_wave": 2, "reason": "facade", "inference": True}])
+case("a deviation with a reason and a citation or inference is valid", not schema.validate_waves(good),
+     str(schema.validate_waves(good)))
+bad = dict(base, deviations=[{"unit": "A", "from_wave": 1, "to_wave": 2, "reason": "  "}])
+case("a deviation with no reason is rejected", any("needs a unit and a reason" in e for e in schema.validate_waves(bad)),
+     str(schema.validate_waves(bad)))
+bad2 = dict(base, deviations=[{"unit": "A", "from_wave": 1, "to_wave": 2, "reason": "x"}])
+case("a deviation with no evidence and no inference is rejected", bool(schema.validate_waves(bad2)),
+     str(schema.validate_waves(bad2)))
+
 print("\n%d of %d passed" % (sum(results), len(results)))
 sys.exit(0 if all(results) else 1)

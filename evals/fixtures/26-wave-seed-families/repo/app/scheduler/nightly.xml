@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DEFTABLE>
+  <FOLDER FOLDER_NAME="NIGHTLY">
+    <JOB JOBNAME="RPTNITE" MEMNAME="RPTJOB">
+    </JOB>
+  </FOLDER>
+</DEFTABLE>

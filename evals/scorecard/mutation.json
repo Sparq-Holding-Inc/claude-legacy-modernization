@@ -13,7 +13,8 @@
     "18",
     "20",
     "22",
-    "25"
+    "25",
+    "26"
    ],
    "equivalent": false
   },
@@ -66,7 +67,8 @@
    "caught_by": [
     "06",
     "07",
-    "16"
+    "16",
+    "26"
    ],
    "equivalent": false
   },
@@ -132,14 +134,16 @@
    "caught_by": [
     "05",
     "06",
-    "07"
+    "07",
+    "26"
    ],
    "equivalent": false
   },
   {
    "mutation": "contract confidence always high",
    "caught_by": [
-    "07"
+    "07",
+    "26"
    ],
    "equivalent": false
   },
@@ -157,7 +161,8 @@
   {
    "mutation": "CSD entry points off",
    "caught_by": [
-    "05"
+    "05",
+    "26"
    ],
    "equivalent": false
   },
@@ -228,6 +233,55 @@
    "mutation": "temporary datasets kept (equivalent: a later guard drops any name still holding an ampersand)",
    "caught_by": [],
    "equivalent": true
+  },
+  {
+   "mutation": "unread mainframe files not listed",
+   "caught_by": [
+    "27"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "JCL text in COBOL not noticed",
+   "caught_by": [
+    "27"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "proc programs not followed from a proc named in COBOL",
+   "caught_by": [
+    "27"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "wave seed: shared writes not detected",
+   "caught_by": [
+    "26"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "wave seed: guessed utility modes ignored",
+   "caught_by": [
+    "26"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "wave seed: shared unit moves with the latest family",
+   "caught_by": [
+    "26"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "wave seed: scheduler job moves with the first family",
+   "caught_by": [
+    "26"
+   ],
+   "equivalent": false
   },
   {
    "mutation": "dead code: dynamic calls ignored",

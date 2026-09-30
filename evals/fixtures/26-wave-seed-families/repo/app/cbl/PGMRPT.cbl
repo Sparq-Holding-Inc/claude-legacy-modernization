@@ -1,0 +1,20 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. PGMRPT.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT IN-FILE ASSIGN TO INFILE.
+           SELECT REP-FILE ASSIGN TO REPORT.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  IN-FILE.
+       01  IN-REC              PIC X(80).
+       FD  REP-FILE.
+       01  REP-REC             PIC X(80).
+       PROCEDURE DIVISION.
+           OPEN INPUT IN-FILE.
+           OPEN OUTPUT REP-FILE.
+           READ IN-FILE.
+           WRITE REP-REC.
+           CLOSE IN-FILE REP-FILE.
+           GOBACK.

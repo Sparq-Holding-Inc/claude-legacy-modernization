@@ -112,8 +112,11 @@ def main():
             w("| End to end | Wave count across CardDemo runs | Identical | %s | %s |" %
               (cw["wave_counts"], "PASS" if cw["wave_count_identical"] else "FAIL"))
             w("| End to end | Pairwise wave co-assignment across CardDemo runs | 80%%+ | Jaccard of co-assigned pairs %s. "
-              "Rand index %s. Unit overlap %s | %s |" %
+              "Rand index %s. Unit overlap %s%s | %s |" %
               (pct(cw["jaccard"]), pct(cw["rand_index_mean"]), pct(cw["unit_overlap"]),
+               (". Deviations from the extractor's wave seed, per run: %s. Each run's Jaccard with the seed: %s" %
+                (cw["deviations"], ", ".join(pct(x) for x in cw["seed_jaccard"])))
+               if cw.get("seed_jaccard") else "",
                "PASS" if cw["jaccard"] >= .8 else "FAIL"))
         else:
             w("| End to end | Wave count and co-assignment across CardDemo runs | Identical, 80%+ | NOT RUN | NOT RUN |")

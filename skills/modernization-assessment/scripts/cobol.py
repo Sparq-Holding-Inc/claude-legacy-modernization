@@ -59,6 +59,10 @@ READ_INTO = re.compile(_NB + r"READ\s+(" + NAME + r")(?:\s+(?:NEXT|PREVIOUS|RECO
 WRITE_FROM = re.compile(_NB + r"(?:WRITE|REWRITE)\s+(" + NAME + r")\s+FROM\s+(" + NAME + r")", I)
 MOVE_RE = re.compile(_NB + r"MOVE\s+(?:CORR(?:ESPONDING)?\s+)?(?:(['\"])(" + MASK + r"*)\1|(" + NAME + r")"
                      r"(?:\s*\([^)]*\))?|(\S+))\s+TO\s+", I)
+# JCL text kept in a literal, for a program that submits it through an internal reader:
+# "//STEP10 EXEC PROC=TRANREPT". The extractor cannot follow it, but it must not call the target dead.
+EMBEDDED_JCL = re.compile(r"""['"]//[A-Z0-9#@$]*\s+EXEC\s+(?:(PROC|PGM)=)?([A-Z0-9#@$]{1,8})""", I)
+
 VALUE_RE = re.compile(_NB + r"(\d\d)\s+(" + NAME + r")\b[^.]*?" + _NB + r"VALUE\s+(?:IS\s+)?(['\"])(" + MASK + r"*)\3", I)
 OTHER_RECV = [
     re.compile(_NB + r"ACCEPT\s+(" + NAME + r")", I),
@@ -316,6 +320,7 @@ class Facts:
         self.fd_records = {}     # 01 name -> file name
         self.rec_uses = []       # (file name or None, fd record or None, record var)
         self.values = {}         # NAME -> (literal, (file,line))
+        self.embedded_jcl = []   # dict(name, how, file, line): JCL text inside a literal
         self.literal_moves = {}  # NAME -> [(literal, (file,line))]
         self.moves_from_name = []  # (source NAME, receiver NAME, (file,line))
         self.receivers = set()   # names that can receive a non literal value
@@ -402,6 +407,11 @@ def parse_program(root, rel, lib):
             if nonexec[k] != "\n":
                 nonexec[k] = " "
     nonexec = "".join(nonexec)
+
+    for m in EMBEDDED_JCL.finditer(orig):
+        w = at(m.start())
+        f.embedded_jcl.append({"name": m.group(2).upper(), "how": (m.group(1) or "proc").lower(),
+                               "file": w.file, "line": w.line})
 
     # ---- data division facts
     for m in VALUE_RE.finditer(masked):

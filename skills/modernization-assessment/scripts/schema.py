@@ -332,6 +332,18 @@ def validate_waves(w, graph=None):
         errs += _citation_or_inference(wave, wh)
     if sorted(x for x in numbers if _is_int(x)) != list(range(1, len(waves) + 1)):
         errs.append("waves: wave numbers must be 1..%d with no gaps" % len(waves))
+    devs = w.get("deviations")
+    if devs is not None:
+        if not isinstance(devs, list):
+            errs.append("waves: deviations must be a list")
+        else:
+            for i, d in enumerate(devs):
+                dh = "deviation[%d]" % i
+                if not isinstance(d, dict) or not isinstance(d.get("unit"), str) \
+                        or not isinstance(d.get("reason"), str) or not d["reason"].strip():
+                    errs.append("%s: needs a unit and a reason" % dh)
+                    continue
+                errs += _citation_or_inference(d, dh)
     if graph is not None:
         kinds = {n["id"]: n.get("unit_type") for n in graph.get("nodes", [])}
         movable = set(PROGRAM_TYPES) | {"jcl_job", "proc", "scheduler_job"}

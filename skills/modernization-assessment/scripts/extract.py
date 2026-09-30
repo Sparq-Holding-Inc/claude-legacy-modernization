@@ -32,6 +32,10 @@ from graph import Graph  # noqa: E402
 VERSION = "0.2.0"
 SKIP_DIRS = {".git", ".hg", ".svn", "node_modules", "__pycache__", ".venv", "venv",
              "modernization-assessment"}
+UNREAD = {".asm": "assembler source", ".mac": "assembler macro", ".ddl": "DB2 DDL", ".dbd": "IMS DBD",
+          ".psb": "IMS PSB", ".dcl": "DB2 DCLGEN", ".ctl": "control cards", ".sql": "SQL script",
+          ".pli": "PL/I source", ".pl1": "PL/I source", ".rexx": "REXX", ".rex": "REXX", ".nat": "Natural source"}
+
 LIMITS = [
     "COBOL is read as fixed format. Free format files are listed as not parsed.",
     "COPY REPLACING is not applied. A copybook is expanded as written.",
@@ -39,10 +43,13 @@ LIMITS = [
     "A called subprogram gets no DDs from its caller's JCL step.",
     "IDCAMS, SORT and other in-stream control cards are not read. Dataset modes on utility steps come from DISP only.",
     "IF/THEN/ELSE and COND= in JCL are not modeled. Step order is file order.",
-    "Nested PROC calls, INCLUDE members and jobs submitted through the internal reader are not followed.",
+    "Nested PROC calls and INCLUDE members are not followed. JCL text inside a COBOL literal is noticed, "
+    "but it makes no edge. A proc or program it names is called unknown, never unreachable.",
     "EXEC CICS RETURN TRANSID, START and SEND MAP are not edges.",
     "Only Control-M XML and shell wrappers that name JCL files are read as schedulers.",
     "DCB, LRECL and RECFM are not read, so a record length on a DD is not compared with a copybook.",
+    "A contract edge is high when both sides COPY the same layout. A program can COPY a layout and still "
+    "read the record through a private one, so high means shared layout, not proven equal.",
     "LINK and XCTL are both call edges. XCTL never returns, and control flow is not modeled.",
 ]
 
@@ -119,11 +126,14 @@ def build(root, as_of, dormant_years=5, use_git=True):
 
     notices = []
     buckets = collections.defaultdict(list)
+    unread = collections.defaultdict(list)
     for rel in files:
         ext = os.path.splitext(rel)[1].lower()
         why = scheduler.unparsed_reason(rel)
         if why:
             unparsed("scheduler", rel, why + ", not parsed")
+            notices.append("%s is a scheduler file the extractor cannot parse. Jobs it schedules are counted as "
+                           "unscheduled here, so the unscheduled list is overstated." % rel)
             continue
         if ext in cobol.CODE_EXT:
             buckets["cobol"].append(rel)
@@ -143,6 +153,13 @@ def build(root, as_of, dormant_years=5, use_git=True):
             with open(os.path.join(root, rel), "rb") as fh:
                 if scheduler.looks_like_controlm(fh.read(4000).decode("latin-1")):
                     buckets["controlm"].append(rel)
+        if ext in UNREAD:
+            unread[ext].append(rel)
+
+    for ext, rels in sorted(unread.items()):
+        eg = ", ".join(rels[1:3])
+        unparsed("unread", rels[0], "%d file(s) of type %s (%s) are not read%s" %
+                 (len(rels), ext, UNREAD[ext], ". Also: " + eg if eg else ""))
 
     # ---------------------------------------------------------- copybooks
     lib = cobol.CopyLibrary(root, buckets["copy"])
@@ -466,6 +483,21 @@ def build(root, as_of, dormant_years=5, use_git=True):
             ut = "batch"
         g.nodes[pid]["unit_type"] = ut
 
+    embedded, seen_emb = [], set()
+    for pid, f in sorted(facts.items()):
+        for r in f.embedded_jcl:
+            if r["how"] == "proc" and r["name"] in procs:
+                dst = schema.proc_id(r["name"])
+            elif r["how"] == "pgm" and r["name"] in prog_set:
+                dst = r["name"]
+            else:
+                continue
+            if (pid, dst) not in seen_emb:
+                seen_emb.add((pid, dst))
+                embedded.append({"src": pid, "dst": dst, "evidence": {"file": r["file"], "line": r["line"]}})
+    proc_programs = {schema.proc_id(n): sorted({st.pgm for st in u.steps if st.pgm in prog_set})
+                     for n, u in procs.items() if any(st.pgm in prog_set for st in u.steps)}
+
     nodes, edges = g.finalize()
     return {
         "schema_version": schema.SCHEMA_VERSION,
@@ -477,7 +509,7 @@ def build(root, as_of, dormant_years=5, use_git=True):
         "nodes": nodes,
         "edges": edges,
         "unparsed": sorted(g.unparsed, key=lambda u: (u["file"], u["reason"])),
-        "analysis": analyze.analyze(nodes, edges, as_of, dormant_years, notices),
+        "analysis": analyze.analyze(nodes, edges, as_of, dormant_years, notices, embedded, proc_programs),
     }
 
 

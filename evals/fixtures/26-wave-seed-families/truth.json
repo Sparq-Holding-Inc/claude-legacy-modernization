@@ -1,0 +1,434 @@
+{
+ "case": "26-wave-seed-families",
+ "status": "edges reviewed by hand against the source and copied from a first run; wave_seed hand-written before the code that computes it",
+ "description": "Seven kinds of work in one small estate: an unshared utility job, a read-only batch job that writes only its own report, a read-only online transaction, a utility job that touches the shared master (IDCAMS, mode only inferred from DISP), a batch writer of the master, an online writer of it, and a DB2 job. PGMSHARE is called by a read-only and a writing transaction, so it moves with the first one. A Control-M job follows the JCL job it runs. A shell wrapper runs a read-only job and a writing job, so it moves with the later family.",
+ "edges": [
+  {
+   "src": "PGMEDIT",
+   "dst": "PGMSHARE",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMEDIT.cbl:5"
+   ]
+  },
+  {
+   "src": "PGMVIEW",
+   "dst": "PGMSHARE",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMVIEW.cbl:5"
+   ]
+  },
+  {
+   "src": "sch:NIGHTLY/RPTNITE",
+   "dst": "job:RPTJOB",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/scheduler/nightly.xml:4"
+   ]
+  },
+  {
+   "src": "step:DBJOB.S1",
+   "dst": "PGMDB",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/DBJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "step:RPTJOB.S1",
+   "dst": "PGMRPT",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/RPTJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "step:SETUP.S1",
+   "dst": "ext:IEFBR14",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/SETUP.jcl:2"
+   ]
+  },
+  {
+   "src": "step:UPDJOB.S1",
+   "dst": "PGMUPD",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/UPDJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "PGMEDIT",
+   "dst": "PGMRPT",
+   "kind": "contract",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/cbl/PGMEDIT.cbl:4",
+    "app/cbl/PGMRPT.cbl:6",
+    "app/cbl/PGMRPT.cbl:15",
+    "app/jcl/RPTJOB.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMEDIT",
+   "dst": "PGMVIEW",
+   "kind": "contract",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/cbl/PGMEDIT.cbl:4",
+    "app/cbl/PGMVIEW.cbl:4"
+   ]
+  },
+  {
+   "src": "PGMUPD",
+   "dst": "PGMRPT",
+   "kind": "contract",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/cbl/PGMRPT.cbl:6",
+    "app/cbl/PGMRPT.cbl:15",
+    "app/cbl/PGMUPD.cbl:6",
+    "app/cbl/PGMUPD.cbl:12",
+    "app/jcl/RPTJOB.jcl:3",
+    "app/jcl/UPDJOB.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMUPD",
+   "dst": "PGMVIEW",
+   "kind": "contract",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/cbl/PGMUPD.cbl:6",
+    "app/cbl/PGMUPD.cbl:12",
+    "app/cbl/PGMVIEW.cbl:4",
+    "app/jcl/UPDJOB.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMDB",
+   "dst": "ds:db2:ACCOUNTS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMDB.cbl:4"
+   ]
+  },
+  {
+   "src": "PGMEDIT",
+   "dst": "ds:SPARQ.TEST.MASTER",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMEDIT.cbl:4"
+   ]
+  },
+  {
+   "src": "PGMRPT",
+   "dst": "ds:SPARQ.TEST.MASTER",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMRPT.cbl:6",
+    "app/cbl/PGMRPT.cbl:15",
+    "app/jcl/RPTJOB.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMRPT",
+   "dst": "ds:SPARQ.TEST.REPORT",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMRPT.cbl:7",
+    "app/cbl/PGMRPT.cbl:16",
+    "app/jcl/RPTJOB.jcl:4"
+   ]
+  },
+  {
+   "src": "PGMUPD",
+   "dst": "ds:SPARQ.TEST.MASTER",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMUPD.cbl:6",
+    "app/cbl/PGMUPD.cbl:12",
+    "app/jcl/UPDJOB.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMVIEW",
+   "dst": "ds:SPARQ.TEST.MASTER",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMVIEW.cbl:4"
+   ]
+  },
+  {
+   "src": "step:SETUP.S1",
+   "dst": "ds:SPARQ.TEST.SCRATCH",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/jcl/SETUP.jcl:3"
+   ]
+  },
+  {
+   "src": "job:DBJOB",
+   "dst": "step:DBJOB.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/DBJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "job:RPTJOB",
+   "dst": "step:RPTJOB.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/RPTJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "job:SETUP",
+   "dst": "step:SETUP.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/SETUP.jcl:2"
+   ]
+  },
+  {
+   "src": "job:UPDJOB",
+   "dst": "step:UPDJOB.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/UPDJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "job:LOADJOB",
+   "dst": "step:LOADJOB.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/LOADJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "step:LOADJOB.S1",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/LOADJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "step:LOADJOB.S1",
+   "dst": "ds:SPARQ.TEST.MASTER",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/jcl/LOADJOB.jcl:3"
+   ]
+  },
+  {
+   "src": "sch:app/scripts/nightly.sh",
+   "dst": "job:RPTJOB",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/scripts/nightly.sh:3"
+   ]
+  },
+  {
+   "src": "sch:app/scripts/nightly.sh",
+   "dst": "job:UPDJOB",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/scripts/nightly.sh:4"
+   ]
+  },
+  {
+   "src": "job:RPTJOB",
+   "dst": "job:UPDJOB",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/scripts/nightly.sh:3",
+    "app/scripts/nightly.sh:4"
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "id": "PGMSHARE",
+   "unit_type": "subprogram",
+   "entry_point": false
+  },
+  {
+   "id": "PGMVIEW",
+   "unit_type": "online_txn",
+   "entry_point": true
+  },
+  {
+   "id": "PGMEDIT",
+   "unit_type": "online_txn",
+   "entry_point": true
+  },
+  {
+   "id": "PGMRPT",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "PGMUPD",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "PGMDB",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "job:SETUP",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:NIGHTLY/RPTNITE",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "job:LOADJOB",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  }
+ ],
+ "wave_seed": {
+  "waves": [
+   {
+    "family": "batch-utility",
+    "units": [
+     "job:SETUP"
+    ]
+   },
+   {
+    "family": "batch-readonly",
+    "units": [
+     "PGMRPT",
+     "job:RPTJOB",
+     "sch:NIGHTLY/RPTNITE"
+    ]
+   },
+   {
+    "family": "online-readonly",
+    "units": [
+     "PGMSHARE",
+     "PGMVIEW"
+    ]
+   },
+   {
+    "family": "batch-data-jobs",
+    "units": [
+     "job:LOADJOB"
+    ]
+   },
+   {
+    "family": "batch-writers",
+    "units": [
+     "PGMUPD",
+     "job:UPDJOB",
+     "sch:app/scripts/nightly.sh"
+    ]
+   },
+   {
+    "family": "online-writers",
+    "units": [
+     "PGMEDIT"
+    ]
+   },
+   {
+    "family": "subsystem",
+    "units": [
+     "PGMDB",
+     "job:DBJOB"
+    ]
+   }
+  ],
+  "unassigned": []
+ }
+}

@@ -16,11 +16,29 @@ dormant     reached, but the last change is older than the dormancy window.
             Propose instrumentation, not deletion.
 If the tree has no entry point at all, nothing can be called unreachable.
 Everything is unknown and a warning says why.
+JCL text inside a COBOL literal (an internal reader submit) names a proc or
+program the graph has no edge to. Such a target, and the programs its proc
+runs, are unknown, not unreachable.
+
+Wave seed
+---------
+A first cut of the migration waves, from facts alone. Every entry point (a JCL
+job or an online transaction) is put in one family, by four tests in order:
+it touches DB2, IMS or MQ; it writes a dataset that a different entry point
+also uses (a utility step whose mode is only inferred from DISP counts as a
+possible write); it is online or batch; it runs an application program or none.
+A batch job with no application program that touches shared data is its own
+family, because its writes are guesses.
+The families have a fixed order. A unit reached from several entry points moves
+with the earliest family that uses it. A scheduler job moves with the last
+family among the JCL jobs it runs. Programs in one call cycle are reached from
+the same entry points, so a cycle always moves whole. Nothing here judges risk.
 """
 
 import collections
 import datetime
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -124,7 +142,143 @@ def _p90(values):
     return vals[max(0, int(len(vals) * 0.9 + 0.999999) - 1)] if vals else 0
 
 
-def analyze(nodes, edges, as_of, dormant_years=5, notices=None):
+FAMILIES = (
+    ("batch-utility", "Batch jobs that run no application program and touch no dataset another entry point uses"),
+    ("batch-readonly", "Batch jobs that run application programs and write nothing another entry point uses"),
+    ("online-readonly", "Online transactions that write nothing another entry point uses"),
+    ("batch-data-jobs", "Batch jobs that run no application program but touch a dataset another entry point uses. "
+                        "The mode is inferred from DISP, so they may write it"),
+    ("batch-writers", "Batch jobs that run application programs and write a dataset another entry point also uses"),
+    ("online-writers", "Online transactions that write a dataset another entry point also uses"),
+    ("subsystem", "Entry points that touch DB2, IMS or MQ"),
+)
+SUBSYSTEM_EXT = re.compile(r"^ext:(MQ[A-Z]{2,}|CBLTDLI|AIBTDLI|DFSRRC00|DSNTEP2|DSNTIAD|DSNUTILB|DSN)$")
+MOVABLE = set(schema.PROGRAM_TYPES) | {"jcl_job", "proc", "scheduler_job"}
+
+
+def _spread(seeds, succ, by_id, reach, extra):
+    """Candidates that the seeds lead to. Walks through any node, because a step joins a proc to its program."""
+    origin = {s: s for s in seeds}
+    work = list(seeds)
+    while work:
+        v = work.pop()
+        for w in list(succ.get(v, ())) + list(extra.get(v, ())):
+            if w in origin or w in reach or w not in by_id:
+                continue
+            origin[w] = origin[v]
+            work.append(w)
+    return {k: v for k, v in origin.items() if by_id[k]["unit_type"] in BUCKET_TYPES}
+
+
+def wave_seed(nodes, edges, entries, unknown, unreachable):
+    by_id = {n["id"]: n for n in nodes}
+    succ, edges_from, sched_of = collections.defaultdict(list), collections.defaultdict(list), collections.defaultdict(list)
+    for e in edges:
+        if e["kind"] in WALK_KINDS:
+            succ[e["src"]].append(e["dst"])
+        if e["kind"] in ("data", "call"):
+            edges_from[e["src"]].append(e)
+        if e["kind"] == "call" and e["src"].startswith("sch:") and e["dst"].startswith("job:"):
+            sched_of[e["src"]].append(e["dst"])
+    roots = sorted(i for i in entries if i in by_id and i not in sched_of
+                   and (by_id[i]["unit_type"] == "jcl_job" or by_id[i]["unit_type"] in schema.PROGRAM_TYPES))
+    owned, roots_of = {}, collections.defaultdict(set)
+    for r in roots:
+        seen, work = {r}, [r]
+        while work:
+            v = work.pop()
+            for w in succ.get(v, ()):
+                if w not in seen:
+                    seen.add(w)
+                    work.append(w)
+        owned[r] = seen
+        for v in seen:
+            roots_of[v].add(r)
+    touch = collections.defaultdict(set)
+    for e in edges:
+        if e["kind"] == "data":
+            touch[e["dst"]] |= roots_of.get(e["src"], set())
+
+    def ev_of(e):
+        return dict(e["evidence"][0])
+
+    def classify(r):
+        n = by_id[r]
+        online = n["unit_type"] == "online_txn"
+        sub = shared = None
+        has_prog = False
+        for v in sorted(owned[r]):
+            if v in by_id and by_id[v]["unit_type"] in schema.PROGRAM_TYPES:
+                has_prog = True
+            for e in edges_from.get(v, ()):
+                if e["kind"] == "data" and e["dst"].startswith("ds:db2:") or \
+                        e["kind"] == "call" and SUBSYSTEM_EXT.match(e["dst"]):
+                    sub = sub or ev_of(e)
+                elif (e["kind"] == "data" and not e["dst"].startswith("ds:dd:") and len(touch[e["dst"]]) > 1
+                      and (e.get("mode") in ("write", "read_write") or "inferred from DISP" in (e.get("note") or ""))):
+                    shared = shared or ev_of(e)
+        if sub:
+            return "subsystem", sub
+        if shared:
+            if online:
+                return "online-writers", shared
+            return ("batch-writers" if has_prog else "batch-data-jobs"), shared
+        own = None
+        for e in edges_from.get(r, ()):
+            own = own or ev_of(e)
+        own = own or ({"file": n["path"], "line": n.get("line") or 1} if n.get("path") else None)
+        if online:
+            return "online-readonly", (n["entry_evidence"][0] if n.get("entry_evidence") else own)
+        return ("batch-readonly" if has_prog else "batch-utility"), own
+
+    order = {name: i for i, (name, _) in enumerate(FAMILIES)}
+    fam_of, basis_of = {}, {}
+    for r in roots:
+        fam_of[r], basis_of[r] = classify(r)
+
+    def family_of(u):
+        if u in sched_of:
+            fams = [family_of(j) for j in sched_of[u] if j in by_id]
+            return max(fams, key=order.get) if fams and None not in fams else None
+        rs = roots_of.get(u, set())
+        if not rs:
+            return None
+        return min((fam_of[r] for r in rs), key=order.get)
+
+    unassigned, assign = [], {}
+    dead, hidden = set(unreachable), set(unknown)
+    for n in nodes:
+        u = n["id"]
+        if n["unit_type"] not in MOVABLE:
+            continue
+        if u in dead:
+            unassigned.append({"id": u, "reason": "dead code candidate, unreachable. See dead-code.json."})
+        elif u in hidden:
+            unassigned.append({"id": u, "reason": "no static path, but a computed call or a submit inside COBOL "
+                                                  "could reach it. See dead-code.json."})
+        elif u.startswith("sch:") and u not in sched_of:
+            unassigned.append({"id": u, "reason": "scheduler job that names no JCL job in the tree"})
+        else:
+            fam = family_of(u)
+            if fam is None:
+                unassigned.append({"id": u, "reason": "no entry point owns it"})
+            else:
+                assign[u] = fam
+    waves = []
+    for name, text in FAMILIES:
+        units = sorted(u for u, f in assign.items() if f == name)
+        if not units:
+            continue
+        fam_roots = [r for r in roots if fam_of[r] == name]
+        evs = {(b["file"], b["line"]) for r in fam_roots for b in [basis_of[r]] if b}
+        waves.append({"wave": len(waves) + 1, "family": name, "description": text, "units": units,
+                      "entry_points": fam_roots,
+                      "evidence": [{"file": f, "line": l} for f, l in sorted(evs)[:3]]})
+    return {"basis": "family of the entry points that use a unit, in a fixed order. Facts only, no risk judgment.",
+            "waves": waves, "unassigned": sorted(unassigned, key=lambda x: x["id"])}
+
+
+def analyze(nodes, edges, as_of, dormant_years=5, notices=None, embedded=None, proc_programs=None):
     by_id = {n["id"]: n for n in nodes}
     succ = collections.defaultdict(list)
     for e in edges:
@@ -179,6 +333,22 @@ def analyze(nodes, edges, as_of, dormant_years=5, notices=None):
                               (len(reachable_dynamic), first["evidence"]["file"], first["evidence"]["line"]))
         else:
             unreachable = sorted(unrea)
+        emb = {}
+        for r in embedded or []:
+            if r["src"] in reach and r["dst"] in set(unreachable) and r["dst"] not in emb:
+                emb[r["dst"]] = r
+        if emb:
+            moved = _spread(emb, succ, by_id, reach, proc_programs or {})
+            moved = {k: v for k, v in moved.items() if k in set(unreachable)}
+            for c, o in sorted(moved.items()):
+                r = emb[o]
+                at = "%s:%d" % (r["evidence"]["file"], r["evidence"]["line"])
+                reasons[c] = ("named in JCL text inside %s at %s, which a running program can submit" % (r["src"], at)
+                              if c == o else "run by %s, which JCL text inside %s names at %s" % (o, r["src"], at))
+            unknown = sorted(set(unknown) | set(moved))
+            unreachable = sorted(set(unreachable) - set(moved))
+            warnings.append("%d proc or program(s) are named only in JCL text inside COBOL. No edge exists, so they "
+                            "are unknown, not unreachable. See dead_code_reasons." % len(moved))
         for c in unreachable:
             reasons[c] = "no static path from any entry point and no reachable computed call in the tree"
         for c in sorted(cands):
@@ -265,6 +435,7 @@ def analyze(nodes, edges, as_of, dormant_years=5, notices=None):
         "dead_code_candidates": {"unreachable": unreachable, "dormant": dormant, "unknown": unknown},
         "dead_code_reasons": reasons,
         "unresolved_dynamic": dynamic,
+        "embedded_jcl": list(embedded or []),
         "structure_basis": basis,
         "fan_in": {k: v for k, v in fi.items() if v},
         "fan_out": {k: v for k, v in fo.items() if v},
@@ -277,5 +448,6 @@ def analyze(nodes, edges, as_of, dormant_years=5, notices=None):
         "unscheduled_jobs": unscheduled,
         "edge_counts": dict(sorted(kinds.items())),
         "node_counts": dict(sorted(types.items())),
+        "wave_seed": wave_seed(nodes, edges, entries, unknown, unreachable),
         "warnings": warnings,
     }

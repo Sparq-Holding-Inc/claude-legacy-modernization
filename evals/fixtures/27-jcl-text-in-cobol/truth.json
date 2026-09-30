@@ -1,0 +1,66 @@
+{
+ "case": "27-jcl-text-in-cobol",
+ "status": "edges reviewed by hand against the source; dead_code and embedded_jcl hand-written before the code that computes them",
+ "description": "PGMMAIN holds JCL text that submits proc LATERPRC through an internal reader. No static edge exists. LATERPRC and the program it runs must be unknown, never unreachable. PGMDEAD is truly dead. An assembler file sits in the tree. The extractor cannot read it, so it must say so.",
+ "edges": [
+  {
+   "src": "step:MAINJOB.S1",
+   "dst": "PGMMAIN",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/MAINJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "job:MAINJOB",
+   "dst": "step:MAINJOB.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/MAINJOB.jcl:2"
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "id": "PGMMAIN",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "job:MAINJOB",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  }
+ ],
+ "dead_code": {
+  "unreachable": [
+   "PGMDEAD"
+  ],
+  "dormant": [],
+  "unknown": [
+   "PGMLATER",
+   "proc:LATERPRC"
+  ]
+ },
+ "embedded_jcl": [
+  {
+   "src": "PGMMAIN",
+   "dst": "proc:LATERPRC",
+   "file": "app/cbl/PGMMAIN.cbl",
+   "line": 6
+  }
+ ],
+ "must_not_unreachable": [
+  "PGMLATER",
+  "proc:LATERPRC"
+ ],
+ "unparsed": [
+  "app/asm/WAITPGM.asm: 1 file(s) of type .asm (assembler source) are not read"
+ ]
+}

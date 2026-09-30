@@ -1,0 +1,3 @@
+//LATERPRC PROC
+//L1       EXEC PGM=PGMLATER
+//         PEND

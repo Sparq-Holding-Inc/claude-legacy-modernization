@@ -1,0 +1,2 @@
+//DBJOB    JOB (ACCT),'DB',CLASS=A
+//S1       EXEC PGM=PGMDB
