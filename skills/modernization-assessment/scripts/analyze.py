@@ -171,7 +171,7 @@ def _spread(seeds, succ, by_id, reach, extra):
 
 
 def wave_seed(nodes, edges, entries, unknown, unreachable, reasons=None, dynamic=None, runtime_named=None,
-              utility_writes=None):
+              utility_writes=None, embedded=None, proc_programs=None):
     by_id = {n["id"]: n for n in nodes}
     succ, edges_from, sched_of = collections.defaultdict(list), collections.defaultdict(list), collections.defaultdict(list)
     for e in edges:
@@ -188,6 +188,11 @@ def wave_seed(nodes, edges, entries, unknown, unreachable, reasons=None, dynamic
             succ[r["src"]].append(r["dst"])
     for w in utility_writes or []:
         uw_from[w["src"]].append(w)
+    submitters = {r["src"] for r in embedded or []}
+    for r in embedded or []:
+        succ[r["src"]].append(r["dst"])
+    for proc, progs in (proc_programs or {}).items():
+        succ[proc].extend(progs)
     roots = sorted(i for i in entries if i in by_id and i not in sched_of
                    and (by_id[i]["unit_type"] == "jcl_job" or by_id[i]["unit_type"] in schema.PROGRAM_TYPES))
     owned, roots_of = {}, collections.defaultdict(set)
@@ -214,7 +219,7 @@ def wave_seed(nodes, edges, entries, unknown, unreachable, reasons=None, dynamic
 
     def classify(r):
         n = by_id[r]
-        online = n["unit_type"] == "online_txn"
+        online = n["unit_type"] == "online_txn" and r not in submitters
         sub = shared = guess = None
         has_prog = False
         for v in sorted(owned[r]):
@@ -254,6 +259,38 @@ def wave_seed(nodes, edges, entries, unknown, unreachable, reasons=None, dynamic
     for r in roots:
         fam_of[r], basis_of[r] = classify(r)
 
+    # Jobs a scheduler chains together move together, in the latest family of the chain. A job that touches
+    # DB2, IMS or MQ keeps its own family.
+    tadj = collections.defaultdict(set)
+    for e in edges:
+        if e["kind"] == "temporal" and e["src"][:4] in ("job:", "sch:") and e["dst"][:4] in ("job:", "sch:"):
+            tadj[e["src"]].add(e["dst"])
+            tadj[e["dst"]].add(e["src"])
+    for sch, jobs in sched_of.items():
+        for j in jobs:
+            tadj[sch].add(j)
+            tadj[j].add(sch)
+    seen_chain = set()
+    for start in sorted(tadj):
+        if start in seen_chain:
+            continue
+        comp, work = set(), [start]
+        while work:
+            x = work.pop()
+            if x not in comp:
+                comp.add(x)
+                work.extend(tadj[x] - comp)
+        seen_chain |= comp
+        chained = [j for j in comp if j in fam_of and fam_of[j] != "subsystem"]
+        if len(chained) > 1:
+            latest = max((fam_of[j] for j in chained), key=order.get)
+            tev = next((dict(e["evidence"][0]) for e in edges if e["kind"] == "temporal" and e["src"] in comp
+                        and e["dst"] in comp), None)
+            for j in chained:
+                if fam_of[j] != latest:
+                    fam_of[j] = latest
+                    basis_of[j] = tev or basis_of[j]
+
     def family_of(u):
         if u in sched_of:
             fams = [family_of(j) for j in sched_of[u] if j in by_id]
@@ -271,7 +308,7 @@ def wave_seed(nodes, edges, entries, unknown, unreachable, reasons=None, dynamic
             continue
         if u in dead:
             unassigned.append({"id": u, "reason": (reasons or {}).get(u) or "dead code candidate, unreachable"})
-        elif u in hidden:
+        elif u in hidden and not roots_of.get(u):
             unassigned.append({"id": u, "reason": (reasons or {}).get(u) or "reachability unknown"})
         elif u.startswith("sch:") and u not in sched_of:
             unassigned.append({"id": u, "reason": "scheduler job that names no JCL job in the tree"})
@@ -473,6 +510,7 @@ def analyze(nodes, edges, as_of, dormant_years=5, notices=None, embedded=None, p
         "unscheduled_jobs": unscheduled,
         "edge_counts": dict(sorted(kinds.items())),
         "node_counts": dict(sorted(types.items())),
-        "wave_seed": wave_seed(nodes, edges, entries, unknown, unreachable, reasons, dynamic, runtime_named, utility_writes),
+        "wave_seed": wave_seed(nodes, edges, entries, unknown, unreachable, reasons, dynamic, runtime_named, utility_writes,
+                              embedded, proc_programs),
         "warnings": warnings,
     }

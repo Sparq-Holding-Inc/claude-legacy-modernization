@@ -163,6 +163,11 @@ The extractor already cut a first plan from facts. Read `03a-wave-seed.md`. Star
 
 A unit that several entry points use moves with the earliest family that uses it. A scheduler job
 moves with the last family among the jobs it runs. A call cycle always moves whole.
+
+Jobs that a scheduler chains together (temporal edges from a wrapper script, Control-M conditions or
+a Control-M folder) move together, in the latest of their families, except a job that touches DB2,
+IMS or MQ. A program that submits JCL through the internal reader counts as batch, and it owns the
+proc or program it submits.
 Every unit is placed, or listed as not placed with a reason. Some families may be empty.
 
 If the tree has no entry point (no JCL job, no CSD transaction, no scheduler), the seed has no waves and
@@ -193,8 +198,8 @@ Change the plan only for a reason you can cite. These are the reasons that count
 1. A must-not-break item, a strongly connected component or a facade dependency forces a unit
    into another wave. Dependency wins over risk quadrant. A high-high unit that everything else
    depends on cannot go last, so say what you would put behind a facade to make it movable.
-2. A wave holds more than 25 units and one argument needs it cut. A wave of 26 units that one sentence
-   describes needs no cut. Cut it at an articulation point
+2. A wave holds more than 25 units and one argument needs it cut. Size alone is not a reason. A wave of
+   26 units that one sentence describes needs no cut. Cut it at an articulation point
    from `analysis.articulation_points`, and name the point.
 3. Something the extractor could not see changes what a unit is: a computed call, a file listed as
    not parsed, JCL text inside COBOL. Cite it.

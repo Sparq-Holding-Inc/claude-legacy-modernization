@@ -1,7 +1,7 @@
 {
  "case": "27-jcl-text-in-cobol",
  "status": "edges reviewed by hand against the source; dead_code and embedded_jcl hand-written before the code that computes them",
- "description": "PGMMAIN holds JCL text that submits proc LATERPRC through an internal reader. No static edge exists. LATERPRC and the program it runs must be unknown, never unreachable. PGMDEAD is truly dead. An assembler file sits in the tree. The extractor cannot read it, so it must say so.",
+ "description": "PGMMAIN holds JCL text that submits proc LATERPRC through an internal reader. No static edge exists. LATERPRC and the program it runs must be unknown, never unreachable. PGMDEAD is truly dead. An assembler file sits in the tree. The extractor cannot read it, so it must say so. PGMSUB is an online program that also holds the JCL text. A program that submits JCL is treated as batch, and it owns what it submits, so PGMLATER and the proc move with it.",
  "edges": [
   {
    "src": "step:MAINJOB.S1",
@@ -36,6 +36,11 @@
    "id": "job:MAINJOB",
    "unit_type": "jcl_job",
    "entry_point": true
+  },
+  {
+   "id": "PGMSUB",
+   "unit_type": "online_txn",
+   "entry_point": true
   }
  ],
  "dead_code": {
@@ -54,6 +59,12 @@
    "dst": "proc:LATERPRC",
    "file": "app/cbl/PGMMAIN.cbl",
    "line": 6
+  },
+  {
+   "src": "PGMSUB",
+   "dst": "proc:LATERPRC",
+   "file": "app/cbl/PGMSUB.cbl",
+   "line": 6
   }
  ],
  "must_not_unreachable": [
@@ -62,5 +73,24 @@
  ],
  "unparsed": [
   "app/asm/WAITPGM.asm: 1 file(s) of type .asm (assembler source) are not read"
- ]
+ ],
+ "wave_seed": {
+  "waves": [
+   {
+    "family": "batch-readonly",
+    "units": [
+     "PGMLATER",
+     "PGMMAIN",
+     "PGMSUB",
+     "job:MAINJOB",
+     "proc:LATERPRC"
+    ]
+   }
+  ],
+  "unassigned": [
+   {
+    "id": "PGMDEAD"
+   }
+  ]
+ }
 }

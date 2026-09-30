@@ -1,7 +1,7 @@
 {
  "case": "26-wave-seed-families",
- "status": "edges reviewed by hand against the source and copied from a first run; wave_seed hand-written before the code that computes it",
- "description": "Seven kinds of work in one small estate: an unshared utility job, a read-only batch job that writes only its own report, a read-only online transaction, a utility job that touches the shared master (IDCAMS, mode only inferred from DISP), a batch writer of the master, an online writer of it, and a DB2 job. PGMSHARE is called by a read-only and a writing transaction, so it moves with the first one. A Control-M job follows the JCL job it runs. A shell wrapper runs a read-only job and a writing job, so it moves with the later family.",
+ "status": "edges reviewed by hand against the source; wave_seed hand-written before the code that computes it (rewritten in loop 3 when the scheduler chain rule was added, before that code ran)",
+ "description": "Seven kinds of work in one small estate: an unshared utility job, a read-only batch job outside any chain, a read-only online transaction, a utility job that touches the shared master (IDCAMS, mode only inferred from DISP), a batch writer of the master, an online writer of it, and a DB2 job. PGMSHARE is called by a read-only and a writing transaction, so it moves with the first one. A shell wrapper runs a read-only job, the writing job and the DB2 job in order. Jobs a scheduler chains together move together, in the latest family of the chain, so the read-only job in the chain moves to the writers. The DB2 job keeps its own family. The wrapper moves with the last family of the jobs it runs.",
  "edges": [
   {
    "src": "PGMEDIT",
@@ -329,6 +329,94 @@
     "app/scripts/nightly.sh:3",
     "app/scripts/nightly.sh:4"
    ]
+  },
+  {
+   "src": "sch:app/scripts/nightly.sh",
+   "dst": "job:DBJOB",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/scripts/nightly.sh:5"
+   ]
+  },
+  {
+   "src": "job:UPDJOB",
+   "dst": "job:DBJOB",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/scripts/nightly.sh:4",
+    "app/scripts/nightly.sh:5"
+   ]
+  },
+  {
+   "src": "job:AUDJOB",
+   "dst": "step:AUDJOB.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/AUDJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "step:AUDJOB.S1",
+   "dst": "PGMAUD",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/AUDJOB.jcl:2"
+   ]
+  },
+  {
+   "src": "PGMAUD",
+   "dst": "ds:SPARQ.TEST.MASTER",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMAUD.cbl:6",
+    "app/cbl/PGMAUD.cbl:12",
+    "app/jcl/AUDJOB.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMEDIT",
+   "dst": "PGMAUD",
+   "kind": "contract",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/cbl/PGMAUD.cbl:6",
+    "app/cbl/PGMAUD.cbl:12",
+    "app/cbl/PGMEDIT.cbl:4",
+    "app/jcl/AUDJOB.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMUPD",
+   "dst": "PGMAUD",
+   "kind": "contract",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/cbl/PGMAUD.cbl:6",
+    "app/cbl/PGMAUD.cbl:12",
+    "app/cbl/PGMUPD.cbl:6",
+    "app/cbl/PGMUPD.cbl:12",
+    "app/jcl/AUDJOB.jcl:3",
+    "app/jcl/UPDJOB.jcl:3"
+   ]
   }
  ],
  "nodes": [
@@ -389,9 +477,8 @@
    {
     "family": "batch-readonly",
     "units": [
-     "PGMRPT",
-     "job:RPTJOB",
-     "sch:NIGHTLY/RPTNITE"
+     "PGMAUD",
+     "job:AUDJOB"
     ]
    },
    {
@@ -410,9 +497,11 @@
    {
     "family": "batch-writers",
     "units": [
+     "PGMRPT",
      "PGMUPD",
+     "job:RPTJOB",
      "job:UPDJOB",
-     "sch:app/scripts/nightly.sh"
+     "sch:NIGHTLY/RPTNITE"
     ]
    },
    {
@@ -425,7 +514,8 @@
     "family": "subsystem",
     "units": [
      "PGMDB",
-     "job:DBJOB"
+     "job:DBJOB",
+     "sch:app/scripts/nightly.sh"
     ]
    }
   ],

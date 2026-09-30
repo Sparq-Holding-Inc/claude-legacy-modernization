@@ -164,7 +164,8 @@
    "mutation": "CSD entry points off",
    "caught_by": [
     "05",
-    "26"
+    "26",
+    "27"
    ],
    "equivalent": false
   },
@@ -331,6 +332,34 @@
    "mutation": "wave seed: guessed reads not their own family",
    "caught_by": [
     "26"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "wave seed: scheduler chains not kept together",
+   "caught_by": [
+    "26"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "wave seed: a proc named in JCL text not owned by its submitter",
+   "caught_by": [
+    "27"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "wave seed: a program that submits JCL counted as online",
+   "caught_by": [
+    "27"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "wave seed: units owned through a submit left unplaced",
+   "caught_by": [
+    "27"
    ],
    "equivalent": false
   },

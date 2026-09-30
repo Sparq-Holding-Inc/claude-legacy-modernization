@@ -130,7 +130,7 @@
    "26-wave-seed-families": {
     "pass": true,
     "problems": [],
-    "edges": 28
+    "edges": 35
    },
    "27-jcl-text-in-cobol": {
     "pass": true,
@@ -150,39 +150,39 @@
   },
   "per_kind": {
    "call": {
-    "tp": 65,
+    "tp": 67,
     "fp": 0,
     "fn": 0
    },
    "include": {
-    "tp": 50,
+    "tp": 51,
     "fp": 0,
     "fn": 0
    },
    "data": {
-    "tp": 31,
+    "tp": 32,
     "fp": 0,
     "fn": 0
    },
    "contract": {
-    "tp": 7,
+    "tp": 9,
     "fp": 0,
     "fn": 0
    },
    "temporal": {
-    "tp": 8,
+    "tp": 9,
     "fp": 0,
     "fn": 0
    }
   },
   "all_pass": true,
   "evidence_resolves": [
-   261,
-   261
+   282,
+   282
   ]
  },
  "carddemo": {
-  "seconds": 0.5,
+  "seconds": 0.6,
   "stats": {
    "call": {
     "tp": 234,

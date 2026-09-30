@@ -1,0 +1,15 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. PGMAUD.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT IN-FILE ASSIGN TO INFILE.
+       DATA DIVISION.
+       FILE SECTION.
+       FD  IN-FILE.
+       01  IN-REC              PIC X(80).
+       PROCEDURE DIVISION.
+           OPEN INPUT IN-FILE.
+           READ IN-FILE.
+           CLOSE IN-FILE.
+           GOBACK.

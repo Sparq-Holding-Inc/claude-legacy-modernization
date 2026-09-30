@@ -17,6 +17,9 @@ Added
   (read-only batch, batch writers, online writers, DB2 or IMS or MQ, and so on) in a fixed order.
   It writes `03a-wave-seed.md` and a draft `03a-waves-draft.json`. Claude names the waves and may
   change them only for a cited reason. Each change goes in `deviations`.
+- The wave seed keeps jobs together when a scheduler chains them (a wrapper script or a Control-M
+  folder), in the latest family of the chain. A program that submits JCL through the internal reader
+  counts as batch and owns what it submits.
 - Facts inside utility steps: the datasets an IDCAMS card deletes, defines or loads, and the program
   an IMS `PARM` or a TSO `RUN PROGRAM` card names. They are not edges. They keep those programs out
   of the unreachable bucket and tell the wave seed which jobs write shared data.
