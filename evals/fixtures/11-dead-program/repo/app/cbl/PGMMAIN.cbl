@@ -1,0 +1,5 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. PGMMAIN.
+       PROCEDURE DIVISION.
+           CALL 'PGMLIVE'.
+           GOBACK.

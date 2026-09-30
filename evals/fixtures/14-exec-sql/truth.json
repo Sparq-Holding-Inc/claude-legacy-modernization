@@ -1,0 +1,80 @@
+{
+  "case": "14-exec-sql",
+  "status": "hand-written before any extractor code",
+  "description": "EXEC SQL: INCLUDE of a system member and a copybook in the tree, four tables with read and write modes.",
+  "edges": [
+    {
+      "src": "PROGSQL",
+      "dst": "ext:SQLCA",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGSQL.cbl:5"
+      ]
+    },
+    {
+      "src": "PROGSQL",
+      "dst": "cpy:DCLCUST",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGSQL.cbl:6"
+      ]
+    },
+    {
+      "src": "PROGSQL",
+      "dst": "ds:db2:CUSTOMER",
+      "kind": "data",
+      "mode": "read",
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGSQL.cbl:9"
+      ]
+    },
+    {
+      "src": "PROGSQL",
+      "dst": "ds:db2:ORDERS",
+      "kind": "data",
+      "mode": "write",
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGSQL.cbl:15"
+      ]
+    },
+    {
+      "src": "PROGSQL",
+      "dst": "ds:db2:AUDIT_LOG",
+      "kind": "data",
+      "mode": "write",
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGSQL.cbl:20"
+      ]
+    },
+    {
+      "src": "PROGSQL",
+      "dst": "ds:db2:STAGING",
+      "kind": "data",
+      "mode": "write",
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGSQL.cbl:23"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "PROGSQL",
+      "unit_type": "batch",
+      "entry_point": false
+    }
+  ]
+}

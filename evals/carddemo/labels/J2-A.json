@@ -1,0 +1,2899 @@
+{
+ "partition": "J2",
+ "pass": "A",
+ "programs": {},
+ "nodes": [
+  {
+   "id": "job:INTRDRJ2",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:INTRDRJ2.IDCAMS",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:OPENFIL",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:OPENFIL.OPCIFIL",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:POSTTRAN",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:POSTTRAN.STEP15",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:PRTCATBL",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:PRTCATBL.DELDEF",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:PRTCATBL.STEP05R",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:PRTCATBL.STEP05R.PRC001",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:PRTCATBL.STEP10R",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:READACCT",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:READACCT.PREDEL",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:READACCT.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:READCARD",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:READCARD.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:READCUST",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:READCUST.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:READXREF",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:READXREF.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:REPTFILE",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:REPTFILE.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:TCATBALF",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:TCATBALF.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TCATBALF.STEP10",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TCATBALF.STEP15",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:TRANBKP",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:TRANBKP.STEP05R",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANBKP.STEP05R.PRC001",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANBKP.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANBKP.STEP10",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:TRANCATG",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:TRANCATG.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANCATG.STEP10",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANCATG.STEP15",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:TRANFILE",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:TRANFILE.CLCIFIL",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANFILE.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANFILE.STEP10",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANFILE.STEP15",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANFILE.STEP20",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANFILE.STEP25",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANFILE.STEP30",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANFILE.OPCIFIL",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:TRANIDX",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:TRANIDX.STEP20",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANIDX.STEP25",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANIDX.STEP30",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:TRANREPT",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:TRANREPT.STEP05R",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANREPT.STEP05R.PRC001",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANREPT.STEP05R#2",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANREPT.STEP10R",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:TRANTYPE",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:TRANTYPE.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANTYPE.STEP10",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:TRANTYPE.STEP15",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:TXT2PDF1",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:TXT2PDF1.TXT2PDF",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:WAITSTEP",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:WAITSTEP.WAIT",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:XREFFILE",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:XREFFILE.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:XREFFILE.STEP10",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:XREFFILE.STEP15",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:XREFFILE.STEP20",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:XREFFILE.STEP25",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:XREFFILE.STEP30",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  }
+ ],
+ "edges": [
+  {
+   "src": "job:INTRDRJ2",
+   "dst": "step:INTRDRJ2.IDCAMS",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/INTRDRJ2.JCL",
+     "line": 7
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:INTRDRJ2.IDCAMS",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/INTRDRJ2.JCL",
+     "line": 7
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:INTRDRJ2.IDCAMS",
+   "dst": "ds:AWS.M2.CARDEMO.FTP.TEST.BKUP",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/INTRDRJ2.JCL",
+     "line": 9
+    }
+   ],
+   "note": "DD IN DISP=SHR; DD statements only, IDCAMS/SORT control cards not read"
+  },
+  {
+   "src": "step:INTRDRJ2.IDCAMS",
+   "dst": "ds:AWS.M2.CARDEMO.FTP.TEST.BKUP.INTRDR",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/INTRDRJ2.JCL",
+     "line": 10
+    }
+   ],
+   "note": "DD OUT DISP=SHR; DD statements only, IDCAMS/SORT control cards not read"
+  },
+  {
+   "src": "job:OPENFIL",
+   "dst": "step:OPENFIL.OPCIFIL",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/OPENFIL.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:OPENFIL.OPCIFIL",
+   "dst": "ext:SDSF",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/OPENFIL.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:POSTTRAN",
+   "dst": "step:POSTTRAN.STEP15",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/POSTTRAN.jcl",
+     "line": 23
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:POSTTRAN.STEP15",
+   "dst": "CBTRN02C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/POSTTRAN.jcl",
+     "line": 23
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:PRTCATBL",
+   "dst": "step:PRTCATBL.DELDEF",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 21
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:PRTCATBL.DELDEF",
+   "dst": "ext:IEFBR14",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 21
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:PRTCATBL.DELDEF",
+   "dst": "ds:AWS.M2.CARDDEMO.TCATBALF.REPT",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 22
+    }
+   ],
+   "note": "DD THEFILE DISP=(MOD,DELETE); DD statements only, IDCAMS/SORT control cards not read; MOD,DELETE is a pre-delete, counted as write per DISP rule"
+  },
+  {
+   "src": "job:PRTCATBL",
+   "dst": "step:PRTCATBL.STEP05R",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 29
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:PRTCATBL.STEP05R",
+   "dst": "proc:REPROC",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 29
+    }
+   ],
+   "note": "EXEC PROC=REPROC; JCLLIB ORDER=AWS.M2.CARDDEMO.PROC member REPROC resolved to app/proc/REPROC.prc"
+  },
+  {
+   "src": "step:PRTCATBL.STEP05R",
+   "dst": "step:PRTCATBL.STEP05R.PRC001",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 29
+    },
+    {
+     "file": "app/proc/REPROC.prc",
+     "line": 21
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:PRTCATBL.STEP05R.PRC001",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/proc/REPROC.prc",
+     "line": 21
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:PRTCATBL.STEP05R.PRC001",
+   "dst": "ds:AWS.M2.CARDDEMO.TCATBALF.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 32
+    }
+   ],
+   "note": "DD PRC001.FILEIN DISP=SHR; DD statements only, IDCAMS/SORT control cards not read"
+  },
+  {
+   "src": "step:PRTCATBL.STEP05R.PRC001",
+   "dst": "ds:AWS.M2.CARDDEMO.TCATBALF.BKUP",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 35
+    }
+   ],
+   "note": "DD PRC001.FILEOUT DISP=(NEW,CATLG,DELETE); DD statements only, IDCAMS/SORT control cards not read; GDG generation or member suffix dropped from DSN (AWS.M2.CARDDEMO.TCATBALF.BKUP(+1))"
+  },
+  {
+   "src": "step:PRTCATBL.STEP05R.PRC001",
+   "dst": "ds:AWS.M2.CARDDEMO.CNTL",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/proc/REPROC.prc",
+     "line": 27
+    }
+   ],
+   "note": "DD SYSIN DISP=SHR; DD statements only, IDCAMS/SORT control cards not read; GDG generation or member suffix dropped from DSN (&CNTLLIB(REPROCT))"
+  },
+  {
+   "src": "job:PRTCATBL",
+   "dst": "step:PRTCATBL.STEP10R",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 43
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:PRTCATBL.STEP10R",
+   "dst": "ext:SORT",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 43
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:PRTCATBL.STEP10R",
+   "dst": "ds:AWS.M2.CARDDEMO.TCATBALF.BKUP",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 44
+    }
+   ],
+   "note": "DD SORTIN DISP=SHR; DD statements only, IDCAMS/SORT control cards not read; GDG generation or member suffix dropped from DSN (AWS.M2.CARDDEMO.TCATBALF.BKUP(+1))"
+  },
+  {
+   "src": "step:PRTCATBL.STEP10R",
+   "dst": "ds:AWS.M2.CARDDEMO.TCATBALF.REPT",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 59
+    }
+   ],
+   "note": "DD SORTOUT DISP=(NEW,CATLG,DELETE); DD statements only, IDCAMS/SORT control cards not read"
+  },
+  {
+   "src": "step:PRTCATBL.DELDEF",
+   "dst": "step:PRTCATBL.STEP05R.PRC001",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 21
+    },
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 29
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:PRTCATBL.STEP05R.PRC001",
+   "dst": "step:PRTCATBL.STEP10R",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 29
+    },
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 43
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:READACCT",
+   "dst": "step:READACCT.PREDEL",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/READACCT.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:READACCT.PREDEL",
+   "dst": "ext:IEFBR14",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/READACCT.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:READACCT.PREDEL",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.PSCOMP",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/READACCT.jcl",
+     "line": 23
+    }
+   ],
+   "note": "DD DD01 DISP=(MOD,DELETE,DELETE); DD statements only, IDCAMS/SORT control cards not read; MOD,DELETE is a pre-delete, counted as write per DISP rule"
+  },
+  {
+   "src": "step:READACCT.PREDEL",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.ARRYPS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/READACCT.jcl",
+     "line": 25
+    }
+   ],
+   "note": "DD DD02 DISP=(MOD,DELETE,DELETE); DD statements only, IDCAMS/SORT control cards not read; MOD,DELETE is a pre-delete, counted as write per DISP rule"
+  },
+  {
+   "src": "step:READACCT.PREDEL",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.VBPS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/READACCT.jcl",
+     "line": 27
+    }
+   ],
+   "note": "DD DD03 DISP=(MOD,DELETE,DELETE); DD statements only, IDCAMS/SORT control cards not read; MOD,DELETE is a pre-delete, counted as write per DISP rule"
+  },
+  {
+   "src": "job:READACCT",
+   "dst": "step:READACCT.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/READACCT.jcl",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:READACCT.STEP05",
+   "dst": "CBACT01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/READACCT.jcl",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:READACCT.PREDEL",
+   "dst": "step:READACCT.STEP05",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/READACCT.jcl",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/READACCT.jcl",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:READCARD",
+   "dst": "step:READCARD.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/READCARD.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:READCARD.STEP05",
+   "dst": "CBACT02C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/READCARD.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:READCUST",
+   "dst": "step:READCUST.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/READCUST.jcl",
+     "line": 21
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:READCUST.STEP05",
+   "dst": "CBCUS01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/READCUST.jcl",
+     "line": 21
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:READXREF",
+   "dst": "step:READXREF.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/READXREF.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:READXREF.STEP05",
+   "dst": "CBACT03C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/READXREF.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:REPTFILE",
+   "dst": "step:REPTFILE.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/REPTFILE.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:REPTFILE.STEP05",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/REPTFILE.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TCATBALF",
+   "dst": "step:TCATBALF.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TCATBALF.STEP05",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TCATBALF",
+   "dst": "step:TCATBALF.STEP10",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TCATBALF.STEP10",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TCATBALF",
+   "dst": "step:TCATBALF.STEP15",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TCATBALF.STEP15",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TCATBALF.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.TCATBALF.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 56
+    }
+   ],
+   "note": "DD TCATBAL DISP=SHR; DD statements only, IDCAMS/SORT control cards not read"
+  },
+  {
+   "src": "step:TCATBALF.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.TCATBALF.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 58
+    }
+   ],
+   "note": "DD TCATBALV DISP=OLD; DD statements only, IDCAMS/SORT control cards not read; DISP=OLD counted as read per guide"
+  },
+  {
+   "src": "step:TCATBALF.STEP05",
+   "dst": "step:TCATBALF.STEP10",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TCATBALF.STEP10",
+   "dst": "step:TCATBALF.STEP15",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 33
+    },
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANBKP",
+   "dst": "step:TRANBKP.STEP05R",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 23
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANBKP.STEP05R",
+   "dst": "proc:REPROC",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 23
+    }
+   ],
+   "note": "EXEC PROC=REPROC; JCLLIB ORDER=AWS.M2.CARDDEMO.PROC member REPROC resolved to app/proc/REPROC.prc"
+  },
+  {
+   "src": "step:TRANBKP.STEP05R",
+   "dst": "step:TRANBKP.STEP05R.PRC001",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 23
+    },
+    {
+     "file": "app/proc/REPROC.prc",
+     "line": 21
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANBKP.STEP05R.PRC001",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/proc/REPROC.prc",
+     "line": 21
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANBKP.STEP05R.PRC001",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 26
+    }
+   ],
+   "note": "DD PRC001.FILEIN DISP=SHR; DD statements only, IDCAMS/SORT control cards not read"
+  },
+  {
+   "src": "step:TRANBKP.STEP05R.PRC001",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.BKUP",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 29
+    }
+   ],
+   "note": "DD PRC001.FILEOUT DISP=(NEW,CATLG,DELETE); DD statements only, IDCAMS/SORT control cards not read; GDG generation or member suffix dropped from DSN (AWS.M2.CARDDEMO.TRANSACT.BKUP(+1))"
+  },
+  {
+   "src": "step:TRANBKP.STEP05R.PRC001",
+   "dst": "ds:AWS.M2.CARDDEMO.CNTL",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/proc/REPROC.prc",
+     "line": 27
+    }
+   ],
+   "note": "DD SYSIN DISP=SHR; DD statements only, IDCAMS/SORT control cards not read; GDG generation or member suffix dropped from DSN (&CNTLLIB(REPROCT))"
+  },
+  {
+   "src": "job:TRANBKP",
+   "dst": "step:TRANBKP.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 37
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANBKP.STEP05",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 37
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANBKP",
+   "dst": "step:TRANBKP.STEP10",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 51
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANBKP.STEP10",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 51
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANBKP.STEP05R.PRC001",
+   "dst": "step:TRANBKP.STEP05",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 23
+    },
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 37
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANBKP.STEP05",
+   "dst": "step:TRANBKP.STEP10",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 37
+    },
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 51
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANCATG",
+   "dst": "step:TRANCATG.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANCATG.STEP05",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANCATG",
+   "dst": "step:TRANCATG.STEP10",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANCATG.STEP10",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANCATG",
+   "dst": "step:TRANCATG.STEP15",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANCATG.STEP15",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANCATG.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANCATG.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 56
+    }
+   ],
+   "note": "DD TRANCATG DISP=SHR; DD statements only, IDCAMS/SORT control cards not read"
+  },
+  {
+   "src": "step:TRANCATG.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANCATG.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 58
+    }
+   ],
+   "note": "DD TCATVSAM DISP=OLD; DD statements only, IDCAMS/SORT control cards not read; DISP=OLD counted as read per guide"
+  },
+  {
+   "src": "step:TRANCATG.STEP05",
+   "dst": "step:TRANCATG.STEP10",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANCATG.STEP10",
+   "dst": "step:TRANCATG.STEP15",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 33
+    },
+    {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANFILE",
+   "dst": "step:TRANFILE.CLCIFIL",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.CLCIFIL",
+   "dst": "ext:SDSF",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANFILE",
+   "dst": "step:TRANFILE.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.STEP05",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANFILE",
+   "dst": "step:TRANFILE.STEP10",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 46
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.STEP10",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 46
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANFILE",
+   "dst": "step:TRANFILE.STEP15",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 67
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.STEP15",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 67
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.DALYTRAN.PS.INIT",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 69
+    }
+   ],
+   "note": "DD TRANSACT DISP=SHR; DD statements only, IDCAMS/SORT control cards not read"
+  },
+  {
+   "src": "step:TRANFILE.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 71
+    }
+   ],
+   "note": "DD TRANVSAM DISP=SHR; DD statements only, IDCAMS/SORT control cards not read"
+  },
+  {
+   "src": "job:TRANFILE",
+   "dst": "step:TRANFILE.STEP20",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 79
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.STEP20",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 79
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANFILE",
+   "dst": "step:TRANFILE.STEP25",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 96
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.STEP25",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 96
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANFILE",
+   "dst": "step:TRANFILE.STEP30",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 106
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.STEP30",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 106
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANFILE",
+   "dst": "step:TRANFILE.OPCIFIL",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 116
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.OPCIFIL",
+   "dst": "ext:SDSF",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 116
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.CLCIFIL",
+   "dst": "step:TRANFILE.STEP05",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.STEP05",
+   "dst": "step:TRANFILE.STEP10",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 32
+    },
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 46
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.STEP10",
+   "dst": "step:TRANFILE.STEP15",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 46
+    },
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 67
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.STEP15",
+   "dst": "step:TRANFILE.STEP20",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 67
+    },
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 79
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.STEP20",
+   "dst": "step:TRANFILE.STEP25",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 79
+    },
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 96
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.STEP25",
+   "dst": "step:TRANFILE.STEP30",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 96
+    },
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 106
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANFILE.STEP30",
+   "dst": "step:TRANFILE.OPCIFIL",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 106
+    },
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 116
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANIDX",
+   "dst": "step:TRANIDX.STEP20",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANIDX.STEP20",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANIDX",
+   "dst": "step:TRANIDX.STEP25",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 39
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANIDX.STEP25",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 39
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANIDX",
+   "dst": "step:TRANIDX.STEP30",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 49
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANIDX.STEP30",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 49
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANIDX.STEP20",
+   "dst": "step:TRANIDX.STEP25",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 39
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANIDX.STEP25",
+   "dst": "step:TRANIDX.STEP30",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 39
+    },
+    {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 49
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANREPT",
+   "dst": "step:TRANREPT.STEP05R",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 23
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANREPT.STEP05R",
+   "dst": "proc:REPROC",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 23
+    }
+   ],
+   "note": "EXEC PROC=REPROC; JCLLIB ORDER=AWS.M2.CARDDEMO.PROC member REPROC resolved to app/proc/REPROC.prc"
+  },
+  {
+   "src": "step:TRANREPT.STEP05R",
+   "dst": "step:TRANREPT.STEP05R.PRC001",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 23
+    },
+    {
+     "file": "app/proc/REPROC.prc",
+     "line": 21
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANREPT.STEP05R.PRC001",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/proc/REPROC.prc",
+     "line": 21
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANREPT.STEP05R.PRC001",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 26
+    }
+   ],
+   "note": "DD PRC001.FILEIN DISP=SHR; DD statements only, IDCAMS/SORT control cards not read"
+  },
+  {
+   "src": "step:TRANREPT.STEP05R.PRC001",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.BKUP",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 29
+    }
+   ],
+   "note": "DD PRC001.FILEOUT DISP=(NEW,CATLG,DELETE); DD statements only, IDCAMS/SORT control cards not read; GDG generation or member suffix dropped from DSN (AWS.M2.CARDDEMO.TRANSACT.BKUP(+1))"
+  },
+  {
+   "src": "step:TRANREPT.STEP05R.PRC001",
+   "dst": "ds:AWS.M2.CARDDEMO.CNTL",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/proc/REPROC.prc",
+     "line": 27
+    }
+   ],
+   "note": "DD SYSIN DISP=SHR; DD statements only, IDCAMS/SORT control cards not read; GDG generation or member suffix dropped from DSN (&CNTLLIB(REPROCT))"
+  },
+  {
+   "src": "job:TRANREPT",
+   "dst": "step:TRANREPT.STEP05R#2",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 37
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANREPT.STEP05R#2",
+   "dst": "ext:SORT",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 37
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANREPT.STEP05R#2",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.BKUP",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 38
+    }
+   ],
+   "note": "DD SORTIN DISP=SHR; DD statements only, IDCAMS/SORT control cards not read; GDG generation or member suffix dropped from DSN (AWS.M2.CARDDEMO.TRANSACT.BKUP(+1))"
+  },
+  {
+   "src": "step:TRANREPT.STEP05R#2",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.DALY",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 51
+    }
+   ],
+   "note": "DD SORTOUT DISP=(NEW,CATLG,DELETE); DD statements only, IDCAMS/SORT control cards not read; GDG generation or member suffix dropped from DSN (AWS.M2.CARDDEMO.TRANSACT.DALY(+1))"
+  },
+  {
+   "src": "job:TRANREPT",
+   "dst": "step:TRANREPT.STEP10R",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 59
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANREPT.STEP10R",
+   "dst": "CBTRN03C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 59
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANREPT.STEP05R.PRC001",
+   "dst": "step:TRANREPT.STEP05R#2",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 23
+    },
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 37
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANREPT.STEP05R#2",
+   "dst": "step:TRANREPT.STEP10R",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 37
+    },
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 59
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANTYPE",
+   "dst": "step:TRANTYPE.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANTYPE.STEP05",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANTYPE",
+   "dst": "step:TRANTYPE.STEP10",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANTYPE.STEP10",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TRANTYPE",
+   "dst": "step:TRANTYPE.STEP15",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANTYPE.STEP15",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANTYPE.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANTYPE.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 56
+    }
+   ],
+   "note": "DD TRANTYPE DISP=SHR; DD statements only, IDCAMS/SORT control cards not read"
+  },
+  {
+   "src": "step:TRANTYPE.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANTYPE.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 58
+    }
+   ],
+   "note": "DD TTYPVSAM DISP=OLD; DD statements only, IDCAMS/SORT control cards not read; DISP=OLD counted as read per guide"
+  },
+  {
+   "src": "step:TRANTYPE.STEP05",
+   "dst": "step:TRANTYPE.STEP10",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TRANTYPE.STEP10",
+   "dst": "step:TRANTYPE.STEP15",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 33
+    },
+    {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:TXT2PDF1",
+   "dst": "step:TXT2PDF1.TXT2PDF",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TXT2PDF1.JCL",
+     "line": 24
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TXT2PDF1.TXT2PDF",
+   "dst": "ext:IKJEFT1B",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/TXT2PDF1.JCL",
+     "line": 24
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:TXT2PDF1.TXT2PDF",
+   "dst": "ds:AWS.M2.LBD.TXT2PDF.EXEC",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TXT2PDF1.JCL",
+     "line": 31
+    }
+   ],
+   "note": "DD SYSEXEC DISP=SHR; DD statements only, IDCAMS/SORT control cards not read"
+  },
+  {
+   "src": "step:TXT2PDF1.TXT2PDF",
+   "dst": "ds:AWS.M2.CARDDEMO.STATEMNT.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/TXT2PDF1.JCL",
+     "line": 33
+    }
+   ],
+   "note": "DD INDD DISP=SHR; DD statements only, IDCAMS/SORT control cards not read"
+  },
+  {
+   "src": "job:WAITSTEP",
+   "dst": "step:WAITSTEP.WAIT",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/WAITSTEP.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:WAITSTEP.WAIT",
+   "dst": "COBSWAIT",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/WAITSTEP.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:XREFFILE",
+   "dst": "step:XREFFILE.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:XREFFILE.STEP05",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:XREFFILE",
+   "dst": "step:XREFFILE.STEP10",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 36
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:XREFFILE.STEP10",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 36
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:XREFFILE",
+   "dst": "step:XREFFILE.STEP15",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 57
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:XREFFILE.STEP15",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 57
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:XREFFILE.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 59
+    }
+   ],
+   "note": "DD XREFDATA DISP=SHR; DD statements only, IDCAMS/SORT control cards not read"
+  },
+  {
+   "src": "step:XREFFILE.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 61
+    }
+   ],
+   "note": "DD XREFVSAM DISP=SHR; DD statements only, IDCAMS/SORT control cards not read"
+  },
+  {
+   "src": "job:XREFFILE",
+   "dst": "step:XREFFILE.STEP20",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 69
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:XREFFILE.STEP20",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 69
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:XREFFILE",
+   "dst": "step:XREFFILE.STEP25",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 87
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:XREFFILE.STEP25",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 87
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:XREFFILE",
+   "dst": "step:XREFFILE.STEP30",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 97
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:XREFFILE.STEP30",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 97
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:XREFFILE.STEP05",
+   "dst": "step:XREFFILE.STEP10",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 36
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:XREFFILE.STEP10",
+   "dst": "step:XREFFILE.STEP15",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 36
+    },
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 57
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:XREFFILE.STEP15",
+   "dst": "step:XREFFILE.STEP20",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 57
+    },
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 69
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:XREFFILE.STEP20",
+   "dst": "step:XREFFILE.STEP25",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 69
+    },
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 87
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:XREFFILE.STEP25",
+   "dst": "step:XREFFILE.STEP30",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 87
+    },
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 97
+    }
+   ],
+   "note": ""
+  }
+ ],
+ "entry_points": [
+  {
+   "id": "job:INTRDRJ2",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/INTRDRJ2.JCL",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:OPENFIL",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/OPENFIL.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:POSTTRAN",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/POSTTRAN.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:PRTCATBL",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/PRTCATBL.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:READACCT",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/READACCT.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:READCARD",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/READCARD.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:READCUST",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/READCUST.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:READXREF",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/READXREF.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:REPTFILE",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/REPTFILE.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:TCATBALF",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/TCATBALF.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:TRANBKP",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/TRANBKP.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:TRANCATG",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/TRANCATG.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:TRANFILE",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/TRANFILE.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:TRANIDX",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/TRANIDX.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:TRANREPT",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/TRANREPT.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:TRANTYPE",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/TRANTYPE.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:TXT2PDF1",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/TXT2PDF1.JCL",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:WAITSTEP",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/WAITSTEP.jcl",
+     "line": 1
+    }
+   ]
+  },
+  {
+   "id": "job:XREFFILE",
+   "via": "JCL JOB statement",
+   "evidence": [
+    {
+     "file": "app/jcl/XREFFILE.jcl",
+     "line": 1
+    }
+   ]
+  }
+ ],
+ "unparsed": [],
+ "notes": [
+  "app/jcl/INTRDRJ2.JCL:7 step step:INTRDRJ2.IDCAMS EXEC parameters: DYNAMNBR=200 (not modeled as edges)",
+  "app/jcl/TRANBKP.jcl:51 step step:TRANBKP.STEP10 EXEC parameters: COND=(4,LT) (not modeled as edges)",
+  "app/jcl/TXT2PDF1.JCL:24 step step:TXT2PDF1.TXT2PDF EXEC parameters: DYNAMNBR=50, PARM=(''), COND=(0,NE) (not modeled as edges)",
+  "app/jcl/TRANREPT.jcl:23 and app/jcl/TRANREPT.jcl:37: two top-level steps are named STEP05R. First is EXEC PROC=REPROC (id step:TRANREPT.STEP05R, expands to step:TRANREPT.STEP05R.PRC001), second is EXEC PGM=SORT (id step:TRANREPT.STEP05R#2).",
+  "DOUBT proc resolution: app/proc/REPROC.prc:1 and app/proc/TRANREPT.prc:1 both declare '//REPROC PROC'. EXEC PROC=REPROC with JCLLIB ORDER=('AWS.M2.CARDDEMO.PROC') resolves by member name, so I used app/proc/REPROC.prc (one step PRC001 EXEC PGM=IDCAMS, REPROC.prc:21). app/proc/TRANREPT.prc (steps STEP01R, STEP05R, STEP10R) is not called by any J2 job; it looks like the source of the inline steps in TRANREPT.jcl. If a checker expands the call from TRANREPT.prc instead, the expected step ids differ.",
+  "proc node: I emitted no node for proc:REPROC (only jobs and steps, per instructions). call edges from the three proc-call steps (PRTCATBL.STEP05R, TRANBKP.STEP05R, TRANREPT.STEP05R) point to proc:REPROC.",
+  "//JOBLIB JCLLIB ORDER=(...) at PRTCATBL.jcl:19, TRANBKP.jcl:19, TRANREPT.jcl:19 is a JCLLIB statement, not a step or DD. No node or edge for it.",
+  "Proc symbolic: &CNTLLIB=AWS.M2.CARDDEMO.CNTL comes from the EXEC statement (PRTCATBL.jcl:29-30, TRANBKP.jcl:23-24, TRANREPT.jcl:23-24). The proc SYSIN DD (app/proc/REPROC.prc:27) is a DSN DD, not in-stream, so it gives step:*.PRC001 -> ds:AWS.M2.CARDDEMO.CNTL read (member REPROCT dropped). Proc FILEIN/FILEOUT (REPROC.prc:23,25, DSN=NULLFILE) are overridden by the job's PRC001.FILEIN/PRC001.FILEOUT DDs.",
+  "GDG generations (+1) are dropped from DSNs. TRANSACT.BKUP(+1) is written by PRC001 and read by the SORT step as the same base DSN. TRANSACT.DALY(+1) written by SORT in TRANREPT (TRANREPT.jcl:51) and read by CBTRN03C in the same job (TRANREPT.jcl:65), that read is a COBOL data edge and not emitted here.",
+  "DISP rule quirks (per guide, DISP only, control cards not read): TCATBALF.jcl:58 TCATBALV, TRANCATG.jcl:58 TCATVSAM, TRANTYPE.jcl:58 TTYPVSAM (DISP=OLD) and TRANFILE.jcl:71 TRANVSAM, INTRDRJ2.JCL:10 OUT (DISP=SHR) are REPRO targets in the in-stream cards but are labeled read from DISP. XREFFILE.jcl:61 XREFVSAM (SHR) likewise.",
+  "IEFBR14 pre-delete steps: DISP=(MOD,DELETE[,DELETE]) counted as write (MOD first subparameter). PRTCATBL.jcl:22 THEFILE, READACCT.jcl:23,25,27 DD01-DD03.",
+  "PRTCATBL.jcl:59 SORTOUT writes ds:AWS.M2.CARDDEMO.TCATBALF.REPT (no GDG suffix); DELDEF step pre-deletes the same DSN, so the DSN has a write edge from both steps.",
+  "OPENFIL.jcl:22, TRANFILE.jcl:22 and :116 run PGM=SDSF with only SYSOUT and in-stream ISFIN commands (CEMT SET FIL(...) OPE/CLO). No DSN DDs, so no data edges. The CEMT file names are not parsed.",
+  "TXT2PDF1.JCL:24-26 EXEC PGM=IKJEFT1B with DYNAMNBR=50, PARM=(''), COND=(0,NE) across a continuation line. ext:IKJEFT1B. Only DD statements labeled: SYSEXEC (line 31) and INDD (line 33) read. The in-stream SYSTSIN command %TXT2PDF ... OUT 'AWS.M2.CARDDEMO.STATEMNT.PS.PDF' (lines 37-39) is not parsed, so the PDF output dataset has no edge. STEPLIB AWS.M2.LBD.TXT2PDF.LOAD skipped.",
+  "READACCT.jcl:1-2 JOB statement continues on line 2 (job name READACCT). Text 'JOB05427' in cols 73-80 of line 1 is sequence noise.",
+  "READCUST.jcl:2 has NOTIFY=&SYUID (typo in source, not &SYSUID). No effect on labels.",
+  "INTRDRJ2.JCL:9-10 dataset names spell CARDEMO (one D): AWS.M2.CARDEMO.FTP.TEST.BKUP and AWS.M2.CARDEMO.FTP.TEST.BKUP.INTRDR. Kept as written. The step is named IDCAMS and runs PGM=IDCAMS (id step:INTRDRJ2.IDCAMS).",
+  "POSTTRAN.jcl, READACCT.jcl STEP05, READCARD.jcl, READCUST.jcl, READXREF.jcl, TRANREPT.jcl STEP10R and WAITSTEP.jcl run in-scope COBOL programs (CBTRN02C, CBACT01C, CBACT02C, CBCUS01C, CBACT03C, CBTRN03C, COBSWAIT). Only the call edge is emitted, data edges belong to the COBOL labelers. Dataset DDs for those steps are not emitted here.",
+  "TRANBKP.jcl:51 STEP10 has COND=(4,LT); temporal edge from STEP05 to STEP10 is emitted regardless.",
+  "Job-only files: OPENFIL, POSTTRAN, READCARD, READCUST, READXREF, REPTFILE, TRANIDX, WAITSTEP, TXT2PDF1, INTRDRJ2 have a single executable step, so no temporal edges."
+ ]
+}

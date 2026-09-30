@@ -1,0 +1,2087 @@
+{
+ "partition": "O2",
+ "pass": "A",
+ "programs": {
+  "COMEN01C": {
+   "path": "app/cbl/COMEN01C.cbl",
+   "program_id": "COMEN01C",
+   "has_exec_cics": true
+  },
+  "CORPT00C": {
+   "path": "app/cbl/CORPT00C.cbl",
+   "program_id": "CORPT00C",
+   "has_exec_cics": true
+  },
+  "COSGN00C": {
+   "path": "app/cbl/COSGN00C.cbl",
+   "program_id": "COSGN00C",
+   "has_exec_cics": true
+  },
+  "COTRN00C": {
+   "path": "app/cbl/COTRN00C.cbl",
+   "program_id": "COTRN00C",
+   "has_exec_cics": true
+  },
+  "COTRN01C": {
+   "path": "app/cbl/COTRN01C.cbl",
+   "program_id": "COTRN01C",
+   "has_exec_cics": true
+  },
+  "COTRN02C": {
+   "path": "app/cbl/COTRN02C.cbl",
+   "program_id": "COTRN02C",
+   "has_exec_cics": true
+  },
+  "COUSR00C": {
+   "path": "app/cbl/COUSR00C.cbl",
+   "program_id": "COUSR00C",
+   "has_exec_cics": true
+  },
+  "COUSR01C": {
+   "path": "app/cbl/COUSR01C.cbl",
+   "program_id": "COUSR01C",
+   "has_exec_cics": true
+  },
+  "COUSR02C": {
+   "path": "app/cbl/COUSR02C.cbl",
+   "program_id": "COUSR02C",
+   "has_exec_cics": true
+  },
+  "COUSR03C": {
+   "path": "app/cbl/COUSR03C.cbl",
+   "program_id": "COUSR03C",
+   "has_exec_cics": true
+  }
+ },
+ "nodes": [
+  {
+   "id": "COMEN01C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "CORPT00C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "COSGN00C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "COTRN00C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "COTRN01C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "COTRN02C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "COUSR00C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "COUSR01C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "COUSR02C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "COUSR03C",
+   "unit_type": "cobol_program"
+  }
+ ],
+ "edges": [
+  {
+   "src": "COMEN01C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 50
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "cpy:COMEN02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 51
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "cpy:COMEN01",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 53
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 55
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 56
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 57
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 58
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 60
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 61
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 138
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "cpy:CORPT00",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 140
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 142
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 143
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 144
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "cpy:CVTRA05Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 146
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 148
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 149
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 48
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "cpy:COSGN00",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 50
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 52
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 53
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 55
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 57
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 58
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 61
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "cpy:COTRN00",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 72
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 74
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 75
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 76
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "cpy:CVTRA05Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 78
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 80
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 81
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 52
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "cpy:COTRN01",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 63
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 65
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 66
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 67
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "cpy:CVTRA05Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 69
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 71
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 72
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 71
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:COTRN02",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 82
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 84
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 85
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 86
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:CVTRA05Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 88
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:CVACT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 89
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:CVACT03Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 90
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 92
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 93
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 66
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "cpy:COUSR00",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 76
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 78
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 79
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 80
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 81
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 83
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 84
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 46
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "cpy:COUSR01",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 48
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 50
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 51
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 52
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 53
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 55
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 56
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 49
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "cpy:COUSR02",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 60
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 62
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 63
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 64
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 65
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 67
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 68
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 49
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "cpy:COUSR03",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 60
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 62
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 63
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 64
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 65
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 67
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 68
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "?dynamic:COMEN01C:156",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 156
+    }
+   ],
+   "note": "EXEC CICS XCTL PROGRAM(CDEMO-MENU-OPT-PGMNAME(WS-OPTION)): subscripted target, dynamic only"
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "?dynamic:COMEN01C:184",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 184
+    }
+   ],
+   "note": "EXEC CICS on 184, XCTL PROGRAM(CDEMO-MENU-OPT-PGMNAME(WS-OPTION)) on 185: subscripted target, dynamic only"
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 201
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 97,199)"
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "?dynamic:COMEN01C:201",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 201
+    }
+   ],
+   "note": "EXEC CICS on 201, XCTL PROGRAM(CDEMO-TO-PROGRAM) on 202: not a pure constant, dynamic remainder"
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "CSUTLDTC",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 392
+    },
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 412
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 548
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 173,543)"
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 548
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 188)"
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "?dynamic:CORPT00C:548",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 548
+    }
+   ],
+   "note": "EXEC CICS on 548, XCTL PROGRAM(CDEMO-TO-PROGRAM) on 549: dynamic remainder"
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "COADM01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 231
+    }
+   ],
+   "note": "literal PROGRAM('COADM01C')"
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 236
+    }
+   ],
+   "note": "literal PROGRAM('COMEN01C')"
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 192
+    },
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 518
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 108,513)"
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 192
+    },
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 518
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 123)"
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "COTRN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 192
+    },
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 518
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 188)"
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "?dynamic:COTRN00C:192",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 192
+    }
+   ],
+   "note": "EXEC CICS on 192, XCTL PROGRAM(CDEMO-TO-PROGRAM) on 193: dynamic remainder"
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "?dynamic:COTRN00C:518",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 518
+    }
+   ],
+   "note": "EXEC CICS on 518, XCTL PROGRAM(CDEMO-TO-PROGRAM) on 519: dynamic remainder"
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 205
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 95,200)"
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 205
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 117)"
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "COTRN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 205
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 126)"
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "?dynamic:COTRN01C:205",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 205
+    }
+   ],
+   "note": "EXEC CICS on 205, XCTL PROGRAM(CDEMO-TO-PROGRAM) on 206: dynamic remainder (also MOVE CDEMO-FROM-PROGRAM TO CDEMO-TO-PROGRAM at 119-120)"
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "CSUTLDTC",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 393
+    },
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 413
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 508
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 116,503)"
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 508
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 138)"
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "?dynamic:COTRN02C:508",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 508
+    }
+   ],
+   "note": "EXEC CICS on 508, XCTL PROGRAM(CDEMO-TO-PROGRAM) on 509: dynamic remainder (also MOVE CDEMO-FROM-PROGRAM TO CDEMO-TO-PROGRAM at 140-141)"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 196
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 206
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 514
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 111,509)"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "COADM01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 196
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 206
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 514
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 126)"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "COUSR02C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 196
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 206
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 514
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 192)"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "COUSR03C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 196
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 206
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 514
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 202)"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "?dynamic:COUSR00C:196",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 196
+    }
+   ],
+   "note": "EXEC CICS on 196, XCTL PROGRAM(CDEMO-TO-PROGRAM) on 197: dynamic remainder"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "?dynamic:COUSR00C:206",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 206
+    }
+   ],
+   "note": "EXEC CICS on 206, XCTL PROGRAM(CDEMO-TO-PROGRAM) on 207: dynamic remainder"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "?dynamic:COUSR00C:514",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 514
+    }
+   ],
+   "note": "EXEC CICS on 514, XCTL PROGRAM(CDEMO-TO-PROGRAM) on 515: dynamic remainder"
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 175
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 79,168)"
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "COADM01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 175
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 94)"
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "?dynamic:COUSR01C:175",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 175
+    }
+   ],
+   "note": "EXEC CICS on 175, XCTL PROGRAM(CDEMO-TO-PROGRAM) on 176: dynamic remainder"
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 258
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 91,253)"
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "COADM01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 258
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 114,125)"
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "?dynamic:COUSR02C:258",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 258
+    }
+   ],
+   "note": "EXEC CICS on 258, XCTL PROGRAM(CDEMO-TO-PROGRAM) on 259: dynamic remainder (also MOVE CDEMO-FROM-PROGRAM TO CDEMO-TO-PROGRAM at 116-117)"
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 205
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 91,200)"
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "COADM01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 205
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (no VALUE in COCOM01Y, receives MOVE literals; literal MOVEs at lines 113,124)"
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "?dynamic:COUSR03C:205",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 205
+    }
+   ],
+   "note": "EXEC CICS on 205, XCTL PROGRAM(CDEMO-TO-PROGRAM) on 206: dynamic remainder (also MOVE CDEMO-FROM-PROGRAM TO CDEMO-TO-PROGRAM at 115-116)"
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CSUSR01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 211
+    }
+   ],
+   "note": "DATASET(WS-USRSEC-FILE) is constant 'USRSEC' (VALUE, never a receiving field); CSD DEFINE FILE(USRSEC) DSNAME; ops: READ INTO(SEC-USER-DATA)"
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA05Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 593
+    },
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 626
+    },
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 660
+    },
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 694
+    }
+   ],
+   "note": "DATASET(WS-TRANSACT-FILE) is constant 'TRANSACT' (VALUE, never a receiving field); CSD DEFINE FILE(TRANSACT) DSNAME; ops: STARTBR, READNEXT INTO(TRAN-RECORD), READPREV INTO(TRAN-RECORD), ENDBR"
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA05Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 269
+    }
+   ],
+   "note": "DATASET(WS-TRANSACT-FILE) is constant 'TRANSACT' (VALUE, never a receiving field); CSD DEFINE FILE(TRANSACT) DSNAME; ops: READ UPDATE INTO(TRAN-RECORD), no REWRITE in program"
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read_write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA05Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 644
+    },
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 675
+    },
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 704
+    },
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 713
+    }
+   ],
+   "note": "DATASET(WS-TRANSACT-FILE) is constant 'TRANSACT' (VALUE, never a receiving field); CSD DEFINE FILE(TRANSACT) DSNAME; ops: STARTBR, READPREV INTO(TRAN-RECORD), ENDBR, WRITE FROM(TRAN-RECORD)"
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.AIX.PATH",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT03Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 578
+    }
+   ],
+   "note": "DATASET(WS-CXACAIX-FILE) is constant 'CXACAIX' (VALUE, never a receiving field); CSD DEFINE FILE(CXACAIX) DSNAME; ops: READ INTO(CARD-XREF-RECORD)"
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT03Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 611
+    }
+   ],
+   "note": "DATASET(WS-CCXREF-FILE) is constant 'CCXREF' (VALUE, never a receiving field); CSD DEFINE FILE(CCXREF) DSNAME; ops: READ INTO(CARD-XREF-RECORD)"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CSUSR01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 588
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 621
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 655
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 689
+    }
+   ],
+   "note": "DATASET(WS-USRSEC-FILE) is constant 'USRSEC' (VALUE, never a receiving field); CSD DEFINE FILE(USRSEC) DSNAME; ops: STARTBR, READNEXT INTO(SEC-USER-DATA), READPREV INTO(SEC-USER-DATA), ENDBR"
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.KSDS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CSUSR01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 240
+    }
+   ],
+   "note": "DATASET(WS-USRSEC-FILE) is constant 'USRSEC' (VALUE, never a receiving field); CSD DEFINE FILE(USRSEC) DSNAME; ops: WRITE FROM(SEC-USER-DATA)"
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read_write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CSUSR01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 322
+    },
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 360
+    }
+   ],
+   "note": "DATASET(WS-USRSEC-FILE) is constant 'USRSEC' (VALUE, never a receiving field); CSD DEFINE FILE(USRSEC) DSNAME; ops: READ UPDATE INTO(SEC-USER-DATA), REWRITE FROM(SEC-USER-DATA)"
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read_write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CSUSR01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 269
+    },
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 307
+    }
+   ],
+   "note": "DATASET(WS-USRSEC-FILE) is constant 'USRSEC' (VALUE, never a receiving field); CSD DEFINE FILE(USRSEC) DSNAME; ops: READ UPDATE INTO(SEC-USER-DATA), DELETE (no FROM/INTO; layout from the READ INTO)"
+  }
+ ],
+ "notes": [
+  "Dynamic-edge line convention: for a split statement (EXEC CICS on one line, XCTL PROGRAM(...) on the next) I used the first physical line of the statement (the EXEC CICS line) both as evidence and in the ?dynamic id, e.g. COMEN01C:184/201, CORPT00C:548, COTRN00C:192/518, COUSR00C:196/206/514. The XCTL keyword itself is one line later. Only COMEN01C:156 has EXEC CICS XCTL on one line.",
+  "COMEN01C:148 EXEC CICS INQUIRE PROGRAM(CDEMO-MENU-OPT-PGMNAME(WS-OPTION)) is not a CALL/LINK/XCTL, so no edge. COMEN01C XCTL at 156 and 184 use the subscripted name CDEMO-MENU-OPT-PGMNAME(WS-OPTION), dynamic only per rule 4 (no candidates), even though COMEN02Y VALUE literals list COACTVWC, COACTUPC, COCRDLIC, COCRDSLC, COCRDUPC, COTRN00C, COTRN01C, COTRN02C, CORPT00C, COBIL00C, COPAUS0C (COMEN02Y.cpy lines 28-89).",
+  "CDEMO-TO-PROGRAM (COCOM01Y, PIC X(08), no VALUE) is the target of the XCTL in 9 of 10 programs. Every literal moved to it anywhere in the program yields a candidate at every XCTL site in that program. MOVE CDEMO-FROM-PROGRAM TO CDEMO-TO-PROGRAM (COTRN01C:119, COTRN02C:140, COUSR02C:116, COUSR03C:115) is a non-literal move, so it only reinforces the dynamic remainder. MOVE 'COSGN00C' TO CDEMO-FROM-PROGRAM at COMEN01C:83 is FROM not TO, ignored.",
+  "COSGN00C XCTL PROGRAM('COADM01C') at 231 and 'COMEN01C' at 236 are plain literals (multi-line EXEC CICS XCTL, the EXEC CICS XCTL keywords are on the evidence line).",
+  "CORPT00C:517 EXEC CICS WRITEQ TD QUEUE('JOBS') is a transient data queue write, not a CICS FILE operation, so no data edge. The program builds inline JCL text (lines 81-127, '//STEP10 EXEC PROC=TRANREPT') as string literals, no edge from it.",
+  "CICS file names come from WORKING-STORAGE VALUE items with trailing blanks ('USRSEC  ', 'TRANSACT', 'CCXREF  ', 'CXACAIX '); none is ever the receiving field of MOVE/STRING/READ INTO in these programs, so all are rule 1 constants. CSD DEFINE FILE entries: CCXREF app/csd/CARDDEMO.CSD:37-40, CXACAIX 63-66, TRANSACT 76-78, USRSEC 88-90.",
+  "COTRN02C:40 WS-ACCTDAT-FILE VALUE 'ACCTDAT ' is declared but never used in an EXEC CICS statement, so no ACCTDAT edge. COTRN02C also copies CVACT01Y (ACCOUNT-RECORD) with no file operation using it, so it is an include only.",
+  "COTRN01C READ ... UPDATE (269) has no REWRITE anywhere in the program, so mode is read. COUSR03C DELETE (307) has no FROM/INTO, layout_copybooks taken from its READ INTO(SEC-USER-DATA) at 269 (CSUSR01Y defines 01 SEC-USER-DATA).",
+  "DFHAID and DFHBMSCA are not in app/cpy or app/cpy-bms, so ext:. COMEN01, CORPT00, COSGN00, COTRN00-02, COUSR00-03 are BMS symbolic-map copybooks in app/cpy-bms (stems match ignoring case), so cpy:. COSGN00C:59 '*COPY DFHATTR.' is a comment (column 7 asterisk), no edge.",
+  "Nodes list only the 10 labeled programs, and no entry_points are given (CSD TRANSACTION mapping CC00, CM00, CR00, CT00-02, CU00-03 belongs to the CSD labeler).",
+  "Node ids for all programs equal the PROGRAM-ID. All 10 programs contain EXEC CICS, has_exec_cics true."
+ ]
+}

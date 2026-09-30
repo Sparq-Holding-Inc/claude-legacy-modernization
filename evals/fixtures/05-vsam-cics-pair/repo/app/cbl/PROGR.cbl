@@ -1,0 +1,11 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. PROGR.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       COPY ACCTREC.
+       PROCEDURE DIVISION.
+           EXEC CICS READ FILE('ACCTDAT')
+                INTO(ACCT-REC)
+                RIDFLD(ACCT-ID)
+           END-EXEC.
+           EXEC CICS RETURN END-EXEC.

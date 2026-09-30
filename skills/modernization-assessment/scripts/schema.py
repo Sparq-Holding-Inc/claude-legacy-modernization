@@ -120,6 +120,15 @@ def ds_id(name):
     return "ds:" + name.upper()
 
 
+def ds_dd_id(program, dd):
+    """A DD that no JCL step maps. Kept per program, never merged across programs."""
+    return "ds:dd:%s.%s" % (program.upper(), dd.upper())
+
+
+def ds_db2_id(table):
+    return "ds:db2:" + table.upper()
+
+
 def sch_id(folder, job):
     return "sch:%s/%s" % (folder, job)
 

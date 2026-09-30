@@ -1,0 +1,91 @@
+{
+  "case": "15-fixed-format",
+  "status": "hand-written before any extractor code",
+  "description": "Fixed format traps: comment lines in column 7 (* and /) holding CALL and COPY, a COPY split over two lines, COPY REPLACING, a lower case call, a CALL statement split over lines, text in columns 73 to 80, a string literal continued with a dash in column 7 that contains the word CALL, a CRLF file, and a nested COPY.",
+  "edges": [
+    {
+      "src": "PROGMAIN",
+      "dst": "cpy:REAL1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGMAIN.cbl:8"
+      ]
+    },
+    {
+      "src": "PROGMAIN",
+      "dst": "cpy:REAL2",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGMAIN.cbl:9"
+      ]
+    },
+    {
+      "src": "PROGMAIN",
+      "dst": "cpy:REAL3",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGMAIN.cbl:11"
+      ]
+    },
+    {
+      "src": "cpy:REAL1",
+      "dst": "cpy:REAL4",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cpy/REAL1.cpy:2"
+      ]
+    },
+    {
+      "src": "PROGTWO",
+      "dst": "cpy:REAL4",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGTWO.cbl:5"
+      ]
+    },
+    {
+      "src": "PROGMAIN",
+      "dst": "PROGLOW",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGMAIN.cbl:16"
+      ]
+    },
+    {
+      "src": "PROGMAIN",
+      "dst": "PROGTWO",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGMAIN.cbl:17"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "PROGMAIN",
+      "unit_type": "batch",
+      "entry_point": false
+    }
+  ]
+}

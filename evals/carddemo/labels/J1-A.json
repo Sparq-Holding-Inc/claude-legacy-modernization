@@ -1,0 +1,3169 @@
+{
+ "partition": "J1",
+ "pass": "A",
+ "nodes": [
+  {
+   "id": "job:ACCTFILE",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:ACCTFILE.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:ACCTFILE.STEP10",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:ACCTFILE.STEP15",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:CARDFILE",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:CARDFILE.CLCIFIL",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CARDFILE.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CARDFILE.STEP10",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CARDFILE.STEP15",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CARDFILE.STEP40",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CARDFILE.STEP50",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CARDFILE.STEP60",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CARDFILE.OPCIFIL",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:CBADMCDJ",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:CBADMCDJ.STEP1",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:CBEXPORT",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:CBEXPORT.STEP01",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CBEXPORT.STEP02",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:CBIMPORT",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:CBIMPORT.STEP01",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:CLOSEFIL",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:CLOSEFIL.CLCIFIL",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:COMBTRAN",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:COMBTRAN.STEP05R",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:COMBTRAN.STEP10",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:CREASTMT",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:CREASTMT.DELDEF01",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CREASTMT.STEP010",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CREASTMT.STEP020",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CREASTMT.STEP030",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CREASTMT.STEP040",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:CUSTFILE",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:CUSTFILE.CLCIFIL",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CUSTFILE.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CUSTFILE.STEP10",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CUSTFILE.STEP15",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:CUSTFILE.OPCIFIL",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:DALYREJS",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:DALYREJS.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:DEFCUST",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:DEFCUST.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:DEFCUST.STEP05#2",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:DEFGDGB",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:DEFGDGB.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:DEFGDGD",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:DEFGDGD.STEP10",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:DEFGDGD.STEP20",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:DEFGDGD.STEP30",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:DEFGDGD.STEP40",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:DEFGDGD.STEP50",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:DEFGDGD.STEP60",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:DISCGRP",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:DISCGRP.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:DISCGRP.STEP10",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:DISCGRP.STEP15",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:DUSRSECJ",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:DUSRSECJ.PREDEL",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:DUSRSECJ.STEP01",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:DUSRSECJ.STEP02",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:DUSRSECJ.STEP03",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:ESDSRRDS",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:ESDSRRDS.PREDEL",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:ESDSRRDS.STEP01",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:ESDSRRDS.STEP02",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:ESDSRRDS.STEP03",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:ESDSRRDS.STEP04",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:ESDSRRDS.STEP05",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:FTPJCLS",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:FTPJCLS.STEP1",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:INTCALC",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:INTCALC.STEP15",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "job:INTRDRJ1",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "step:INTRDRJ1.IDCAMS",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  },
+  {
+   "id": "step:INTRDRJ1.STEP01",
+   "unit_type": "jcl_step",
+   "entry_point": false
+  }
+ ],
+ "edges": [
+  {
+   "src": "job:ACCTFILE",
+   "dst": "step:ACCTFILE.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ACCTFILE.STEP05",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:ACCTFILE",
+   "dst": "step:ACCTFILE.STEP10",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ACCTFILE.STEP10",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:ACCTFILE",
+   "dst": "step:ACCTFILE.STEP15",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ACCTFILE.STEP15",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ACCTFILE.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 56
+    }
+   ],
+   "note": "DD ACCTDATA DISP=SHR"
+  },
+  {
+   "src": "step:ACCTFILE.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 58
+    }
+   ],
+   "note": "DD ACCTVSAM DISP=SHR"
+  },
+  {
+   "src": "step:ACCTFILE.STEP05",
+   "dst": "step:ACCTFILE.STEP10",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ACCTFILE.STEP10",
+   "dst": "step:ACCTFILE.STEP15",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 33
+    },
+    {
+     "file": "app/jcl/ACCTFILE.jcl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CARDFILE",
+   "dst": "step:CARDFILE.CLCIFIL",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.CLCIFIL",
+   "dst": "ext:SDSF",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CARDFILE",
+   "dst": "step:CARDFILE.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.STEP05",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CARDFILE",
+   "dst": "step:CARDFILE.STEP10",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 47
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.STEP10",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 47
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CARDFILE",
+   "dst": "step:CARDFILE.STEP15",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 68
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.STEP15",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 68
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDDATA.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 70
+    }
+   ],
+   "note": "DD CARDDATA DISP=SHR"
+  },
+  {
+   "src": "step:CARDFILE.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 72
+    }
+   ],
+   "note": "DD CARDVSAM DISP=SHR"
+  },
+  {
+   "src": "job:CARDFILE",
+   "dst": "step:CARDFILE.STEP40",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 80
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.STEP40",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 80
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CARDFILE",
+   "dst": "step:CARDFILE.STEP50",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 97
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.STEP50",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 97
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CARDFILE",
+   "dst": "step:CARDFILE.STEP60",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 107
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.STEP60",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 107
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CARDFILE",
+   "dst": "step:CARDFILE.OPCIFIL",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 118
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.OPCIFIL",
+   "dst": "ext:SDSF",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 118
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.CLCIFIL",
+   "dst": "step:CARDFILE.STEP05",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.STEP05",
+   "dst": "step:CARDFILE.STEP10",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 33
+    },
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 47
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.STEP10",
+   "dst": "step:CARDFILE.STEP15",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 47
+    },
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 68
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.STEP15",
+   "dst": "step:CARDFILE.STEP40",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 68
+    },
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 80
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.STEP40",
+   "dst": "step:CARDFILE.STEP50",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 80
+    },
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 97
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.STEP50",
+   "dst": "step:CARDFILE.STEP60",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 97
+    },
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 107
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CARDFILE.STEP60",
+   "dst": "step:CARDFILE.OPCIFIL",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 107
+    },
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 118
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CBADMCDJ",
+   "dst": "step:CBADMCDJ.STEP1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CBADMCDJ.jcl",
+     "line": 27
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CBADMCDJ.STEP1",
+   "dst": "ext:DFHCSDUP",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CBADMCDJ.jcl",
+     "line": 27
+    }
+   ],
+   "note": "PARM='CSD(READWRITE),PAGESIZE(60),NOCOMPAT'"
+  },
+  {
+   "src": "step:CBADMCDJ.STEP1",
+   "dst": "ds:OEM.CICSTS.DFHCSD",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/CBADMCDJ.jcl",
+     "line": 30
+    }
+   ],
+   "note": "DD DFHCSD DISP=SHR"
+  },
+  {
+   "src": "job:CBEXPORT",
+   "dst": "step:CBEXPORT.STEP01",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CBEXPORT.jcl",
+     "line": 24
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CBEXPORT.STEP01",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CBEXPORT.jcl",
+     "line": 24
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CBEXPORT",
+   "dst": "step:CBEXPORT.STEP02",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CBEXPORT.jcl",
+     "line": 43
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CBEXPORT.STEP02",
+   "dst": "CBEXPORT",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CBEXPORT.jcl",
+     "line": 43
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CBEXPORT.STEP01",
+   "dst": "step:CBEXPORT.STEP02",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CBEXPORT.jcl",
+     "line": 24
+    },
+    {
+     "file": "app/jcl/CBEXPORT.jcl",
+     "line": 43
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CBIMPORT",
+   "dst": "step:CBIMPORT.STEP01",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CBIMPORT.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CBIMPORT.STEP01",
+   "dst": "CBIMPORT",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CBIMPORT.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CLOSEFIL",
+   "dst": "step:CLOSEFIL.CLCIFIL",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CLOSEFIL.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CLOSEFIL.CLCIFIL",
+   "dst": "ext:SDSF",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CLOSEFIL.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:COMBTRAN",
+   "dst": "step:COMBTRAN.STEP05R",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:COMBTRAN.STEP05R",
+   "dst": "ext:SORT",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:COMBTRAN.STEP05R",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.BKUP",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 23
+    }
+   ],
+   "note": "DD SORTIN DISP=SHR"
+  },
+  {
+   "src": "step:COMBTRAN.STEP05R",
+   "dst": "ds:AWS.M2.CARDDEMO.SYSTRAN",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 25
+    }
+   ],
+   "note": "DD (concat) DISP=SHR"
+  },
+  {
+   "src": "step:COMBTRAN.STEP05R",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.COMBINED",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 33
+    }
+   ],
+   "note": "DD SORTOUT DISP=NEW"
+  },
+  {
+   "src": "job:COMBTRAN",
+   "dst": "step:COMBTRAN.STEP10",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 41
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:COMBTRAN.STEP10",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 41
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:COMBTRAN.STEP10",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.COMBINED",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 43
+    }
+   ],
+   "note": "DD TRANSACT DISP=SHR"
+  },
+  {
+   "src": "step:COMBTRAN.STEP10",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 45
+    }
+   ],
+   "note": "DD TRANVSAM DISP=SHR"
+  },
+  {
+   "src": "step:COMBTRAN.STEP05R",
+   "dst": "step:COMBTRAN.STEP10",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/COMBTRAN.jcl",
+     "line": 41
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CREASTMT",
+   "dst": "step:CREASTMT.DELDEF01",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CREASTMT.DELDEF01",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CREASTMT",
+   "dst": "step:CREASTMT.STEP010",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 44
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CREASTMT.STEP010",
+   "dst": "ext:SORT",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 44
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CREASTMT.STEP010",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 45
+    }
+   ],
+   "note": "DD SORTIN DISP=SHR"
+  },
+  {
+   "src": "step:CREASTMT.STEP010",
+   "dst": "ds:AWS.M2.CARDDEMO.TRXFL.SEQ",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 48
+    }
+   ],
+   "note": "DD SORTOUT DISP=NEW"
+  },
+  {
+   "src": "job:CREASTMT",
+   "dst": "step:CREASTMT.STEP020",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 56
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CREASTMT.STEP020",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 56
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CREASTMT.STEP020",
+   "dst": "ds:AWS.M2.CARDDEMO.TRXFL.SEQ",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 58
+    }
+   ],
+   "note": "DD INFILE DISP=SHR"
+  },
+  {
+   "src": "step:CREASTMT.STEP020",
+   "dst": "ds:AWS.M2.CARDDEMO.TRXFL.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 59
+    }
+   ],
+   "note": "DD OUTFILE DISP=SHR"
+  },
+  {
+   "src": "job:CREASTMT",
+   "dst": "step:CREASTMT.STEP030",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 66
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CREASTMT.STEP030",
+   "dst": "ext:IEFBR14",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 66
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CREASTMT.STEP030",
+   "dst": "ds:AWS.M2.CARDDEMO.STATEMNT.HTML",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 67
+    }
+   ],
+   "note": "DD HTMLFILE DISP=MOD"
+  },
+  {
+   "src": "step:CREASTMT.STEP030",
+   "dst": "ds:AWS.M2.CARDDEMO.STATEMNT.PS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 72
+    }
+   ],
+   "note": "DD STMTFILE DISP=MOD"
+  },
+  {
+   "src": "job:CREASTMT",
+   "dst": "step:CREASTMT.STEP040",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 79
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CREASTMT.STEP040",
+   "dst": "CBSTM03A",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 79
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CREASTMT.DELDEF01",
+   "dst": "step:CREASTMT.STEP010",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 44
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CREASTMT.STEP010",
+   "dst": "step:CREASTMT.STEP020",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 44
+    },
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 56
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CREASTMT.STEP020",
+   "dst": "step:CREASTMT.STEP030",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 56
+    },
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 66
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CREASTMT.STEP030",
+   "dst": "step:CREASTMT.STEP040",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 66
+    },
+    {
+     "file": "app/jcl/CREASTMT.JCL",
+     "line": 79
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CUSTFILE",
+   "dst": "step:CUSTFILE.CLCIFIL",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CUSTFILE.CLCIFIL",
+   "dst": "ext:SDSF",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CUSTFILE",
+   "dst": "step:CUSTFILE.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CUSTFILE.STEP05",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CUSTFILE",
+   "dst": "step:CUSTFILE.STEP10",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 43
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CUSTFILE.STEP10",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 43
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CUSTFILE",
+   "dst": "step:CUSTFILE.STEP15",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 64
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CUSTFILE.STEP15",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 64
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CUSTFILE.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.CUSTDATA.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 66
+    }
+   ],
+   "note": "DD CUSTDATA DISP=SHR"
+  },
+  {
+   "src": "step:CUSTFILE.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.CUSTDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 68
+    }
+   ],
+   "note": "DD CUSTVSAM DISP=SHR"
+  },
+  {
+   "src": "job:CUSTFILE",
+   "dst": "step:CUSTFILE.OPCIFIL",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 76
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CUSTFILE.OPCIFIL",
+   "dst": "ext:SDSF",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 76
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CUSTFILE.CLCIFIL",
+   "dst": "step:CUSTFILE.STEP05",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CUSTFILE.STEP05",
+   "dst": "step:CUSTFILE.STEP10",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 32
+    },
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 43
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CUSTFILE.STEP10",
+   "dst": "step:CUSTFILE.STEP15",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 43
+    },
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 64
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:CUSTFILE.STEP15",
+   "dst": "step:CUSTFILE.OPCIFIL",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 64
+    },
+    {
+     "file": "app/jcl/CUSTFILE.jcl",
+     "line": 76
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:DALYREJS",
+   "dst": "step:DALYREJS.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DALYREJS.jcl",
+     "line": 21
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DALYREJS.STEP05",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DALYREJS.jcl",
+     "line": 21
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:DEFCUST",
+   "dst": "step:DEFCUST.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFCUST.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFCUST.STEP05",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFCUST.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:DEFCUST",
+   "dst": "step:DEFCUST.STEP05#2",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFCUST.jcl",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFCUST.STEP05#2",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFCUST.jcl",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFCUST.STEP05",
+   "dst": "step:DEFCUST.STEP05#2",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFCUST.jcl",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/DEFCUST.jcl",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:DEFGDGB",
+   "dst": "step:DEFGDGB.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGB.jcl",
+     "line": 21
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFGDGB.STEP05",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGB.jcl",
+     "line": 21
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:DEFGDGD",
+   "dst": "step:DEFGDGD.STEP10",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 24
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFGDGD.STEP10",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 24
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:DEFGDGD",
+   "dst": "step:DEFGDGD.STEP20",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 36
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFGDGD.STEP20",
+   "dst": "ext:IEBGENER",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 36
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFGDGD.STEP20",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANTYPE.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 39
+    }
+   ],
+   "note": "DD SYSUT1 DISP=SHR"
+  },
+  {
+   "src": "step:DEFGDGD.STEP20",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANTYPE.BKUP",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 40
+    }
+   ],
+   "note": "DD SYSUT2 DISP=NEW"
+  },
+  {
+   "src": "job:DEFGDGD",
+   "dst": "step:DEFGDGD.STEP30",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 47
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFGDGD.STEP30",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 47
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:DEFGDGD",
+   "dst": "step:DEFGDGD.STEP40",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 59
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFGDGD.STEP40",
+   "dst": "ext:IEBGENER",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 59
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFGDGD.STEP40",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANCATG.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 62
+    }
+   ],
+   "note": "DD SYSUT1 DISP=SHR"
+  },
+  {
+   "src": "step:DEFGDGD.STEP40",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANCATG.PS.BKUP",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 63
+    }
+   ],
+   "note": "DD SYSUT2 DISP=NEW"
+  },
+  {
+   "src": "job:DEFGDGD",
+   "dst": "step:DEFGDGD.STEP50",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 70
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFGDGD.STEP50",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 70
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:DEFGDGD",
+   "dst": "step:DEFGDGD.STEP60",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 82
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFGDGD.STEP60",
+   "dst": "ext:IEBGENER",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 82
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFGDGD.STEP60",
+   "dst": "ds:AWS.M2.CARDDEMO.DISCGRP.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 85
+    }
+   ],
+   "note": "DD SYSUT1 DISP=SHR"
+  },
+  {
+   "src": "step:DEFGDGD.STEP60",
+   "dst": "ds:AWS.M2.CARDDEMO.DISCGRP.BKUP",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 86
+    }
+   ],
+   "note": "DD SYSUT2 DISP=NEW"
+  },
+  {
+   "src": "step:DEFGDGD.STEP10",
+   "dst": "step:DEFGDGD.STEP20",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 24
+    },
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 36
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFGDGD.STEP20",
+   "dst": "step:DEFGDGD.STEP30",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 36
+    },
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 47
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFGDGD.STEP30",
+   "dst": "step:DEFGDGD.STEP40",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 47
+    },
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 59
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFGDGD.STEP40",
+   "dst": "step:DEFGDGD.STEP50",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 59
+    },
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 70
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DEFGDGD.STEP50",
+   "dst": "step:DEFGDGD.STEP60",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 70
+    },
+    {
+     "file": "app/jcl/DEFGDGD.jcl",
+     "line": 82
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:DISCGRP",
+   "dst": "step:DISCGRP.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DISCGRP.STEP05",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:DISCGRP",
+   "dst": "step:DISCGRP.STEP10",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DISCGRP.STEP10",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:DISCGRP",
+   "dst": "step:DISCGRP.STEP15",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DISCGRP.STEP15",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DISCGRP.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.DISCGRP.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 56
+    }
+   ],
+   "note": "DD DISCGRP DISP=SHR"
+  },
+  {
+   "src": "step:DISCGRP.STEP15",
+   "dst": "ds:AWS.M2.CARDDEMO.DISCGRP.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 58
+    }
+   ],
+   "note": "DD DISCVSAM DISP=OLD"
+  },
+  {
+   "src": "step:DISCGRP.STEP05",
+   "dst": "step:DISCGRP.STEP10",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 22
+    },
+    {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DISCGRP.STEP10",
+   "dst": "step:DISCGRP.STEP15",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 33
+    },
+    {
+     "file": "app/jcl/DISCGRP.jcl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:DUSRSECJ",
+   "dst": "step:DUSRSECJ.PREDEL",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 23
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DUSRSECJ.PREDEL",
+   "dst": "ext:IEFBR14",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 23
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DUSRSECJ.PREDEL",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.PS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 25
+    }
+   ],
+   "note": "DD DD01 DISP=MOD"
+  },
+  {
+   "src": "job:DUSRSECJ",
+   "dst": "step:DUSRSECJ.STEP01",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DUSRSECJ.STEP01",
+   "dst": "ext:IEBGENER",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DUSRSECJ.STEP01",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.PS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 46
+    }
+   ],
+   "note": "DD SYSUT2 DISP=NEW"
+  },
+  {
+   "src": "job:DUSRSECJ",
+   "dst": "step:DUSRSECJ.STEP02",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 58
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DUSRSECJ.STEP02",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 58
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:DUSRSECJ",
+   "dst": "step:DUSRSECJ.STEP03",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 80
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DUSRSECJ.STEP03",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 80
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DUSRSECJ.STEP03",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 82
+    }
+   ],
+   "note": "DD IN DISP=SHR"
+  },
+  {
+   "src": "step:DUSRSECJ.STEP03",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 83
+    }
+   ],
+   "note": "DD OUT DISP=SHR"
+  },
+  {
+   "src": "step:DUSRSECJ.PREDEL",
+   "dst": "step:DUSRSECJ.STEP01",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 23
+    },
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DUSRSECJ.STEP01",
+   "dst": "step:DUSRSECJ.STEP02",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 32
+    },
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 58
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:DUSRSECJ.STEP02",
+   "dst": "step:DUSRSECJ.STEP03",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 58
+    },
+    {
+     "file": "app/jcl/DUSRSECJ.jcl",
+     "line": 80
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:ESDSRRDS",
+   "dst": "step:ESDSRRDS.PREDEL",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 24
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ESDSRRDS.PREDEL",
+   "dst": "ext:IEFBR14",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 24
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ESDSRRDS.PREDEL",
+   "dst": "ds:AWS.M2.CARDDEMO.ESDSRRDS.PS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 26
+    }
+   ],
+   "note": "DD DD01 DISP=MOD"
+  },
+  {
+   "src": "job:ESDSRRDS",
+   "dst": "step:ESDSRRDS.STEP01",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ESDSRRDS.STEP01",
+   "dst": "ext:IEBGENER",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ESDSRRDS.STEP01",
+   "dst": "ds:AWS.M2.CARDDEMO.ESDSRRDS.PS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 47
+    }
+   ],
+   "note": "DD SYSUT2 DISP=NEW"
+  },
+  {
+   "src": "job:ESDSRRDS",
+   "dst": "step:ESDSRRDS.STEP02",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 59
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ESDSRRDS.STEP02",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 59
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:ESDSRRDS",
+   "dst": "step:ESDSRRDS.STEP03",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 79
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ESDSRRDS.STEP03",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 79
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ESDSRRDS.STEP03",
+   "dst": "ds:AWS.M2.CARDDEMO.ESDSRRDS.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 81
+    }
+   ],
+   "note": "DD IN DISP=SHR"
+  },
+  {
+   "src": "step:ESDSRRDS.STEP03",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.ESDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 82
+    }
+   ],
+   "note": "DD OUT DISP=SHR"
+  },
+  {
+   "src": "job:ESDSRRDS",
+   "dst": "step:ESDSRRDS.STEP04",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 93
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ESDSRRDS.STEP04",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 93
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:ESDSRRDS",
+   "dst": "step:ESDSRRDS.STEP05",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 113
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ESDSRRDS.STEP05",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 113
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ESDSRRDS.STEP05",
+   "dst": "ds:AWS.M2.CARDDEMO.ESDSRRDS.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 115
+    }
+   ],
+   "note": "DD IN DISP=SHR"
+  },
+  {
+   "src": "step:ESDSRRDS.STEP05",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.RRDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 116
+    }
+   ],
+   "note": "DD OUT DISP=SHR"
+  },
+  {
+   "src": "step:ESDSRRDS.PREDEL",
+   "dst": "step:ESDSRRDS.STEP01",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 24
+    },
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ESDSRRDS.STEP01",
+   "dst": "step:ESDSRRDS.STEP02",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 33
+    },
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 59
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ESDSRRDS.STEP02",
+   "dst": "step:ESDSRRDS.STEP03",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 59
+    },
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 79
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ESDSRRDS.STEP03",
+   "dst": "step:ESDSRRDS.STEP04",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 79
+    },
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 93
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:ESDSRRDS.STEP04",
+   "dst": "step:ESDSRRDS.STEP05",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 93
+    },
+    {
+     "file": "app/jcl/ESDSRRDS.jcl",
+     "line": 113
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:FTPJCLS",
+   "dst": "step:FTPJCLS.STEP1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/FTPJCL.JCL",
+     "line": 30
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:FTPJCLS.STEP1",
+   "dst": "ext:FTP",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/FTPJCL.JCL",
+     "line": 30
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:INTCALC",
+   "dst": "step:INTCALC.STEP15",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/INTCALC.jcl",
+     "line": 22
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:INTCALC.STEP15",
+   "dst": "CBACT04C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/INTCALC.jcl",
+     "line": 22
+    }
+   ],
+   "note": "PARM='2022071800'"
+  },
+  {
+   "src": "job:INTRDRJ1",
+   "dst": "step:INTRDRJ1.IDCAMS",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/INTRDRJ1.JCL",
+     "line": 6
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:INTRDRJ1.IDCAMS",
+   "dst": "ext:IDCAMS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/INTRDRJ1.JCL",
+     "line": 6
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:INTRDRJ1.IDCAMS",
+   "dst": "ds:AWS.M2.CARDEMO.FTP.TEST",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/INTRDRJ1.JCL",
+     "line": 8
+    }
+   ],
+   "note": "DD IN DISP=SHR"
+  },
+  {
+   "src": "step:INTRDRJ1.IDCAMS",
+   "dst": "ds:AWS.M2.CARDEMO.FTP.TEST.BKUP",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/INTRDRJ1.JCL",
+     "line": 9
+    }
+   ],
+   "note": "DD OUT DISP=SHR"
+  },
+  {
+   "src": "job:INTRDRJ1",
+   "dst": "step:INTRDRJ1.STEP01",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/INTRDRJ1.JCL",
+     "line": 14
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:INTRDRJ1.STEP01",
+   "dst": "ext:IEBGENER",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/INTRDRJ1.JCL",
+     "line": 14
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "step:INTRDRJ1.STEP01",
+   "dst": "ds:AWS.M2.CARDDEMO.JCL",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/jcl/INTRDRJ1.JCL",
+     "line": 17
+    }
+   ],
+   "note": "DD SYSUT1 DISP=SHR"
+  },
+  {
+   "src": "step:INTRDRJ1.IDCAMS",
+   "dst": "step:INTRDRJ1.STEP01",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/jcl/INTRDRJ1.JCL",
+     "line": 6
+    },
+    {
+     "file": "app/jcl/INTRDRJ1.JCL",
+     "line": 14
+    }
+   ],
+   "note": ""
+  }
+ ],
+ "notes": [
+  "No job in this partition calls a PROC (no EXEC PROC= or bare EXEC X), so no proc steps were expanded and there are no step-to-proc call edges. app/proc/REPROC.prc and TRANREPT.prc are unused here.",
+  "app/jcl/FTPJCL.JCL: the job name on the JOB card is FTPJCLS (not FTPJCL), so ids are job:FTPJCLS and step:FTPJCLS.STEP1 (lines 1, 30). Step runs PGM=FTP, in-stream SYSIN (DD *) not parsed.",
+  "app/jcl/DEFCUST.jcl:22 and :32 both name a step STEP05; the second is step:DEFCUST.STEP05#2. Both are IDCAMS with control cards only (DELETE AWS.CCDA.CUSTDATA.CLUSTER, then DEFINE CLUSTER AWS.CUSTDATA.CLUSTER), so no data edges.",
+  "app/jcl/CREASTMT.JCL:90: garbled text after the SPACE parameter on the STMTFILE DD of STEP040 (stray '00,RECFM=FB), ATA.VSAM.KSDS'). It follows a blank so it is comment text on a continuation line; DSN is on line 91. STEP040 runs in-scope CBSTM03A so no step data edge is emitted anyway.",
+  "app/jcl/CBADMCDJ.jcl:27: STEP1 PGM=DFHCSDUP with PARM='CSD(READWRITE),PAGESIZE(60),NOCOMPAT' (continuation line 28). DFHCSD DD (line 30) is DISP=SHR so mode is read by the DISP rule, although the utility actually updates the CSD. Line 25 is a JCL SET statement, not a step. In-stream CSD definitions (lines 34-163) not parsed.",
+  "Steps with PGM=SDSF (CARDFILE CLCIFIL/OPCIFIL, CUSTFILE CLCIFIL/OPCIFIL, CLOSEFIL CLCIFIL) have only SYSOUT and in-stream ISFIN DDs, so no data edges. The CEMT commands in ISFIN are not parsed.",
+  "IDCAMS steps: only DD statements were used for data edges; REPRO, DEFINE and DELETE control cards in SYSIN were not read, so files IDCAMS creates or deletes through control cards (DEFINE CLUSTER, DEFINE GENERATIONDATAGROUP steps) have no data edges. Mode comes from DISP only, so REPRO output DDs with DISP=SHR or OLD (ACCTFILE.STEP15 ACCTVSAM, CARDFILE.STEP15 CARDVSAM, DISCGRP.STEP15 DISCVSAM, CREASTMT.STEP020 OUTFILE, and so on) show as read though they are really written.",
+  "DISP=(MOD,DELETE,DELETE) DDs on IEFBR14 (CREASTMT.STEP030 lines 67 and 72; DUSRSECJ.PREDEL line 25; ESDSRRDS.PREDEL line 26) are labeled write because MOD gives write under the guide, although the effect is a delete.",
+  "Trailing (...) removed from DSNs: TRANSACT.BKUP(0), SYSTRAN(0), TRANSACT.COMBINED(+1), TRANTYPE.BKUP(+1), TRANCATG.PS.BKUP(+1), DISCGRP.BKUP(+1), and AWS.M2.CARDDEMO.JCL(INTRDRJ2) to ds:AWS.M2.CARDDEMO.JCL (INTRDRJ1.STEP01 line 17).",
+  "COMBTRAN.jcl:25 is an unnamed concatenated DD under SORTIN (DSN=AWS.M2.CARDDEMO.SYSTRAN(0)); it gets its own read edge with evidence line 25.",
+  "INTRDRJ1.JCL:8-9 DSNs are spelled AWS.M2.CARDEMO.FTP.TEST and AWS.M2.CARDEMO.FTP.TEST.BKUP (CARDEMO, missing D) in the source, kept as written. INTRDRJ1.STEP01 SYSUT2 DD SYSOUT=(A,INTRDR) is skipped as a SYSOUT DD. It submits INTRDRJ2 through the internal reader, but no job-to-job call edge is labeled because the guide defines job-level call edges only for PGM=, PROC, Control-M and shell submits.",
+  "Steps running in-scope programs get no data edges here: CBEXPORT.STEP02 (CBEXPORT), CBIMPORT.STEP01 (CBIMPORT), CREASTMT.STEP040 (CBSTM03A), INTCALC.STEP15 (CBACT04C, PARM='2022071800' at line 22).",
+  "DEFGDGD.jcl STEP20/40/60 are IEBGENER (ext) with SYSIN DUMMY, which is skipped. DUSRSECJ.jcl:34 and ESDSRRDS.jcl:35 SYSUT1 DD * data lines are not parsed.",
+  "Temporal edges treat COND=(0,NE) steps as ordinary executable steps (COND is not evaluated). Temporal evidence lists the EXEC line of the source step, then of the destination step.",
+  "ESDSRRDS.jcl has CRLF line endings; line numbers are unaffected.",
+  "Data edge evidence is the first line of the DD statement; the note field gives the DD name and DISP."
+ ]
+}

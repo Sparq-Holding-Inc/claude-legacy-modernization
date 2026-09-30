@@ -1,0 +1,97 @@
+{
+  "case": "09-temporal-controlm",
+  "status": "hand-written before any extractor code",
+  "description": "Control-M: JOBA sets condition JOBA-DONE, JOBB waits on it. JOBB deleting the condition (SIGN -) makes no edge. JOBA waiting on a condition nobody sets makes no edge.",
+  "edges": [
+    {
+      "src": "job:JOBA",
+      "dst": "step:JOBA.S1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/JOBA.jcl:2"
+      ]
+    },
+    {
+      "src": "job:JOBB",
+      "dst": "step:JOBB.S1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/JOBB.jcl:2"
+      ]
+    },
+    {
+      "src": "step:JOBA.S1",
+      "dst": "ext:IEFBR14",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/JOBA.jcl:2"
+      ]
+    },
+    {
+      "src": "step:JOBB.S1",
+      "dst": "ext:IEFBR14",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/JOBB.jcl:2"
+      ]
+    },
+    {
+      "src": "sch:NIGHTLY/JOBA",
+      "dst": "job:JOBA",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/scheduler/nightly.xml:4"
+      ]
+    },
+    {
+      "src": "sch:NIGHTLY/JOBB",
+      "dst": "job:JOBB",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/scheduler/nightly.xml:8"
+      ]
+    },
+    {
+      "src": "sch:NIGHTLY/JOBA",
+      "dst": "sch:NIGHTLY/JOBB",
+      "kind": "temporal",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/scheduler/nightly.xml:6",
+        "app/scheduler/nightly.xml:9"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "sch:NIGHTLY/JOBA",
+      "unit_type": "scheduler_job",
+      "entry_point": true
+    },
+    {
+      "id": "sch:NIGHTLY/JOBB",
+      "unit_type": "scheduler_job",
+      "entry_point": true
+    }
+  ]
+}

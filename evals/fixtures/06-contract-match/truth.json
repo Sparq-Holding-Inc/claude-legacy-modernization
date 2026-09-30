@@ -1,0 +1,137 @@
+{
+  "case": "06-contract-match",
+  "status": "hand-written before any extractor code",
+  "description": "Job WRITEJOB writes a dataset with copybook LAYOUTX. Job READJOB reads it with the same copybook. High confidence contract.",
+  "edges": [
+    {
+      "src": "job:WRITEJOB",
+      "dst": "step:WRITEJOB.S1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/WRITEJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "job:READJOB",
+      "dst": "step:READJOB.S1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/READJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "step:WRITEJOB.S1",
+      "dst": "PGMW",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/WRITEJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "step:READJOB.S1",
+      "dst": "PGMR",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/READJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "PGMW",
+      "dst": "cpy:LAYOUTX",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PGMW.cbl:11"
+      ]
+    },
+    {
+      "src": "PGMR",
+      "dst": "cpy:LAYOUTX",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PGMR.cbl:11"
+      ]
+    },
+    {
+      "src": "PGMW",
+      "dst": "ds:SPARQ.TEST.MASTER",
+      "kind": "data",
+      "mode": "write",
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PGMW.cbl:6",
+        "app/cbl/PGMW.cbl:13",
+        "app/jcl/WRITEJOB.jcl:3"
+      ]
+    },
+    {
+      "src": "PGMR",
+      "dst": "ds:SPARQ.TEST.MASTER",
+      "kind": "data",
+      "mode": "read",
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PGMR.cbl:6",
+        "app/cbl/PGMR.cbl:13",
+        "app/jcl/READJOB.jcl:3"
+      ]
+    },
+    {
+      "src": "PGMW",
+      "dst": "PGMR",
+      "kind": "contract",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PGMW.cbl:6",
+        "app/cbl/PGMW.cbl:13",
+        "app/jcl/WRITEJOB.jcl:3",
+        "app/cbl/PGMR.cbl:6",
+        "app/cbl/PGMR.cbl:13",
+        "app/jcl/READJOB.jcl:3"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "job:WRITEJOB",
+      "unit_type": "jcl_job",
+      "entry_point": true
+    },
+    {
+      "id": "job:READJOB",
+      "unit_type": "jcl_job",
+      "entry_point": true
+    },
+    {
+      "id": "PGMW",
+      "unit_type": "batch",
+      "entry_point": false
+    },
+    {
+      "id": "PGMR",
+      "unit_type": "batch",
+      "entry_point": false
+    }
+  ]
+}

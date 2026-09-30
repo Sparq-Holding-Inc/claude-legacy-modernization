@@ -1,0 +1,130 @@
+{
+  "case": "16-proc-expansion",
+  "status": "hand-written before any extractor code",
+  "description": "A job calls an external PROC. The PROC step is expanded under the calling step. A symbolic parameter comes from the EXEC statement. One DD is overridden with PROCSTEP.DDNAME.",
+  "edges": [
+    {
+      "src": "job:RUNPROC",
+      "dst": "step:RUNPROC.S1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/RUNPROC.jcl:2"
+      ]
+    },
+    {
+      "src": "job:RUNPROC",
+      "dst": "step:RUNPROC.S2",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/RUNPROC.jcl:4"
+      ]
+    },
+    {
+      "src": "step:RUNPROC.S1",
+      "dst": "proc:COPYPROC",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/RUNPROC.jcl:2"
+      ]
+    },
+    {
+      "src": "step:RUNPROC.S1",
+      "dst": "step:RUNPROC.S1.CP01",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/RUNPROC.jcl:2",
+        "app/proc/COPYPROC.prc:2"
+      ]
+    },
+    {
+      "src": "step:RUNPROC.S1.CP01",
+      "dst": "PGMCOPY",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/proc/COPYPROC.prc:2"
+      ]
+    },
+    {
+      "src": "step:RUNPROC.S2",
+      "dst": "ext:IEFBR14",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/RUNPROC.jcl:4"
+      ]
+    },
+    {
+      "src": "step:RUNPROC.S1.CP01",
+      "dst": "step:RUNPROC.S2",
+      "kind": "temporal",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/proc/COPYPROC.prc:2",
+        "app/jcl/RUNPROC.jcl:4"
+      ]
+    },
+    {
+      "src": "PGMCOPY",
+      "dst": "ds:SPARQ.OVERRIDE.IN",
+      "kind": "data",
+      "mode": "read",
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PGMCOPY.cbl:6",
+        "app/cbl/PGMCOPY.cbl:15",
+        "app/proc/COPYPROC.prc:3",
+        "app/jcl/RUNPROC.jcl:2"
+      ]
+    },
+    {
+      "src": "PGMCOPY",
+      "dst": "ds:SPARQ.OVERRIDE.OUT",
+      "kind": "data",
+      "mode": "write",
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PGMCOPY.cbl:7",
+        "app/cbl/PGMCOPY.cbl:16",
+        "app/jcl/RUNPROC.jcl:3"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "job:RUNPROC",
+      "unit_type": "jcl_job",
+      "entry_point": true
+    },
+    {
+      "id": "proc:COPYPROC",
+      "unit_type": "proc",
+      "entry_point": false
+    },
+    {
+      "id": "step:RUNPROC.S1.CP01",
+      "unit_type": "jcl_step",
+      "entry_point": false
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+{
+  "case": "08-temporal-steps",
+  "status": "hand-written before any extractor code",
+  "description": "Step order inside one JCL job, including a repeated step name.",
+  "edges": [
+    {
+      "src": "job:SEQJOB",
+      "dst": "step:SEQJOB.STEP1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/SEQJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "job:SEQJOB",
+      "dst": "step:SEQJOB.STEP2",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/SEQJOB.jcl:3"
+      ]
+    },
+    {
+      "src": "job:SEQJOB",
+      "dst": "step:SEQJOB.STEP3",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/SEQJOB.jcl:4"
+      ]
+    },
+    {
+      "src": "job:SEQJOB",
+      "dst": "step:SEQJOB.STEP2#2",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/SEQJOB.jcl:5"
+      ]
+    },
+    {
+      "src": "step:SEQJOB.STEP1",
+      "dst": "PGMA",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/SEQJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "step:SEQJOB.STEP2",
+      "dst": "PGMB",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/SEQJOB.jcl:3"
+      ]
+    },
+    {
+      "src": "step:SEQJOB.STEP3",
+      "dst": "PGMC",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/SEQJOB.jcl:4"
+      ]
+    },
+    {
+      "src": "step:SEQJOB.STEP2#2",
+      "dst": "ext:IEFBR14",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/SEQJOB.jcl:5"
+      ]
+    },
+    {
+      "src": "step:SEQJOB.STEP1",
+      "dst": "step:SEQJOB.STEP2",
+      "kind": "temporal",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/SEQJOB.jcl:2",
+        "app/jcl/SEQJOB.jcl:3"
+      ]
+    },
+    {
+      "src": "step:SEQJOB.STEP2",
+      "dst": "step:SEQJOB.STEP3",
+      "kind": "temporal",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/SEQJOB.jcl:3",
+        "app/jcl/SEQJOB.jcl:4"
+      ]
+    },
+    {
+      "src": "step:SEQJOB.STEP3",
+      "dst": "step:SEQJOB.STEP2#2",
+      "kind": "temporal",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/SEQJOB.jcl:4",
+        "app/jcl/SEQJOB.jcl:5"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "job:SEQJOB",
+      "unit_type": "jcl_job",
+      "entry_point": true
+    },
+    {
+      "id": "step:SEQJOB.STEP2#2",
+      "unit_type": "jcl_step",
+      "entry_point": false
+    }
+  ]
+}

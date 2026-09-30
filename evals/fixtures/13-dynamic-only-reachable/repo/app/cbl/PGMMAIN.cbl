@@ -1,0 +1,10 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. PGMMAIN.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  WS-PGM-NAME             PIC X(8).
+       PROCEDURE DIVISION.
+       MAIN-PARA.
+           ACCEPT WS-PGM-NAME.
+           CALL WS-PGM-NAME.
+           GOBACK.

@@ -1,0 +1,2 @@
+//JOBB     JOB (ACCT),'X',CLASS=A
+//S1       EXEC PGM=IEFBR14

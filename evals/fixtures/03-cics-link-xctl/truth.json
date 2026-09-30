@@ -1,0 +1,86 @@
+{
+  "case": "03-cics-link-xctl",
+  "status": "hand-written before any extractor code",
+  "description": "LINK with a literal, LINK with a variable fed from COMMAREA, XCTL with a variable fed by one literal MOVE, XCTL with a VALUE constant.",
+  "edges": [
+    {
+      "src": "PROGA",
+      "dst": "PROGB",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGA.cbl:12"
+      ]
+    },
+    {
+      "src": "PROGA",
+      "dst": "?dynamic:PROGA:16",
+      "kind": "call",
+      "mode": null,
+      "resolved": false,
+      "confidence": "low",
+      "evidence": [
+        "app/cbl/PROGA.cbl:16"
+      ]
+    },
+    {
+      "src": "PROGA",
+      "dst": "PROGC",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "medium",
+      "evidence": [
+        "app/cbl/PROGA.cbl:20",
+        "app/cbl/PROGA.cbl:19"
+      ]
+    },
+    {
+      "src": "PROGA",
+      "dst": "?dynamic:PROGA:20",
+      "kind": "call",
+      "mode": null,
+      "resolved": false,
+      "confidence": "low",
+      "evidence": [
+        "app/cbl/PROGA.cbl:20"
+      ]
+    },
+    {
+      "src": "PROGA",
+      "dst": "PROGD",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGA.cbl:23",
+        "app/cbl/PROGA.cbl:5"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "PROGA",
+      "unit_type": "online_txn",
+      "entry_point": false
+    },
+    {
+      "id": "PROGB",
+      "unit_type": "online_txn",
+      "entry_point": false
+    },
+    {
+      "id": "PROGC",
+      "unit_type": "online_txn",
+      "entry_point": false
+    },
+    {
+      "id": "PROGD",
+      "unit_type": "online_txn",
+      "entry_point": false
+    }
+  ]
+}

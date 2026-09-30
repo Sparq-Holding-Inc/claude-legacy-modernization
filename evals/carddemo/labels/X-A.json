@@ -1,0 +1,2035 @@
+{
+ "partition": "X",
+ "pass": "A",
+ "programs": {},
+ "nodes": [
+  {
+   "id": "cpy:COADM02Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COCOM01Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CODATECN",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COMEN02Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COSTM01",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COTTL01Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CSDAT01Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CSLKPCDY",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CSMSG01Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CSMSG02Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CSSETATY",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CSSTRPFY",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CSUSR01Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CSUTLDPY",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CSUTLDWY",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CUSTREC",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CVACT01Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CVACT02Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CVACT03Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CVCRD01Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CVCUS01Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CVEXPORT",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CVTRA01Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CVTRA02Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CVTRA03Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CVTRA04Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CVTRA05Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CVTRA06Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CVTRA07Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:UNUSED1Y",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COACTUP",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COACTVW",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COADM01",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COBIL00",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COCRDLI",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COCRDSL",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COCRDUP",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COMEN01",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:CORPT00",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COSGN00",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COTRN00",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COTRN01",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COTRN02",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COUSR00",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COUSR01",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COUSR02",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "cpy:COUSR03",
+   "unit_type": "copybook",
+   "entry_point": false
+  },
+  {
+   "id": "map:COACTUP",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:COACTVW",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:COADM01",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:COBIL00",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:COCRDLI",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:COCRDSL",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:COCRDUP",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:COMEN01",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:CORPT00",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:COSGN00",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:COTRN00",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:COTRN01",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:COTRN02",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:COUSR00",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:COUSR01",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:COUSR02",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "map:COUSR03",
+   "unit_type": "map",
+   "entry_point": false
+  },
+  {
+   "id": "proc:REPROC",
+   "unit_type": "proc",
+   "entry_point": false
+  },
+  {
+   "id": "proc:TRANREPT",
+   "unit_type": "proc",
+   "entry_point": false
+  },
+  {
+   "id": "sch:DAILY-TransactionBackup/CLOSEFIL",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:DAILY-TransactionBackup/TRANBKP",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:DAILY-TransactionBackup/WAITSTEP",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:DAILY-TransactionBackup/OPENFIL",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:WEEKLY-DisclosureGroupsRefresh/WAITSTEP",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:WEEKLY-TransactionTypesDBRefresh/TRANEXTR",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:MONTHLY-InterestCalculation/CLOSEFIL",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:MONTHLY-InterestCalculation/INTCALC",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:MONTHLY-InterestCalculation/COMBTRAN",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:MONTHLY-InterestCalculation/WAITSTEP",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:MONTHLY-InterestCalculation/OPENFIL",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:scripts/remote_refresh.sh",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:scripts/run_full_batch.sh",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:scripts/run_interest_calc.sh",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  },
+  {
+   "id": "sch:scripts/run_posting.sh",
+   "unit_type": "scheduler_job",
+   "entry_point": true
+  }
+ ],
+ "edges": [
+  {
+   "src": "sch:DAILY-TransactionBackup/CLOSEFIL",
+   "dst": "job:CLOSEFIL",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 4
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:DAILY-TransactionBackup/TRANBKP",
+   "dst": "job:TRANBKP",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 8
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:DAILY-TransactionBackup/WAITSTEP",
+   "dst": "job:WAITSTEP",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 14
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:DAILY-TransactionBackup/OPENFIL",
+   "dst": "job:OPENFIL",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 20
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2",
+   "dst": "job:MNTTRDB2",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 27
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL",
+   "dst": "job:CLOSEFIL",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 33
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP",
+   "dst": "job:DISCGRP",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 38
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:WEEKLY-DisclosureGroupsRefresh/WAITSTEP",
+   "dst": "job:WAITSTEP",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 44
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL",
+   "dst": "job:OPENFIL",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 50
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:WEEKLY-TransactionTypesDBRefresh/TRANEXTR",
+   "dst": "job:TRANEXTR",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 58
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:MONTHLY-InterestCalculation/CLOSEFIL",
+   "dst": "job:CLOSEFIL",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 65
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:MONTHLY-InterestCalculation/INTCALC",
+   "dst": "job:INTCALC",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 69
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:MONTHLY-InterestCalculation/COMBTRAN",
+   "dst": "job:COMBTRAN",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 75
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:MONTHLY-InterestCalculation/WAITSTEP",
+   "dst": "job:WAITSTEP",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 81
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:MONTHLY-InterestCalculation/OPENFIL",
+   "dst": "job:OPENFIL",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 87
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:DAILY-TransactionBackup/CLOSEFIL",
+   "dst": "sch:DAILY-TransactionBackup/TRANBKP",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 5
+    },
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 9
+    }
+   ],
+   "note": "OUTCOND DAILY-TransactionBackup-CLOSEFIL SIGN=+ -> INCOND DAILY-TransactionBackup-CLOSEFIL"
+  },
+  {
+   "src": "sch:DAILY-TransactionBackup/TRANBKP",
+   "dst": "sch:DAILY-TransactionBackup/WAITSTEP",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 11
+    },
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 15
+    }
+   ],
+   "note": "OUTCOND DAILY-TransactionBackup-TRANBKP SIGN=+ -> INCOND DAILY-TransactionBackup-TRANBKP"
+  },
+  {
+   "src": "sch:DAILY-TransactionBackup/WAITSTEP",
+   "dst": "sch:DAILY-TransactionBackup/OPENFIL",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 17
+    },
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 21
+    }
+   ],
+   "note": "OUTCOND DAILY-TransactionBackup-WAITSTEP SIGN=+ -> INCOND DAILY-TransactionBackup-WAITSTEP"
+  },
+  {
+   "src": "sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2",
+   "dst": "sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 28
+    },
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 34
+    }
+   ],
+   "note": "OUTCOND WEEKLY-TransactionTypesDBRefresh-MNTTRDB2 SIGN=+ -> INCOND WEEKLY-TransactionTypesDBRefresh-MNTTRDB2"
+  },
+  {
+   "src": "sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2",
+   "dst": "sch:WEEKLY-TransactionTypesDBRefresh/TRANEXTR",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 28
+    },
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 59
+    }
+   ],
+   "note": "OUTCOND WEEKLY-TransactionTypesDBRefresh-MNTTRDB2 SIGN=+ -> INCOND WEEKLY-TransactionTypesDBRefresh-MNTTRDB2"
+  },
+  {
+   "src": "sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL",
+   "dst": "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 35
+    },
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 39
+    }
+   ],
+   "note": "OUTCOND WEEKLY-DisclosureGroupsRefresh-CLOSEFIL SIGN=+ -> INCOND WEEKLY-DisclosureGroupsRefresh-CLOSEFIL"
+  },
+  {
+   "src": "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP",
+   "dst": "sch:WEEKLY-DisclosureGroupsRefresh/WAITSTEP",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 41
+    },
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 45
+    }
+   ],
+   "note": "OUTCOND WEEKLY-DisclosureGroupsRefresh-DISCGRP SIGN=+ -> INCOND WEEKLY-DisclosureGroupsRefresh-DISCGRP"
+  },
+  {
+   "src": "sch:WEEKLY-DisclosureGroupsRefresh/WAITSTEP",
+   "dst": "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 47
+    },
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 51
+    }
+   ],
+   "note": "OUTCOND WEEKLY-DisclosureGroupsRefresh-WAITSTEP SIGN=+ -> INCOND WEEKLY-DisclosureGroupsRefresh-WAITSTEP"
+  },
+  {
+   "src": "sch:MONTHLY-InterestCalculation/CLOSEFIL",
+   "dst": "sch:MONTHLY-InterestCalculation/INTCALC",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 66
+    },
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 70
+    }
+   ],
+   "note": "OUTCOND MONTHLY-InterestCalculation-CLOSEFIL SIGN=+ -> INCOND MONTHLY-InterestCalculation-CLOSEFIL"
+  },
+  {
+   "src": "sch:MONTHLY-InterestCalculation/INTCALC",
+   "dst": "sch:MONTHLY-InterestCalculation/COMBTRAN",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 72
+    },
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 76
+    }
+   ],
+   "note": "OUTCOND MONTHLY-InterestCalculation-INTCALC SIGN=+ -> INCOND MONTHLY-InterestCalculation-INTCALC"
+  },
+  {
+   "src": "sch:MONTHLY-InterestCalculation/COMBTRAN",
+   "dst": "sch:MONTHLY-InterestCalculation/WAITSTEP",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 78
+    },
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 82
+    }
+   ],
+   "note": "OUTCOND MONTHLY-InterestCalculation-COMBTRAN SIGN=+ -> INCOND MONTHLY-InterestCalculation-COMBTRAN"
+  },
+  {
+   "src": "sch:MONTHLY-InterestCalculation/WAITSTEP",
+   "dst": "sch:MONTHLY-InterestCalculation/OPENFIL",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 84
+    },
+    {
+     "file": "app/scheduler/CardDemo.controlm",
+     "line": 88
+    }
+   ],
+   "note": "OUTCOND MONTHLY-InterestCalculation-WAITSTEP SIGN=+ -> INCOND MONTHLY-InterestCalculation-WAITSTEP"
+  },
+  {
+   "src": "sch:scripts/remote_refresh.sh",
+   "dst": "job:CLOSEFIL",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 13
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/remote_refresh.sh",
+   "dst": "job:ACCTFILE",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 17
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/remote_refresh.sh",
+   "dst": "job:CARDFILE",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 20
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/remote_refresh.sh",
+   "dst": "job:XREFFILE",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 23
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/remote_refresh.sh",
+   "dst": "job:CUSTFILE",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 26
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/remote_refresh.sh",
+   "dst": "job:TRANFILE",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 29
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/remote_refresh.sh",
+   "dst": "job:DISCGRP",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/remote_refresh.sh",
+   "dst": "job:TCATBALF",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 35
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/remote_refresh.sh",
+   "dst": "job:TRANCATG",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 38
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/remote_refresh.sh",
+   "dst": "job:TRANTYPE",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 41
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/remote_refresh.sh",
+   "dst": "job:DUSRSECJ",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 44
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/remote_refresh.sh",
+   "dst": "job:OPENFIL",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 50
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_full_batch.sh",
+   "dst": "job:CLOSEFIL",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 13
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_full_batch.sh",
+   "dst": "job:ACCTFILE",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 17
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_full_batch.sh",
+   "dst": "job:CARDFILE",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 20
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_full_batch.sh",
+   "dst": "job:XREFFILE",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 23
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_full_batch.sh",
+   "dst": "job:CUSTFILE",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 26
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_full_batch.sh",
+   "dst": "job:TRANBKP",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 29
+    },
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 55
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_full_batch.sh",
+   "dst": "job:DISCGRP",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 32
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_full_batch.sh",
+   "dst": "job:TCATBALF",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 35
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_full_batch.sh",
+   "dst": "job:TRANTYPE",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 38
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_full_batch.sh",
+   "dst": "job:DUSRSECJ",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 41
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_full_batch.sh",
+   "dst": "job:POSTTRAN",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 47
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_full_batch.sh",
+   "dst": "job:INTCALC",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 51
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_full_batch.sh",
+   "dst": "job:COMBTRAN",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 58
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_full_batch.sh",
+   "dst": "job:TRANIDX",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 62
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_full_batch.sh",
+   "dst": "job:OPENFIL",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 66
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_interest_calc.sh",
+   "dst": "job:CLOSEFIL",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_interest_calc.sh",
+     "line": 15
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_interest_calc.sh",
+   "dst": "job:INTCALC",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_interest_calc.sh",
+     "line": 19
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_interest_calc.sh",
+   "dst": "job:TRANBKP",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_interest_calc.sh",
+     "line": 23
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_interest_calc.sh",
+   "dst": "job:COMBTRAN",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_interest_calc.sh",
+     "line": 26
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_interest_calc.sh",
+   "dst": "job:TRANIDX",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_interest_calc.sh",
+     "line": 30
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_interest_calc.sh",
+   "dst": "job:OPENFIL",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_interest_calc.sh",
+     "line": 34
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_posting.sh",
+   "dst": "job:CLOSEFIL",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 13
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_posting.sh",
+   "dst": "job:ACCTFILE",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 17
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_posting.sh",
+   "dst": "job:TCATBALF",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 20
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_posting.sh",
+   "dst": "job:TRANBKP",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 23
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_posting.sh",
+   "dst": "job:POSTTRAN",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 26
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_posting.sh",
+   "dst": "job:TRANIDX",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 30
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "sch:scripts/run_posting.sh",
+   "dst": "job:OPENFIL",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 34
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "job:CLOSEFIL",
+   "dst": "job:ACCTFILE",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 17
+    },
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 17
+    },
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 17
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:ACCTFILE",
+   "dst": "job:CARDFILE",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 20
+    },
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 20
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:CARDFILE",
+   "dst": "job:XREFFILE",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 23
+    },
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 23
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:XREFFILE",
+   "dst": "job:CUSTFILE",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 26
+    },
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 26
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:CUSTFILE",
+   "dst": "job:TRANFILE",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 29
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:TRANFILE",
+   "dst": "job:DISCGRP",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 32
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:DISCGRP",
+   "dst": "job:TCATBALF",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 35
+    },
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 35
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:TCATBALF",
+   "dst": "job:TRANCATG",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 38
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:TRANCATG",
+   "dst": "job:TRANTYPE",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 41
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:TRANTYPE",
+   "dst": "job:DUSRSECJ",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 44
+    },
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 41
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:DUSRSECJ",
+   "dst": "job:OPENFIL",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/remote_refresh.sh",
+     "line": 50
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:CUSTFILE",
+   "dst": "job:TRANBKP",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 29
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:TRANBKP",
+   "dst": "job:DISCGRP",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 32
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:TCATBALF",
+   "dst": "job:TRANTYPE",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 38
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:DUSRSECJ",
+   "dst": "job:POSTTRAN",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 47
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:POSTTRAN",
+   "dst": "job:INTCALC",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 51
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:INTCALC",
+   "dst": "job:TRANBKP",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 55
+    },
+    {
+     "file": "scripts/run_interest_calc.sh",
+     "line": 23
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:TRANBKP",
+   "dst": "job:COMBTRAN",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 58
+    },
+    {
+     "file": "scripts/run_interest_calc.sh",
+     "line": 26
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:COMBTRAN",
+   "dst": "job:TRANIDX",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 62
+    },
+    {
+     "file": "scripts/run_interest_calc.sh",
+     "line": 30
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:TRANIDX",
+   "dst": "job:OPENFIL",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_full_batch.sh",
+     "line": 66
+    },
+    {
+     "file": "scripts/run_interest_calc.sh",
+     "line": 34
+    },
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 34
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:CLOSEFIL",
+   "dst": "job:INTCALC",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_interest_calc.sh",
+     "line": 19
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:ACCTFILE",
+   "dst": "job:TCATBALF",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 20
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:TCATBALF",
+   "dst": "job:TRANBKP",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 23
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:TRANBKP",
+   "dst": "job:POSTTRAN",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 26
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  },
+  {
+   "src": "job:POSTTRAN",
+   "dst": "job:TRANIDX",
+   "kind": "temporal",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "scripts/run_posting.sh",
+     "line": 30
+    }
+   ],
+   "note": "consecutive submits in shell wrapper; evidence is the second put of the pair, one entry per script"
+  }
+ ],
+ "entry_points": [
+  {
+   "id": "COACTUPC",
+   "via": "CSD TRANSACTION(CAUP)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 306
+    }
+   ]
+  },
+  {
+   "id": "COACTVWC",
+   "via": "CSD TRANSACTION(CAVW)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 317
+    }
+   ]
+  },
+  {
+   "id": "COADM01C",
+   "via": "CSD TRANSACTION(CA00)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 327
+    }
+   ]
+  },
+  {
+   "id": "COBIL00C",
+   "via": "CSD TRANSACTION(CB00)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 337
+    }
+   ]
+  },
+  {
+   "id": "COCRDSLC",
+   "via": "CSD TRANSACTION(CCDL)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 347
+    }
+   ]
+  },
+  {
+   "id": "COCRDLIC",
+   "via": "CSD TRANSACTION(CCLI)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 357
+    }
+   ]
+  },
+  {
+   "id": "COCRDUPC",
+   "via": "CSD TRANSACTION(CCUP)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 367
+    }
+   ]
+  },
+  {
+   "id": "COSGN00C",
+   "via": "CSD TRANSACTION(CC00)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 378
+    }
+   ]
+  },
+  {
+   "id": "COCRDSEC",
+   "via": "CSD TRANSACTION(CDV1)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 388
+    }
+   ]
+  },
+  {
+   "id": "COMEN01C",
+   "via": "CSD TRANSACTION(CM00)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 399
+    }
+   ]
+  },
+  {
+   "id": "CORPT00C",
+   "via": "CSD TRANSACTION(CR00)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 409
+    }
+   ]
+  },
+  {
+   "id": "COTRN00C",
+   "via": "CSD TRANSACTION(CT00)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 419
+    }
+   ]
+  },
+  {
+   "id": "COTRN01C",
+   "via": "CSD TRANSACTION(CT01)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 429
+    }
+   ]
+  },
+  {
+   "id": "COTRN02C",
+   "via": "CSD TRANSACTION(CT02)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 439
+    }
+   ]
+  },
+  {
+   "id": "COUSR00C",
+   "via": "CSD TRANSACTION(CU00)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 449
+    }
+   ]
+  },
+  {
+   "id": "COUSR01C",
+   "via": "CSD TRANSACTION(CU01)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 459
+    }
+   ]
+  },
+  {
+   "id": "COUSR02C",
+   "via": "CSD TRANSACTION(CU02)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 469
+    }
+   ]
+  },
+  {
+   "id": "COUSR03C",
+   "via": "CSD TRANSACTION(CU03)",
+   "evidence": [
+    {
+     "file": "app/csd/CARDDEMO.CSD",
+     "line": 479
+    }
+   ]
+  }
+ ],
+ "unparsed": [
+  {
+   "file": "app/scheduler/CardDemo.ca7",
+   "reason": "CA-7 (CA Technologies) LJOB list output, not Control-M XML: fixed-format text report with JOB= / SCHD listings; different scheduler product and format, not parsed."
+  }
+ ],
+ "notes": [
+  "FILE ACCTDAT -> AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS (line 1)",
+  "FILE CARDAIX -> AWS.M2.CARDDEMO.CARDDATA.VSAM.AIX.PATH (line 13)",
+  "FILE CARDDAT -> AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS (line 25)",
+  "FILE CCXREF -> AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS (line 37)",
+  "FILE CUSTDAT -> AWS.M2.CARDDEMO.CUSTDATA.VSAM.KSDS (line 50)",
+  "FILE CXACAIX -> AWS.M2.CARDDEMO.CARDXREF.VSAM.AIX.PATH (line 63)",
+  "FILE TRANSACT -> AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS (line 76)",
+  "FILE USRSEC -> AWS.M2.CARDDEMO.USRSEC.VSAM.KSDS (line 88)",
+  "CSD FILE table convention: line N is the line of the 'DEFINE FILE(name)' statement; the DSNAME(...) keyword is on the next line (N+1). Every DEFINE FILE has a DSNAME.",
+  "CSD also defines LIBRARY(CARDDLIB) and LIBRARY(COM2DOLL) -> AWS.M2.CARDDEMO.LOADLIB (lines 489, 494) and TDQUEUE(JOBS) 'SUBMIT JOBS FROM CICS' (DDNAME INREADER, line 499). Not labeled as edges or entry points.",
+  "app/csd/CARDDEMO.CSD DEFINE TRANSACTION(CDV1) (a developer transaction) maps to COCRDSEC; COCRDSEC has no other transaction. All 18 transactions are labeled as entry points, one per DEFINE TRANSACTION.",
+  "Copybooks: no COPY (or EXEC SQL INCLUDE) statements exist inside any file in app/cpy or app/cpy-bms (grep of every non-comment line, case-insensitive; only hits were the licence text 'copy of the License'). So zero include edges from copybooks.",
+  "Copybook ids use the file stem upper-cased (app/cpy/COSTM01.CPY -> cpy:COSTM01). No stem appears in both app/cpy and app/cpy-bms. 30 + 17 = 47 copybook nodes (a hidden .GITKEEP placeholder in app/cpy-bms is not a copybook and is skipped).",
+  "BMS: every mapset name (label on the DFHMSD line, e.g. app/bms/COSGN00.bms:19) equals the file stem. 17 map nodes, no edges.",
+  "app/proc/TRANREPT.prc line 1 declares '//REPROC PROC' (copy-paste of REPROC.prc, same PROC name as the other file), but the file is TRANREPT.prc and its content is a different proc (steps STEP01R, STEP05R, STEP10R). I used the file stem for the id: proc:TRANREPT. Human check: a JCL 'EXEC PROC=TRANREPT' vs 'EXEC PROC=REPROC' resolution depends on member name, which is the file stem.",
+  "Control-M: 15 JOB elements, folder attribute taken from the nearest enclosing FOLDER or SMART_FOLDER FOLDER_NAME. SMART_FOLDER at line 32 has FOLDER_NAME=WEEKLY-DisclosureGroupsRefresh but PARENT_FOLDER=WEEKLY-TransactionTypesDBRefresh; SMART_FOLDER at line 57 has FOLDER_NAME=WEEKLY-TransactionTypesDBRefresh. Job TRANEXTR (line 58) has a stale PARENT_FOLDER=WEEKLY-DisclosureGroupsRefresh attribute but sits inside the SMART_FOLDER named WEEKLY-TransactionTypesDBRefresh, so its id is sch:WEEKLY-TransactionTypesDBRefresh/TRANEXTR (enclosing FOLDER_NAME used, PARENT_FOLDER ignored).",
+  "Control-M: the two SMART_FOLDER elements are not JOB elements and get no sch node, although they carry JOBNAME and TASKTYPE='SMART Table'. Folder-level OUTCOND elements (SIGN='-', lines 55 and 62) are ignored per the guide.",
+  "Control-M: MEMNAME MNTTRDB2 and TRANEXTR have no JCL file in app/jcl (they live under app/app-transaction-type-db2, out of scope); the call edges to job:MNTTRDB2 and job:TRANEXTR are kept as required by the guide, and those job nodes will not exist in the JCL partition.",
+  "Control-M: the cross-folder condition WEEKLY-TransactionTypesDBRefresh-MNTTRDB2 (OUTCOND + at line 28 in the FOLDER, INCOND at lines 34 and 59) yields two temporal edges, matched on NAME alone, one crossing into the other SMART_FOLDER (CLOSEFIL of WEEKLY-DisclosureGroupsRefresh). WAITSTEP/OPENFIL/CLOSEFIL names repeat across folders, so ids are disambiguated by folder. The monthly folder has two JOBs with JOBISN=4 (WAITSTEP line 81, OPENFIL line 87); ids are by name so no clash. INCOND names are also matched only to OUTCOND SIGN='+' of the same NAME; SIGN='-' OUTCONDs (which delete the condition) are ignored.",
+  "Shell wrappers: scripts/run_full_batch.sh, run_interest_calc.sh, run_posting.sh, remote_refresh.sh each submit JCL via 'put jcl/NAME.jcl' inside a tnftp heredoc. Job ids come from the JCL filename stem, which equals the JOB name in each app/jcl file (checked). Edges merged across scripts: one edge per (src,dst) with one evidence entry per script/put. Temporal edge evidence = line of the second put of each pair (one entry per script that produces the pair).",
+  "Shell wrappers: run_full_batch.sh submits TRANBKP twice (lines 29 and 55); the call edge lists both puts. remote_refresh.sh submits TRANFILE and TRANCATG (lines 29, 38), which run_full_batch.sh does not. Lines 43-44 'Data Refresh Complete' echo/sleep are not submits.",
+  "Shell wrappers skipped: scripts/remote_submit.sh (line 23 'put $file_name' is a variable), scripts/remote_compile.sh (line 38 'put $file_basename_no_extension.tmp', variable; also a template-generated compile job, not a named JCL file), scripts/upld_module.sh (line 37 uploads a source module to a PDS, not a JCL job), scripts/git-addSrcVersionInfo.sh, local_compile.sh, pad.awk. scripts/compile_batch.jcl.template is a JCL template with a ZZZZZZZZ placeholder job name: not labeled here (not a .sh, and JCL belongs to the JCL partition).",
+  "scripts/markers/* are 0-byte make marker files, not scheduler artifacts. No cron, Autosys or other scheduler-like artifacts found in scope (grep for crontab/insert_job/autosys/cron/tivoli/TWS/zeke). app/jcl INTRDRJ1/INTRDRJ2/FTPJCL are JCL, left to the JCL partition."
+ ]
+}

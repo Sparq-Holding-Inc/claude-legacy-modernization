@@ -1,0 +1,80 @@
+{
+  "case": "05-vsam-cics-pair",
+  "status": "hand-written before any extractor code",
+  "description": "A VSAM file written by one CICS program and read by another. The CSD maps the CICS file name to the dataset and marks both programs as transaction entry points. Both use the ACCTREC layout, so the pair is a high confidence contract.",
+  "edges": [
+    {
+      "src": "PROGW",
+      "dst": "cpy:ACCTREC",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGW.cbl:5"
+      ]
+    },
+    {
+      "src": "PROGR",
+      "dst": "cpy:ACCTREC",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGR.cbl:5"
+      ]
+    },
+    {
+      "src": "PROGW",
+      "dst": "ds:SPARQ.TEST.ACCTDAT.KSDS",
+      "kind": "data",
+      "mode": "write",
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGW.cbl:7"
+      ]
+    },
+    {
+      "src": "PROGR",
+      "dst": "ds:SPARQ.TEST.ACCTDAT.KSDS",
+      "kind": "data",
+      "mode": "read",
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGR.cbl:7"
+      ]
+    },
+    {
+      "src": "PROGW",
+      "dst": "PROGR",
+      "kind": "contract",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGW.cbl:7",
+        "app/cbl/PROGR.cbl:7"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "PROGW",
+      "unit_type": "online_txn",
+      "entry_point": true
+    },
+    {
+      "id": "PROGR",
+      "unit_type": "online_txn",
+      "entry_point": true
+    },
+    {
+      "id": "ds:SPARQ.TEST.ACCTDAT.KSDS",
+      "unit_type": "dataset",
+      "entry_point": false
+    }
+  ]
+}

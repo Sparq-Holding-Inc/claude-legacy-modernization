@@ -1,0 +1,119 @@
+{
+  "case": "10-temporal-shell",
+  "status": "hand-written before any extractor code",
+  "description": "A shell wrapper submits JOBA then JOBB. A commented out submit of JOBC is not a submit.",
+  "edges": [
+    {
+      "src": "job:JOBA",
+      "dst": "step:JOBA.S1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "jcl/JOBA.jcl:2"
+      ]
+    },
+    {
+      "src": "job:JOBB",
+      "dst": "step:JOBB.S1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "jcl/JOBB.jcl:2"
+      ]
+    },
+    {
+      "src": "job:JOBC",
+      "dst": "step:JOBC.S1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "jcl/JOBC.jcl:2"
+      ]
+    },
+    {
+      "src": "step:JOBA.S1",
+      "dst": "ext:IEFBR14",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "jcl/JOBA.jcl:2"
+      ]
+    },
+    {
+      "src": "step:JOBB.S1",
+      "dst": "ext:IEFBR14",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "jcl/JOBB.jcl:2"
+      ]
+    },
+    {
+      "src": "step:JOBC.S1",
+      "dst": "ext:IEFBR14",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "jcl/JOBC.jcl:2"
+      ]
+    },
+    {
+      "src": "sch:scripts/nightly.sh",
+      "dst": "job:JOBA",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "scripts/nightly.sh:4"
+      ]
+    },
+    {
+      "src": "sch:scripts/nightly.sh",
+      "dst": "job:JOBB",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "scripts/nightly.sh:5"
+      ]
+    },
+    {
+      "src": "job:JOBA",
+      "dst": "job:JOBB",
+      "kind": "temporal",
+      "mode": null,
+      "resolved": true,
+      "confidence": "medium",
+      "evidence": [
+        "scripts/nightly.sh:4",
+        "scripts/nightly.sh:5"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "sch:scripts/nightly.sh",
+      "unit_type": "scheduler_job",
+      "entry_point": true
+    },
+    {
+      "id": "job:JOBC",
+      "unit_type": "jcl_job",
+      "entry_point": true
+    }
+  ]
+}

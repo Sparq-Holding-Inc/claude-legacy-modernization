@@ -1,0 +1,2080 @@
+{
+ "partition": "O1",
+ "pass": "B",
+ "programs": {
+  "COACTUPC": {
+   "path": "app/cbl/COACTUPC.cbl",
+   "program_id": "COACTUPC",
+   "has_exec_cics": true
+  },
+  "COACTVWC": {
+   "path": "app/cbl/COACTVWC.cbl",
+   "program_id": "COACTVWC",
+   "has_exec_cics": true
+  },
+  "COADM01C": {
+   "path": "app/cbl/COADM01C.cbl",
+   "program_id": "COADM01C",
+   "has_exec_cics": true
+  },
+  "COBIL00C": {
+   "path": "app/cbl/COBIL00C.cbl",
+   "program_id": "COBIL00C",
+   "has_exec_cics": true
+  },
+  "COCRDLIC": {
+   "path": "app/cbl/COCRDLIC.cbl",
+   "program_id": "COCRDLIC",
+   "has_exec_cics": true
+  },
+  "COCRDSLC": {
+   "path": "app/cbl/COCRDSLC.cbl",
+   "program_id": "COCRDSLC",
+   "has_exec_cics": true
+  },
+  "COCRDUPC": {
+   "path": "app/cbl/COCRDUPC.cbl",
+   "program_id": "COCRDUPC",
+   "has_exec_cics": true
+  }
+ },
+ "nodes": [
+  {
+   "id": "COACTUPC",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "COACTVWC",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "COADM01C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "COBIL00C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "COCRDLIC",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "COCRDSLC",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "COCRDUPC",
+   "unit_type": "cobol_program"
+  }
+ ],
+ "edges": [
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:CSUTLDWY",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 166
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:CVCRD01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 597
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:CSLKPCDY",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 602
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 615
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 616
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 620
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:COACTUP",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 623
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 626
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 629
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:CSMSG02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 632
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 635
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:CVACT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 640
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:CVACT03Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 643
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:CVCUS01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 646
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 650
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:CSSETATY",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3208
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3214
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3220
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3226
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3232
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3238
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3244
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3250
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3256
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3262
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3268
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3274
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3280
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3286
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3292
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3298
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3304
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3310
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3316
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3322
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3328
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3334
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3340
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3346
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3352
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3358
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3364
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3370
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3376
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3382
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3388
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3394
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3400
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3405
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3411
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3417
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3422
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3427
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3432
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:CSSTRPFY",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 4199
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "cpy:CSUTLDPY",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 4232
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "cpy:CVCRD01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 207
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 211
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 221
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 222
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 226
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "cpy:COACTVW",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 229
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 232
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 235
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "cpy:CSMSG02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 238
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 241
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "cpy:CVACT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 244
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "cpy:CVACT02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 248
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "cpy:CVACT03Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 251
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "cpy:CVCUS01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 254
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "cpy:CSSTRPFY",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 913
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COADM01C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COADM01C.cbl",
+     "line": 50
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COADM01C",
+   "dst": "cpy:COADM02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COADM01C.cbl",
+     "line": 51
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COADM01C",
+   "dst": "cpy:COADM01",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COADM01C.cbl",
+     "line": 53
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COADM01C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COADM01C.cbl",
+     "line": 55
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COADM01C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COADM01C.cbl",
+     "line": 56
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COADM01C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COADM01C.cbl",
+     "line": 57
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COADM01C",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COADM01C.cbl",
+     "line": 58
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COADM01C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COADM01C.cbl",
+     "line": 60
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COADM01C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COADM01C.cbl",
+     "line": 61
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 63
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "cpy:COBIL00",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 74
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 76
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 77
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 78
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "cpy:CVACT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 80
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "cpy:CVACT03Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 81
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "cpy:CVTRA05Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 82
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 84
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 85
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "cpy:CVCRD01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 221
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 227
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 267
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 268
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 272
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "cpy:COCRDLI",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 276
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 279
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 281
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 285
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "cpy:CVACT02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 290
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "cpy:CSSTRPFY",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 1416
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "cpy:CVCRD01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 194
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 198
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 208
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 209
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 213
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "cpy:COCRDSL",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 215
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 218
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 221
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "cpy:CSMSG02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 224
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 227
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "cpy:CVACT02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 234
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "cpy:CVCUS01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 240
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "cpy:CSSTRPFY",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 855
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "cpy:CVCRD01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 268
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 272
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 327
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 328
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 332
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "cpy:COCRDUP",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 334
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 337
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 340
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "cpy:CSMSG02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 343
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 346
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "cpy:CVACT02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 353
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "cpy:CVCUS01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 359
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "cpy:CSSTRPFY",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 1528
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COADM01C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COADM01C.cbl",
+     "line": 168
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM) via CDEMO-TO-PROGRAM; MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM at 101 and 166"
+  },
+  {
+   "src": "COADM01C",
+   "dst": "?dynamic:COADM01C:168",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COADM01C.cbl",
+     "line": 168
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM): field has no VALUE and is also filled from the received COMMAREA (group MOVE line 90); EXEC CICS on 168, XCTL keyword on 169"
+  },
+  {
+   "src": "COADM01C",
+   "dst": "?dynamic:COADM01C:145",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COADM01C.cbl",
+     "line": 145
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-ADMIN-OPT-PGMNAME(WS-OPTION)): subscripted name, dynamic only (table in COADM02Y holds COUSR00C..COUSR03C, COTRTLIC, COTRTUPC but not followed per rule 4); EXEC CICS on 145, XCTL keyword on 146"
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 281
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM; MOVE 'COSGN00C' at 108 and 276"
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 281
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM; MOVE 'COMEN01C' at 130"
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "?dynamic:COBIL00C:281",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 281
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM): MOVE CDEMO-FROM-PROGRAM TO CDEMO-TO-PROGRAM at 132-133 (non-constant source); EXEC CICS on 281, XCTL keyword on 282"
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 349
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM; MOVE LIT-MENUPGM TO CDEMO-TO-PROGRAM at 336, LIT-MENUPGM VALUE 'COMEN01C' (constant)"
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "?dynamic:COACTVWC:349",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 349
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM): MOVE CDEMO-FROM-PROGRAM TO CDEMO-TO-PROGRAM at 338"
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 956
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM; MOVE LIT-MENUPGM TO CDEMO-TO-PROGRAM at 939, LIT-MENUPGM VALUE 'COMEN01C' (constant)"
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "?dynamic:COACTUPC:956",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 956
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM): MOVE CDEMO-FROM-PROGRAM TO CDEMO-TO-PROGRAM at 941"
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 331
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM; MOVE LIT-MENUPGM TO CDEMO-TO-PROGRAM at 318, LIT-MENUPGM VALUE 'COMEN01C' (constant)"
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "?dynamic:COCRDSLC:331",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 331
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM): MOVE CDEMO-FROM-PROGRAM TO CDEMO-TO-PROGRAM at 320"
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 473
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM; MOVE LIT-MENUPGM TO CDEMO-TO-PROGRAM at 451, LIT-MENUPGM VALUE 'COMEN01C' (constant)"
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "?dynamic:COCRDUPC:473",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 473
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM): MOVE CDEMO-FROM-PROGRAM TO CDEMO-TO-PROGRAM at 453"
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 402
+    }
+   ],
+   "note": "XCTL PROGRAM(LIT-MENUPGM); LIT-MENUPGM VALUE 'COMEN01C', never a MOVE receiver (rule 1 constant)"
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "COCRDLIC",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 538
+    },
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 566
+    }
+   ],
+   "note": "via CCARD-NEXT-PROG; MOVE LIT-THISPGM TO CCARD-NEXT-PROG at 428, 592, 600 (LIT-THISPGM VALUE 'COCRDLIC'); self-transfer candidate under rule 2 (control flow not followed)"
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "COCRDSLC",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 538
+    },
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 566
+    }
+   ],
+   "note": "via CCARD-NEXT-PROG; MOVE LIT-CARDDTLPGM TO CCARD-NEXT-PROG at 526 (LIT-CARDDTLPGM VALUE 'COCRDSLC'); actual use is the 538 XCTL, 566 listed per rule 2"
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "COCRDUPC",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 538
+    },
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 566
+    }
+   ],
+   "note": "via CCARD-NEXT-PROG; MOVE LIT-CARDUPDPGM TO CCARD-NEXT-PROG at 554 (LIT-CARDUPDPGM VALUE 'COCRDUPC'); actual use is the 566 XCTL, 538 listed per rule 2"
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "?dynamic:COCRDLIC:538",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 538
+    }
+   ],
+   "note": "XCTL PROGRAM(CCARD-NEXT-PROG): not a pure constant, also cleared by INITIALIZE CC-WORK-AREA"
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "?dynamic:COCRDLIC:566",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 566
+    }
+   ],
+   "note": "XCTL PROGRAM(CCARD-NEXT-PROG): not a pure constant, also cleared by INITIALIZE CC-WORK-AREA"
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "CSUTLDTC",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cpy/CSUTLDPY.cpy",
+     "line": 293
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 4232
+    }
+   ],
+   "note": "CALL 'CSUTLDTC' is written in procedure copybook CSUTLDPY (line 293), which COACTUPC copies at line 4232; the call only exists after COPY expansion"
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.AIX.PATH",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT03Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3654
+    }
+   ],
+   "note": "DATASET(LIT-CARDXREFNAME-ACCT-PATH) VALUE 'CXACAIX ' -> CSD DSNAME; READ INTO(CARD-XREF-RECORD)"
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read_write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3703
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3894
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 4065
+    }
+   ],
+   "note": "LIT-ACCTFILENAME VALUE 'ACCTDAT '; READ INTO(ACCOUNT-RECORD) at 3703, READ UPDATE at 3894, REWRITE FROM(ACCT-UPDATE-RECORD, local WS record line 418) at 4065 (EXEC CICS at 4065, REWRITE on 4066)"
+  },
+  {
+   "src": "COACTUPC",
+   "dst": "ds:AWS.M2.CARDDEMO.CUSTDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read_write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVCUS01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3753
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 3921
+    },
+    {
+     "file": "app/cbl/COACTUPC.cbl",
+     "line": 4085
+    }
+   ],
+   "note": "LIT-CUSTFILENAME VALUE 'CUSTDAT '; READ INTO(CUSTOMER-RECORD) at 3753, READ UPDATE at 3921, REWRITE FROM(CUST-UPDATE-RECORD, local WS record line 434) at 4085 (EXEC CICS at 4085, REWRITE on 4086)"
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.AIX.PATH",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT03Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 727
+    }
+   ],
+   "note": "DATASET(LIT-CARDXREFNAME-ACCT-PATH) VALUE 'CXACAIX '; READ INTO(CARD-XREF-RECORD)"
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 776
+    }
+   ],
+   "note": "DATASET(LIT-ACCTFILENAME) VALUE 'ACCTDAT '; READ INTO(ACCOUNT-RECORD)"
+  },
+  {
+   "src": "COACTVWC",
+   "dst": "ds:AWS.M2.CARDDEMO.CUSTDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVCUS01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COACTVWC.cbl",
+     "line": 826
+    }
+   ],
+   "note": "DATASET(LIT-CUSTFILENAME) VALUE 'CUSTDAT '; READ INTO(CUSTOMER-RECORD), 01 defined in CVCUS01Y"
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read_write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 345
+    },
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 379
+    }
+   ],
+   "note": "DATASET(WS-ACCTDAT-FILE) VALUE 'ACCTDAT '; READ UPDATE INTO(ACCOUNT-RECORD) at 345, REWRITE FROM(ACCOUNT-RECORD) at 379"
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.AIX.PATH",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT03Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 410
+    }
+   ],
+   "note": "DATASET(WS-CXACAIX-FILE) VALUE 'CXACAIX '; READ INTO(CARD-XREF-RECORD)"
+  },
+  {
+   "src": "COBIL00C",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read_write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA05Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 443
+    },
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 474
+    },
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 503
+    },
+    {
+     "file": "app/cbl/COBIL00C.cbl",
+     "line": 512
+    }
+   ],
+   "note": "DATASET(WS-TRANSACT-FILE) VALUE 'TRANSACT'; STARTBR 443, READPREV INTO(TRAN-RECORD) 474, ENDBR 503, WRITE FROM(TRAN-RECORD) 512"
+  },
+  {
+   "src": "COCRDLIC",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT02Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 1129
+    },
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 1146
+    },
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 1197
+    },
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 1258
+    },
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 1273
+    },
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 1294
+    },
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 1322
+    },
+    {
+     "file": "app/cbl/COCRDLIC.cbl",
+     "line": 1375
+    }
+   ],
+   "note": "DATASET/FILE(LIT-CARD-FILE) VALUE 'CARDDAT '; browse only: STARTBR, READNEXT INTO(CARD-RECORD), READPREV, ENDBR"
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT02Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 742
+    }
+   ],
+   "note": "FILE(LIT-CARDFILENAME) VALUE 'CARDDAT '; READ INTO(CARD-RECORD)"
+  },
+  {
+   "src": "COCRDSLC",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.AIX.PATH",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT02Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDSLC.cbl",
+     "line": 783
+    }
+   ],
+   "note": "FILE(LIT-CARDFILENAME-ACCT-PATH) VALUE 'CARDAIX '; READ INTO(CARD-RECORD)"
+  },
+  {
+   "src": "COCRDUPC",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read_write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT02Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 1382
+    },
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 1427
+    },
+    {
+     "file": "app/cbl/COCRDUPC.cbl",
+     "line": 1477
+    }
+   ],
+   "note": "FILE(LIT-CARDFILENAME) VALUE 'CARDDAT '; READ INTO(CARD-RECORD) 1382, READ UPDATE 1427, REWRITE FROM(CARD-UPDATE-RECORD, local WS record line 314) at 1477 (EXEC CICS at 1477, REWRITE on 1478)"
+  }
+ ],
+ "notes": [
+  "No dynamic-file-name CICS ops: every FILE/DATASET name is a WORKING-STORAGE VALUE constant never used as a MOVE receiver, trailing blanks trimmed.",
+  "?dynamic line numbers use the first physical line of the statement (the EXEC CICS line), same as evidence; in COADM01C and COBIL00C the XCTL keyword is one line later.",
+  "COACTVWC.cbl:248 copies CVACT02Y under a comment that says customer layout; CVACT02Y defines CARD-RECORD. COACTVWC never reads the card file so no data edge uses it.",
+  "COACTUPC/COCRDUPC REWRITE FROM records (ACCT-UPDATE-RECORD, CUST-UPDATE-RECORD, CARD-UPDATE-RECORD) are local WORKING-STORAGE groups, not copybooks; layout_copybooks come from the READ INTO records.",
+  "COACTUPC CALL 'CSUTLDTC' lives in copybook app/cpy/CSUTLDPY.cpy:293 (sequence-number 005100 in cols 1-6, code, not a comment); labeled as a COACTUPC call because the copybook is expanded into it.",
+  "COCRDLIC XCTL PROGRAM(CCARD-NEXT-PROG) at 538 and 566 each get candidate edges to all three literals moved to CCARD-NEXT-PROG plus a dynamic edge, per rule 2 (no control-flow following); COCRDLIC self-edge included per rule 2.",
+  "COADM01C has no file operations (WS-USRSEC-FILE is declared but unused). Commented-out COPY lines (COCRDSLC 231 and 237, COCRDUPC 351 and 357) not counted.",
+  "SYNCPOINT, ASKTIME, FORMATTIME, HANDLE ABEND, HANDLE CONDITION, SEND/RECEIVE MAP, RETURN, ABEND not labeled."
+ ]
+}

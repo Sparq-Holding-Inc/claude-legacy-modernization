@@ -1,0 +1,30 @@
+{
+  "case": "01-static-call",
+  "status": "hand-written before any extractor code",
+  "description": "A literal CALL. The word CALL inside a DISPLAY string is not a call.",
+  "edges": [
+    {
+      "src": "PROGA",
+      "dst": "PROGB",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGA.cbl:6"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "PROGA",
+      "unit_type": "batch",
+      "entry_point": false
+    },
+    {
+      "id": "PROGB",
+      "unit_type": "subprogram",
+      "entry_point": false
+    }
+  ]
+}

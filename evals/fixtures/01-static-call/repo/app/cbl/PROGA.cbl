@@ -1,0 +1,7 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. PROGA.
+       PROCEDURE DIVISION.
+       MAIN-PARA.
+           DISPLAY 'CALL FAILED IF WE GET HERE'.
+           CALL 'PROGB'.
+           STOP RUN.

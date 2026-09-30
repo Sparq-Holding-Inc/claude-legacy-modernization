@@ -1,0 +1,36 @@
+{
+  "case": "04-shared-copybook",
+  "status": "hand-written before any extractor code",
+  "description": "Two programs share working storage through one copybook.",
+  "edges": [
+    {
+      "src": "PROGA",
+      "dst": "cpy:SHARED01",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGA.cbl:5"
+      ]
+    },
+    {
+      "src": "PROGB",
+      "dst": "cpy:SHARED01",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PROGB.cbl:5"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "cpy:SHARED01",
+      "unit_type": "copybook",
+      "entry_point": false
+    }
+  ]
+}

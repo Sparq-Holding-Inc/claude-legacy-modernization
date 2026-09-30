@@ -1,0 +1,2024 @@
+{
+ "partition": "B",
+ "pass": "B",
+ "programs": {
+  "CBACT01C": {
+   "path": "app/cbl/CBACT01C.cbl",
+   "program_id": "CBACT01C",
+   "has_exec_cics": false
+  },
+  "CBACT02C": {
+   "path": "app/cbl/CBACT02C.cbl",
+   "program_id": "CBACT02C",
+   "has_exec_cics": false
+  },
+  "CBACT03C": {
+   "path": "app/cbl/CBACT03C.cbl",
+   "program_id": "CBACT03C",
+   "has_exec_cics": false
+  },
+  "CBACT04C": {
+   "path": "app/cbl/CBACT04C.cbl",
+   "program_id": "CBACT04C",
+   "has_exec_cics": false
+  },
+  "CBCUS01C": {
+   "path": "app/cbl/CBCUS01C.cbl",
+   "program_id": "CBCUS01C",
+   "has_exec_cics": false
+  },
+  "CBEXPORT": {
+   "path": "app/cbl/CBEXPORT.cbl",
+   "program_id": "CBEXPORT",
+   "has_exec_cics": false
+  },
+  "CBIMPORT": {
+   "path": "app/cbl/CBIMPORT.cbl",
+   "program_id": "CBIMPORT",
+   "has_exec_cics": false
+  },
+  "CBSTM03A": {
+   "path": "app/cbl/CBSTM03A.CBL",
+   "program_id": "CBSTM03A",
+   "has_exec_cics": false
+  },
+  "CBSTM03B": {
+   "path": "app/cbl/CBSTM03B.CBL",
+   "program_id": "CBSTM03B",
+   "has_exec_cics": false
+  },
+  "CBTRN01C": {
+   "path": "app/cbl/CBTRN01C.cbl",
+   "program_id": "CBTRN01C",
+   "has_exec_cics": false
+  },
+  "CBTRN02C": {
+   "path": "app/cbl/CBTRN02C.cbl",
+   "program_id": "CBTRN02C",
+   "has_exec_cics": false
+  },
+  "CBTRN03C": {
+   "path": "app/cbl/CBTRN03C.cbl",
+   "program_id": "CBTRN03C",
+   "has_exec_cics": false
+  },
+  "COBSWAIT": {
+   "path": "app/cbl/COBSWAIT.cbl",
+   "program_id": "COBSWAIT",
+   "has_exec_cics": false
+  },
+  "CSUTLDTC": {
+   "path": "app/cbl/CSUTLDTC.cbl",
+   "program_id": "CSUTLDTC",
+   "has_exec_cics": false
+  }
+ },
+ "nodes": [
+  {
+   "id": "CBACT01C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "CBACT02C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "CBACT03C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "CBACT04C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "CBCUS01C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "CBEXPORT",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "CBIMPORT",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "CBSTM03A",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "CBSTM03B",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "CBTRN01C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "CBTRN02C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "CBTRN03C",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "COBSWAIT",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "CSUTLDTC",
+   "unit_type": "cobol_program"
+  },
+  {
+   "id": "cpy:CVACT01Y",
+   "unit_type": "copybook"
+  },
+  {
+   "id": "cpy:CODATECN",
+   "unit_type": "copybook"
+  },
+  {
+   "id": "cpy:CVACT02Y",
+   "unit_type": "copybook"
+  },
+  {
+   "id": "cpy:CVACT03Y",
+   "unit_type": "copybook"
+  },
+  {
+   "id": "cpy:CVTRA01Y",
+   "unit_type": "copybook"
+  },
+  {
+   "id": "cpy:CVTRA02Y",
+   "unit_type": "copybook"
+  },
+  {
+   "id": "cpy:CVTRA05Y",
+   "unit_type": "copybook"
+  },
+  {
+   "id": "cpy:CVCUS01Y",
+   "unit_type": "copybook"
+  },
+  {
+   "id": "cpy:CVEXPORT",
+   "unit_type": "copybook"
+  },
+  {
+   "id": "cpy:COSTM01",
+   "unit_type": "copybook"
+  },
+  {
+   "id": "cpy:CUSTREC",
+   "unit_type": "copybook"
+  },
+  {
+   "id": "cpy:CVTRA06Y",
+   "unit_type": "copybook"
+  },
+  {
+   "id": "cpy:CVTRA03Y",
+   "unit_type": "copybook"
+  },
+  {
+   "id": "cpy:CVTRA04Y",
+   "unit_type": "copybook"
+  },
+  {
+   "id": "cpy:CVTRA07Y",
+   "unit_type": "copybook"
+  },
+  {
+   "id": "ext:COBDATFT",
+   "unit_type": "external_program"
+  },
+  {
+   "id": "ext:CEE3ABD",
+   "unit_type": "external_program"
+  },
+  {
+   "id": "ext:MVSWAIT",
+   "unit_type": "external_program"
+  },
+  {
+   "id": "ext:CEEDAYS",
+   "unit_type": "external_program"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.ACCTDATA.PSCOMP",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.ACCTDATA.ARRYPS",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.ACCTDATA.VBPS",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.TCATBALF.VSAM.KSDS",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.DISCGRP.VSAM.KSDS",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.SYSTRAN",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.CUSTDATA.VSAM.KSDS",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.EXPORT.DATA",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.CUSTDATA.IMPORT",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.ACCTDATA.IMPORT",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.CARDXREF.IMPORT",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.TRANSACT.IMPORT",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:dd:CBIMPORT.CARDOUT",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.IMPORT.ERRORS",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.STATEMNT.PS",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.STATEMNT.HTML",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:dd:CBSTM03B.TRNXFILE",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:dd:CBSTM03B.XREFFILE",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:dd:CBSTM03B.CUSTFILE",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:dd:CBSTM03B.ACCTFILE",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:dd:CBTRN01C.DALYTRAN",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:dd:CBTRN01C.CUSTFILE",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:dd:CBTRN01C.XREFFILE",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:dd:CBTRN01C.CARDFILE",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:dd:CBTRN01C.ACCTFILE",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:dd:CBTRN01C.TRANFILE",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.DALYTRAN.PS",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.DALYREJS",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.TRANSACT.DALY",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.TRANTYPE.VSAM.KSDS",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.TRANCATG.VSAM.KSDS",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.TRANREPT",
+   "unit_type": "dataset"
+  },
+  {
+   "id": "ds:AWS.M2.CARDDEMO.DATEPARM",
+   "unit_type": "dataset"
+  }
+ ],
+ "edges": [
+  {
+   "src": "CBACT01C",
+   "dst": "cpy:CVACT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT01C.cbl",
+     "line": 89
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBACT01C",
+   "dst": "cpy:CODATECN",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT01C.cbl",
+     "line": 90
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBACT02C",
+   "dst": "cpy:CVACT02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT02C.cbl",
+     "line": 45
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBACT03C",
+   "dst": "cpy:CVACT03Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT03C.cbl",
+     "line": 45
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBACT04C",
+   "dst": "cpy:CVTRA01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT04C.cbl",
+     "line": 97
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBACT04C",
+   "dst": "cpy:CVACT03Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT04C.cbl",
+     "line": 102
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBACT04C",
+   "dst": "cpy:CVTRA02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT04C.cbl",
+     "line": 107
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBACT04C",
+   "dst": "cpy:CVACT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT04C.cbl",
+     "line": 112
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBACT04C",
+   "dst": "cpy:CVTRA05Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT04C.cbl",
+     "line": 117
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBCUS01C",
+   "dst": "cpy:CVCUS01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBCUS01C.cbl",
+     "line": 45
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBEXPORT",
+   "dst": "cpy:CVCUS01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 75
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBEXPORT",
+   "dst": "cpy:CVACT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 78
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBEXPORT",
+   "dst": "cpy:CVACT03Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 81
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBEXPORT",
+   "dst": "cpy:CVTRA05Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 84
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBEXPORT",
+   "dst": "cpy:CVACT02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 87
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBEXPORT",
+   "dst": "cpy:CVEXPORT",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 96
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBIMPORT",
+   "dst": "cpy:CVCUS01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 84
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBIMPORT",
+   "dst": "cpy:CVACT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 89
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBIMPORT",
+   "dst": "cpy:CVACT03Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 94
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBIMPORT",
+   "dst": "cpy:CVTRA05Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 99
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBIMPORT",
+   "dst": "cpy:CVACT02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 104
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBIMPORT",
+   "dst": "cpy:CVEXPORT",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 113
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBSTM03A",
+   "dst": "cpy:COSTM01",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 51
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBSTM03A",
+   "dst": "cpy:CVACT03Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 53
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBSTM03A",
+   "dst": "cpy:CUSTREC",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 55
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBSTM03A",
+   "dst": "cpy:CVACT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 57
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN01C",
+   "dst": "cpy:CVTRA06Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 99
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN01C",
+   "dst": "cpy:CVCUS01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 104
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN01C",
+   "dst": "cpy:CVACT03Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 109
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN01C",
+   "dst": "cpy:CVACT02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 114
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN01C",
+   "dst": "cpy:CVACT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 119
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN01C",
+   "dst": "cpy:CVTRA05Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 124
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN02C",
+   "dst": "cpy:CVTRA06Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 102
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN02C",
+   "dst": "cpy:CVTRA05Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 107
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN02C",
+   "dst": "cpy:CVACT03Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 112
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN02C",
+   "dst": "cpy:CVACT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 121
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN02C",
+   "dst": "cpy:CVTRA01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 126
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN03C",
+   "dst": "cpy:CVTRA05Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN03C.cbl",
+     "line": 93
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN03C",
+   "dst": "cpy:CVACT03Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN03C.cbl",
+     "line": 98
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN03C",
+   "dst": "cpy:CVTRA03Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN03C.cbl",
+     "line": 103
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN03C",
+   "dst": "cpy:CVTRA04Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN03C.cbl",
+     "line": 108
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBTRN03C",
+   "dst": "cpy:CVTRA07Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN03C.cbl",
+     "line": 113
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBACT01C",
+   "dst": "ext:COBDATFT",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT01C.cbl",
+     "line": 231
+    }
+   ],
+   "note": "assembler date routine (app/asm, out of scope)"
+  },
+  {
+   "src": "CBACT01C",
+   "dst": "ext:CEE3ABD",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT01C.cbl",
+     "line": 410
+    }
+   ],
+   "note": "LE abend service, not in app/cbl"
+  },
+  {
+   "src": "CBACT02C",
+   "dst": "ext:CEE3ABD",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT02C.cbl",
+     "line": 158
+    }
+   ],
+   "note": "LE abend service, not in app/cbl"
+  },
+  {
+   "src": "CBACT03C",
+   "dst": "ext:CEE3ABD",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT03C.cbl",
+     "line": 158
+    }
+   ],
+   "note": "LE abend service, not in app/cbl"
+  },
+  {
+   "src": "CBACT04C",
+   "dst": "ext:CEE3ABD",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT04C.cbl",
+     "line": 632
+    }
+   ],
+   "note": "LE abend service, not in app/cbl"
+  },
+  {
+   "src": "CBCUS01C",
+   "dst": "ext:CEE3ABD",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBCUS01C.cbl",
+     "line": 158
+    }
+   ],
+   "note": "LE abend service, not in app/cbl"
+  },
+  {
+   "src": "CBEXPORT",
+   "dst": "ext:CEE3ABD",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 579
+    }
+   ],
+   "note": "LE abend service, not in app/cbl"
+  },
+  {
+   "src": "CBIMPORT",
+   "dst": "ext:CEE3ABD",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 484
+    }
+   ],
+   "note": "LE abend service, not in app/cbl"
+  },
+  {
+   "src": "CBSTM03A",
+   "dst": "CBSTM03B",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 351
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 377
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 401
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 734
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 746
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 769
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 787
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 805
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 835
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 860
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 877
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 893
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 909
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CBSTM03A",
+   "dst": "ext:CEE3ABD",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 923
+    }
+   ],
+   "note": "LE abend service, not in app/cbl"
+  },
+  {
+   "src": "CBTRN01C",
+   "dst": "ext:CEE3ABD",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 473
+    }
+   ],
+   "note": "LE abend service, not in app/cbl"
+  },
+  {
+   "src": "CBTRN02C",
+   "dst": "ext:CEE3ABD",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 711
+    }
+   ],
+   "note": "LE abend service, not in app/cbl"
+  },
+  {
+   "src": "CBTRN03C",
+   "dst": "ext:CEE3ABD",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN03C.cbl",
+     "line": 630
+    }
+   ],
+   "note": "LE abend service, not in app/cbl"
+  },
+  {
+   "src": "COBSWAIT",
+   "dst": "ext:MVSWAIT",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COBSWAIT.cbl",
+     "line": 38
+    }
+   ],
+   "note": "assembler wait routine (app/asm, out of scope)"
+  },
+  {
+   "src": "CSUTLDTC",
+   "dst": "ext:CEEDAYS",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CSUTLDTC.cbl",
+     "line": 116
+    }
+   ],
+   "note": "LE date service, not in app/cbl"
+  },
+  {
+   "src": "CBACT01C",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT01C.cbl",
+     "line": 29
+    }
+   ],
+   "note": "DD ACCTFILE. READ INTO ACCOUNT-RECORD (CVACT01Y). DD in app/jcl/READACCT.jcl:35 (STEP05)."
+  },
+  {
+   "src": "CBACT01C",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.PSCOMP",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT01C.cbl",
+     "line": 35
+    }
+   ],
+   "note": "DD OUTFILE. FD record OUT-ACCT-REC is inline, WRITE without FROM, so no layout copybook. DD in app/jcl/READACCT.jcl:37."
+  },
+  {
+   "src": "CBACT01C",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.ARRYPS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT01C.cbl",
+     "line": 40
+    }
+   ],
+   "note": "DD ARRYFILE. FD record ARR-ARRAY-REC is inline, no layout copybook. DD in app/jcl/READACCT.jcl:41."
+  },
+  {
+   "src": "CBACT01C",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.VBPS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT01C.cbl",
+     "line": 45
+    }
+   ],
+   "note": "DD VBRCFILE. FD record VBR-REC is inline PIC X(80), no layout copybook. DD in app/jcl/READACCT.jcl:45."
+  },
+  {
+   "src": "CBACT02C",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT02Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT02C.cbl",
+     "line": 29
+    }
+   ],
+   "note": "DD CARDFILE. READ INTO CARD-RECORD (CVACT02Y). DD in app/jcl/READCARD.jcl:25."
+  },
+  {
+   "src": "CBACT03C",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT03Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT03C.cbl",
+     "line": 29
+    }
+   ],
+   "note": "DD XREFFILE. READ INTO CARD-XREF-RECORD (CVACT03Y). DD in app/jcl/READXREF.jcl:25."
+  },
+  {
+   "src": "CBACT04C",
+   "dst": "ds:AWS.M2.CARDDEMO.TCATBALF.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT04C.cbl",
+     "line": 28
+    }
+   ],
+   "note": "DD TCATBALF. READ INTO TRAN-CAT-BAL-RECORD (CVTRA01Y). DD in app/jcl/INTCALC.jcl:27."
+  },
+  {
+   "src": "CBACT04C",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT03Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT04C.cbl",
+     "line": 34
+    }
+   ],
+   "note": "DD XREFFILE. READ INTO CARD-XREF-RECORD (CVACT03Y). DD XREFFILE in app/jcl/INTCALC.jcl:29. JCL also has DD XREFFIL1 (AIX path) that the program never selects."
+  },
+  {
+   "src": "CBACT04C",
+   "dst": "ds:AWS.M2.CARDDEMO.DISCGRP.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA02Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT04C.cbl",
+     "line": 47
+    }
+   ],
+   "note": "DD DISCGRP. READ INTO DIS-GROUP-RECORD (CVTRA02Y). DD in app/jcl/INTCALC.jcl:35."
+  },
+  {
+   "src": "CBACT04C",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read_write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT04C.cbl",
+     "line": 41
+    }
+   ],
+   "note": "DD ACCTFILE. OPEN I-O (line 291); READ INTO and REWRITE FROM ACCOUNT-RECORD (CVACT01Y). DD in app/jcl/INTCALC.jcl:33."
+  },
+  {
+   "src": "CBACT04C",
+   "dst": "ds:AWS.M2.CARDDEMO.SYSTRAN",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA05Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBACT04C.cbl",
+     "line": 53
+    }
+   ],
+   "note": "DD TRANSACT. OPEN OUTPUT; WRITE FD-TRANFILE-REC FROM TRAN-RECORD (CVTRA05Y). DD DSN is GDG AWS.M2.CARDDEMO.SYSTRAN(+1), generation dropped. app/jcl/INTCALC.jcl:37."
+  },
+  {
+   "src": "CBCUS01C",
+   "dst": "ds:AWS.M2.CARDDEMO.CUSTDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVCUS01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBCUS01C.cbl",
+     "line": 29
+    }
+   ],
+   "note": "DD CUSTFILE. READ INTO CUSTOMER-RECORD (CVCUS01Y). DD in app/jcl/READCUST.jcl:24."
+  },
+  {
+   "src": "CBEXPORT",
+   "dst": "ds:AWS.M2.CARDDEMO.CUSTDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVCUS01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 35
+    }
+   ],
+   "note": "DD CUSTFILE. COPY CVCUS01Y inside FD. DD in app/jcl/CBEXPORT.jcl:49 (STEP02)."
+  },
+  {
+   "src": "CBEXPORT",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 41
+    }
+   ],
+   "note": "DD ACCTFILE. COPY CVACT01Y inside FD. DD in app/jcl/CBEXPORT.jcl:51."
+  },
+  {
+   "src": "CBEXPORT",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT03Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 47
+    }
+   ],
+   "note": "DD XREFFILE. COPY CVACT03Y inside FD. DD in app/jcl/CBEXPORT.jcl:53."
+  },
+  {
+   "src": "CBEXPORT",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA05Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 53
+    }
+   ],
+   "note": "DD TRANSACT. COPY CVTRA05Y inside FD. DD in app/jcl/CBEXPORT.jcl:55."
+  },
+  {
+   "src": "CBEXPORT",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT02Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 59
+    }
+   ],
+   "note": "DD CARDFILE. COPY CVACT02Y inside FD. DD in app/jcl/CBEXPORT.jcl:57."
+  },
+  {
+   "src": "CBEXPORT",
+   "dst": "ds:AWS.M2.CARDDEMO.EXPORT.DATA",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVEXPORT"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 65
+    }
+   ],
+   "note": "DD EXPFILE. WRITE EXPORT-OUTPUT-RECORD FROM EXPORT-RECORD (CVEXPORT). DD in app/jcl/CBEXPORT.jcl:62."
+  },
+  {
+   "src": "CBIMPORT",
+   "dst": "ds:AWS.M2.CARDDEMO.EXPORT.DATA",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVEXPORT"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 37
+    }
+   ],
+   "note": "DD EXPFILE. READ INTO EXPORT-RECORD (CVEXPORT). DD in app/jcl/CBIMPORT.jcl:28 (STEP01)."
+  },
+  {
+   "src": "CBIMPORT",
+   "dst": "ds:AWS.M2.CARDDEMO.CUSTDATA.IMPORT",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVCUS01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 43
+    }
+   ],
+   "note": "DD CUSTOUT. COPY CVCUS01Y inside FD. DD in app/jcl/CBIMPORT.jcl:33."
+  },
+  {
+   "src": "CBIMPORT",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.IMPORT",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 48
+    }
+   ],
+   "note": "DD ACCTOUT. COPY CVACT01Y inside FD. DD in app/jcl/CBIMPORT.jcl:38."
+  },
+  {
+   "src": "CBIMPORT",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.IMPORT",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT03Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 53
+    }
+   ],
+   "note": "DD XREFOUT. COPY CVACT03Y inside FD. DD in app/jcl/CBIMPORT.jcl:43."
+  },
+  {
+   "src": "CBIMPORT",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.IMPORT",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA05Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 58
+    }
+   ],
+   "note": "DD TRNXOUT. COPY CVTRA05Y inside FD. DD TRNXOUT in app/jcl/CBIMPORT.jcl:48."
+  },
+  {
+   "src": "CBIMPORT",
+   "dst": "ds:dd:CBIMPORT.CARDOUT",
+   "kind": "data",
+   "mode": "write",
+   "resolved": false,
+   "layout_copybooks": [
+    "cpy:CVACT02Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 63
+    }
+   ],
+   "note": "DD CARDOUT. COPY CVACT02Y inside FD. STEP01 of app/jcl/CBIMPORT.jcl has no CARDOUT DD, so unresolved."
+  },
+  {
+   "src": "CBIMPORT",
+   "dst": "ds:AWS.M2.CARDDEMO.IMPORT.ERRORS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBIMPORT.cbl",
+     "line": 68
+    }
+   ],
+   "note": "DD ERROUT. WRITE ERROR-OUTPUT-RECORD FROM WS-ERROR-RECORD, which is inline in the program, no layout copybook. DD ERROUT in app/jcl/CBIMPORT.jcl:56."
+  },
+  {
+   "src": "CBSTM03A",
+   "dst": "ds:AWS.M2.CARDDEMO.STATEMNT.PS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 39
+    }
+   ],
+   "note": "DD STMTFILE. WRITE FD-STMTFILE-REC FROM ST-LINEnn, all inline WORKING-STORAGE records, no layout copybook. DD in app/jcl/CREASTMT.JCL:87 (STEP040); the DSN is on line 91 after a garbled continuation line 90."
+  },
+  {
+   "src": "CBSTM03A",
+   "dst": "ds:AWS.M2.CARDDEMO.STATEMNT.HTML",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 40
+    }
+   ],
+   "note": "DD HTMLFILE. WRITE FD-HTMLFILE-REC FROM HTML-* inline records, no layout copybook. DD in app/jcl/CREASTMT.JCL:92."
+  },
+  {
+   "src": "CBSTM03B",
+   "dst": "ds:dd:CBSTM03B.TRNXFILE",
+   "kind": "data",
+   "mode": "read",
+   "resolved": false,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBSTM03B.CBL",
+     "line": 31
+    }
+   ],
+   "note": "DD TRNXFILE. Never run by its own step; only CALLed by CBSTM03A. The DD in the calling step is app/jcl/CREASTMT.JCL:83 (AWS.M2.CARDDEMO.TRXFL.VSAM.KSDS). READ INTO LK-M03B-FLDT is a linkage buffer, no layout copybook."
+  },
+  {
+   "src": "CBSTM03B",
+   "dst": "ds:dd:CBSTM03B.XREFFILE",
+   "kind": "data",
+   "mode": "read",
+   "resolved": false,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBSTM03B.CBL",
+     "line": 37
+    }
+   ],
+   "note": "DD XREFFILE. No step runs CBSTM03B directly. Calling step DD: app/jcl/CREASTMT.JCL:84 (AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS). READ INTO LK-M03B-FLDT, no layout copybook."
+  },
+  {
+   "src": "CBSTM03B",
+   "dst": "ds:dd:CBSTM03B.CUSTFILE",
+   "kind": "data",
+   "mode": "read",
+   "resolved": false,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBSTM03B.CBL",
+     "line": 43
+    }
+   ],
+   "note": "DD CUSTFILE. No step runs CBSTM03B directly. Calling step DD: app/jcl/CREASTMT.JCL:86 (AWS.M2.CARDDEMO.CUSTDATA.VSAM.KSDS). READ INTO LK-M03B-FLDT, no layout copybook."
+  },
+  {
+   "src": "CBSTM03B",
+   "dst": "ds:dd:CBSTM03B.ACCTFILE",
+   "kind": "data",
+   "mode": "read",
+   "resolved": false,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBSTM03B.CBL",
+     "line": 49
+    }
+   ],
+   "note": "DD ACCTFILE. No step runs CBSTM03B directly. Calling step DD: app/jcl/CREASTMT.JCL:85 (AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS). READ INTO LK-M03B-FLDT, no layout copybook."
+  },
+  {
+   "src": "CBTRN01C",
+   "dst": "ds:dd:CBTRN01C.DALYTRAN",
+   "kind": "data",
+   "mode": "read",
+   "resolved": false,
+   "layout_copybooks": [
+    "cpy:CVTRA06Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 29
+    }
+   ],
+   "note": "DD DALYTRAN. No JCL step runs CBTRN01C. READ INTO DALYTRAN-RECORD (CVTRA06Y)."
+  },
+  {
+   "src": "CBTRN01C",
+   "dst": "ds:dd:CBTRN01C.CUSTFILE",
+   "kind": "data",
+   "mode": "read",
+   "resolved": false,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 34
+    }
+   ],
+   "note": "DD CUSTFILE. No JCL step runs CBTRN01C. Opened INPUT but never read; no READ INTO, so no layout copybook by the rule (CVCUS01Y is copied to WORKING-STORAGE)."
+  },
+  {
+   "src": "CBTRN01C",
+   "dst": "ds:dd:CBTRN01C.XREFFILE",
+   "kind": "data",
+   "mode": "read",
+   "resolved": false,
+   "layout_copybooks": [
+    "cpy:CVACT03Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 40
+    }
+   ],
+   "note": "DD XREFFILE. No JCL step runs CBTRN01C. READ INTO CARD-XREF-RECORD (CVACT03Y)."
+  },
+  {
+   "src": "CBTRN01C",
+   "dst": "ds:dd:CBTRN01C.CARDFILE",
+   "kind": "data",
+   "mode": "read",
+   "resolved": false,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 46
+    }
+   ],
+   "note": "DD CARDFILE. No JCL step runs CBTRN01C. Opened INPUT but never read; no layout copybook by the rule (CVACT02Y is copied to WORKING-STORAGE)."
+  },
+  {
+   "src": "CBTRN01C",
+   "dst": "ds:dd:CBTRN01C.ACCTFILE",
+   "kind": "data",
+   "mode": "read",
+   "resolved": false,
+   "layout_copybooks": [
+    "cpy:CVACT01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 52
+    }
+   ],
+   "note": "DD ACCTFILE. No JCL step runs CBTRN01C. READ INTO ACCOUNT-RECORD (CVACT01Y)."
+  },
+  {
+   "src": "CBTRN01C",
+   "dst": "ds:dd:CBTRN01C.TRANFILE",
+   "kind": "data",
+   "mode": "read",
+   "resolved": false,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN01C.cbl",
+     "line": 58
+    }
+   ],
+   "note": "DD TRANFILE. No JCL step runs CBTRN01C. Opened INPUT but never read; no layout copybook by the rule (CVTRA05Y is copied to WORKING-STORAGE)."
+  },
+  {
+   "src": "CBTRN02C",
+   "dst": "ds:AWS.M2.CARDDEMO.DALYTRAN.PS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA06Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 29
+    }
+   ],
+   "note": "DD DALYTRAN. READ INTO DALYTRAN-RECORD (CVTRA06Y). DD in app/jcl/POSTTRAN.jcl:30 (STEP15)."
+  },
+  {
+   "src": "CBTRN02C",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA05Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 34
+    }
+   ],
+   "note": "DD TRANFILE. OPEN OUTPUT only; WRITE FD-TRANFILE-REC FROM TRAN-RECORD (CVTRA05Y). DD TRANFILE in app/jcl/POSTTRAN.jcl:28."
+  },
+  {
+   "src": "CBTRN02C",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT03Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 40
+    }
+   ],
+   "note": "DD XREFFILE. READ INTO CARD-XREF-RECORD (CVACT03Y). DD in app/jcl/POSTTRAN.jcl:32."
+  },
+  {
+   "src": "CBTRN02C",
+   "dst": "ds:AWS.M2.CARDDEMO.DALYREJS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 46
+    }
+   ],
+   "note": "DD DALYREJS. WRITE FD-REJS-RECORD FROM REJECT-RECORD, inline in the program, no layout copybook. DD DSN is GDG AWS.M2.CARDDEMO.DALYREJS(+1), generation dropped. app/jcl/POSTTRAN.jcl:34."
+  },
+  {
+   "src": "CBTRN02C",
+   "dst": "ds:AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read_write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 51
+    }
+   ],
+   "note": "DD ACCTFILE. OPEN I-O; READ INTO and REWRITE FROM ACCOUNT-RECORD (CVACT01Y). DD in app/jcl/POSTTRAN.jcl:39."
+  },
+  {
+   "src": "CBTRN02C",
+   "dst": "ds:AWS.M2.CARDDEMO.TCATBALF.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read_write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 57
+    }
+   ],
+   "note": "DD TCATBALF. OPEN I-O; READ INTO, WRITE FROM and REWRITE FROM TRAN-CAT-BAL-RECORD (CVTRA01Y). DD in app/jcl/POSTTRAN.jcl:41."
+  },
+  {
+   "src": "CBTRN03C",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.DALY",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA05Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN03C.cbl",
+     "line": 29
+    }
+   ],
+   "note": "DD TRANFILE. READ INTO TRAN-RECORD (CVTRA05Y). DD TRANFILE, GDG AWS.M2.CARDDEMO.TRANSACT.DALY(+1), generation dropped. Same DD in app/jcl/TRANREPT.jcl:65 (STEP10R) and app/proc/TRANREPT.prc:63."
+  },
+  {
+   "src": "CBTRN03C",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT03Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN03C.cbl",
+     "line": 33
+    }
+   ],
+   "note": "DD CARDXREF. READ INTO CARD-XREF-RECORD (CVACT03Y). DD CARDXREF in app/jcl/TRANREPT.jcl:67 and app/proc/TRANREPT.prc:65."
+  },
+  {
+   "src": "CBTRN03C",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANTYPE.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA03Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN03C.cbl",
+     "line": 39
+    }
+   ],
+   "note": "DD TRANTYPE. READ INTO TRAN-TYPE-RECORD (CVTRA03Y). DD in app/jcl/TRANREPT.jcl:69 and app/proc/TRANREPT.prc:67."
+  },
+  {
+   "src": "CBTRN03C",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANCATG.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA04Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN03C.cbl",
+     "line": 45
+    }
+   ],
+   "note": "DD TRANCATG. READ INTO TRAN-CAT-RECORD (CVTRA04Y). DD in app/jcl/TRANREPT.jcl:71 and app/proc/TRANREPT.prc:69."
+  },
+  {
+   "src": "CBTRN03C",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANREPT",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN03C.cbl",
+     "line": 51
+    }
+   ],
+   "note": "DD TRANREPT. WRITE FD-REPTFILE-REC has no FROM, so no layout copybook by the rule; the record is built by MOVE from CVTRA07Y items. DD TRANREPT, GDG AWS.M2.CARDDEMO.TRANREPT(+1), generation dropped. app/jcl/TRANREPT.jcl:76 and app/proc/TRANREPT.prc:74."
+  },
+  {
+   "src": "CBTRN03C",
+   "dst": "ds:AWS.M2.CARDDEMO.DATEPARM",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [],
+   "evidence": [
+    {
+     "file": "app/cbl/CBTRN03C.cbl",
+     "line": 55
+    }
+   ],
+   "note": "DD DATEPARM. READ INTO WS-DATEPARM-RECORD, inline in the program, no layout copybook. DD in app/jcl/TRANREPT.jcl:73 and app/proc/TRANREPT.prc:71."
+  }
+ ],
+ "notes": [
+  "No EXEC CICS, EXEC SQL, IMS or MQ in any of the 14 programs (grep of all lines, case-insensitive), so has_exec_cics is false everywhere.",
+  "All CALL targets are string literals; no variable targets, so no ?dynamic edges.",
+  "CBSTM03B is never named in an EXEC PGM=; it is only CALLed by CBSTM03A (app/cbl/CBSTM03A.CBL lines 351..909). By the guide rule its four data edges are ds:dd:CBSTM03B.* with resolved false. The files actually resolve through the CBSTM03A step: app/jcl/CREASTMT.JCL:83-86 (TRXFL.VSAM.KSDS, CARDXREF.VSAM.KSDS, ACCTDATA.VSAM.KSDS, CUSTDATA.VSAM.KSDS).",
+  "CBSTM03A has no SELECT for TRNXFILE/XREFFILE/CUSTFILE/ACCTFILE (they are opened through CBSTM03B via ALTER/GO TO and CALL, lines 296-310, 726-810), so it has data edges for STMTFILE and HTMLFILE only.",
+  "CBTRN01C is not run by any JCL or proc (grep PGM=CBTRN01C finds nothing), so all six of its data edges are ds:dd:CBTRN01C.* unresolved.",
+  "CBIMPORT selects CARDOUT (app/cbl/CBIMPORT.cbl:63) but STEP01 of app/jcl/CBIMPORT.jcl defines only EXPFILE, CUSTOUT, ACCTOUT, XREFOUT, TRNXOUT, ERROUT. So ds:dd:CBIMPORT.CARDOUT is unresolved.",
+  "CBTRN03C runs in both app/jcl/TRANREPT.jcl STEP10R and app/proc/TRANREPT.prc STEP10R with identical DSNs, so one edge per dataset.",
+  "GDG DSNs drop the (+1): AWS.M2.CARDDEMO.SYSTRAN (CBACT04C), DALYREJS (CBTRN02C), TRANSACT.DALY and TRANREPT (CBTRN03C).",
+  "app/jcl/CREASTMT.JCL:90 has junk text after the SPACE parameter ('00,RECFM=FB), ATA.VSAM.KSDS'); JCL treats it as a comment because the parameter list ends at the blank after the comma, and the is on line 91 (STATEMNT.PS).",
+  "app/jcl/INTCALC.jcl:31 has DD XREFFIL1 (CARDXREF.VSAM.AIX.PATH) that CBACT04C never selects (it uses XREFFILE only), so no edge for it.",
+  "Layout copybooks follow the guide strictly (FD COPY, READ INTO, WRITE FROM). Empty lists mean the record is inline, is written without FROM, or is only read into a linkage buffer. Doubtful spots: CBTRN03C REPORT-FILE (records built by MOVE from CVTRA07Y items), CBTRN01C customer/card/transaction files (opened, never read, copybook only in WORKING-STORAGE), CBSTM03B files (READ INTO LK-M03B-FLDT; CBSTM03A then MOVEs FLDT into CARD-XREF-RECORD/CUSTOMER-RECORD/ACCOUNT-RECORD from CVACT03Y/CUSTREC/CVACT01Y).",
+  "CBACT01C mode: OUTFILE, ARRYFILE, VBRCFILE opened OUTPUT so write. The account file is read only (OPEN INPUT line 319).",
+  "COBSWAIT (ACCEPT FROM SYSIN, no SELECT) and CSUTLDTC (no files) have no data edges. COBSWAIT calls MVSWAIT (app/asm), CSUTLDTC calls CEEDAYS.",
+  "CVCUS01Y.cpy and CUSTREC.cpy both define 01 CUSTOMER-RECORD. CBSTM03A copies CUSTREC; every other program that touches customers copies CVCUS01Y.",
+  "No entry_points listed: entry points for the batch programs are the JCL jobs, which other labelers cover. Node entry_point flags are left out for the same reason."
+ ]
+}

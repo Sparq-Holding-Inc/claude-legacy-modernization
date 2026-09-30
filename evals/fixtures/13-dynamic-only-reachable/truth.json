@@ -1,0 +1,57 @@
+{
+  "case": "13-dynamic-only-reachable",
+  "status": "hand-written before any extractor code",
+  "description": "HIDDEN01 has no static inbound edge, but PGMMAIN makes a dynamic call that could reach it. It must never be called unreachable.",
+  "edges": [
+    {
+      "src": "job:MAINJOB",
+      "dst": "step:MAINJOB.S1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/MAINJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "step:MAINJOB.S1",
+      "dst": "PGMMAIN",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/MAINJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "PGMMAIN",
+      "dst": "?dynamic:PGMMAIN:9",
+      "kind": "call",
+      "mode": null,
+      "resolved": false,
+      "confidence": "low",
+      "evidence": [
+        "app/cbl/PGMMAIN.cbl:9"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "HIDDEN01",
+      "unit_type": "batch",
+      "entry_point": false
+    }
+  ],
+  "dead_code": {
+    "unreachable": [],
+    "dormant": [],
+    "unknown": [
+      "HIDDEN01"
+    ]
+  },
+  "must_not_unreachable": [
+    "HIDDEN01"
+  ]
+}

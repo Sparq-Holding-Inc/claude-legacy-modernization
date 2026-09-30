@@ -1,0 +1,30 @@
+{
+  "case": "02-dynamic-call",
+  "status": "hand-written before any extractor code",
+  "description": "CALL of a data name that is only ever ACCEPTed. Must be an unresolved dynamic edge, never dropped.",
+  "edges": [
+    {
+      "src": "PROGA",
+      "dst": "?dynamic:PROGA:9",
+      "kind": "call",
+      "mode": null,
+      "resolved": false,
+      "confidence": "low",
+      "evidence": [
+        "app/cbl/PROGA.cbl:9"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "PROGA",
+      "unit_type": "batch",
+      "entry_point": false
+    },
+    {
+      "id": "?dynamic:PROGA:9",
+      "unit_type": "external",
+      "entry_point": false
+    }
+  ]
+}

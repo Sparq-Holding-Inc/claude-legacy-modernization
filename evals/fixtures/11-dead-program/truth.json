@@ -1,0 +1,81 @@
+{
+  "case": "11-dead-program",
+  "status": "hand-written before any extractor code",
+  "description": "PGMDEAD has no inbound edge from any entry point, even though it calls a live program. UNUSED is a copybook nobody includes. There is no dynamic call anywhere, so both are safely unreachable.",
+  "edges": [
+    {
+      "src": "job:MAINJOB",
+      "dst": "step:MAINJOB.S1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/MAINJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "step:MAINJOB.S1",
+      "dst": "PGMMAIN",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/MAINJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "PGMMAIN",
+      "dst": "PGMLIVE",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PGMMAIN.cbl:4"
+      ]
+    },
+    {
+      "src": "PGMDEAD",
+      "dst": "PGMLIVE",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PGMDEAD.cbl:4"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "job:MAINJOB",
+      "unit_type": "jcl_job",
+      "entry_point": true
+    },
+    {
+      "id": "PGMMAIN",
+      "unit_type": "batch",
+      "entry_point": false
+    },
+    {
+      "id": "PGMLIVE",
+      "unit_type": "subprogram",
+      "entry_point": false
+    },
+    {
+      "id": "PGMDEAD",
+      "unit_type": "batch",
+      "entry_point": false
+    }
+  ],
+  "dead_code": {
+    "unreachable": [
+      "PGMDEAD",
+      "cpy:UNUSED"
+    ],
+    "dormant": [],
+    "unknown": []
+  }
+}

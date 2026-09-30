@@ -1,0 +1,73 @@
+{
+  "case": "12-dormant-program",
+  "status": "hand-written before any extractor code",
+  "description": "OLDPGM is reachable on paper but was last modified in 2011. NEWPGM is reachable and recent. Extraction runs as of 2026-09-30 with a 5 year dormancy window.",
+  "edges": [
+    {
+      "src": "job:MAINJOB",
+      "dst": "step:MAINJOB.S1",
+      "kind": "include",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/MAINJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "step:MAINJOB.S1",
+      "dst": "PGMMAIN",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/jcl/MAINJOB.jcl:2"
+      ]
+    },
+    {
+      "src": "PGMMAIN",
+      "dst": "OLDPGM",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PGMMAIN.cbl:4"
+      ]
+    },
+    {
+      "src": "PGMMAIN",
+      "dst": "NEWPGM",
+      "kind": "call",
+      "mode": null,
+      "resolved": true,
+      "confidence": "high",
+      "evidence": [
+        "app/cbl/PGMMAIN.cbl:5"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "OLDPGM",
+      "unit_type": "subprogram",
+      "entry_point": false,
+      "last_modified": "2011-03-04"
+    },
+    {
+      "id": "NEWPGM",
+      "unit_type": "subprogram",
+      "entry_point": false,
+      "last_modified": "2026-05-01"
+    }
+  ],
+  "dead_code": {
+    "unreachable": [],
+    "dormant": [
+      "OLDPGM"
+    ],
+    "unknown": []
+  },
+  "as_of": "2026-09-30"
+}

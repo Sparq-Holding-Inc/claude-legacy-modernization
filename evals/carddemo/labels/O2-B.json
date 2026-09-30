@@ -1,0 +1,2099 @@
+{
+ "partition": "O2",
+ "pass": "B",
+ "programs": {
+  "COMEN01C": {
+   "path": "app/cbl/COMEN01C.cbl",
+   "program_id": "COMEN01C",
+   "has_exec_cics": true
+  },
+  "CORPT00C": {
+   "path": "app/cbl/CORPT00C.cbl",
+   "program_id": "CORPT00C",
+   "has_exec_cics": true
+  },
+  "COSGN00C": {
+   "path": "app/cbl/COSGN00C.cbl",
+   "program_id": "COSGN00C",
+   "has_exec_cics": true
+  },
+  "COTRN00C": {
+   "path": "app/cbl/COTRN00C.cbl",
+   "program_id": "COTRN00C",
+   "has_exec_cics": true
+  },
+  "COTRN01C": {
+   "path": "app/cbl/COTRN01C.cbl",
+   "program_id": "COTRN01C",
+   "has_exec_cics": true
+  },
+  "COTRN02C": {
+   "path": "app/cbl/COTRN02C.cbl",
+   "program_id": "COTRN02C",
+   "has_exec_cics": true
+  },
+  "COUSR00C": {
+   "path": "app/cbl/COUSR00C.cbl",
+   "program_id": "COUSR00C",
+   "has_exec_cics": true
+  },
+  "COUSR01C": {
+   "path": "app/cbl/COUSR01C.cbl",
+   "program_id": "COUSR01C",
+   "has_exec_cics": true
+  },
+  "COUSR02C": {
+   "path": "app/cbl/COUSR02C.cbl",
+   "program_id": "COUSR02C",
+   "has_exec_cics": true
+  },
+  "COUSR03C": {
+   "path": "app/cbl/COUSR03C.cbl",
+   "program_id": "COUSR03C",
+   "has_exec_cics": true
+  }
+ },
+ "nodes": [
+  {
+   "id": "COMEN01C",
+   "unit_type": "cobol_program",
+   "entry_point": false
+  },
+  {
+   "id": "CORPT00C",
+   "unit_type": "cobol_program",
+   "entry_point": false
+  },
+  {
+   "id": "COSGN00C",
+   "unit_type": "cobol_program",
+   "entry_point": false
+  },
+  {
+   "id": "COTRN00C",
+   "unit_type": "cobol_program",
+   "entry_point": false
+  },
+  {
+   "id": "COTRN01C",
+   "unit_type": "cobol_program",
+   "entry_point": false
+  },
+  {
+   "id": "COTRN02C",
+   "unit_type": "cobol_program",
+   "entry_point": false
+  },
+  {
+   "id": "COUSR00C",
+   "unit_type": "cobol_program",
+   "entry_point": false
+  },
+  {
+   "id": "COUSR01C",
+   "unit_type": "cobol_program",
+   "entry_point": false
+  },
+  {
+   "id": "COUSR02C",
+   "unit_type": "cobol_program",
+   "entry_point": false
+  },
+  {
+   "id": "COUSR03C",
+   "unit_type": "cobol_program",
+   "entry_point": false
+  }
+ ],
+ "edges": [
+  {
+   "src": "COMEN01C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 50
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "cpy:COMEN02Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 51
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "cpy:COMEN01",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 53
+    }
+   ],
+   "note": "BMS symbolic map copybook in app/cpy-bms"
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 55
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 56
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 57
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 58
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 60
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 61
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 138
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "cpy:CORPT00",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 140
+    }
+   ],
+   "note": "BMS symbolic map copybook in app/cpy-bms"
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 142
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 143
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 144
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "cpy:CVTRA05Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 146
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 148
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 149
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 48
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "cpy:COSGN00",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 50
+    }
+   ],
+   "note": "BMS symbolic map copybook in app/cpy-bms"
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 52
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 53
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 54
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 55
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 57
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 58
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 61
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "cpy:COTRN00",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 72
+    }
+   ],
+   "note": "BMS symbolic map copybook in app/cpy-bms"
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 74
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 75
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 76
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "cpy:CVTRA05Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 78
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 80
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 81
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 52
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "cpy:COTRN01",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 63
+    }
+   ],
+   "note": "BMS symbolic map copybook in app/cpy-bms"
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 65
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 66
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 67
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "cpy:CVTRA05Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 69
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 71
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 72
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 71
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:COTRN02",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 82
+    }
+   ],
+   "note": "BMS symbolic map copybook in app/cpy-bms"
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 84
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 85
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 86
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:CVTRA05Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 88
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:CVACT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 89
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "cpy:CVACT03Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 90
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 92
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 93
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 66
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "cpy:COUSR00",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 76
+    }
+   ],
+   "note": "BMS symbolic map copybook in app/cpy-bms"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 78
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 79
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 80
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 81
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 83
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 84
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 46
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "cpy:COUSR01",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 48
+    }
+   ],
+   "note": "BMS symbolic map copybook in app/cpy-bms"
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 50
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 51
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 52
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 53
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 55
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 56
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 49
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "cpy:COUSR02",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 60
+    }
+   ],
+   "note": "BMS symbolic map copybook in app/cpy-bms"
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 62
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 63
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 64
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 65
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 67
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 68
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "cpy:COCOM01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 49
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "cpy:COUSR03",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 60
+    }
+   ],
+   "note": "BMS symbolic map copybook in app/cpy-bms"
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "cpy:COTTL01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 62
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "cpy:CSDAT01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 63
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "cpy:CSMSG01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 64
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "cpy:CSUSR01Y",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 65
+    }
+   ],
+   "note": ""
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "ext:DFHAID",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 67
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "ext:DFHBMSCA",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 68
+    }
+   ],
+   "note": "not in app/cpy or app/cpy-bms (CICS supplied)"
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 201
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM at line(s) 97,199; no control-flow tracing"
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "?dynamic:COMEN01C:201",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 201
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM); CDEMO-TO-PROGRAM (COCOM01Y, no VALUE) is a receiving field, so dynamic remainder; statement starts at 201, XCTL keyword on the same or next line"
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 548
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM at line(s) 173,543; no control-flow tracing"
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 548
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COMEN01C' TO CDEMO-TO-PROGRAM at line(s) 188; no control-flow tracing"
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "?dynamic:CORPT00C:548",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 548
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM); CDEMO-TO-PROGRAM (COCOM01Y, no VALUE) is a receiving field, so dynamic remainder; statement starts at 548, XCTL keyword on the same or next line"
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 192
+    },
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 518
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM at line(s) 108,513; no control-flow tracing"
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 192
+    },
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 518
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COMEN01C' TO CDEMO-TO-PROGRAM at line(s) 123; no control-flow tracing"
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "COTRN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 192
+    },
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 518
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COTRN01C' TO CDEMO-TO-PROGRAM at line(s) 188; no control-flow tracing"
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "?dynamic:COTRN00C:192",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 192
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM); CDEMO-TO-PROGRAM (COCOM01Y, no VALUE) is a receiving field, so dynamic remainder; statement starts at 192, XCTL keyword on the same or next line"
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "?dynamic:COTRN00C:518",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 518
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM); CDEMO-TO-PROGRAM (COCOM01Y, no VALUE) is a receiving field, so dynamic remainder; statement starts at 518, XCTL keyword on the same or next line"
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 205
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM at line(s) 95,200; no control-flow tracing"
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 205
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COMEN01C' TO CDEMO-TO-PROGRAM at line(s) 117; no control-flow tracing"
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "COTRN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 205
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COTRN00C' TO CDEMO-TO-PROGRAM at line(s) 126; no control-flow tracing"
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "?dynamic:COTRN01C:205",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 205
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM); CDEMO-TO-PROGRAM (COCOM01Y, no VALUE) is a receiving field, so dynamic remainder; statement starts at 205, XCTL keyword on the same or next line"
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 508
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM at line(s) 116,503; no control-flow tracing"
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 508
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COMEN01C' TO CDEMO-TO-PROGRAM at line(s) 138; no control-flow tracing"
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "?dynamic:COTRN02C:508",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 508
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM); CDEMO-TO-PROGRAM (COCOM01Y, no VALUE) is a receiving field, so dynamic remainder; statement starts at 508, XCTL keyword on the same or next line"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 196
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 206
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 514
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM at line(s) 111,509; no control-flow tracing"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "COADM01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 196
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 206
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 514
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COADM01C' TO CDEMO-TO-PROGRAM at line(s) 126; no control-flow tracing"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "COUSR02C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 196
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 206
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 514
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COUSR02C' TO CDEMO-TO-PROGRAM at line(s) 192; no control-flow tracing"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "COUSR03C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 196
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 206
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 514
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COUSR03C' TO CDEMO-TO-PROGRAM at line(s) 202; no control-flow tracing"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "?dynamic:COUSR00C:196",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 196
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM); CDEMO-TO-PROGRAM (COCOM01Y, no VALUE) is a receiving field, so dynamic remainder; statement starts at 196, XCTL keyword on the same or next line"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "?dynamic:COUSR00C:206",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 206
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM); CDEMO-TO-PROGRAM (COCOM01Y, no VALUE) is a receiving field, so dynamic remainder; statement starts at 206, XCTL keyword on the same or next line"
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "?dynamic:COUSR00C:514",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 514
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM); CDEMO-TO-PROGRAM (COCOM01Y, no VALUE) is a receiving field, so dynamic remainder; statement starts at 514, XCTL keyword on the same or next line"
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 175
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM at line(s) 79,168; no control-flow tracing"
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "COADM01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 175
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COADM01C' TO CDEMO-TO-PROGRAM at line(s) 94; no control-flow tracing"
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "?dynamic:COUSR01C:175",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 175
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM); CDEMO-TO-PROGRAM (COCOM01Y, no VALUE) is a receiving field, so dynamic remainder; statement starts at 175, XCTL keyword on the same or next line"
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 258
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM at line(s) 91,253; no control-flow tracing"
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "COADM01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 258
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COADM01C' TO CDEMO-TO-PROGRAM at line(s) 114,125; no control-flow tracing"
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "?dynamic:COUSR02C:258",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 258
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM); CDEMO-TO-PROGRAM (COCOM01Y, no VALUE) is a receiving field, so dynamic remainder; statement starts at 258, XCTL keyword on the same or next line"
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "COSGN00C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 205
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COSGN00C' TO CDEMO-TO-PROGRAM at line(s) 91,200; no control-flow tracing"
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "COADM01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 205
+    }
+   ],
+   "note": "via CDEMO-TO-PROGRAM (EXEC CICS XCTL PROGRAM(CDEMO-TO-PROGRAM)); MOVE 'COADM01C' TO CDEMO-TO-PROGRAM at line(s) 113,124; no control-flow tracing"
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "?dynamic:COUSR03C:205",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 205
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-TO-PROGRAM); CDEMO-TO-PROGRAM (COCOM01Y, no VALUE) is a receiving field, so dynamic remainder; statement starts at 205, XCTL keyword on the same or next line"
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "?dynamic:COMEN01C:156",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 156
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-MENU-OPT-PGMNAME(WS-OPTION)) is subscripted: dynamic only (inside WHEN CDEMO-MENU-OPT-PGMNAME(WS-OPTION) = 'COPAUS0C' branch after EXEC CICS INQUIRE PROGRAM at 148, which is not a call edge)"
+  },
+  {
+   "src": "COMEN01C",
+   "dst": "?dynamic:COMEN01C:184",
+   "kind": "call",
+   "mode": null,
+   "resolved": false,
+   "evidence": [
+    {
+     "file": "app/cbl/COMEN01C.cbl",
+     "line": 184
+    }
+   ],
+   "note": "XCTL PROGRAM(CDEMO-MENU-OPT-PGMNAME(WS-OPTION)) is subscripted: dynamic only; statement starts at 184 (EXEC CICS), XCTL keyword on 185 (WHEN OTHER branch)"
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "COADM01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 231
+    }
+   ],
+   "note": "EXEC CICS XCTL PROGRAM('COADM01C') for admin user"
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "COMEN01C",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 236
+    }
+   ],
+   "note": "EXEC CICS XCTL PROGRAM('COMEN01C') for regular user"
+  },
+  {
+   "src": "CORPT00C",
+   "dst": "CSUTLDTC",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 392
+    },
+    {
+     "file": "app/cbl/CORPT00C.cbl",
+     "line": 412
+    }
+   ],
+   "note": "CALL 'CSUTLDTC' date validation (start and end date)"
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "CSUTLDTC",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 393
+    },
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 413
+    }
+   ],
+   "note": "CALL 'CSUTLDTC' date validation (orig and proc date)"
+  },
+  {
+   "src": "COSGN00C",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CSUSR01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COSGN00C.cbl",
+     "line": 211
+    }
+   ],
+   "note": "DATASET(WS-USRSEC-FILE) is a constant (VALUE 'USRSEC', never a receiving field); CICS file USRSEC maps to DSNAME via app/csd/CARDDEMO.CSD DEFINE FILE at line 88. READ INTO(SEC-USER-DATA), 01 in CSUSR01Y."
+  },
+  {
+   "src": "COTRN00C",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA05Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 593
+    },
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 626
+    },
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 660
+    },
+    {
+     "file": "app/cbl/COTRN00C.cbl",
+     "line": 694
+    }
+   ],
+   "note": "DATASET(WS-TRANSACT-FILE) is a constant (VALUE 'TRANSACT', never a receiving field); CICS file TRANSACT maps to DSNAME via app/csd/CARDDEMO.CSD DEFINE FILE at line 76. STARTBR/READNEXT/READPREV/ENDBR; INTO(TRAN-RECORD), 01 in CVTRA05Y."
+  },
+  {
+   "src": "COTRN01C",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA05Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN01C.cbl",
+     "line": 269
+    }
+   ],
+   "note": "DATASET(WS-TRANSACT-FILE) is a constant (VALUE 'TRANSACT', never a receiving field); CICS file TRANSACT maps to DSNAME via app/csd/CARDDEMO.CSD DEFINE FILE at line 76. READ ... UPDATE counts as read; no REWRITE in program. INTO(TRAN-RECORD), 01 in CVTRA05Y."
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "ds:AWS.M2.CARDDEMO.TRANSACT.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read_write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVTRA05Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 644
+    },
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 675
+    },
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 704
+    },
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 713
+    }
+   ],
+   "note": "DATASET(WS-TRANSACT-FILE) is a constant (VALUE 'TRANSACT', never a receiving field); CICS file TRANSACT maps to DSNAME via app/csd/CARDDEMO.CSD DEFINE FILE at line 76. STARTBR/READPREV/ENDBR read, WRITE FROM(TRAN-RECORD) write; 01 TRAN-RECORD in CVTRA05Y."
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT03Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 611
+    }
+   ],
+   "note": "DATASET(WS-CCXREF-FILE) is a constant (VALUE 'CCXREF', never a receiving field); CICS file CCXREF maps to DSNAME via app/csd/CARDDEMO.CSD DEFINE FILE at line 37. READ INTO(CARD-XREF-RECORD), 01 in CVACT03Y."
+  },
+  {
+   "src": "COTRN02C",
+   "dst": "ds:AWS.M2.CARDDEMO.CARDXREF.VSAM.AIX.PATH",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CVACT03Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COTRN02C.cbl",
+     "line": 578
+    }
+   ],
+   "note": "DATASET(WS-CXACAIX-FILE) is a constant (VALUE 'CXACAIX', never a receiving field); CICS file CXACAIX maps to DSNAME via app/csd/CARDDEMO.CSD DEFINE FILE at line 63. READ INTO(CARD-XREF-RECORD), 01 in CVACT03Y. Alternate index path over the card xref cluster."
+  },
+  {
+   "src": "COUSR00C",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CSUSR01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 588
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 621
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 655
+    },
+    {
+     "file": "app/cbl/COUSR00C.cbl",
+     "line": 689
+    }
+   ],
+   "note": "DATASET(WS-USRSEC-FILE) is a constant (VALUE 'USRSEC', never a receiving field); CICS file USRSEC maps to DSNAME via app/csd/CARDDEMO.CSD DEFINE FILE at line 88. STARTBR/READNEXT/READPREV/ENDBR; INTO(SEC-USER-DATA), 01 in CSUSR01Y."
+  },
+  {
+   "src": "COUSR01C",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.KSDS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CSUSR01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR01C.cbl",
+     "line": 240
+    }
+   ],
+   "note": "DATASET(WS-USRSEC-FILE) is a constant (VALUE 'USRSEC', never a receiving field); CICS file USRSEC maps to DSNAME via app/csd/CARDDEMO.CSD DEFINE FILE at line 88. WRITE FROM(SEC-USER-DATA), 01 in CSUSR01Y."
+  },
+  {
+   "src": "COUSR02C",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read_write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CSUSR01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 322
+    },
+    {
+     "file": "app/cbl/COUSR02C.cbl",
+     "line": 360
+    }
+   ],
+   "note": "DATASET(WS-USRSEC-FILE) is a constant (VALUE 'USRSEC', never a receiving field); CICS file USRSEC maps to DSNAME via app/csd/CARDDEMO.CSD DEFINE FILE at line 88. READ UPDATE (read, line 322) then REWRITE FROM(SEC-USER-DATA) (write, line 360); 01 in CSUSR01Y."
+  },
+  {
+   "src": "COUSR03C",
+   "dst": "ds:AWS.M2.CARDDEMO.USRSEC.VSAM.KSDS",
+   "kind": "data",
+   "mode": "read_write",
+   "resolved": true,
+   "layout_copybooks": [
+    "cpy:CSUSR01Y"
+   ],
+   "evidence": [
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 269
+    },
+    {
+     "file": "app/cbl/COUSR03C.cbl",
+     "line": 307
+    }
+   ],
+   "note": "DATASET(WS-USRSEC-FILE) is a constant (VALUE 'USRSEC', never a receiving field); CICS file USRSEC maps to DSNAME via app/csd/CARDDEMO.CSD DEFINE FILE at line 88. READ UPDATE (read, line 269) then DELETE (write, line 307); READ INTO(SEC-USER-DATA), 01 in CSUSR01Y. DELETE has no INTO/FROM."
+  }
+ ],
+ "notes": [
+  "All 10 programs are CICS online programs (has_exec_cics true).",
+  "XCTL/dynamic LINE: for 'EXEC CICS' on one line and 'XCTL PROGRAM(...)' on the next (COMEN01C:184/185 and 201/202, COTRN00C:192/193 and 518/519, etc.) I used the first physical line of the statement (the EXEC CICS line) for both evidence and the ?dynamic id. If the adjudicated convention is the XCTL keyword line, those ids shift by +1.",
+  "CDEMO-TO-PROGRAM has no VALUE in COCOM01Y (app/cpy/COCOM01Y.cpy:24) and is a MOVE receiver everywhere, so every XCTL PROGRAM(CDEMO-TO-PROGRAM) gets one edge per distinct literal moved to it anywhere in that program plus one ?dynamic edge. MOVE CDEMO-FROM-PROGRAM TO CDEMO-TO-PROGRAM (COTRN01C:119, COTRN02C:140, COUSR02C:116, COUSR03C:115) is not a literal and gives no candidate edge.",
+  "COMEN01C:156 and :184 XCTL PROGRAM(CDEMO-MENU-OPT-PGMNAME(WS-OPTION)) are subscripted: dynamic only, no candidate edges (menu literals live in COMEN02Y).",
+  "EXEC CICS INQUIRE PROGRAM(...) at COMEN01C:148 is not CALL/LINK/XCTL and gets no edge.",
+  "CORPT00C:517 EXEC CICS WRITEQ TD QUEUE('JOBS') is a transient data queue, not a FILE/DATASET operation, so no data edge. CORPT00C also holds JCL text in string literals (line 94 '//STEP10 EXEC PROC=TRANREPT') that is not a statement.",
+  "COSGN00C:59 and COUSR01C:57 '*COPY DFHATTR.' are comment lines, no include edge. COTRN02C:147/471 COPY-LAST-TRAN-DATA is a paragraph name, not a COPY.",
+  "DFHAID and DFHBMSCA are not in app/cpy or app/cpy-bms so they are ext:DFHAID and ext:DFHBMSCA.",
+  "COTRN00C:61 and COTRN02C:71 COPY COCOM01Y is followed by extra 05-level items (CDEMO-CT00-INFO / CDEMO-CT02-INFO) that extend the commarea. Not an include issue.",
+  "WS-USRSEC-FILE VALUE is 'USRSEC  ' with trailing blanks; treated as USRSEC. COTRN02C declares WS-ACCTDAT-FILE 'ACCTDAT ' but never uses it in a CICS statement, so no ACCTDAT data edge. COMEN01C declares WS-USRSEC-FILE but has no file operation.",
+  "COTRN02C:578 uses file CXACAIX, whose CSD DSNAME is the AIX path AWS.M2.CARDDEMO.CARDXREF.VSAM.AIX.PATH, distinct from CCXREF DSN AWS.M2.CARDDEMO.CARDXREF.VSAM.KSDS; two separate data edges.",
+  "COTRN01C has READ ... UPDATE on TRANSACT (line 269) with no REWRITE, so mode read.",
+  "Entry points (CSD TRANSACTION) are not labeled here; left to the CSD labelers."
+ ]
+}
