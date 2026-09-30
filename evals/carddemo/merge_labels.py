@@ -236,7 +236,7 @@ def cmd_build():
         "scope_dirs": ["app/cbl", "app/cpy", "app/cpy-bms", "app/bms", "app/jcl", "app/proc",
                        "app/csd", "app/scheduler", "scripts"],
         "provenance": dict(provenance),
-        "entry_programs": entry,
+        "entry_points": entry,
         "unparsed": unparsed,
         "edges": out_edges,
         "notes": notes,

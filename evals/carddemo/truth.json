@@ -21,7 +21,7 @@
   "adjudicated_include": 1,
   "single_pass": 433
  },
- "entry_programs": [
+ "entry_points": [
   "COACTUPC",
   "COACTVWC",
   "COADM01C",
