@@ -117,6 +117,8 @@ def main():
                "PASS" if cw["jaccard"] >= .8 else "FAIL"))
         else:
             w("| End to end | Wave count and co-assignment across CardDemo runs | Identical, 80%+ | NOT RUN | NOT RUN |")
+        w("| End to end | graph.json is what the extractor produces (Claude did not edit the facts) | Integrity check | %d of %d runs identical | %s |" %
+          (s.get("graph_unmodified_runs", 0), s["runs_scored"], "PASS" if s.get("graph_unmodified_runs", 0) == s["runs_scored"] else "FAIL"))
         w("| End to end | Every JSON output validates | 100%% | %d of %d runs have all four files valid | %s |" %
           (s["json_all_valid_runs"], s["runs_scored"], "PASS" if s["json_all_valid_runs"] == s["runs_scored"] else "FAIL"))
         w("| End to end | Cost and wall time per CardDemo run | Published, no bar | See the run table | INFO |")
@@ -224,6 +226,20 @@ def main():
               (r["run"], r["harness"], turns, timing, cost, ci["total"] - ci["unresolved"], ci["total"],
                "valid" if r["json_all_valid"] else "INVALID", r.get("wave_count", "n/a"),
                "yes" if r["hook_gave_up"] else "no"))
+        w("")
+    prov = load("e2e-provenance.json")
+    if prov and s and s["runs_scored"]:
+        w("## How the end to end runs were produced")
+        w("")
+        w(prov["why"])
+        w("")
+        w("- Date: %s. Plugin commit when the runs started: `%s`. Model: %s." %
+          (prov["date"], prov["plugin_commit_at_start"], prov["model"]))
+        w("- **Not exercised by this harness:**")
+        for x in prov["not_exercised"]:
+            w("  - " + x)
+        w("- %s" % prov["changes_during_runs"])
+        w("- To replace these with real headless runs: `%s`" % prov["rerun"])
         w("")
     return "\n".join(L) + "\n"
 

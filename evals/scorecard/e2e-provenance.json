@@ -1,0 +1,16 @@
+{
+ "harness": "subagents",
+ "date": "2026-09-30",
+ "plugin_commit_at_start": "f33744c",
+ "why": "Headless `claude -p` could not sign in in the build environment (OAuth login expired). The same command and skill files were run by hand through Claude subagents, then scored by the same scorer.",
+ "model": "Claude Sonnet 5.5 subagents (the plugin's own agents use sonnet at medium effort)",
+ "not_exercised": [
+  "Loading the plugin with --plugin-dir and the namespaced command name",
+  "The live Stop hook. It was tested with test_hook.py. Each agent ran the same checker by hand before finishing.",
+  "The plugin's own subagents. The subagents did that work inline.",
+  "Dollar cost. Tokens and time are reported instead.",
+  "Interactive scoping questions"
+ ],
+ "changes_during_runs": "The extractor gained byte order mark handling and unterminated EXEC reporting after the runs started. Every saved graph.json was re-checked against a fresh extraction and is identical.",
+ "rerun": "After `claude auth login`: python3 evals/run_e2e_evals.py --cases all"
+}

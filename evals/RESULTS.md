@@ -10,15 +10,16 @@ Environment: Python 3.13.3, Claude Code 2.1.241 (Claude Code), CardDemo commit `
 
 | Level | Metric | Bar | Result | Status |
 |---|---|---|---|---|
-| Extractor, fixtures | Precision and recall, every edge kind | 100% | 24 of 24 fixtures pass. Every kind 100% | PASS |
-| Extractor, CardDemo | call edges, precision and recall vs draft truth | 95%+ | P 100.0%, R 100.0% | PASS (provisional) |
-| Extractor, CardDemo | include edges, precision and recall vs draft truth | 95%+ | P 100.0%, R 100.0% | PASS (provisional) |
-| Extractor, CardDemo | data edges, precision and recall vs draft truth | 95%+ | P 100.0%, R 100.0% | PASS (provisional) |
-| Extractor, CardDemo | contract edges, recall vs draft truth | 75%+, reported as is | R 100.0% (P 100.0%) | PASS (provisional) |
-| Extractor, CardDemo | temporal edges, recall vs draft truth | 75%+, reported as is | R 100.0% (P 100.0%) | PASS (provisional) |
-| End to end | Citations, dynamic targets, waves, JSON validity, cost | see plan | NOT RUN | NOT RUN |
+| Extractor, fixtures | Precision and recall, every edge kind | 100% | 25 of 25 fixtures pass. Every kind 100% | PASS |
+| End to end | Citations that resolve | 100% | 100.0% (1353 of 1353) | PASS |
+| End to end | Unreachable claims on dynamic call targets | 0 | 0 | PASS |
+| End to end | Wave count and co-assignment across CardDemo runs | Identical, 80%+ | NOT RUN | NOT RUN |
+| End to end | graph.json is what the extractor produces (Claude did not edit the facts) | Integrity check | 0 of 13 runs identical | FAIL |
+| End to end | Every JSON output validates | 100% | 13 of 13 runs have all four files valid | PASS |
+| End to end | Cost and wall time per CardDemo run | Published, no bar | See the run table | INFO |
+| End to end | How the runs were produced | | subagent | INFO |
 | Packaging | `claude plugin validate --strict` on the marketplace | Clean | ✔ Validation passed | PASS |
-| Packaging | `claude plugin validate --strict` on the plugin manifest | Clean | ✔ Validation passed | PASS |
+| Packaging | `claude plugin validate --strict` on the plugin manifest, which also checks hooks/hooks.json | Clean | ✔ Validation passed | PASS |
 | Packaging | `claude plugin validate --strict` on the skills | Clean | ✔ Validation passed | PASS |
 | Packaging | `claude plugin validate --strict` on the agents | Clean | ✔ Validation passed | PASS |
 | Packaging | `claude plugin validate --strict` on the commands | Clean | ✔ Validation passed | PASS |
@@ -29,13 +30,13 @@ Truth was written by hand before the extractor existed. Each fixture is one trap
 
 | Kind | Precision | Recall | TP | FP | FN |
 |---|---|---|---|---|---|
-| call | 100.0% | 100.0% | 46 | 0 | 0 |
+| call | 100.0% | 100.0% | 47 | 0 | 0 |
 | include | 100.0% | 100.0% | 39 | 0 | 0 |
 | data | 100.0% | 100.0% | 19 | 0 | 0 |
 | contract | 100.0% | 100.0% | 3 | 0 | 0 |
 | temporal | 100.0% | 100.0% | 7 | 0 | 0 |
 
-Evidence lines that resolve to a real file and line: 154 of 154.
+Evidence lines that resolve to a real file and line: 155 of 155.
 
 | Fixture | Result | Edges in truth |
 |---|---|---|
@@ -63,43 +64,19 @@ Evidence lines that resolve to a real file and line: 154 of 154.
 | 22-rw-modes | pass | 6 |
 | 23-subscripted-target | pass | 1 |
 | 24-dsn-forms | pass | 5 |
-
-## Extractor: AWS CardDemo (draft truth, provisional)
-
-Extraction time: 0.5 seconds (bar: under 60). Graded scope: the core application folders. The three optional IMS, DB2 and MQ extensions are read but not scored, because the plugin does not claim them.
-
-| Kind | Precision | Recall | TP | FP | FN | Evidence overlaps truth |
-|---|---|---|---|---|---|---|
-| call | 100.0% | 100.0% | 234 | 0 | 0 | 234 of 234 |
-| include | 100.0% | 100.0% | 318 | 0 | 0 | 318 of 318 |
-| data | 100.0% | 100.0% | 142 | 0 | 0 | 142 of 142 |
-| contract | 100.0% | 100.0% | 50 | 0 | 0 | 50 of 50 |
-| temporal | 100.0% | 100.0% | 100 | 0 | 0 | 100 of 100 |
-
-- Entry programs from the CSD match the truth: True.
-- CA-7 listing reported as not parsed: True.
-- Every evidence line resolves: 2134 of 2134.
-- Computed calls left unresolved, by design: 28.
-- Dead code candidates over the whole tree: {'unreachable': 2, 'dormant': 0, 'unknown': 10}.
-
-### Read these numbers with care
-
-1. **The labelers and the extractor share definitions.** Both follow `carddemo/LABELING.md`. A high score shows the extractor applies the rules as a careful reader does. It does not show the rules are right.
-2. **The truth was labeled by Claude.** Two independent passes per COBOL partition agreed on nearly every edge. That does not rule out a shared blind spot.
-3. **Contract edges are derived** from labeled data edges and layout copybooks by rule, so contract recall largely tests the join logic.
-4. **The extractor found one real gap on this benchmark**, a `COPY 'MEMBER'` with the name in quotes. It was fixed and fixture 17 was added. No truth file was edited to get here.
+| 25-unterminated-exec | pass | 1 |
 
 ## Can the fixtures fail?
 
-`evals/mutation_check.py` breaks the extractor in 31 ways and lists the fixtures that notice. 30 caught, 1 equivalent (no behavior change), 0 not caught.
+`evals/mutation_check.py` breaks the extractor in 33 ways and lists the fixtures that notice. 32 caught, 1 equivalent (no behavior change), 0 not caught.
 
 | Mutation | Caught by fixtures |
 |---|---|
-| string literals not masked | 01, 03, 05, 11, 12, 15, 17, 18, 20, 22 |
+| string literals not masked | 01, 03, 05, 11, 12, 15, 17, 18, 20, 22, 25 |
 | COPY never expanded | 05, 06 |
 | quoted COPY names unsupported | 17 |
 | columns 73 to 80 read as code | 15 |
-| comment indicator ignored | 15 |
+| comment indicator ignored | 15, 25 |
 | dash continuation ignored | 18 |
 | constants not resolved | 03 |
 | OPEN OUTPUT read as read | 06, 07, 16 |
@@ -116,6 +93,8 @@ Extraction time: 0.5 seconds (bar: under 60). Graded scope: the core application
 | computed calls dropped | 02, 03, 13, 18, 23 |
 | CSD entry points off | 05 |
 | git dates off | 12 |
+| byte order mark not stripped | 25 |
+| unterminated EXEC dropped silently | 25 |
 | subscripted names resolved like plain names | 23 |
 | EXEC SQL text visible to CALL scan | 21 |
 | CICS DELETE read as read | 22 |
@@ -133,4 +112,36 @@ Extraction time: 0.5 seconds (bar: under 60). Graded scope: the core application
 |---|---|
 | Citation hook (`test_hook.py`) | 11 of 11 pass |
 | End to end scorer (`test_e2e_metrics.py`) | 11 of 11 pass |
+
+## End to end runs
+
+| Run | Harness | Turns | Wall or model time | Cost or tokens | Citations | JSON | Waves | Hook gave up |
+|---|---|---|---|---|---|---|---|---|
+| 01-static-call | subagent | n/a | n/a | n/a | 78 of 78 resolve | valid | 1 | no |
+| 02-dynamic-call | subagent | n/a | n/a | n/a | 46 of 46 resolve | valid | 1 | no |
+| 03-cics-link-xctl | subagent | n/a | n/a | n/a | 123 of 123 resolve | valid | 1 | no |
+| 04-shared-copybook | subagent | n/a | n/a | n/a | 71 of 71 resolve | valid | 1 | no |
+| 05-vsam-cics-pair | subagent | n/a | n/a | n/a | 110 of 110 resolve | valid | 1 | no |
+| 06-contract-match | subagent | n/a | n/a | n/a | 127 of 127 resolve | valid | 1 | no |
+| 07-contract-mismatch | subagent | n/a | n/a | n/a | 171 of 171 resolve | valid | 1 | no |
+| 08-temporal-steps | subagent | n/a | n/a | n/a | 133 of 133 resolve | valid | 1 | no |
+| 09-temporal-controlm | subagent | n/a | n/a | n/a | 101 of 101 resolve | valid | 1 | no |
+| 10-temporal-shell | subagent | n/a | n/a | n/a | 93 of 93 resolve | valid | 1 | no |
+| 11-dead-program | subagent | n/a | n/a | n/a | 119 of 119 resolve | valid | 1 | no |
+| 12-dormant-program | subagent | n/a | n/a | n/a | 83 of 83 resolve | valid | 1 | no |
+| 13-dynamic-only-reachable | subagent | n/a | n/a | n/a | 98 of 98 resolve | valid | 1 | no |
+
+## How the end to end runs were produced
+
+Headless `claude -p` could not sign in in the build environment (OAuth login expired). The same command and skill files were run by hand through Claude subagents, then scored by the same scorer.
+
+- Date: 2026-09-30. Plugin commit when the runs started: `f33744c`. Model: Claude Sonnet 5.5 subagents (the plugin's own agents use sonnet at medium effort).
+- **Not exercised by this harness:**
+  - Loading the plugin with --plugin-dir and the namespaced command name
+  - The live Stop hook. It was tested with test_hook.py. Each agent ran the same checker by hand before finishing.
+  - The plugin's own subagents. The subagents did that work inline.
+  - Dollar cost. Tokens and time are reported instead.
+  - Interactive scoping questions
+- The extractor gained byte order mark handling and unterminated EXEC reporting after the runs started. Every saved graph.json was re-checked against a fresh extraction and is identical.
+- To replace these with real headless runs: `After `claude auth login`: python3 evals/run_e2e_evals.py --cases all`
 

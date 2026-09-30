@@ -247,6 +247,34 @@ def unreachable_on_dynamic(out_dir, must_not=None):
     return sorted(claimed & unknown)
 
 
+def graph_unmodified(out_dir, case):
+    """True when graph.json equals what the extractor produces from the original source today.
+
+    It proves Claude did not edit the facts, and that later extractor changes did not alter this run's graph.
+    """
+    import tempfile
+    import extract
+    import run_extractor_evals as R
+    saved = load_json(os.path.join(out_dir, "graph.json"))
+    if not saved:
+        return None
+    as_of = datetime.date.fromisoformat(saved["analysis"]["as_of"])
+    dormant = saved["analysis"]["dormant_years"]
+    if case == "carddemo":
+        fresh = extract.build(CARDDEMO, as_of, dormant, True)
+    else:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = os.path.join(tmp, "repo")
+            shutil.copytree(os.path.join(FIXTURES, case, "repo"), repo)
+            hp = os.path.join(repo, "history.json")
+            hist = json.load(open(hp)) if os.path.exists(hp) else None
+            if hist:
+                os.remove(hp)
+                R.make_git_history(repo, hist)
+            fresh = extract.build(repo, as_of, dormant, use_git=bool(hist))
+    return fresh["nodes"] == saved["nodes"] and fresh["edges"] == saved["edges"]
+
+
 def score_run(run_dir, case):
     out_dir = os.path.join(run_dir, "modernization-assessment")
     res = {"case": case, "run": os.path.basename(run_dir)}
@@ -270,6 +298,7 @@ def score_run(run_dir, case):
                         "resolve_rate": (1 - bad / total) if total else None}
     summary = os.path.join(out_dir, "00-summary.md")
     res["hook_gave_up"] = os.path.exists(summary) and "## Unresolved citations" in open(summary, errors="replace").read()
+    res["graph_unmodified"] = graph_unmodified(out_dir, case)
     res["json"] = json_status(out_dir)
     res["json_all_valid"] = all(v == "valid" for v in res["json"].values())
     must = None
@@ -302,6 +331,7 @@ def score_all(cases, n_runs=CARDDEMO_RUNS):
     tot = sum(s["citations"]["total"] for s in ran)
     bad = sum(s["citations"]["unresolved"] for s in ran)
     summary["citations"] = {"total": tot, "unresolved": bad, "resolve_rate": (1 - bad / tot) if tot else None}
+    summary["graph_unmodified_runs"] = sum(1 for s in ran if s.get("graph_unmodified"))
     summary["runs_scored"] = len(ran)
     summary["runs_expected"] = len(scores)
     summary["json_all_valid_runs"] = sum(1 for s in ran if s["json_all_valid"])
@@ -364,6 +394,7 @@ def main():
     print("\nruns scored: %d of %d" % (s["runs_scored"], s["runs_expected"]))
     print("citations: %s" % s["citations"])
     print("runs with all JSON valid: %d" % s["json_all_valid_runs"])
+    print("runs whose graph.json equals a fresh extraction: %d" % s["graph_unmodified_runs"])
     print("unreachable claims on dynamic targets: %d" % s["unreachable_on_dynamic_total"])
     if "carddemo_waves" in s:
         print("carddemo waves:", s["carddemo_waves"])
