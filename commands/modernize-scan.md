@@ -1,6 +1,6 @@
 ---
 description: Assess a COBOL, CICS, JCL and VSAM codebase for modernization. Scripts extract the coupling graph. Claude cuts the waves and scores the risk.
-argument-hint: '[path] [--target rehost|replatform|refactor|rewrite] [--must-not-break "text"] [--telemetry none|partial|provided] [--wave N]'
+argument-hint: '[path] [--target rehost|replatform|refactor|rewrite] [--must-not-break "text"] [--telemetry none|partial|provided] [--delivery conventional|ai-assisted|agent-led] [--wave N]'
 allowed-tools:
   - 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/*)'
   - 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/hooks/check_citations.py" *)'
@@ -19,6 +19,10 @@ Arguments you were given: `$ARGUMENTS`
 - `--target` is the target state: `rehost`, `replatform`, `refactor` or `rewrite`.
 - `--must-not-break` is a quoted list of what must not break.
 - `--telemetry` says whether runtime telemetry exists: `none`, `partial` or `provided`.
+- `--delivery` says how the work will be done, for the estimate: `conventional` (no AI coding assistance),
+  `ai-assisted` (engineers using an AI coding agent) or `agent-led` (an agent does most of the port, people
+  review). It is optional and it is not a scoping question. If it is missing, the estimate shows both
+  conventional and AI-assisted and says so. Record what you were given in `00-summary.md`.
 - `--wave N` means: skip the assessment, read the existing `modernization-assessment/` folder, and
   plan wave N in detail. See the last section.
 

@@ -22,6 +22,9 @@ repeatability. It is not evidence that the wave boundaries are right. A mainfram
 
 **Paths in citations.** A citation such as `modernization-assessment/waves.json:365` points at a file in this folder. The run wrote its output to a folder with that name. Every other citation is a path inside the CardDemo checkout.
 
+**The estimate in this sample predates the two-case rule.** `04-estimate.md` is on a conventional basis and does
+not show an AI-assisted case. The skill now asks for both, and states the basis in the first line.
+
 **Read it with care.**
 - The graph facts (`graph.json`, `01-inventory.md`, `02a-edge-tables.md`, `05a-dead-code-candidates.md`) come
   from the extractor. Every row cites a file and a line.

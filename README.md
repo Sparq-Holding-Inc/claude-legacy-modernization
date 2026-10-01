@@ -111,6 +111,11 @@ Read this before you trust it.
   validators check structure: the file and line are real, the plan covers every unit, the dead code
   buckets agree with the extractor, and a risk's wave matches the plan. Whether the cited line
   supports the sentence is for a person to check.
+- **The estimate is uncalibrated, and it is shown on two bases.** `04-estimate.md` gives engineer-weeks for a
+  conventional team and for an AI-assisted team, and says which parts shrink with AI and which do not
+  (getting the oracle, approvals, cutover). Every rate in it is Claude's planning assumption. The plugin carries
+  no measured productivity data. Replace the rates with your team's measured velocity from the first wave.
+  `--delivery conventional|ai-assisted|agent-led` picks which case leads the summary.
 - **The judgment is Claude's.** Risk scores and every change to the wave seed are opinions with
   cited reasons. Two runs on the same graph can differ. `evals/RESULTS.md` says by how much.
 

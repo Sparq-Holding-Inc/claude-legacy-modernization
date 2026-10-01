@@ -251,6 +251,31 @@ reason, unless a deviation places them.
 
 Estimate per wave, and be explicit about the method. Do not produce a single number.
 
+**Say the basis in the first line of `04-estimate.md`.** A figure in engineer-weeks means nothing until it
+says how the work gets done. Show two cases side by side for every wave:
+
+- **Conventional.** A team without AI coding assistance.
+- **AI-assisted.** Engineers using an AI coding agent to read, port and test, with human review.
+
+If the user passed `--delivery conventional`, `ai-assisted` or `agent-led`, the headline number in
+`00-summary.md` uses that case. If not, quote both. Never quote one figure without saying which case it is.
+
+Split each wave into its terms (port, boundary work, equivalence harness, cutover) and say for each whether
+AI assistance shrinks it:
+
+- **Understanding the code.** This assessment already did it. Do not charge discovery weeks for what the
+  extractor and this run produced. What remains is the client's answers in `00-summary.md`.
+- **Port.** An AI coding agent is strong at transliteration when a comparison harness exists. The cost moves
+  to review. Say how much review time you assume for each 1,000 lines.
+- **Boundary work and harness code.** Partly. The code is quick to write. Choosing what the boundary is, is not.
+- **The oracle, approvals, rehearsals, cutover windows and client availability.** These do not shrink with AI.
+  Often they are the longest term.
+
+Write each AI-assisted reduction as a falsifiable assumption ("assumes review takes a quarter of the authoring
+time it replaces"), never as a multiplier. This plugin carries no calibrated productivity data, so say that in
+the first paragraph. Any rate in `04-estimate.md` is a planning assumption, not a benchmark, and the team's
+measured velocity from wave 2 replaces it.
+
 Give a range, and give the two or three assumptions the range is most sensitive to. State them as
 falsifiable claims: "assumes the 41 batch jobs in wave 2 share one date handling copybook. If they
 do not, wave 2 roughly doubles." That sentence is worth more than the number.

@@ -13,6 +13,9 @@ Added
 - Computed calls are kept as unresolved edges. They are never dropped.
 - Graph facts computed by script: entry points, reachability, call cycles, articulation points,
   god modules, dataset hubs, and dead code candidates in three buckets.
+- The estimate states its basis and shows a conventional case and an AI-assisted case for every wave, with
+  the reduction written as an assumption per term. `--delivery` picks which leads. Added after a reviewer
+  asked whether the estimate assumed AI. It did not say. The sample in `examples/carddemo/` predates this.
 - A wave seed. The extractor cuts a first plan from facts alone: every entry point goes in a family
   (read-only batch, batch writers, online writers, DB2 or IMS or MQ, and so on) in a fixed order.
   It writes `03a-wave-seed.md` and a draft `03a-waves-draft.json`. Claude names the waves and may
