@@ -3,7 +3,22 @@
 A Claude Code plugin for the first two weeks of a mainframe modernization program. That is the part
 where you still do not know what you are dealing with.
 
-Point it at a COBOL, CICS, JCL and VSAM codebase. It produces what an engineering leader can take
+## Terms used in this README
+
+| Term | Meaning |
+|---|---|
+| **Unit** | The smallest thing the plan moves: a program, a JCL job, a proc, or a scheduler job. Steps, copybooks and datasets move with their owner. |
+| **Edge** | One dependency between two units, with the file and line that prove it. Kinds: `call`, `include`, `data`, `contract` and `temporal`. Together the edges are the dependency map (`graph.json`). |
+| **Entry point** | Where work starts: a JCL job, a CICS transaction, or a scheduler job. Reachability is traced from here. |
+| **Wave** | A group of units that ship together, in a set order. Each wave must deploy on its own, roll back on its own, have a boundary you can test, and be something a stakeholder can name. |
+| **Blast radius** | How much breaks, and how far away, if a wave goes wrong. |
+| **Dead code** | Code that may be safe to retire, in three buckets. Unreachable: no path from any entry point. Dormant: reachable on paper, but untouched for years. Unknown: a computed call could reach it. |
+| **Computed call** | A call whose target is a variable, so the extractor cannot always see where it goes. |
+| **Behavioral equivalence** | Proof that the new system does what the old one did. The test that proves it needs an oracle. |
+| **Oracle** | The source of truth the new system is compared against, such as archived output from the old system. |
+| **Citation** | A file and line that backs a claim. The Stop hook checks that each one exists. |
+
+Point the plugin at a COBOL, CICS, JCL and VSAM codebase. It produces what an engineering leader can take
 into a steering meeting:
 
 1. **A dependency map.** What calls what, which datasets are shared, which programs are bound
