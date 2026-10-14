@@ -54,7 +54,7 @@ fluent text and no way to check it. So this plugin splits the work:
 ## Install
 
 ```
-/plugin marketplace add teamsparq/claude-legacy-modernization
+/plugin marketplace add Sparq-Holding-Inc/claude-legacy-modernization
 /plugin install legacy-modernization@sparq
 ```
 
