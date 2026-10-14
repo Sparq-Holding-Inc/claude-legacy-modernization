@@ -55,8 +55,8 @@ A computed target (CALL WS-PGM-NAME) points to a node
 dropped. A statically named target that is simply not in the tree (CEEDAYS,
 IDCAMS, a system copybook) points to an "ext:" node with resolved=true.
 
-Deviations from the build plan, all logged in TEARDOWN.md
----------------------------------------------------------
+Deviations from the original schema
+-----------------------------------
 * unit_type adds "subprogram" and "external".
 * lang adds null (datasets, external nodes).
 * Node ids are prefixed by kind (see above).
