@@ -152,6 +152,22 @@ assessment of CardDemo is in `examples/carddemo/`.
 Not supported today: RPG, Oracle ADF, PL/SQL, .NET Framework, and Java. Each needs its own extractor
 and its own benchmark. None is claimed until it has been measured.
 
+## Support
+
+The GitHub issue tracker is the primary support channel:
+<https://github.com/Sparq-Holding-Inc/claude-legacy-modernization/issues>
+
+Bug reports are most useful with the source dialect, the command you ran, and the contents of
+`modernization-assessment/00-summary.md`. Do not paste client source into a public issue.
+
+For anything that does not belong in a public issue, including a private report of a defect found
+on a client estate, contact the maintainer directly.
+
+- **Maintainer:** Phil Morehead, Sparq
+- **Email:** phil.morehead@teamsparq.com
+
+Issues are acknowledged within five business days.
+
 ## About
 
 Sparq is a Select partner in the Claude Partner Network Services Track.
