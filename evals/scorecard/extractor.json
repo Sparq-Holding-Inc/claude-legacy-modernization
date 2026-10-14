@@ -187,7 +187,7 @@
   ]
  },
  "carddemo": {
-  "seconds": 0.7,
+  "seconds": 0.5,
   "stats": {
    "call": {
     "tp": 234,

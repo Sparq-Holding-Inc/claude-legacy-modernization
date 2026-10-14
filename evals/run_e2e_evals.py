@@ -291,7 +291,7 @@ def score_run(run_dir, case):
         res["ran"] = False
         return res
     res["ran"] = True
-    work = meta.get("work") or ""
+    work = (meta.get("work") or "").replace("<workspace>", os.path.dirname(PLUGIN))
     roots = [work, out_dir]
     total, bad = citation_stats(out_dir, roots)
     res["citations"] = {"total": total, "unresolved": bad,

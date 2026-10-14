@@ -23,7 +23,7 @@ passes were compared and every disagreement was settled by reading the source
 
 ## Benchmark
 
-Root: `/Users/phillipmorehead/Legacy Modernization Assessor Plugin/bench/carddemo`
+Root: `<workspace>/bench/carddemo`
 (AWS CardDemo, commit `59cc6c2fd7ebd7ef7925cad552a01a4b8b6e4d5e`).
 All paths in labels are relative to that root, for example `app/cbl/COSGN00C.cbl`.
 

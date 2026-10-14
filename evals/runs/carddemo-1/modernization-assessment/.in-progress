@@ -1,6 +1,6 @@
 {
  "state": "running",
- "target": "/Users/phillipmorehead/Legacy Modernization Assessor Plugin/bench/runs/carddemo-1/work",
+ "target": "<workspace>/bench/runs/carddemo-1/work",
  "mode": "full",
  "require": [
   "graph.json",

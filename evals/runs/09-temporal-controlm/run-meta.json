@@ -7,7 +7,7 @@
   "-p",
   "/legacy-modernization:modernize-scan --target refactor --must-not-break \"the nightly batch cycle\" --telemetry none",
   "--plugin-dir",
-  "/Users/phillipmorehead/Legacy Modernization Assessor Plugin/sparq-legacy-modernization",
+  "<workspace>/sparq-legacy-modernization",
   "--permission-mode",
   "acceptEdits",
   "--output-format",
@@ -18,5 +18,5 @@
   "120",
   "--no-session-persistence"
  ],
- "work": "/Users/phillipmorehead/Legacy Modernization Assessor Plugin/bench/runs/09-temporal-controlm/work"
+ "work": "<workspace>/bench/runs/09-temporal-controlm/work"
 }

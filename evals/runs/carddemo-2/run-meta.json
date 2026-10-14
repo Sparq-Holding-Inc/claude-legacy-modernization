@@ -7,7 +7,7 @@
   "-p",
   "/legacy-modernization:modernize-scan --target refactor --must-not-break \"daily transaction posting, the account and card master refresh, and the transaction report\" --telemetry none",
   "--plugin-dir",
-  "/Users/phillipmorehead/Legacy Modernization Assessor Plugin/sparq-legacy-modernization",
+  "<workspace>/sparq-legacy-modernization",
   "--permission-mode",
   "acceptEdits",
   "--output-format",
@@ -18,5 +18,5 @@
   "120",
   "--no-session-persistence"
  ],
- "work": "/Users/phillipmorehead/Legacy Modernization Assessor Plugin/bench/runs/carddemo-2/work"
+ "work": "<workspace>/bench/runs/carddemo-2/work"
 }
