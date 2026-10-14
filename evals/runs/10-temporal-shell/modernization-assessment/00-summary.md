@@ -1,99 +1,47 @@
 # 00 Summary
 
-Assessment of the tree in `.` (a folder of 3 JCL jobs and 1 shell wrapper). Generated 2026-09-30.
-
 ## Scoping answers
 
-- **Target state:** refactor. Given as `--target refactor`.
-- **Must not break:** "the nightly batch cycle". Given as `--must-not-break`. It maps to the wrapper
-  `sch:scripts/nightly.sh` and the two jobs it submits, JOBA and JOBB. The match rests on the wrapper's own
-  comment, "Nightly chain" (`scripts/nightly.sh:2`). Nothing else in the tree is named as a cycle, and no
-  outputs of the cycle are named anywhere. See Open Questions 1 and 5.
-- **Telemetry:** none. Given as `--telemetry none`. Every dead-code claim is provisional.
-- **Defaults:** no defaults applied. All three answers came as flags. This was a non-interactive run and
-  nobody was asked.
-
-## What is in the tree
-
-The tree holds no application code. It has no COBOL, no copybook, no proc, no CSD, no dataset and no
-scheduler definition beyond a six line shell wrapper (`meta.files_seen` in graph.json, analysis). Each JCL job
-runs only IEFBR14, a system utility that does nothing, and has no DD statement (`jcl/JOBA.jcl:2`,
-`jcl/JOBB.jcl:2`, `jcl/JOBC.jcl:2`). Under a refactor target there is no code here to restructure. What
-can be assessed is the cycle's order, its failure rule and its verification.
-
-## Result
-
-| Finding | Confidence | Evidence |
+| Question | Answer | Source |
 |---|---|---|
-| The plan is 1 wave. No structure in the tree offers a place to cut, and the four units total far below any size limit. | medium | `modernization-assessment/waves.json:1` |
-| One temporal edge exists, JOBA before JOBB. It comes from the order of two submit lines and is rated medium by the extractor. | medium | `scripts/nightly.sh:4`, `scripts/nightly.sh:5` |
-| The wrapper stops on the first failed command, so a failed JOBA submit keeps JOBB from running. | medium | `scripts/nightly.sh:3` |
-| JOBC is not submitted, the submit is commented out, and a comment calls it retired. It stays in no dead-code bucket and is held from the port pending confirmation. | low | `scripts/nightly.sh:2`, `scripts/nightly.sh:6` |
-| There is no data, contract or call coupling, no cycle, no god module and no computed call. The absence reflects the tree, not the system. | high | analysis fields `sccs`, `data_hubs`, `unresolved_dynamic` |
-| Dormancy was not computed, because the tree has no git history. An empty dormant list means not measured. | high | analysis field `warnings` |
-| Wave 1 estimate: 7 to 16 person-days, mostly discovery and verification. | low | inference |
+| Scope | `.` (current directory) | no scope argument |
+| Target state | refactor | `--target refactor` |
+| Must not break | "the nightly batch cycle" | `--must-not-break` |
+| Telemetry | none | `--telemetry none` |
+| Delivery | not given. The estimate shows conventional and AI-assisted side by side. | no `--delivery` flag |
 
-## Wave count
+All three scoping answers came as flags, so no defaults were applied.
 
-**1 wave.** Wave 1, "Nightly batch cycle", holds `job:JOBA`, `job:JOBB`, `job:JOBC` and
-`sch:scripts/nightly.sh`. It is the extractor's seed with no deviation (`03-waves.md`). Its blast radius is
-high, because it holds the whole must-not-break item. Its confidence is low.
+## Findings
+
+- **What is in the tree:** 3 JCL jobs, 1 shell wrapper, 0 COBOL programs, 0 copybooks, 0 datasets. Nothing was left unparsed (`analysis`: `node_counts`, `unparsed`).
+- **Waves:** 1 (`modernization-assessment/waves.json`, `modernization-assessment/03-waves.md`). Confidence is low.
+- **Must-not-break mapping:** "the nightly batch cycle" maps to `sch:scripts/nightly.sh`, JOBA and JOBB (`scripts/nightly.sh:4`, `scripts/nightly.sh:5`).
+- **Headline estimate:** conventional 7 to 19 engineer-days, AI-assisted 6 to 17. The spread comes from approvals and cutover, which AI does not shorten (`modernization-assessment/04-estimate.md`).
+- **Dead code:** JOBC is retired by the wrapper's own header and has its submit commented out (`scripts/nightly.sh:2`, `scripts/nightly.sh:6`). Dormancy was not measured, and with no telemetry every dead-code claim is provisional.
 
 ## Largest risk
 
-The must-not-break nightly cycle depends on one ordering, JOBA before JOBB, and the only thing that
-sets that order is the sequence of two `submit` lines in a shell wrapper (`scripts/nightly.sh:4`,
-`scripts/nightly.sh:5`). Whether `submit` waits for JOBA to finish is not in the tree. If it does not wait
-(as the z/OS UNIX `submit` command does not, inference), the order is not enforced today, and `set -e`
-catches only a failed submit (`scripts/nightly.sh:3`). A port that replaces the wrapper with parallel jobs, or
-with a scheduler that treats the order as a rule when it is a habit, or the reverse, changes the
-cycle silently. The tree gives no data reason for the order (no shared dataset, `jcl/JOBA.jcl:2`,
-`jcl/JOBB.jcl:2`). The harness must settle this before the wrapper is retired. Confidence: medium that the
-risk is real, low on which way the answer falls.
+The nightly cycle may not be in the tree. Every step runs only IEFBR14, a no-op utility (`jcl/JOBA.jcl:2`, `jcl/JOBB.jcl:2`, `jcl/JOBC.jcl:2`), and the tree has no dataset. The one real behavior is the order and stop-on-failure rule in the wrapper (`scripts/nightly.sh:3`), and `submit` is not defined here. A plan, estimate or equivalence claim built on this tree describes the wrapper, not necessarily the business cycle. Confidence: high that the tree is incomplete; the size of the gap is unknown (inference).
 
-## Open Questions
+## Open Questions for the client's engineers
 
-For the client's engineers.
-
-1. **Is `scripts/nightly.sh` the whole nightly batch cycle?** What starts it, when, in which time zone, and
-   on which host? Is there a second wrapper or a scheduler the tree does not hold? (`scripts/nightly.sh:2`)
-2. **What does `submit` do?** It is not defined in the tree. Does it return at once or wait for the job? Does
-   it pass the job's return code back to the shell, so that `set -e` sees an abend? (`scripts/nightly.sh:3`,
-   `scripts/nightly.sh:4`)
-3. **Why must JOBB run after JOBA?** No dataset links them. Is there a side effect the tree does not show, or
-   is it habit? What should happen to JOBB when JOBA abends? (`scripts/nightly.sh:5`)
-4. **Is JOBC retired, and does anything else submit it?** The comment says so and the submit is commented
-   out. Can the client show run history for a full year? Should the file be kept? (`scripts/nightly.sh:2`,
-   `scripts/nightly.sh:6`, `jcl/JOBC.jcl:1`)
-5. **Is this JCL the real JCL, and where is the application code?** JOBA, JOBB and JOBC each run only IEFBR14
-   with no DD statement. Which programs and datasets does the production nightly cycle run and touch? Which
-   outputs (reports, extracts, files for partners) is "must not break" really about? (`jcl/JOBA.jcl:2`,
-   `jcl/JOBB.jcl:2`)
-6. **Can the client supply 12 months of job logs, return codes and SMF records for the chain?** They would turn
-   the dead-code register from provisional to evidence, and they are the oracle for the harness. This includes
-   at least one month-end and one year-end night.
-7. **Can the client supply file dates or source history?** The tree is not a git repository, so the dormancy rule
-   did not run (analysis field `warnings`).
-8. **Does the team have someone who can read JCL and the site's shell tooling?** It affects the estimate
-   (`04-estimate.md`).
-
-## Files the extractor did not parse
-
-None. `unparsed` is empty (`meta.limits` and `unparsed` in graph.json, analysis).
+1. What is `submit` in `scripts/nightly.sh:4`? Does it wait for the job to finish and return the job's return code, or only confirm the job was accepted? This decides whether `set -e` (`scripts/nightly.sh:3`) really stops JOBB when JOBA fails.
+2. Is the nightly cycle only JOBA and JOBB? The jobs run IEFBR14 only (`jcl/JOBA.jcl:2`, `jcl/JOBB.jcl:2`). Where are the programs, procs and datasets that do the real work?
+3. Is JOBC really retired (`scripts/nightly.sh:2`)? Does any scheduler, operator or other script submit it? The extractor lists it as unscheduled.
+4. Which scheduler runs `nightly.sh` and when? The extractor reads only Control-M XML and shell wrappers that name JCL files (`meta.limits`), so any other scheduler is invisible.
+5. What does JOBB depend on from JOBA? The only link is line order in the script (`scripts/nightly.sh:4`, `scripts/nightly.sh:5`), rated medium. With no data edge, is the order a real dependency or a habit?
+6. Which job logs, return-code history and archived outputs exist for the last 12 months, including month-end and fiscal-year-end? They are the oracle in `modernization-assessment/06-test-strategy.md`, and the telemetry for the dead-code register.
+7. The tree is not a git repository, so no last-modified date exists. Can you provide source history? Without it the dormant bucket stays unmeasured (`analysis`: `warnings`).
+8. Can the old chain stay up for a parallel run during wave 1?
 
 ## Extractor limits that touch this system
 
-- **Only Control-M XML and shell wrappers that name JCL files are read as schedulers.** The wrapper's `set -e`
-  and its comments are not read as behavior. I read the six lines by hand (`scripts/nightly.sh:1` through
-  `scripts/nightly.sh:6`).
-- **IF/THEN/ELSE and COND= are not modeled, and step order is file order.** For the wrapper this means the
-  temporal edge is the order of the lines, not proof of the order of execution. That is why the edge is
-  medium (`scripts/nightly.sh:4`, `scripts/nightly.sh:5`).
-- The other limits (fixed format COBOL, COPY REPLACING, computed CALL targets, DD and record lengths, CICS
-  chains) do not touch this tree. It holds no COBOL and no DD statement.
+- JCL IF/THEN/ELSE and COND= are not modeled, and step order is file order (`meta.limits`). With one step per job here, that matters only if the real jobs have more.
+- Only Control-M XML and shell wrappers naming JCL files are read as schedulers (`meta.limits`).
+- DCB, LRECL and RECFM are not read (`meta.limits`). No dataset exists in the tree, so this is untested.
+- Not parsed: nothing.
 
-## Reading order
+## Artifacts
 
-`01-inventory.md`, `02-coupling.md`, `03-waves.md`, `04-estimate.md`, `05-dead-code.md`, `06-test-strategy.md`.
-Generated fact tables: `01-inventory.md`, `02a-edge-tables.md`, `03a-wave-seed.md`, `05a-dead-code-candidates.md`.
-Machine files: `graph.json`, `waves.json`, `risks.json`, `dead-code.json`.
+`01-inventory.md`, `02-coupling.md` (with `02a-edge-tables.md`), `03-waves.md`, `waves.json`, `04-estimate.md`, `05-dead-code.md`, `dead-code.json`, `06-test-strategy.md`, `risks.json`, `graph.json`.

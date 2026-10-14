@@ -1,28 +1,23 @@
 {
- "target_state": "refactor",
- "waves": [
-  {
-   "wave": 1,
-   "family": "batch-readonly",
-   "name": "The whole tree: MAINJOB and its three programs",
-   "units": [
-    "NEWPGM",
-    "OLDPGM",
-    "PGMMAIN",
-    "job:MAINJOB"
-   ],
-   "rationale": "The tree has one entry point, so it has one family and one wave. MAINJOB runs PGMMAIN, and PGMMAIN calls OLDPGM and NEWPGM unconditionally, so the four units are one call chain and move together. The family label batch-readonly means the extractor found no dataset edge. It does not prove the job writes nothing, because the tree holds no DD statements. The wave passes the four validity tests only in a thin sense. It can be deployed and rolled back as a unit, because a single job step is the whole surface. Its only testable boundary in the tree is the job's return code and step execution, since no dataset is named. The tree is likely a fragment of the real nightly cycle, so this is a wave for the code we were given, not for the system.",
-   "unblocks": "Nothing else in this tree. It is the only wave, so it is a chore unless MAINJOB is the nightly batch cycle. Then it proves the toolchain and the harness on that cycle.",
-   "blast_radius": "medium",
-   "confidence": "medium",
-   "evidence": [
+  "target_state": "refactor",
+  "waves": [
     {
-     "file": "app/jcl/MAINJOB.jcl",
-     "line": 1
+      "wave": 1,
+      "family": "batch-readonly",
+      "name": "MAINJOB batch chain",
+      "units": ["NEWPGM", "OLDPGM", "PGMMAIN", "job:MAINJOB"],
+      "rationale": "One job, one driver program and two subprograms with a single entry point. They share no dataset or copybook, so one wave is the whole system. Splitting it would cut the only call chain and give a wave with no testable boundary.",
+      "unblocks": "Nothing in the tree depends on it. It does prove the toolchain and the equivalence harness for any larger batch system the client has not supplied.",
+      "blast_radius": "low",
+      "confidence": "medium",
+      "evidence": [
+        {"file": "app/jcl/MAINJOB.jcl", "line": 1},
+        {"file": "app/jcl/MAINJOB.jcl", "line": 2},
+        {"file": "app/cbl/PGMMAIN.cbl", "line": 4},
+        {"file": "app/cbl/PGMMAIN.cbl", "line": 5}
+      ]
     }
-   ]
-  }
- ],
- "unassigned": [],
- "deviations": []
+  ],
+  "unassigned": [],
+  "deviations": []
 }

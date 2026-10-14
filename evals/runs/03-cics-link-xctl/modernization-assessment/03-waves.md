@@ -1,30 +1,24 @@
 # 03 Waves
 
-## Result: no waves
+**Wave count: 0.** No wave is proposed, and that is the correct answer from this tree. `modernization-assessment/waves.json:3` holds `"waves": []`.
 
-`modernization-assessment/waves.json` has `"target_state": "refactor"` (line 2) and an empty `waves` list (line 3). All four programs are in `unassigned`. This is deliberate, and it follows the rule for a tree with no entry point.
+## Why
 
-The extractor found no entry point: no CSD transaction, no JCL job, no scheduler job, no wrapper (analysis: `entry_points`, empty; warning printed by `extract.py`). The wave seed puts every unit in a family by the entry points that use it. With none, it places nothing (`03a-wave-seed.md`). I did not invent a wave, and I made no deviation from the seed (`deviations` is empty, `modernization-assessment/waves.json:10`).
+The tree has no entry point. There is no CSD transaction, JCL job, scheduler job or wrapper (`analysis` field `entry_points` is empty; `analysis` field `warnings`). The wave method sorts entry points into families (batch, read-only online, write online, DB2). With none, every unit is unknown and nothing can be sequenced. Inventing a wave would be a guess about who calls PROGA.
 
-## Units not placed
+| Unit | Status | Reason | Evidence | Confidence |
+|---|---|---|---|---|
+| PROGA | unassigned | No transaction or job names it. Its two computed calls are open. | `app/cbl/PROGA.cbl:16` | low |
+| PROGB | unassigned | Reached only from PROGA by LINK. | `app/cbl/PROGA.cbl:12` | low |
+| PROGC | unassigned | Reached only from PROGA by XCTL. | `app/cbl/PROGA.cbl:20` | low |
+| PROGD | unassigned | Reached only from PROGA by XCTL. | `app/cbl/PROGA.cbl:23` | low |
 
-| Unit | Confidence | Reason | Evidence |
-|---|---|---|---|
-| PROGA | low | No entry point in the tree. Nothing calls it, and no CSD was supplied to show whether a transaction starts it. It is the hub for the other three. | `app/cbl/PROGA.cbl:1` |
-| PROGB | low | No entry point in the tree. Its only caller is PROGA, by a static LINK. | `app/cbl/PROGA.cbl:12` |
-| PROGC | low | No entry point in the tree. Its only caller is PROGA, by XCTL. | `app/cbl/PROGA.cbl:20` |
-| PROGD | low | No entry point in the tree. Its only caller is PROGA, by an XCTL that follows another XCTL (inference: probably never executed). | `app/cbl/PROGA.cbl:23` |
+## The must-not-break item
 
-## What would have to be true to cut waves
+"The nightly batch cycle" maps to no unit here. All four programs are CICS online programs: they use EXEC CICS and the extractor typed them `online_txn` (`app/cbl/PROGA.cbl:12`). There is no JCL, no batch program and no dataset in the tree. Either the batch cycle is in code that was not supplied, or it does not call these programs. Both readings are open questions in `00-summary.md`.
 
-Nothing can be sequenced until the client supplies at least one of: a CSD or RDO listing that names the transactions and their initial programs, JCL for the batch jobs, or a scheduler export. Only then does the extractor have entry points to start from.
+## If the missing inputs arrive
 
-Once entry points exist, this is what the code already says about how the four units would move:
+inference: the likely order is PROGB, PROGC and PROGD first (leaves, 4 lines each, no data), then PROGA behind a facade, because PROGA is the articulation point. This needs the CSD to confirm. It is not a plan.
 
-- PROGA moves with the earliest family that uses it. PROGB, PROGC and PROGD have only PROGA as a caller (analysis: `fan_in`), so they move with it, or before it if PROGA is kept behind a facade that still reaches the old versions.
-- PROGA is scored high-high in `risks.json` because of the computed LINK at `app/cbl/PROGA.cbl:16`. High-high units go late and go behind a facade. The facade would have to accept any program name in the COMMAREA and route it to either the old or the new program. That is inference.
-- The wave would have to be one that can be rolled back on its own. The four programs write no dataset (no SELECT, OPEN, READ or WRITE appears in `app/cbl/PROGA.cbl:1-26`), so rollback is a routing change, not a data restore. That is inference from a tree that may be a fragment.
-
-## Must-not-break: the nightly batch cycle
-
-The user named the nightly batch cycle as a thing that must not break. It maps to no unit in this tree. There is no JCL, no scheduler definition, no batch program and no dataset. All four programs use EXEC CICS (`app/cbl/PROGA.cbl:12`). I have not mapped it to any of them. It is the first item in Open Questions in `00-summary.md`.
+No deviations from the seed (`modernization-assessment/waves.json:10`).

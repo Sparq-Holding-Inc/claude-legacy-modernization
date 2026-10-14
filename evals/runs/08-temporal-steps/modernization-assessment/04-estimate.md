@@ -1,57 +1,27 @@
 # 04 Estimate
 
-## Method
+**Basis.** `--delivery` was not given, so every figure shows both cases: conventional (no AI coding assistance) and AI-assisted (engineers using an AI coding agent, with human review). This plugin carries no calibrated productivity data. Every rate below is a planning assumption, not a benchmark. Replace it with measured velocity after wave 1.
 
-The estimate is per wave, as a range, and every number is inference. It is not measured and it does not come
-from lines of code. The tree is 12 lines of COBOL and 5 lines of JCL, and a line count says nothing here
-(`app/cbl/PGMA.cbl:4`, `app/jcl/SEQJOB.jcl:5`). I ranked the drivers in the order that moves the effort:
+The tree is 12 lines of COBOL and 5 lines of JCL (`app/cbl/PGMA.cbl:4`, `app/jcl/SEQJOB.jcl:5`). The estimate is for what the tree shows. If the real system is larger, the estimate is void. `inference`
 
-| Driver | What the tree shows | Effect on wave 1 | Evidence |
-|---|---|---|---|
-| Coupling edges that cross the wave boundary | None. There is one wave and no dataset, so nothing crosses it. | Lowers the estimate | `analysis` field `edge_counts` |
-| A behavioral oracle | None in the tree. No dataset, log or report is present. | Raises it. This is the largest cost. | inference |
-| God modules in the wave | None. | Neutral | `analysis` field `god_modules` |
-| Business logic held in the database | Unknown. No SQL is in the programs. | Unknown | `app/cbl/PGMA.cbl:3` |
-| Someone who can read the source language | Unknown. Not stated. | Unknown | inference |
+## Wave 1
 
-## Wave 1 range
+| Term | Conventional | AI-assisted | Does AI shrink it? | Evidence |
+|---|---|---|---|---|
+| Understanding the code | 0 weeks | 0 weeks | Already done by this run | `app/cbl/PGMA.cbl:4` |
+| Port of three stubs | 0.2 to 0.5 weeks | 0.1 to 0.3 weeks | Yes, if a harness exists. Assumes review takes a quarter of the authoring time it replaces. | `app/cbl/PGMB.cbl:4` |
+| Boundary work (step order, return codes) | 0.5 to 1 week | 0.4 to 0.8 weeks | Little. Choosing the boundary is the hard part. | `app/jcl/SEQJOB.jcl:2` |
+| Equivalence harness | 1 to 2 weeks | 0.7 to 1.5 weeks | Partly. Code is quick, the oracle is not. | inference |
+| Cutover, rehearsal, approvals | 1 to 2 weeks | 1 to 2 weeks | No | inference |
+| **Total** | **2.7 to 5.5 weeks** | **2.2 to 4.6 weeks** | | inference |
 
-| Piece of work | Range in person-days | Confidence | Evidence |
-|---|---|---|---|
-| Port PGMA, PGMB and PGMC | under 1 | medium | `app/cbl/PGMA.cbl:4`, `app/cbl/PGMB.cbl:4`, `app/cbl/PGMC.cbl:4` |
-| Port the job: step order, return codes, the step name rule | 1 to 3 | low | `app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:5` |
-| Build the oracle and the harness: collect logs and outputs, agree the normalization spec, run the comparison | 3 to 10 | low | inference |
-| Total for wave 1 | about 5 to 14 | low | inference |
+## Assumptions the range is most sensitive to
 
-There is one wave, so the total for the assessment is the same range. Do not read it as a quote. It is what
-this tree supports, and the tree is thin.
+1. Assumes the duplicate STEP2 (`app/jcl/SEQJOB.jcl:5`) is a copy error in this extract and the real job has four distinctly named steps. If the real job depends on the repeated name, the boundary work roughly doubles.
+2. Assumes the real programs are as small as these stubs. If they are not, the port term grows with their size, and this estimate no longer applies.
+3. Assumes the client can supply job logs or archived output for the oracle. If they cannot, the harness term roughly doubles, because the oracle must be built by hand.
 
-## The assumptions this range is most sensitive to
+## Where AI can and cannot help
 
-1. **The programs in the tree are the programs that run.** The range assumes PGMA, PGMB and PGMC really are
-   no-ops. If production runs programs with real logic and real files, this range does not apply at all.
-   The estimate would have to be redone from the real source, and it would likely be several times larger.
-   That is the assumption that matters most. Each program is four lines with only `GOBACK`
-   (`app/cbl/PGMA.cbl:4`, `app/cbl/PGMB.cbl:4`, `app/cbl/PGMC.cbl:4`).
-2. **The client can supply job logs with return codes for SEQJOB for at least 13 months.** If only the last
-   few weeks exist, the harness effort roughly doubles, because month-end and year-end cases must be built by
-   hand. Nothing in the tree gives a log (`analysis` field `warnings`).
-3. **The repeated step name STEP2 is a defect in this copy, not a feature of production.** If production
-   really runs a name collision, the port needs a step identity rule and a restart rule, and the job port
-   grows by 2 to 4 days (`app/jcl/SEQJOB.jcl:3`, `app/jcl/SEQJOB.jcl:5`).
-
-## Where Claude Code helps, and where it does not
-
-| Task | Claude Code | Evidence |
-|---|---|---|
-| Transliterate PGMA, PGMB, PGMC | Strong. Each is a single `GOBACK`, so this is mechanical. | `app/cbl/PGMA.cbl:4` |
-| Reproduce the step sequence in the target's orchestrator | Strong once the step name rule is decided by a human. | `app/jcl/SEQJOB.jcl:2`, `app/jcl/SEQJOB.jcl:5` |
-| Say what the nightly cycle is for | Weak. Nothing is written down, and the tree has no comment, schedule or dataset that shows intent. | inference |
-| Decide whether the second STEP2 is a defect | Weak. It is a client decision. | `app/jcl/SEQJOB.jcl:5` |
-| Build the comparison harness once outputs exist | Strong, given a written normalization spec. | inference |
-
-## A note on the target
-
-The target is refactor: the same behavior in restructured code, often as services. The tree gives no reason
-to split three no-op programs into services, since they share no code and no data (`analysis` fields
-`fan_in`, `fan_out`). The choice of target will matter once the real programs arrive. That is inference.
+- Strong: transliterating the stubs once a comparison harness exists.
+- Weak: deciding what the repeated step name means, and what "nightly" means for this job. Those are questions for people.

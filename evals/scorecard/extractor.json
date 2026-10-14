@@ -146,26 +146,31 @@
     "pass": true,
     "problems": [],
     "edges": 15
+   },
+   "30-wave-seed-groups": {
+    "pass": true,
+    "problems": [],
+    "edges": 44
    }
   },
   "per_kind": {
    "call": {
-    "tp": 67,
+    "tp": 80,
     "fp": 0,
     "fn": 0
    },
    "include": {
-    "tp": 51,
+    "tp": 62,
     "fp": 0,
     "fn": 0
    },
    "data": {
-    "tp": 32,
+    "tp": 44,
     "fp": 0,
     "fn": 0
    },
    "contract": {
-    "tp": 9,
+    "tp": 17,
     "fp": 0,
     "fn": 0
    },
@@ -177,12 +182,12 @@
   },
   "all_pass": true,
   "evidence_resolves": [
-   282,
-   282
+   399,
+   399
   ]
  },
  "carddemo": {
-  "seconds": 0.6,
+  "seconds": 0.7,
   "stats": {
    "call": {
     "tp": 234,
@@ -286,8 +291,8 @@
   },
   "ca7_reported_unparsed": true,
   "evidence_resolves": [
-   2242,
-   2242
+   2248,
+   2248
   ],
   "evidence_overlap_with_truth": {
    "call:total": 234,

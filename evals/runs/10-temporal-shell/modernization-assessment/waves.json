@@ -1,36 +1,27 @@
 {
- "target_state": "refactor",
- "waves": [
-  {
-   "wave": 1,
-   "family": "batch-utility",
-   "name": "Nightly batch cycle",
-   "units": [
-    "job:JOBA",
-    "job:JOBB",
-    "job:JOBC",
-    "sch:scripts/nightly.sh"
-   ],
-   "rationale": "All three JCL jobs run only IEFBR14 with no DD statements, and no dataset links them to anything else, so the seed family batch-utility holds and one wave is a sound cut. It carries the whole must-not-break nightly cycle: the wrapper submits JOBA and then JOBB. The wave passes the four tests. The wrapper can be swapped while the old one stays as the fallback. Rollback is reverting that swap. The boundary is job order and return codes. A stakeholder can name it as the nightly cycle on the new platform. The weak test is the boundary, because the tree shows no output to compare. JOBC is carried here only because the extractor counts every unscheduled job as an entry point. The wrapper comment calls it retired, so no port work is planned for it until the client confirms.",
-   "unblocks": "Nothing else in this tree depends on it: no data, contract or call edge reaches these jobs from another unit. In sequencing terms it is a chore, and no later wave exists to unblock. Its value is retiring the shell wrapper and leaving an order and return code harness for whatever the client adds to the tree later.",
-   "blast_radius": "high",
-   "confidence": "low",
-   "evidence": [
+  "target_state": "refactor",
+  "waves": [
     {
-     "file": "jcl/JOBA.jcl",
-     "line": 1
-    },
-    {
-     "file": "jcl/JOBB.jcl",
-     "line": 1
-    },
-    {
-     "file": "jcl/JOBC.jcl",
-     "line": 1
+      "wave": 1,
+      "family": "batch-utility",
+      "name": "Nightly batch cycle",
+      "units": [
+        "job:JOBA",
+        "job:JOBB",
+        "job:JOBC",
+        "sch:scripts/nightly.sh"
+      ],
+      "rationale": "All three jobs run only IEFBR14 and touch no dataset, so one family describes them. The wrapper submits JOBA then JOBB (scripts/nightly.sh:4, scripts/nightly.sh:5) and is the must-not-break item. JOBC is retired per scripts/nightly.sh:2 and its submit is commented out at scripts/nightly.sh:6. It is kept in the wave only so the unit is accounted for. If the client confirms it is retired, retire it instead of porting it. The wave is sound as one unit because the order JOBA then JOBB is the only coupling and it lives in the wrapper. Nothing in the tree shows what the cycle really does, since IEFBR14 is a no-op (jcl/JOBA.jcl:2), so the real work is either outside the tree or nothing (inference).",
+      "unblocks": "Nothing inside this tree. It is the whole system, so the wave is a chore until the client supplies the real nightly programs, datasets and scheduler. It does prove the wrapper-ordering and job-failure semantics that any later wave must keep.",
+      "blast_radius": "low",
+      "confidence": "low",
+      "evidence": [
+        {"file": "jcl/JOBA.jcl", "line": 1},
+        {"file": "jcl/JOBB.jcl", "line": 1},
+        {"file": "jcl/JOBC.jcl", "line": 1}
+      ]
     }
-   ]
-  }
- ],
- "unassigned": [],
- "deviations": []
+  ],
+  "unassigned": [],
+  "deviations": []
 }

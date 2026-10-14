@@ -1,44 +1,18 @@
 {
  "units": [
   {
-   "id": "job:MAINJOB",
-   "port_difficulty": {
-    "score": 1,
-    "why": "One EXEC PGM step and no DD statements, so nothing to translate beyond the step itself."
-   },
-   "blast_radius": {
-    "score": 3,
-    "why": "The only entry point in the tree, so the likeliest home of the must-not-break nightly batch cycle, but no scheduler in the tree confirms that."
-   },
-   "quadrant": "low-high",
-   "wave": 1,
-   "driving_fact": "MAINJOB is the only job and the only entry point, and it runs PGMMAIN in step S1.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/jcl/MAINJOB.jcl",
-     "line": 1
-    },
-    {
-     "file": "app/jcl/MAINJOB.jcl",
-     "line": 2
-    }
-   ],
-   "inference": true
-  },
-  {
    "id": "PGMMAIN",
    "port_difficulty": {
     "score": 1,
-    "why": "Two literal CALL statements and GOBACK. No arithmetic, no files, no branches."
+    "why": "Six lines: two unconditional CALLs and GOBACK. No arithmetic, no data, no special-cased codes."
    },
    "blast_radius": {
     "score": 3,
-    "why": "Sole gateway to OLDPGM and NEWPGM and an articulation point, so it sits on the whole path if MAINJOB is the nightly cycle."
+    "why": "Sole entry program and the articulation point for both subprograms, on the path mapped by inference to the must-not-break nightly cycle. It touches no datasets and a failed CALL abends loudly."
    },
    "quadrant": "low-high",
    "wave": 1,
-   "driving_fact": "Calls OLDPGM at line 4 and NEWPGM at line 5, both unconditionally, and is the articulation point in analysis.articulation_points.",
+   "driving_fact": "Articulation point: OLDPGM and NEWPGM are reachable only through it, and job:MAINJOB runs it.",
    "confidence": "medium",
    "evidence": [
     {
@@ -49,22 +23,21 @@
      "file": "app/cbl/PGMMAIN.cbl",
      "line": 5
     }
-   ],
-   "inference": true
+   ]
   },
   {
    "id": "OLDPGM",
    "port_difficulty": {
     "score": 1,
-    "why": "The body is a single GOBACK. There is no logic in this source to port."
+    "why": "Procedure body is only GOBACK, so there is no logic or arithmetic to port."
    },
    "blast_radius": {
     "score": 2,
-    "why": "Writes nothing, but PGMMAIN calls it unconditionally, so dropping it as dormant would break the call loudly."
+    "why": "Called unconditionally every run, so removing it would break the call, but it does nothing observable, has fan-in 1 and no datasets."
    },
    "quadrant": "low-low",
    "wave": 1,
-   "driving_fact": "Not modified since 2011-03-04, yet called unconditionally by PGMMAIN, which was added on 2026-05-01.",
+   "driving_fact": "Dormant by date (last modified 2011-03-04) but PGMMAIN calls it unconditionally at line 4, so it is live code.",
    "confidence": "medium",
    "evidence": [
     {
@@ -81,15 +54,15 @@
    "id": "NEWPGM",
    "port_difficulty": {
     "score": 1,
-    "why": "The body is a single GOBACK. There is no logic in this source to port."
+    "why": "Procedure body is only GOBACK, so there is no logic or arithmetic to port."
    },
    "blast_radius": {
     "score": 2,
-    "why": "Writes nothing, and PGMMAIN calls it unconditionally, so a missing port would fail loudly."
+    "why": "Called unconditionally by PGMMAIN, fan-in 1, no datasets, and a missing program would abend loudly."
    },
    "quadrant": "low-low",
    "wave": 1,
-   "driving_fact": "Called unconditionally by PGMMAIN at line 5, and it has no callees of its own.",
+   "driving_fact": "Called unconditionally by PGMMAIN at line 5 and does nothing observable.",
    "confidence": "medium",
    "evidence": [
     {
@@ -99,6 +72,32 @@
     {
      "file": "app/cbl/PGMMAIN.cbl",
      "line": 5
+    }
+   ]
+  },
+  {
+   "id": "job:MAINJOB",
+   "port_difficulty": {
+    "score": 1,
+    "why": "Two-line JCL: a JOB card and one EXEC PGM=PGMMAIN step, with no DDs, PARM or conditional logic."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "The only entry point, mapped to the nightly batch cycle by inference only because no scheduler was parsed. The programs behind it do nothing observable, and a failed run would be loud."
+   },
+   "quadrant": "low-high",
+   "wave": 1,
+   "driving_fact": "Only entry point in the tree. The nightly-cycle mapping is inferred, and cross-job ordering is unknown without a scheduler export.",
+   "confidence": "medium",
+   "inference": true,
+   "evidence": [
+    {
+     "file": "app/jcl/MAINJOB.jcl",
+     "line": 1
+    },
+    {
+     "file": "app/jcl/MAINJOB.jcl",
+     "line": 2
     }
    ]
   }

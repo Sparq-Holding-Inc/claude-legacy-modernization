@@ -1,5 +1,22 @@
 {
  "case": "carddemo",
- "harness": "subagent",
+ "wall_seconds": 345.6,
+ "returncode": 0,
+ "command": [
+  "claude",
+  "-p",
+  "/legacy-modernization:modernize-scan --target refactor --must-not-break \"daily transaction posting, the account and card master refresh, and the transaction report\" --telemetry none",
+  "--plugin-dir",
+  "/Users/phillipmorehead/Legacy Modernization Assessor Plugin/sparq-legacy-modernization",
+  "--permission-mode",
+  "acceptEdits",
+  "--output-format",
+  "json",
+  "--max-budget-usd",
+  "8.0",
+  "--max-turns",
+  "120",
+  "--no-session-persistence"
+ ],
  "work": "/Users/phillipmorehead/Legacy Modernization Assessor Plugin/bench/runs/carddemo-2/work"
 }

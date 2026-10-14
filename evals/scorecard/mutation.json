@@ -16,7 +16,8 @@
     "25",
     "26",
     "28",
-    "29"
+    "29",
+    "30"
    ],
    "equivalent": false
   },
@@ -70,7 +71,8 @@
     "06",
     "07",
     "16",
-    "26"
+    "26",
+    "30"
    ],
    "equivalent": false
   },
@@ -137,7 +139,8 @@
     "05",
     "06",
     "07",
-    "26"
+    "26",
+    "30"
    ],
    "equivalent": false
   },
@@ -145,7 +148,8 @@
    "mutation": "contract confidence always high",
    "caught_by": [
     "07",
-    "26"
+    "26",
+    "30"
    ],
    "equivalent": false
   },
@@ -261,7 +265,8 @@
   {
    "mutation": "wave seed: shared writes not detected",
    "caught_by": [
-    "26"
+    "26",
+    "30"
    ],
    "equivalent": false
   },
@@ -339,6 +344,34 @@
    "mutation": "wave seed: scheduler chains not kept together",
    "caught_by": [
     "26"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "wave seed: writers of the same dataset not bound",
+   "caught_by": [
+    "30"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "wave seed: readers bound to the writer",
+   "caught_by": [
+    "30"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "wave seed: shared program does not bind",
+   "caught_by": [
+    "30"
+   ],
+   "equivalent": false
+  },
+  {
+   "mutation": "wave seed: family never cut into groups",
+   "caught_by": [
+    "30"
    ],
    "equivalent": false
   },

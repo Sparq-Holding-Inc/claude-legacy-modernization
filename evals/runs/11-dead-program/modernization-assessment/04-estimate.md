@@ -1,56 +1,24 @@
 # 04 Estimate
 
-Target state: refactor. Every figure below is inference. It is a range in person-days, built from the
-factors in the table, not from lines of code. There is one wave, so there is no single number to give
-for the system. The estimate covers only the tree we were given.
+Basis: the delivery mode was not given (`--delivery` missing), so both cases are shown. This plugin carries no calibrated productivity data. Every rate below is a planning assumption, not a benchmark. Replace it with measured velocity.
 
-## Method
+The supplied code is 14 lines of COBOL and JCL in three live units (`app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMLIVE.cbl:4`, `app/jcl/MAINJOB.jcl:2`). The estimate is for this tree only. If the real nightly cycle is larger, it is void.
 
-The weight goes to the things that move an estimate most. Line count is not one of them.
-
-| Factor | What the tree shows | Effect | Confidence | Evidence |
+| Wave 1 term | Conventional | AI-assisted | Does AI shrink it? | Evidence |
 |---|---|---|---|---|
-| Coupling edges crossing the wave boundary | None. Wave 1 holds every live unit. | Pushes the estimate down | high | analysis: `articulation_points` and `data_hubs` are empty |
-| Behavioral oracle | Unknown. The job has no DD, so no archived output file exists in the tree. | Sets the harness cost. This is the main driver. | low | `app/jcl/MAINJOB.jcl:2` |
-| God modules in the wave | None | Pushes down | high | analysis: `god_modules` is empty |
-| Business logic in the database | None in the tree. No SQL, no DB2 table, no dataset. | Pushes down | medium | analysis: `data_hubs` is empty |
-| A team member who reads COBOL | Not stated | Unknown. Not priced. | low | inference |
+| Understanding | 0 | 0 | Done by this assessment | inference |
+| Port (3 units) | 0.5 to 1 week | 0.5 week | Barely. The code is trivial. | inference |
+| Boundary work | 0.5 week | 0.5 week | Deciding the boundary is human work | inference |
+| Equivalence harness | 1 to 2 weeks | 1 week | Harness code is quick. Getting job output is not. | inference |
+| Cutover and rehearsal | 1 week | 1 week | No. Windows and approvals do not shrink. | inference |
+| **Total** | **3 to 4.5 weeks** | **2.5 to 3 weeks** | | inference |
 
-The live source is 11 lines: `PGMMAIN` 5, `PGMLIVE` 4 and `MAINJOB` 2
-(`app/cbl/PGMMAIN.cbl:5`, `app/cbl/PGMLIVE.cbl:4`, `app/jcl/MAINJOB.jcl:2`).
+## Sensitive assumptions
 
-## Estimate by wave
+1. Assumes the supplied programs are the whole cycle. If the real programs hold logic, the port term grows in proportion to the lines and the AI-assisted case depends on the review rate (assumed: review takes a quarter of the authoring time it replaces).
+2. Assumes archived job output exists for the oracle. If it does not, the harness term roughly doubles.
+3. Assumes one cutover window is available. If the cycle must run in parallel for a full month-end, add at least one month elapsed.
 
-| Wave | Part | Range (person-days) | Confidence | Evidence |
-|---|---|---|---|---|
-| 1 | Port the three units to the refactor target | 0.5 to 1.5 | medium | inference |
-| 1 | Build the comparison harness and run it against the legacy job | 3 to 8 | low | inference |
-| 1 | Normalization spec, deviation register, sign-off | 1 to 2 | low | inference |
-| 1 | Total | 4.5 to 11.5 | low | inference |
-| Cleanup | Remove `PGMDEAD` and `cpy:UNUSED` once telemetry confirms | 0.5 | medium | `app/cbl/PGMDEAD.cbl:4`, `app/cpy/UNUSED.cpy:1` |
+## Where the agent helps
 
-The port is a small share. The harness is most of the cost, because a job with no output has to be
-verified from its return code, its log and its place in the cycle.
-
-## The assumptions this range is most sensitive to
-
-1. Assumes `job:MAINJOB` is the whole nightly batch cycle. If the real cycle has other jobs, this range
-   covers only the fragment we were given. It carries no ordering work and no shared-data work, and the
-   plan has to be cut again from the client's scheduler export. The total then grows with the number of
-   jobs and adds a cycle-level harness. Low confidence. (`app/jcl/MAINJOB.jcl:1`)
-2. Assumes a legacy run of `job:MAINJOB` can be observed, by a parallel run or by at least 12 months of
-   archived job logs. If neither exists, the only oracle is a characterization test written from the
-   source. That test proves a call returns and nothing more. The harness cost falls to the low end, but
-   the equivalence claim stays provisional and cannot sign off the wave. (inference)
-3. Assumes the source in the tree is the source behind the production load modules. `PGMMAIN` and `PGMLIVE`
-   hold no logic (`app/cbl/PGMLIVE.cbl:4`). If production runs different code, the port range is wrong by
-   an unknown multiple. (inference)
-
-## Where Claude Code can do the port, and where it cannot
-
-| Part | Claude Code | Confidence | Evidence |
-|---|---|---|---|
-| Transliterate `PGMMAIN`, `PGMLIVE` and the JCL step into the refactor target | Strong. It is a call and a return, and a good harness will catch any slip. | high | `app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMLIVE.cbl:4` |
-| Write the harness scaffold and the normalization spec | Strong | medium | inference |
-| Say whether `job:MAINJOB` is the nightly batch cycle | Cannot. This is business intent the source does not carry. Ask the client. | high | `app/jcl/MAINJOB.jcl:1` |
-| Say what runs after the job and what checks its return code | Cannot. It lives in a scheduler that is not in the tree. | high | analysis: `warnings` names the missing scheduler |
+Strong at transliterating `PGMMAIN` and `PGMLIVE` once a harness exists. Weak at intent. No business rule is visible here to infer.

@@ -1,26 +1,14 @@
 {
  "telemetry": "none",
  "unreachable": [
-  {
-   "id": "cpy:UNUSED1Y",
-   "reason": "No program includes it. The extractor found no static path and no reachable computed call in the tree, and a search of the source finds its name only in its own file. Provisional, because no telemetry was given and COPY REPLACING is not applied (meta.limits). Safe to propose for deletion after one confirmation.",
-   "confidence": "high",
-   "evidence": [{"file": "app/cpy/UNUSED1Y.cpy", "line": 1}]
-  }
+  {"id": "cpy:UNUSED1Y", "reason": "No program includes it. Provisional: no telemetry, and a copybook cannot run, so the risk is only a missed COPY in a source the extractor did not read.", "confidence": "medium",
+   "evidence": [{"file": "app/cpy/UNUSED1Y.cpy", "line": 1}]}
  ],
  "dormant": [],
  "unknown": [
-  {
-   "id": "CBTRN01C",
-   "reason": "No JCL step runs it and no static edge reaches it, so 28 reachable computed calls could in principle target it. I could bound the menu calls: the option tables COMEN02Y and COADM02Y do not list it, the CSD defines no program for it, and it opens all six of its files INPUT. It repeats CBTRN02C's header ('Post the records from daily transaction file') but posts nothing. It is very likely retired, but a JCL member outside the tree or a hand run would not show here. The validator keeps it in unknown. Ask before deleting.",
-   "confidence": "low",
-   "evidence": [{"file": "app/cbl/CBTRN01C.cbl", "line": 254}, {"file": "app/cpy/COMEN02Y.cpy", "line": 28}, {"file": "app/csd/CARDDEMO.CSD", "line": 173}]
-  },
-  {
-   "id": "proc:TRANREPT",
-   "reason": "No JCL step names it, but CORPT00C holds JCL text that runs it (EXEC PROC=TRANREPT) and writes that text to the JOBS queue, which submits it at run time. CORPT00C is menu option 9, so this proc very likely runs whenever a user requests the transaction report online. It is a must-not-break item, not dead code. It stays in unknown because the extractor cannot draw an edge from JCL text inside a COBOL literal.",
-   "confidence": "low",
-   "evidence": [{"file": "app/cbl/CORPT00C.cbl", "line": 94}, {"file": "app/cbl/CORPT00C.cbl", "line": 517}, {"file": "app/cpy/COMEN02Y.cpy", "line": 77}, {"file": "app/proc/TRANREPT.prc", "line": 1}]
-  }
+  {"id": "CBTRN01C", "reason": "No JCL step runs it. The 28 computed calls were traced and none reaches it, but a COMMAREA from outside the tree could. Do not delete without telemetry.", "confidence": "low",
+   "evidence": [{"file": "app/cbl/CBTRN01C.cbl", "line": 23}]},
+  {"id": "proc:TRANREPT", "reason": "Named only in JCL text inside CORPT00C, which submits it at run time. It is live on the transaction report path.", "confidence": "high",
+   "evidence": [{"file": "app/cbl/CORPT00C.cbl", "line": 94}]}
  ]
 }

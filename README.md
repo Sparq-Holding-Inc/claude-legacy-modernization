@@ -119,7 +119,8 @@ Read this before you trust it.
 - **JCL `IF/THEN/ELSE` and `COND=` are not modeled.** Step order is file order.
 - **`RETURN TRANSID`, `START`, `SEND MAP`, IMS and MQ are not edges.**
 - **COPY `REPLACING` is not applied.**
-- **The wave seed is crude.** It sorts entry points by what they write and where they run. It does
+- **The wave seed is crude.** It sorts entry points by what they write and where they run, then cuts
+  each family into groups that are bound by a shared written dataset or a shared program. It does
   not know your business. It puts a compile job and a posting job in neighboring families if both
   write shared data. Claude and you are expected to argue with it.
 - **A citation proves a line exists, not that it says what the claim says.** The hook and the

@@ -1,48 +1,24 @@
 # 04 Estimate
 
-There are no waves (`03-waves.md`), so there is no per-wave estimate. Two things can be estimated.
-The port of the two source files that are in the tree can be estimated as a range. The nightly batch
-cycle around them cannot be estimated, and no number is offered for it.
+**Basis: no `--delivery` was given, so both cases are shown, conventional and AI-assisted.** This plugin carries no calibrated productivity data. Every rate here is a planning assumption, not a benchmark. Replace it with the team's measured velocity.
 
-Every figure below is inference. The tree holds no history of past ports and no measure of team
-velocity.
+The tree is 11 lines of COBOL in two programs (app/cbl/PROGA.cbl:7, app/cbl/PROGB.cbl:4). There are no waves to estimate per wave, so this is one estimate for the whole tree.
 
-## What is estimated
+| Term | Conventional | AI-assisted | AI assumption | Confidence | Evidence |
+|---|---|---|---|---|---|
+| Understanding | 0 days, already done here | 0 days | This assessment covers it | high | modernization-assessment/graph.json:36 |
+| Port of two programs | 0.5 to 1 day | 0.25 to 0.5 day | Review takes about as long as writing 11 lines | medium | app/cbl/PROGA.cbl:7 |
+| Boundary and harness | 1 to 3 days | 1 to 2 days | Choosing the boundary does not shrink | low | inference |
+| Oracle, approvals, rehearsal, cutover | 2 to 10 days | 2 to 10 days | Does not shrink with AI | low | inference |
 
-| Scope | Range | Method | Confidence | Evidence |
-|---|---|---|---|---|
-| Port PROGA and PROGB, refactor target, source only | 0.5 to 2 engineer-days | Eleven lines of straight-line code with one call and no data access. Most of the time goes to the harness, not the code. | low | inference |
-| Build the comparison harness for the two programs (SYSOUT text and return code) | 1 to 3 engineer-days | One captured output and one condition code per run. Range depends on how the client can supply job output. | low | inference |
-| The nightly batch cycle | not estimated | No JCL, no scheduler and no dataset exists in the tree. There is nothing to count. | not applicable | `modernization-assessment/waves.json:3` |
+Total: roughly 3.5 to 14 days conventional, 3.25 to 12.5 days AI-assisted. This is a wide range because the real cost is the nightly cycle, which is not in the tree.
 
-## The assumptions the range is most sensitive to
+## What the range is most sensitive to
 
-1. **Assumes the deployed PROGB is a no-op like this source.** If a different PROGB is link-edited in
-   production, and this stub is a placeholder for it, then PROGB is a program we have not seen and
-   the port range is void. Its source is a single `GOBACK` (`app/cbl/PROGB.cbl:4`).
-2. **Assumes nothing outside the tree calls PROGA or PROGB.** If other programs call PROGB,
-   each caller is a new edge that crosses the boundary, and the count of crossing edges is what moves
-   an estimate the most. Nothing in the tree shows a second caller, but the tree may be a fragment.
-3. **Assumes the target platform gives the same result for a `CALL` to a subprogram that
-   returns at once, and for a default return code.** Neither program sets `RETURN-CODE`. If the
-   cycle tests the step's condition code, a port must return the same code. This is inference from
-   `app/cbl/PROGA.cbl:1-7`.
+1. Assumes the nightly batch cycle is only PROGA and PROGB. If it holds more programs, JCL or datasets, this estimate does not apply and must be redone from the supplied tree.
+2. Assumes a parallel run or archived outputs exist as an oracle. If they do not, the oracle term can double.
+3. Assumes no one needs to read COBOL beyond these two files.
 
-## What moves an estimate here
+## Where Claude Code helps
 
-| Driver, in rough order of weight | State in this tree | Evidence |
-|---|---|---|
-| Coupling edges crossing the wave boundary | One call edge, and it is inside the pair. No other edge is known. | analysis field `edge_counts` |
-| A behavioral oracle | None in the tree. No archived outputs, no job logs, no datasets. | analysis field `data_hubs` |
-| God modules in the wave | None. | analysis field `god_modules` |
-| Business logic in the database | No `EXEC SQL` in either file. | `app/cbl/PROGA.cbl:1-7` |
-| Someone who can read the source language | Not known. Ask the client. | inference |
-
-## Where Claude Code can do the port and where it cannot
-
-- **Mechanical.** A transliteration of PROGA and PROGB is well within reach. There is no arithmetic,
-  no data layout and no control flow beyond one call.
-- **Not inferable from source.** Why PROGB is empty, and what the message text at
-  `app/cbl/PROGA.cbl:5` is meant to signal to operators. A port would copy the message verbatim. Whether
-  to keep it is a decision for the client, and it belongs in the Deviation Register if it changes.
-- **Not possible from this tree.** The nightly batch cycle itself. It needs the JCL and scheduler.
+It is strong at transliterating these 11 lines with a harness. It cannot tell from the code why PROGA prints its message before the call (app/cbl/PROGA.cbl:5). That needs a person who knows the intent.

@@ -20,6 +20,13 @@ Added
   (read-only batch, batch writers, online writers, DB2 or IMS or MQ, and so on) in a fixed order.
   It writes `03a-wave-seed.md` and a draft `03a-waves-draft.json`. Claude names the waves and may
   change them only for a cited reason. Each change goes in `deviations`.
+- The wave seed cuts a family into groups. Two entry points in a family are bound when both write the
+  same dataset or run the same application program. Bound entry points share a wave. The rest form one
+  independent wave, listed first. A reader is ordered after a writer but is not bound to it. This split
+  the 55-unit batch writers wave on CardDemo into two. It was added after a real headless run cut that
+  wave by hand and the other two runs did not. A coupled group can still be too big to ship as one wave.
+- A totals row in a findings table now says `inference` in its Evidence cell. The citation hook had
+  flagged a bare totals row in a real run. The wave seed table in `03a-wave-seed.md` gains a totals row.
 - The wave seed keeps jobs together when a scheduler chains them (a wrapper script or a Control-M
   folder), in the latest family of the chain. A program that submits JCL through the internal reader
   counts as batch and owns what it submits.

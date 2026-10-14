@@ -1,62 +1,51 @@
 # 02 Coupling
 
-Facts are in `02a-edge-tables.md`. This file holds the argument. The tree is small: four COBOL programs, all CICS, no copybook, no dataset, no JCL, no CSD and no scheduler (`01-inventory.md`). Every coupling here is a call. There is no data, contract or temporal coupling to find.
+Fact tables are in `02a-edge-tables.md`. This file is the argument.
 
-Open edges: two computed calls and one medium confidence static call. That is far below the 20 that would justify the `dependency-cartographer` agent, so I worked them by hand from the source. What follows about them is inference and is labeled that way.
+## Scale
 
-## The coupling patterns that constrain the sequence
+Four COBOL programs, 38 lines, five call edges, no data edges, no copybooks, no JCL. `graph.json` has no dataset or contract node (`analysis` field `data_hubs` is empty, `edge_counts` is call only). Coupling here is call coupling and nothing else.
 
-1. **One hub, three leaves.** PROGA is the only caller in the tree. It makes three static calls and two computed calls. PROGB, PROGC and PROGD each have exactly one caller, PROGA, and call nothing (analysis: `fan_in`, `fan_out`). PROGA is the only articulation point (analysis: `articulation_points`).
-2. **LINK and XCTL are different couplings, and the graph draws them the same.** LINK returns to the caller. XCTL hands the task over and never returns. The extractor records both as `call` edges and does not model control flow (`meta.limits`). Reading the source shows the difference matters here: see the table below.
-3. **A target chosen by the caller's COMMAREA.** PROGA moves its COMMAREA into a variable and links to whatever program that names. The value is set by a program or transaction outside the tree.
+## Patterns that constrain the sequence
 
-## Open edges, worked by hand
+| # | Pattern | Evidence | Confidence |
+|---|---|---|---|
+| 1 | PROGA is a hub with fan-out 3. Everything else hangs off it. | `app/cbl/PROGA.cbl:12`, `app/cbl/PROGA.cbl:20`, `app/cbl/PROGA.cbl:23` | high |
+| 2 | Two of PROGA's targets are reached only through a variable (`WS-NEXT-PGM`, `LIT-PGM-D`). The extractor resolved both from VALUE and MOVE literals. | `app/cbl/PROGA.cbl:5`, `app/cbl/PROGA.cbl:19` | medium for PROGC, high for PROGD |
+| 3 | XCTL never returns. PROGC and PROGD take over the task from PROGA, so they are a continuation of PROGA's logic, not services it calls. The extractor models LINK and XCTL both as `call` and does not model control flow (`meta.limits`). | `app/cbl/PROGA.cbl:20`, `app/cbl/PROGA.cbl:23` | high |
 
-Everything in this table is **inference** from reading the source. The graph facts are in `02a-edge-tables.md`.
+Coupling note on pattern 3, labeled inference: because PROGA ends in an XCTL to PROGD after an XCTL to PROGC, the second XCTL at line 23 is unreachable in straight-line flow. Line 20 never returns. Either the code is dead after line 20 or a condition was removed. inference, nothing in the file branches. A human must say which.
 
-| Site | What the extractor said | What the source shows | Set of targets | Confidence | Evidence |
-|---|---|---|---|---|---|
-| LINK PROGRAM(WS-ANY-PGM) | Computed call, unresolved, low confidence | WS-ANY-PGM is set once, by `MOVE DFHCOMMAREA TO WS-ANY-PGM`. DFHCOMMAREA is the linkage item PROGA receives. Nothing in the tree calls PROGA, so nothing in the tree sets it. No check of the COMMAREA length or content appears before the LINK. | Cannot be bounded from the source. Any program the region can load, including PROGB, PROGC, PROGD and programs outside the tree. | low | `app/cbl/PROGA.cbl:9`, `app/cbl/PROGA.cbl:15`, `app/cbl/PROGA.cbl:16` (inference) |
-| XCTL PROGRAM(WS-NEXT-PGM) | Two entries: a medium confidence call to PROGC and a low confidence computed call | WS-NEXT-PGM is assigned once, by `MOVE 'PROGC'`, on the line just before the XCTL. No branch sits between the two lines. Both extractor entries describe the same statement. | PROGC only, provable inside PROGA | medium (a full read of PROGA finds no other assignment) | `app/cbl/PROGA.cbl:6`, `app/cbl/PROGA.cbl:19`, `app/cbl/PROGA.cbl:20` (inference) |
-| XCTL PROGRAM(LIT-PGM-D) | High confidence call to PROGD, via a constant | The constant is `'PROGD'`, so the target is right. But this statement follows an unconditional XCTL to PROGC. XCTL does not return, so this one runs only if the first XCTL fails. The EXEC CICS RETURN at line 26 is in the same position. | PROGD, but the edge is very likely dead by control flow | medium: the name is certain, the execution is not | `app/cbl/PROGA.cbl:5`, `app/cbl/PROGA.cbl:20`, `app/cbl/PROGA.cbl:23`, `app/cbl/PROGA.cbl:26` (inference) |
-
-A failed XCTL (for example a missing program) does not fall through when the statement names no RESP option and the program has no HANDLE CONDITION. The default is that the task ends abnormally. Neither appears in PROGA. That is inference from standard CICS condition handling, not from anything in the tree.
-
-## What the coupling does to the sequence
-
-There is no sequence to give. `analysis` reports no entry points, so there are no waves (`03-waves.md`). What the coupling does say:
-
-- PROGB, PROGC and PROGD can be ported in any order relative to each other. Each is a bare RETURN with one caller (`app/cbl/PROGB.cbl:4`, `app/cbl/PROGC.cbl:4`, `app/cbl/PROGD.cbl:4`).
-- PROGA cannot be cut over until its LINK target set is known. A refactor that replaces LINK with a service call needs either a table of the permitted names or a router that keeps the dynamic lookup.
-- XCTL has no direct equivalent in a call-and-return service model. A port that turns it into a plain call and then runs the next statement would run the PROGD transfer that the original never reaches. This is a behavior difference to write into the Deviation Register or to avoid on purpose (`06-test-strategy.md`).
-
-## Cluster view
-
-Cluster level only. The whole tree is one cluster.
+## Cluster graph
 
 ```mermaid
 graph LR
-  caller["callers and CSD transactions\n(not in the tree)"] -->|COMMAREA names a program| A["PROGA\nrouting hub"]
-  A -->|LINK, returns| B["PROGB\nRETURN only"]
-  A -->|LINK, computed target| X["unbounded target set"]
-  A -->|XCTL, never returns| C["PROGC\nRETURN only"]
-  A -.->|XCTL after XCTL,\nlikely dead| D["PROGD\nRETURN only"]
+  A[PROGA hub] -->|LINK, returns| B[PROGB]
+  A -->|XCTL via WS-NEXT-PGM| C[PROGC]
+  A -->|XCTL via LIT-PGM-D| D[PROGD]
+  A -.->|LINK, computed target| X1((unknown))
+  A -.->|XCTL, computed target| X2((unknown))
 ```
+
+At this size a program-level graph is the cluster graph.
 
 ## Strongly connected components
 
-None (analysis: `sccs`). Nothing forces two programs to move together.
+None (`analysis` field `sccs` is empty). Nothing forces programs to move together on a cycle. The facade argument below still applies.
 
 ## God modules
 
-None (analysis: `god_modules`). PROGA has the highest fan-out, 3, but the tree is too small for a top-decile test to mean anything.
+None (`analysis` field `god_modules` is empty). PROGA is 26 lines (`app/cbl/PROGA.cbl:26`).
 
 ## Articulation points
 
-PROGA (analysis: `articulation_points`). In a tree this small it is trivially the only connector. If the real system is larger, this result does not carry over.
+PROGA (`analysis` field `articulation_points`). It is trivially so, as the only caller of three leaves. It is the natural boundary: put PROGA behind a facade and its three targets can be replaced one at a time. inference.
 
-## The honest boundary
+## The honest boundary: computed calls
 
-- Two computed calls are open (analysis: `unresolved_dynamic`, `app/cbl/PROGA.cbl:16`, `app/cbl/PROGA.cbl:20`). One of them, at line 20, I can close from the source. The one at line 16 I cannot. It keeps PROGB, PROGC and PROGD from being called unreachable, and would do so even if an entry point existed.
-- No CSD, JCL, scheduler or copybook was supplied. The extractor read only COBOL (`meta.files_seen`, analysis). The tree may be a fragment of a larger system, and the coupling above holds only for these four files.
-- `EXEC CICS RETURN TRANSID`, `START` and `SEND MAP` are not edges (`meta.limits`). None appears in these four files. Every RETURN is a plain RETURN, for example `app/cbl/PROGA.cbl:26`.
+| Site | What the code shows | Evidence | Confidence |
+|---|---|---|---|
+| LINK `WS-ANY-PGM` | The target is `DFHCOMMAREA`, a caller-supplied 8 byte field. It can name any program on the region. The extractor could resolve nothing. | `app/cbl/PROGA.cbl:15`, `app/cbl/PROGA.cbl:16` | low |
+| XCTL `WS-NEXT-PGM` | One literal, `'PROGC'`, is moved to it. The edge note says other literals may exist. In this file there is only one MOVE. | `app/cbl/PROGA.cbl:19`, `app/cbl/PROGA.cbl:20` | medium |
+
+The first is the real finding. The commarea is the contract between PROGA and its caller, and that caller is not in the tree. Every program on the CICS region is a possible target, so the set of programs PROGA can run is open. In a refactor to services this is a routing table that does not yet exist. The calling transaction and the CSD are the way to close it. Until then, no program in the tree can be called dead, and none outside the tree can be called safe to change.

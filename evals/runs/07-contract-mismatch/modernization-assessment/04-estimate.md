@@ -1,56 +1,53 @@
 # 04 Estimate
 
-Target state: refactor. These are ranges in person-days for one engineer working with Claude Code. They are
-inference, built from the drivers below. They are not measured, and there is no team velocity yet. The tree is 32
-lines of COBOL and 9 lines of JCL, so lines of code are not what moves the number. Evidence: `01-inventory.md`
-counts, and `app/cbl/PGMR.cbl:1`, `app/cbl/PGMW.cbl:1`.
+**Basis.** No `--delivery` flag was given, so every figure below shows two cases side by side: **conventional** (a team with no AI coding assistance) and **AI-assisted** (engineers using an AI coding agent, with human review). Neither is a headline. Pick the case that matches how the work will be done.
 
-| Wave | Range (person-days) | What is in it | Confidence | Evidence |
-|---|---|---|---|---|
-| 1. Reader side | 3 to 6 | Toolchain and CI set up for the first time. A packed decimal decoder. A ported reader. Golden input files (good, short, bad). The shared schema for the file. | medium | `app/cbl/PGMR.cbl:14`, `app/cpy/LAYOUTY.cpy:3` |
-| 2. Writer side | 5 to 10 | A ported writer. A decision on record length and on the undefined record content. A parallel run or replay against the legacy job. The retirement of the duplicate copybook. | low | `app/cbl/PGMW.cbl:14`, `app/jcl/WRITEJOB.jcl:4`, `app/cpy/LAYOUTX.cpy:3` |
-| Total | 8 to 16 | Both waves. Excludes client review time and the scheduler work for the nightly cycle, which cannot be sized without the scheduler export. | low | analysis: `warnings` in `modernization-assessment/graph.json` |
+This plugin carries no calibrated productivity data. Every rate here is a planning assumption, not a benchmark. Replace it with the team's measured velocity once wave 1 is done.
 
-## Method
+## What is being estimated
 
-The number was built from these drivers, in order of weight. It was not built from lines of code.
+Two COBOL programs of 16 lines each, two JCL jobs, two 3-line copybooks (`modernization-assessment/01-inventory.md`). The code is small enough that the port is not the cost. The cost is proving the nightly cycle still works.
 
-| Driver | What the tree shows | Effect on the range | Evidence |
-|---|---|---|---|
-| Coupling edges crossing the wave boundary | One contract edge, medium confidence, through the dataset | Sets the size of wave 2. It needs a contract test and a decision about the two copybooks | `app/cbl/PGMW.cbl:11`, `app/cbl/PGMR.cbl:11` |
-| Behavioral oracle | None in the tree. No archived output, no data file | Pushes both waves to the weak end of the oracle ladder until the client supplies one (see `06-test-strategy.md`) | analysis: `node_counts` in `modernization-assessment/graph.json` |
-| God modules | None | No facade work | analysis: `god_modules` in `modernization-assessment/graph.json` |
-| Logic in the database | No SQL, no DB2 in the tree | None | inference: `app/cbl/PGMR.cbl:12`, `app/cbl/PGMW.cbl:12` |
-| Someone who can read COBOL and JCL | Not known | The code is so small that a reviewer can cover it in an hour. Not a driver here. Inference | `app/cbl/PGMR.cbl:16` |
+## Per wave
 
-## The assumptions the range is most sensitive to
+Engineer-days, ranges. A day is one engineer.
 
-Each is a claim that can be checked.
+| Wave | Term | Conventional | AI-assisted | Does AI assistance shrink it? | Confidence | Evidence |
+|---|---|---|---|---|---|---|
+| 1 (PGMR, READJOB) | Port | 1 to 2 | 0.5 to 1 | Yes. 16 lines of transliteration; assumes review takes about as long as writing it would, since the program is so small | medium | `app/cbl/PGMR.cbl:1` |
+| 1 | Boundary work (settle the record length and the layout) | 1 to 2 | 1 to 2 | No. The decision is whose layout wins, and that is a human call | medium | `app/jcl/WRITEJOB.jcl:4`, `app/cpy/LAYOUTY.cpy:2` |
+| 1 | Equivalence harness | 2 to 4 | 1.5 to 3 | Partly. The code is quick; choosing what to compare is not | medium | inference |
+| 1 | Cutover and rehearsal | 1 to 3 | 1 to 3 | No. Depends on client availability and the cycle window | low | inference |
+| 2 (PGMW, WRITEJOB) | Port | 1 to 2 | 0.5 to 1 | Yes, as above | medium | `app/cbl/PGMW.cbl:1` |
+| 2 | Boundary work (decide: reproduce or initialise the record) | 2 to 4 | 2 to 4 | No. See assumption 2 | low | `app/cbl/PGMW.cbl:14` |
+| 2 | Equivalence harness (byte-exact output compare) | 2 to 3 | 1.5 to 2.5 | Partly | medium | inference |
+| 2 | Cutover, rollback rehearsal, dataset cleanup | 2 to 4 | 2 to 4 | No | low | `app/jcl/WRITEJOB.jcl:3` |
 
-1. **The catalogued file really holds 15 byte records, or the extra bytes hold nothing.** WRITEJOB asks for
-   LRECL=80 but the layout is 15 bytes. If the real dataset has meaningful data beyond byte 15, the two
-   copybooks describe a fraction of the file, and both waves roughly grow by half, because the reader and the
-   writer both have to model the rest. Evidence: `app/jcl/WRITEJOB.jcl:4`, `app/cpy/LAYOUTX.cpy:3`.
-2. **No program outside this tree reads or writes `SPARQ.TEST.MASTER`.** If there is a third reader, wave 2
-   gains roughly one wave 1 reader's worth of work per extra reader, because each needs the contract test.
-   Inference. Evidence: `app/jcl/READJOB.jcl:3`.
-3. **The legacy output of PGMW can be repeated byte for byte, or the varying bytes can be masked.** PGMW moves
-   nothing into its record before writing it. If the content changes from run to run, the diff needs a mask
-   for those bytes and the oracle gets weaker, which adds about two to three days to wave 2. Inference.
-   Evidence: `app/cbl/PGMW.cbl:14`.
+| Wave | Conventional total | AI-assisted total |
+|---|---|---|
+| 1 | 5 to 11 days | 4 to 9 days |
+| 2 | 7 to 13 days | 6 to 11 days |
+| Both | **12 to 24 days** | **10 to 20 days** |
 
-## Where Claude Code helps and where it does not
+Understanding the code is not charged. This assessment did it. What remains is the client's answers (see Open Questions in `modernization-assessment/00-summary.md`).
 
-| Work | Claude Code | Why | Evidence |
-|---|---|---|---|
-| Transliterating open, read, write and close in both programs | Strong | Sixteen lines each, no branches, no computed calls | `app/cbl/PGMR.cbl:13`, `app/cbl/PGMW.cbl:13` |
-| A packed decimal codec for `S9(7)V99` in the target, with a decimal type and zero tolerance | Strong, with a test harness | A well-defined format, and the same field in both copybooks | `app/cpy/LAYOUTX.cpy:3`, `app/cpy/LAYOUTY.cpy:3` |
-| Turning the two JCL jobs into orchestrator definitions | Strong for the shape, weak for the intent | It cannot know the intended record length or the rerun rule | `app/jcl/WRITEJOB.jcl:3`, `app/jcl/WRITEJOB.jcl:4` |
-| Deciding what PGMW is meant to write, and whether `LR-AMT` and `LY-VALUE` mean the same thing | Cannot | The source has no rule to read. Someone has to say. Inference | `app/cbl/PGMW.cbl:14`, `app/cpy/LAYOUTY.cpy:3` |
-| Placing the two jobs in the nightly cycle | Cannot | The scheduler was not supplied | analysis: `warnings` in `modernization-assessment/graph.json` |
+The gap between the two columns is small, and that is the point. On a tree this small, the terms that AI assistance does not shrink (the decision on the layout, the oracle, the rehearsals, the cycle window) are most of the work.
 
-## How to read this
+## What the range is most sensitive to
 
-Wave 1 is a low value chore that proves the toolchain and produces the shared schema. Most of the money is in
-wave 2, and most of wave 2 is the verification of the file, not the port. Inference. Evidence:
-`app/cbl/PGMR.cbl:14`, `app/jcl/WRITEJOB.jcl:4`.
+1. **The nightly cycle is bigger than these two jobs.** The figures assume `job:READJOB` and `job:WRITEJOB` are the whole must-not-break item. No scheduler is in the tree (`analysis.warnings`). If the cycle holds other jobs that touch `SPARQ.TEST.MASTER`, wave 2 roughly doubles, because each extra consumer needs its own boundary check.
+2. **The writer's undefined output.** The figures assume a captured production output file exists to compare against. PGMW writes a record it never fills (`app/cbl/PGMW.cbl:14`). If no archive of that file exists, the oracle falls back to characterization tests from source, which here would test undefined bytes. Then wave 2 grows by the time to arrange a parallel run, roughly 5 to 10 more days, and its confidence is low.
+3. **The record length.** The figures assume `LRECL=80` is the real record length and the padding is spaces or low values that the reader ignores (`app/jcl/WRITEJOB.jcl:4`, `app/cbl/PGMR.cbl:14`). If another consumer reads all 80 bytes, the 65 bytes after the layout are part of the contract and the harness must compare them.
+
+## Where Claude Code can do the mechanical work
+
+| Mechanical, strong with a harness | Weak, needs a person |
+|---|---|
+| Transliterating both programs (read, write, close) | Deciding whether to reproduce or fix the uninitialised record in PGMW |
+| Writing the byte-exact comparison harness once the normalization spec is signed | Deciding the one true layout and record length |
+| Checking that the two copybooks have equal pictures and offsets | Knowing what else reads the dataset, or what deletes it before `WRITEJOB` |
+| Packed decimal (`COMP-3`) encode and decode in a decimal type | Rehearsals, approvals, and the cutover window |
+
+## Not estimated
+
+Any change to the scheduler, the dataset allocation policy, or jobs outside this tree. None of them is in the tree.

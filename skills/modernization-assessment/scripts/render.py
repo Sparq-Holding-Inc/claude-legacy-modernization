@@ -202,6 +202,10 @@ def deadcode(g):
     return "\n".join(out) + "\n"
 
 
+def wave_name(w):
+    return w["family"] + (" (%s)" % w["group"] if w.get("group") else "")
+
+
 def waveseed(g):
     seed = g["analysis"]["wave_seed"]
     out = ["# 03a Wave seed", "",
@@ -210,16 +214,21 @@ def waveseed(g):
            "DB2, IMS or MQ; it writes a dataset a different entry point also uses; it is online or batch; it runs "
            "an application program or none. A unit used by several entry points moves with the earliest family "
            "that uses it. A scheduler job moves with the last family among the jobs it runs. A call cycle "
-           "always moves whole.", "",
+           "always moves whole. A family is then cut into groups. Two entry points in it are bound together when "
+           "both write the same dataset or run the same application program. Bound entry points share a wave "
+           "(coupled). The rest form one independent wave, listed first. A coupled wave can still be too big to "
+           "ship alone.", "",
            "`03a-waves-draft.json` holds the same plan in the shape of `waves.json`.", ""]
     rows = []
     for w in seed["waves"]:
-        rows.append([w["wave"], w["family"], len(w["units"]), len(w["entry_points"]), cite(w["evidence"])])
+        rows.append([w["wave"], wave_name(w), len(w["units"]), len(w["entry_points"]), cite(w["evidence"])])
+    rows.append(["Total", "", sum(len(w["units"]) for w in seed["waves"]),
+                 sum(len(w["entry_points"]) for w in seed["waves"]), "analysis"])
     out += table(["Wave", "Family", "Units", "Entry points", "Evidence"], rows) + [""]
     for w in seed["waves"]:
         shown = w["units"][:80]
         more = " (+%d more in the draft)" % (len(w["units"]) - 80) if len(w["units"]) > 80 else ""
-        out += ["## Wave %d. %s" % (w["wave"], w["family"]), "", w["description"] + ".", "",
+        out += ["## Wave %d. %s" % (w["wave"], wave_name(w)), "", w["description"] + ".", "",
                 ", ".join("`%s`" % u for u in shown) + more, ""]
         if w.get("computed_calls"):
             out += ["Computed calls in this wave, so its confidence cannot be high: " +

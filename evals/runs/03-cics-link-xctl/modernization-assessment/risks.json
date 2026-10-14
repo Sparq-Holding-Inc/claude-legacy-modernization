@@ -4,15 +4,15 @@
    "id": "PROGA",
    "port_difficulty": {
     "score": 3,
-    "why": "26 lines of routing, but one LINK target comes from the caller's COMMAREA and cannot be bounded, and LINK returns while XCTL never does."
+    "why": "Only 26 lines, but it LINKs to a program name taken from DFHCOMMAREA at run time and XCTLs (never returns), so the target set is open and CICS dispatch semantics must be reproduced; no oracle exists (telemetry none)."
    },
    "blast_radius": {
-    "score": 3,
-    "why": "Sole articulation point: it reaches the three other programs plus an unbounded computed target, but the source reads and writes no dataset and no must-not-break item maps to it."
+    "score": 4,
+    "why": "Articulation point that fans out to PROGB, PROGC and PROGD plus two unresolved dynamic targets; a wrong route fails silently or loudly depending on callers I cannot see, and nothing in the tree ties it to the nightly batch cycle."
    },
    "quadrant": "high-high",
    "wave": null,
-   "driving_fact": "LINK PROGRAM(WS-ANY-PGM) at line 16 takes its target from DFHCOMMAREA (line 15), which nothing in the tree sets.",
+   "driving_fact": "EXEC CICS LINK PROGRAM(WS-ANY-PGM) at line 16 uses a name moved from DFHCOMMAREA, so what it calls is decided by its callers, not by this tree.",
    "confidence": "medium",
    "evidence": [
     {
@@ -33,24 +33,20 @@
    "id": "PROGB",
    "port_difficulty": {
     "score": 1,
-    "why": "The whole body is EXEC CICS RETURN, with no logic, no data and no copybook."
+    "why": "Four lines, only EXEC CICS RETURN; no logic, data or arithmetic."
    },
    "blast_radius": {
     "score": 1,
-    "why": "Linked from one program, returns to it, touches no dataset. May be a stub, so the real body could be elsewhere."
+    "why": "Does nothing; fan-in 1 from PROGA, so a wrong port changes no data. Caveat: the deployed version may differ from this stub."
    },
    "quadrant": "low-low",
    "wave": null,
-   "driving_fact": "Statically linked from PROGA at line 12 and contains only a RETURN.",
+   "driving_fact": "Entire body is a CICS RETURN, called by PROGA line 12.",
    "confidence": "medium",
    "evidence": [
     {
      "file": "app/cbl/PROGB.cbl",
      "line": 4
-    },
-    {
-     "file": "app/cbl/PROGA.cbl",
-     "line": 12
     }
    ]
   },
@@ -58,24 +54,20 @@
    "id": "PROGC",
    "port_difficulty": {
     "score": 1,
-    "why": "The whole body is EXEC CICS RETURN, with no logic, no data and no copybook."
+    "why": "Four lines, only EXEC CICS RETURN; no logic."
    },
    "blast_radius": {
     "score": 2,
-    "why": "It is the program PROGA transfers to and never gets control back from, so it ends the chain. Its body is empty, which may mean a stub."
+    "why": "No-op body, but reached by XCTL via a medium confidence edge (WS-NEXT-PGM), so the routing into it needs checking."
    },
    "quadrant": "low-low",
    "wave": null,
-   "driving_fact": "XCTL target of PROGA at line 20 (literal PROGC moved at line 19), so control never returns to PROGA.",
+   "driving_fact": "Entire body is a CICS RETURN; the only edge into it is medium confidence.",
    "confidence": "medium",
    "evidence": [
     {
      "file": "app/cbl/PROGC.cbl",
      "line": 4
-    },
-    {
-     "file": "app/cbl/PROGA.cbl",
-     "line": 19
     },
     {
      "file": "app/cbl/PROGA.cbl",
@@ -87,24 +79,20 @@
    "id": "PROGD",
    "port_difficulty": {
     "score": 1,
-    "why": "The whole body is EXEC CICS RETURN, with no logic, no data and no copybook."
+    "why": "Four lines, only EXEC CICS RETURN; no logic."
    },
    "blast_radius": {
     "score": 1,
-    "why": "Its only static caller sits after an unconditional XCTL, so it looks unreachable by control flow. A computed LINK could still reach it."
+    "why": "No-op body; fan-in 1 from PROGA via a high confidence XCTL on a constant."
    },
    "quadrant": "low-low",
    "wave": null,
-   "driving_fact": "The static XCTL to PROGD at line 23 follows the unconditional XCTL to PROGC at line 20, so it cannot run unless that first XCTL fails.",
-   "confidence": "low",
+   "driving_fact": "Entire body is a CICS RETURN, reached by XCTL on constant LIT-PGM-D.",
+   "confidence": "medium",
    "evidence": [
     {
      "file": "app/cbl/PROGD.cbl",
      "line": 4
-    },
-    {
-     "file": "app/cbl/PROGA.cbl",
-     "line": 20
     },
     {
      "file": "app/cbl/PROGA.cbl",

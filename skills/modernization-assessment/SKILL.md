@@ -165,6 +165,14 @@ The extractor already cut a first plan from facts. Read `03a-wave-seed.md`. Star
 A unit that several entry points use moves with the earliest family that uses it. A scheduler job
 moves with the last family among the jobs it runs. A call cycle always moves whole.
 
+The extractor then cuts a family into groups. Two entry points in a family are bound together when both
+write the same dataset or run the same application program. Bound entry points form a coupled group and
+share a wave. Entry points bound to none form an independent group, which goes first. A wave in the seed
+carries a `group` field of `independent`, `coupled` or `coupled-N` when its family was cut. A reader of a
+dataset another entry point writes is ordered after the writer but not bound to it. A coupled group can
+still be too big to ship as one wave. Test it against the four wave tests, and cut it with a cited reason
+if it fails.
+
 Jobs that a scheduler chains together (temporal edges from a wrapper script, Control-M conditions or
 a Control-M folder) move together, in the latest of their families, except a job that touches DB2,
 IMS or MQ. A program that submits JCL through the internal reader counts as batch, and it owns the
@@ -291,6 +299,9 @@ What moves the estimate, in rough order of weight:
 Say where Claude Code can do the mechanical port and where it cannot. It is strong at
 transliteration with a good test harness. It is weak at inferring intent from undocumented business
 rules. Name which parts are which.
+
+A totals row sums the rows above it. It has no source line of its own. Put the word `inference` in its
+Evidence cell. The citation hook flags a table row with neither a citation nor that word.
 
 Write `04-estimate.md`.
 

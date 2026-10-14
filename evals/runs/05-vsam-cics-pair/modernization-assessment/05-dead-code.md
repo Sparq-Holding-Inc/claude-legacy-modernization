@@ -1,13 +1,16 @@
-# 05 Dead code
+# Dead code
 
-Telemetry: none. **Every dead-code claim here is provisional.** The extractor also could not measure dormancy. No last-modified dates exist because the tree is not a git repository (`modernization-assessment/graph.json:260`). The dormant list is empty because it was not measured. It is not empty because nothing is old.
+Telemetry: none. Every claim here is provisional.
 
-| Bucket | Units | Reason | Confidence | Evidence |
-|---|---|---|---|---|
-| Unreachable | none | Both programs are reached from an enabled CSD transaction, and the copybook is included by both. | medium | analysis: `dead_code_candidates` at `modernization-assessment/graph.json:179`; `app/csd/DEMO.CSD:4-7` |
-| Reachable but dormant | none, not measured | No dates and no telemetry. | low | analysis: `warnings` at `modernization-assessment/graph.json:259` |
-| Unknown | none | No computed calls exist, so nothing is held open. | medium | analysis: `unresolved_dynamic` at `modernization-assessment/graph.json:185` |
+| Bucket | Units | Confidence | Evidence |
+|---|---|---|---|
+| Unreachable | none | high | analysis: `dead_code_candidates.unreachable` is empty |
+| Dormant | none, **not measured** | n/a | analysis: `warnings` says dormancy was not computed |
+| Unknown | none | high | analysis: `dead_code_candidates.unknown` is empty |
 
-Reachable here means only that the CSD defines a transaction for the program and marks it enabled (`app/csd/DEMO.CSD:5`, `app/csd/DEMO.CSD:7`). It does not mean the transaction runs. Nothing is proposed for deletion. Ask for transaction counts for TRNR and TRNW over 12 months, and instrument both until they arrive.
+- Both programs are entry points through the CSD (app/csd/DEMO.CSD:4, app/csd/DEMO.CSD:6), so both are reachable. The copybook is included by both (app/cbl/PROGR.cbl:5, app/cbl/PROGW.cbl:5).
+- The dormant list is empty because the tree is not a git repository and no last-modified dates exist. An empty list means not measured. It does not mean nothing is old.
+- There are no computed calls (`analysis.unresolved_dynamic` is empty), so no unknown bucket arises from one.
+- No scheduler was parsed. Whether the transactions are used in production is unknown. The dataset name contains TEST (app/csd/DEMO.CSD:2), so the whole tree may be a demo region (inference).
 
-No job is unscheduled, because the tree holds no job (`modernization-assessment/graph.json:206`). The batch cycle is a scheduling and dead-code question the tree cannot answer.
+Machine form: `dead-code.json`. Extractor candidates: `05a-dead-code-candidates.md`.

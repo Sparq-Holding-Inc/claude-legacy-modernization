@@ -1,45 +1,37 @@
 {
- "target_state": "refactor",
- "waves": [
-  {
-   "wave": 1,
-   "family": "batch-readonly",
-   "name": "Reader job: consume the master file",
-   "units": [
-    "PGMR",
-    "job:READJOB"
-   ],
-   "rationale": "READJOB runs PGMR, which opens SPARQ.TEST.MASTER for input with DISP=SHR, reads one record and closes it. It writes nothing another job uses, so it is the safe first wave and proves the toolchain and the packed decimal read of LAYOUTX. The family is sound, but the wave is weak. PGMR produces no output, so the boundary that can be tested is the return code and the file status, and nothing a stakeholder can name changes. Treat it as a chore wave. The wave cut sits at the dataset, which is the one articulation point in the graph.",
-   "unblocks": "Nothing a business stakeholder can name. It proves the toolchain and a target-side decoder for LAYOUTX that the wave 2 harness reuses. This is a chore wave.",
-   "blast_radius": "low",
-   "confidence": "low",
-   "evidence": [
+  "target_state": "refactor",
+  "waves": [
     {
-     "file": "app/jcl/READJOB.jcl",
-     "line": 1
-    }
-   ]
-  },
-  {
-   "wave": 2,
-   "family": "batch-writers",
-   "name": "Writer job: produce the master file",
-   "units": [
-    "PGMW",
-    "job:WRITEJOB"
-   ],
-   "rationale": "WRITEJOB runs PGMW, which creates SPARQ.TEST.MASTER and writes one record through LAYOUTX. The dataset is read by PGMR in wave 1, so this wave moves the writer side of the only contract in the tree. The output file is the testable boundary and can be compared byte for byte with a golden master. Confidence is medium and not higher because no scheduler was parsed, the DD says LRECL=80 against a 15 byte layout, and PGMW writes a record it never fills. Wave 1 ports the reader first, so the new reader must accept bytes the legacy writer still produces. That keeps the legacy format fixed until the writer moves.",
-   "unblocks": "Retiring the legacy writer, the last program on the SPARQ.TEST.MASTER contract. After this wave the layout is owned by the new code and can be documented and versioned.",
-   "blast_radius": "medium",
-   "confidence": "medium",
-   "evidence": [
+      "wave": 1,
+      "family": "batch-readonly",
+      "name": "Master file reader",
+      "units": ["PGMR", "job:READJOB"],
+      "rationale": "READJOB runs PGMR, which opens SPARQ.TEST.MASTER for input only and writes nothing another entry point uses. It proves the toolchain and the comparison harness on the smaller risk. The reader keeps consuming the file the legacy writer still produces, so it can be deployed and rolled back on its own.",
+      "unblocks": "The record layout in LAYOUTX, which wave 2 shares, and the first decoded packed-decimal comparison.",
+      "blast_radius": "low",
+      "confidence": "medium",
+      "evidence": [
+        {"file": "app/jcl/READJOB.jcl", "line": 1},
+        {"file": "app/jcl/READJOB.jcl", "line": 3},
+        {"file": "app/cbl/PGMR.cbl", "line": 13}
+      ]
+    },
     {
-     "file": "app/cbl/PGMW.cbl",
-     "line": 6
+      "wave": 2,
+      "family": "batch-writers",
+      "name": "Master file writer",
+      "units": ["PGMW", "job:WRITEJOB"],
+      "rationale": "WRITEJOB runs PGMW, which creates SPARQ.TEST.MASTER, the dataset PGMR reads. The byte layout of that file is the contract that wave 1 already depends on, so this wave carries the cutover risk. It goes after the reader because the new reader can be proven against legacy output first.",
+      "unblocks": "Retiring the legacy producer of the master file. Nothing else in the tree depends on this wave.",
+      "blast_radius": "medium",
+      "confidence": "medium",
+      "evidence": [
+        {"file": "app/cbl/PGMW.cbl", "line": 6},
+        {"file": "app/jcl/WRITEJOB.jcl", "line": 3},
+        {"file": "app/cpy/LAYOUTX.cpy", "line": 3}
+      ]
     }
-   ]
-  }
- ],
- "unassigned": [],
- "deviations": []
+  ],
+  "unassigned": [],
+  "deviations": []
 }

@@ -1,58 +1,33 @@
 # 04 Estimate
 
-Every number here is inference. No port velocity was measured, and no telemetry or oracle exists yet.
-The ranges are engineer-days for one engineer who reads COBOL and JCL, and they include the harness for
-the wave. They are not a quote. The size of the system is 32 lines of COBOL, 3 lines of copybook and 9
-lines of JCL (`app/cbl/PGMR.cbl:16`, `app/cbl/PGMW.cbl:16`, `app/cpy/LAYOUTX.cpy:3`). The port is small.
-The evidence that it is correct is the work.
+**Basis: both cases are shown, because `--delivery` was not given.** Conventional means a team without AI coding assistance. AI-assisted means engineers using an AI coding agent, with human review. This plugin carries no calibrated productivity data. Every rate below is a planning assumption, not a benchmark, and the team's measured velocity from wave 1 replaces it.
 
-## Method
+Figures are engineer-weeks, as ranges.
 
-The estimate is not built from line counts. It is built from what the skill weighs, in order:
+| Wave | Conventional | AI-assisted | Which term dominates | Evidence |
+|---|---|---|---|---|
+| 1. Master file reader (`PGMR`, `job:READJOB`) | 2 to 4 | 1.5 to 3 | Harness set-up and the oracle, not the port | `app/cbl/PGMR.cbl:13`, `app/jcl/READJOB.jcl:3` |
+| 2. Master file writer (`PGMW`, `job:WRITEJOB`) | 2 to 5 | 1.5 to 4 | Byte-exact output, the record-length question, rehearsal | `app/cbl/PGMW.cbl:14`, `app/jcl/WRITEJOB.jcl:4` |
+| Total | 4 to 9 | 3 to 7 | | inference |
 
-| Driver | What this tree shows | Effect on the range | Evidence |
+## Terms per wave, and whether AI assistance shrinks them
+
+| Term | Shrinks with AI? | Assumption (falsifiable) | Evidence |
 |---|---|---|---|
-| Coupling edges crossing the wave boundary | One contract edge, PGMW to PGMR, on one dataset | Sets the harness. One boundary file to compare | `app/cbl/PGMW.cbl:11`, `app/cbl/PGMR.cbl:11` |
-| Behavioral oracle | None in the tree. The dataset name is here, its contents are not | The largest swing. See assumption 3 | inference |
-| God modules in the wave | None | No facade work | analysis, field `god_modules` |
-| Logic in the database | No DB2 node exists in the graph | None | analysis, field `node_counts` |
-| Someone who reads the source language | Unknown | Assumed yes. If not, add the time to learn it | inference |
+| Understanding the code | Already done | This assessment holds it. The programs are 16 lines each, so no discovery weeks are charged. What remains is the client's answers in `00-summary.md`. | `app/cbl/PGMR.cbl:1` |
+| Port | Yes | Each program is 16 lines (`app/cbl/PGMR.cbl:16`). Assumes review of the ported code takes about a quarter of the authoring time it replaces, and under a day per program. | `app/cbl/PGMW.cbl:16` |
+| Boundary work and harness code | Partly | The harness code is quick to write. Choosing the boundary (the dataset, bytes and all) and the normalization spec is not. Assumes one person-week for the comparison harness, reused in both waves. | inference |
+| The oracle, approvals, rehearsals, cutover windows, client availability | **No** | Assumes the client can supply archived generations of the master file and a rehearsal window within two weeks of asking. This is the longest term in the conventional case and the same in the AI-assisted case. | inference |
 
-## Ranges per wave
+## What the range is most sensitive to
 
-| Wave | Range (engineer-days) | What is in it | Evidence |
-|---|---|---|---|
-| 1. Reader job | 3 to 6 | Port PGMR and the READJOB step, build the LAYOUTX decoder, prove the new reader opens and reads the legacy file | `app/cbl/PGMR.cbl:13` |
-| 2. Writer job | 4 to 8 | Port PGMW and the WRITEJOB allocation, golden master compare of the output file, decide the uninitialized record and LRECL questions | `app/cbl/PGMW.cbl:14`, `app/jcl/WRITEJOB.jcl:4` |
-| Shared: oracle collection and harness | 3 to 10 | Get a saved copy of the dataset and job output, set up the normalization spec and the deviation register | inference |
+1. **Assumes the client supplies real prior copies of `SPARQ.TEST.MASTER`, or its production equivalent.** If none exist, the oracle is a characterization test built from the source, and wave 2 is provisional and roughly doubles in effort to cover bad-data cases by hand.
+2. **Assumes the 80-byte `LRECL` and the 15-byte copybook record are reconciled by a known convention** (for example, the real file holds 80-byte padded records and the program only needs the first 15). If they are not, wave 2 needs a decision from the client before work starts (`app/jcl/WRITEJOB.jcl:4`, `app/cpy/LAYOUTX.cpy:3`).
+3. **Assumes the nightly cycle is these two jobs and nothing else.** If the real cycle has jobs not in this tree, this estimate covers only part of it and the total grows with them (`modernization-assessment/graph.json:383`).
 
-Total: about 10 to 24 engineer-days. The spread is mostly the shared line, and the shared line is mostly
-one question: does an oracle exist.
+## Where Claude Code can do the port, and where it cannot
 
-## The assumptions the range is most sensitive to
-
-1. **The file on disk holds 15 byte records.** The copybook gives 15 bytes by hand
-   (`app/cpy/LAYOUTX.cpy:2`, `app/cpy/LAYOUTX.cpy:3`) and the DD says `LRECL=80`
-   (`app/jcl/WRITEJOB.jcl:4`). If the real file holds 80 byte records with 65 bytes of filler, wave 2
-   grows by about 1 to 3 days. The port then has to reproduce the filler value, and the reader has to
-   skip it.
-2. **The two jobs in the tree are the whole nightly cycle.** No scheduler was parsed
-   (`analysis`, field `warnings`). If the scheduler export names other jobs that read or write
-   SPARQ.TEST.MASTER, each extra reader adds about 1 to 2 days, and the cut between wave 1 and wave 2
-   moves.
-3. **A saved copy of the dataset or of the job output exists.** If it does, the harness is a golden
-   master compare. If it does not, the harness has to be built from characterization tests, the
-   weakest oracle. Add about 3 to 5 days, and every wave stays provisional.
-4. **PGMW is the real program and not a stub.** It writes a record it never fills
-   (`app/cbl/PGMW.cbl:13`, `app/cbl/PGMW.cbl:14`). If the client has a fuller version, the tree is not
-   the system, and this estimate does not apply to it.
-
-## Where Claude Code can do the mechanical port, and where it cannot
-
-| Part | Claude Code | Why | Evidence |
-|---|---|---|---|
-| PGMR and PGMW transliteration | Strong | Each is a sequential open, one I/O statement, close. There is no branching | `app/cbl/PGMR.cbl:13`, `app/cbl/PGMW.cbl:13` |
-| Packed decimal codec for LR-AMT | Strong with a test | The encoding is fixed and checkable with known byte strings | `app/cpy/LAYOUTX.cpy:3` |
-| JCL allocation to target storage semantics | Partial | The NEW, CATLG and DELETE dispositions map to a design choice, not a translation | `app/jcl/WRITEJOB.jcl:3` |
-| What the record means | Cannot | No field names beyond LR-KEY and LR-AMT and no rules in the code | `app/cpy/LAYOUTX.cpy:2` |
-| Why LRECL=80, and whether writing an unfilled record is intended | Cannot | The intent is not in the source. It needs the client | `app/jcl/WRITEJOB.jcl:4`, `app/cbl/PGMW.cbl:14` |
+- **Strong:** transliterating `PGMR` and `PGMW` once the comparison harness exists. They are straight sequential open, read or write, close (`app/cbl/PGMR.cbl:13`, `app/cbl/PGMW.cbl:13`).
+- **Strong:** decoding and encoding `COMP-3` in a decimal type, when checked byte for byte against real records (`app/cpy/LAYOUTX.cpy:3`).
+- **Weak:** inferring intent. `PGMW` writes `LAYOUT-REC` without moving any value into it (`app/cbl/PGMW.cbl:14`). Whether that is a deliberate empty test record, a stub or a defect is a question for a person (inference).
+- **Weak:** knowing what the cycle is. Nothing in the tree names a nightly schedule.

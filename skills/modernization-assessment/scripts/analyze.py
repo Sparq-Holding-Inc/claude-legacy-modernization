@@ -33,6 +33,12 @@ The families have a fixed order. A unit reached from several entry points moves
 with the earliest family that uses it. A scheduler job moves with the last
 family among the JCL jobs it runs. Programs in one call cycle are reached from
 the same entry points, so a cycle always moves whole. Nothing here judges risk.
+A family is then cut into groups. Two entry points in the family are bound together when both write the same
+dataset, or when they run the same application program. A reader of a dataset another entry point writes is
+ordered after the writer, but is not bound to it. Entry points bound to another entry point form a coupled
+group and keep one wave. Entry points bound to none form one independent group. The independent group goes
+first, then the coupled groups from the smallest up. A family with no independent group and one coupled group
+stays one wave. The cut is only a first pass: a coupled group can still be too big to ship as one wave.
 """
 
 import collections
@@ -214,6 +220,18 @@ def wave_seed(nodes, edges, entries, unknown, unreachable, reasons=None, dynamic
     for w in utility_writes or []:
         touch[w["dst"]] |= roots_of.get(w["src"], set())
 
+    wrote, used = collections.defaultdict(set), collections.defaultdict(set)
+    for e in edges:
+        if e["kind"] == "data" and not e["dst"].startswith("ds:dd:"):
+            for r in roots_of.get(e["src"], ()):
+                used[r].add(e["dst"])
+                if e.get("mode") in ("write", "read_write"):
+                    wrote[r].add(e["dst"])
+    for w in utility_writes or []:
+        for r in roots_of.get(w["src"], ()):
+            used[r].add(w["dst"])
+            wrote[r].add(w["dst"])
+
     def ev_of(e):
         return dict(e["evidence"][0])
 
@@ -318,17 +336,75 @@ def wave_seed(nodes, edges, entries, unknown, unreachable, reasons=None, dynamic
                 unassigned.append({"id": u, "reason": "no entry point owns it"})
             else:
                 assign[u] = fam
+    def cut_groups(fam_roots):
+        """Entry points of one family, cut into (label, entry points) groups. See the module docstring."""
+        parent = {r: r for r in fam_roots}
+
+        def find(x):
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+
+        def join(a, b):
+            parent[find(a)] = find(b)
+
+        by_ds, by_prog = collections.defaultdict(list), collections.defaultdict(list)
+        for r in fam_roots:
+            for d in used[r]:
+                by_ds[d].append(r)
+            for v in owned[r]:
+                if v != r and v in by_id and by_id[v]["unit_type"] in schema.PROGRAM_TYPES:
+                    by_prog[v].append(r)
+        for d, rs in by_ds.items():
+            ws = [r for r in rs if d in wrote[r]]
+            for x in ws[1:]:
+                join(ws[0], x)
+        for rs in by_prog.values():
+            for x in rs[1:]:
+                join(rs[0], x)
+        comps = collections.defaultdict(list)
+        for r in fam_roots:
+            comps[find(r)].append(r)
+        alone = sorted(r for c in comps.values() if len(c) == 1 for r in c)
+        coupled = sorted((sorted(c) for c in comps.values() if len(c) > 1), key=lambda c: (len(c), c[0]))
+        if not coupled or (len(coupled) == 1 and not alone):
+            return [(None, sorted(fam_roots))]
+        out = [("independent", alone)] if alone else []
+        for i, c in enumerate(coupled, 1):
+            out.append(("coupled" if len(coupled) == 1 else "coupled-%d" % i, c))
+        return out
+
     waves = []
     for name, text in FAMILIES:
+        fam_roots = [r for r in roots if fam_of[r] == name]
         units = sorted(u for u, f in assign.items() if f == name)
         if not units:
             continue
-        fam_roots = [r for r in roots if fam_of[r] == name]
-        evs = {(b["file"], b["line"]) for r in fam_roots for b in [basis_of[r]] if b}
-        waves.append({"wave": len(waves) + 1, "family": name, "description": text, "units": units,
-                      "entry_points": fam_roots,
-                      "computed_calls": sorted({d["src"] for d in (dynamic or [])} & set(units)),
-                      "evidence": [{"file": f, "line": l} for f, l in sorted(evs)[:3]]})
+        groups = cut_groups(fam_roots) if len(fam_roots) > 1 else [(None, fam_roots)]
+        rank = {r: i for i, (_, rs) in enumerate(groups) for r in rs}
+
+        def group_of(u):
+            if u in sched_of:
+                gs = [rank[j] for j in sched_of[u] if j in rank]
+            else:
+                gs = [rank[r] for r in roots_of.get(u, ()) if r in rank]
+            if not gs:
+                return 0
+            return max(gs) if u in sched_of else min(gs)
+
+        for gi, (label, grs) in enumerate(groups):
+            gunits = [u for u in units if group_of(u) == gi]
+            if not gunits:
+                continue
+            evs = {(b["file"], b["line"]) for r in grs for b in [basis_of[r]] if b}
+            w = {"wave": len(waves) + 1, "family": name, "description": text, "units": gunits,
+                 "entry_points": grs,
+                 "computed_calls": sorted({d["src"] for d in (dynamic or [])} & set(gunits)),
+                 "evidence": [{"file": f, "line": l} for f, l in sorted(evs)[:3]]}
+            if label:
+                w["group"] = label
+            waves.append(w)
     return {"basis": "family of the entry points that use a unit, in a fixed order. Facts only, no risk judgment.",
             "waves": waves, "unassigned": sorted(unassigned, key=lambda x: x["id"])}
 

@@ -3,16 +3,16 @@
   {
    "id": "PGMR",
    "port_difficulty": {
-    "score": 2,
-    "why": "Sixteen lines. It opens, reads one record and closes. The record is never used, and there is no AT END and no FILE STATUS. The only care is decoding a COMP-3 field it never touches, and there is no output to compare against."
+    "score": 1,
+    "why": "Opens, reads one record and closes; no computation, no packed-decimal arithmetic, no special-cased codes (app/cbl/PGMR.cbl:13-15)."
    },
    "blast_radius": {
-    "score": 3,
-    "why": "Read-only and reversible, but it sits on the medium confidence contract edge with PGMW, and it produces no output. A wrong decode would be silent. A wrong file attribute would abend the read."
+    "score": 2,
+    "why": "Read-only consumer of SPARQ.TEST.MASTER (DISP=SHR) with no output of its own, so a wrong port cannot corrupt data; the medium contract edge is verified name-only, and a failed OPEN or READ abends loudly."
    },
-   "quadrant": "low-high",
+   "quadrant": "low-low",
    "wave": 1,
-   "driving_fact": "Reads SPARQ.TEST.MASTER through LAYOUTY while the writer uses LAYOUTX. The two copybooks are separate files with different field names.",
+   "driving_fact": "The medium confidence PGMW->PGMR contract edge is a name-only difference: LAYOUTX and LAYOUTY are both X(10) + S9(7)V99 COMP-3 (15 bytes), so PGMR reads the record PGMW writes at the same offsets.",
    "confidence": "medium",
    "evidence": [
     {
@@ -22,22 +22,26 @@
     {
      "file": "app/cbl/PGMR.cbl",
      "line": 14
+    },
+    {
+     "file": "app/cpy/LAYOUTY.cpy",
+     "line": 3
     }
    ]
   },
   {
    "id": "PGMW",
    "port_difficulty": {
-    "score": 3,
-    "why": "Tiny code, but it writes LAYOUT-REC with no MOVE or INITIALIZE, so the bytes it writes are undefined. The record has a COMP-3 field. The intended content and file length live in the JCL and the copybook, and there is no oracle."
+    "score": 2,
+    "why": "No logic, but it writes LAYOUT-REC without ever moving a value into it, so the COMP-3 field holds whatever storage held; a port must decide to reproduce that or initialize it, and the oracle is missing."
    },
    "blast_radius": {
-    "score": 4,
-    "why": "Sole writer of the shared master. The reader uses a different copybook. A layout drift is silent, and the file is created and cataloged by the job."
+    "score": 3,
+    "why": "Sole writer of the SPARQ.TEST.MASTER data hub (the only articulation point), part of the nightly batch cycle; the bad bytes are silent unless a consumer validates the packed field, and the dataset is recreated each run with no recorded generation to roll back to."
    },
-   "quadrant": "high-high",
+   "quadrant": "low-high",
    "wave": 2,
-   "driving_fact": "Writes SPARQ.TEST.MASTER through LAYOUTX. The only reader, PGMR, reads it through LAYOUTY, so the contract edge is medium confidence.",
+   "driving_fact": "Line 14 writes LAYOUT-REC with no MOVE, and WRITEJOB's DCB says LRECL=80 while the copybook record is 15 bytes, so the file's actual content and record length are decided outside the program.",
    "confidence": "medium",
    "evidence": [
     {
@@ -47,6 +51,14 @@
     {
      "file": "app/cbl/PGMW.cbl",
      "line": 14
+    },
+    {
+     "file": "app/cpy/LAYOUTX.cpy",
+     "line": 3
+    },
+    {
+     "file": "app/jcl/WRITEJOB.jcl",
+     "line": 4
     }
    ]
   },
@@ -54,17 +66,21 @@
    "id": "job:READJOB",
    "port_difficulty": {
     "score": 1,
-    "why": "One step, one DD with DISP=SHR and a SYSOUT. No parameters, no utilities."
+    "why": "One step running PGMR with INFILE pointing at SPARQ.TEST.MASTER, DISP=SHR, no DCB and no symbols (app/jcl/READJOB.jcl:2-3)."
    },
    "blast_radius": {
     "score": 2,
-    "why": "Read-only and reversible. If it runs before the writer has created the dataset it fails at allocation, which is loud. Its place in the nightly cycle is unknown because no scheduler was given."
+    "why": "Read-only, so nothing it does can corrupt the master. Its position in the nightly cycle is unknown because no scheduler was parsed, so it may run before WRITEJOB creates the dataset (loud allocation failure) or read the prior run's data without notice."
    },
    "quadrant": "low-low",
    "wave": 1,
-   "driving_fact": "Reads SPARQ.TEST.MASTER with DISP=SHR and no DCB, so the file attributes come from the catalog entry the writer job created.",
+   "driving_fact": "No scheduler artifact was parsed, so whether READJOB runs after WRITEJOB in the nightly cycle is unknown.",
    "confidence": "medium",
    "evidence": [
+    {
+     "file": "app/jcl/READJOB.jcl",
+     "line": 2
+    },
     {
      "file": "app/jcl/READJOB.jcl",
      "line": 3
@@ -75,15 +91,15 @@
    "id": "job:WRITEJOB",
    "port_difficulty": {
     "score": 2,
-    "why": "One step and one DD. The care is in the DD: a NEW,CATLG allocation with SPACE and a DCB that has to be reproduced or deliberately changed in the target."
+    "why": "One step, but it holds behavior the code does not: DISP=(NEW,CATLG,DELETE) allocation, SPACE=(TRK,(1,1)) and DCB RECFM=FB,LRECL=80 against a 15-byte copybook record (app/jcl/WRITEJOB.jcl:3-4)."
    },
    "blast_radius": {
-    "score": 4,
-    "why": "Creates and catalogs the shared master. A rerun with the same name and DISP=NEW would fail at allocation, which is loud. The LRECL it sets decides the record length every reader sees, and a mismatch would be silent."
+    "score": 3,
+    "why": "Creates the SPARQ.TEST.MASTER dataset in the nightly cycle; NEW means a rerun fails with a JCL error if the dataset already exists (loud), and a target with different allocation or record-length semantics would change the file the reader sees."
    },
    "quadrant": "low-high",
    "wave": 2,
-   "driving_fact": "Allocates SPARQ.TEST.MASTER as NEW,CATLG,DELETE with RECFM=FB and LRECL=80, while the layout copybook describes a 15 byte record. The extractor does not read DCB.",
+   "driving_fact": "WRITEJOB declares LRECL=80 for a 15-byte record and DISP=NEW, so a restart after a partial run needs the dataset deleted first.",
    "confidence": "medium",
    "evidence": [
     {

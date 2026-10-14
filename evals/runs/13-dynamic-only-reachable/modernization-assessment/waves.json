@@ -4,11 +4,11 @@
     {
       "wave": 1,
       "family": "batch-readonly",
-      "name": "MAINJOB and PGMMAIN, the only job in the tree",
+      "name": "Nightly batch cycle (MAINJOB)",
       "units": ["PGMMAIN", "job:MAINJOB"],
-      "rationale": "This is the only entry point, so a single wave is all the facts support. The batch-readonly family is trivially true and weak: no data edge exists, but the CALL at PGMMAIN.cbl:9 has an unbounded target, so what the job writes is unknown. The wave is deployable and rollback-able as one job (rerun the legacy JCL). Its boundary is testable only at the job return code, because neither program writes a file. It is nameable to a stakeholder only if MAINJOB is the nightly batch cycle, and the tree does not show that. Treat it as a candidate wave until the callee set is bounded.",
-      "unblocks": "Nothing in this tree. No other unit calls, reads from or is ordered after these two. It is a chore for sequencing purposes. Its value is that it forces the callee set of the computed CALL, and the rest of the nightly cycle, to be named.",
-      "blast_radius": "high",
+      "rationale": "One JCL job runs one program (app/jcl/MAINJOB.jcl:2). The program touches no dataset, so the family is batch-readonly by fact. It is the whole reachable system, so it is the whole nightly cycle as far as this tree shows. The program calls a name it reads at run time (app/cbl/PGMMAIN.cbl:9), so the real scope of the wave is not known until that name is known.",
+      "unblocks": "Nothing in this tree. No other unit depends on it. It is the only wave, so it is the proof of the toolchain and the equivalence harness.",
+      "blast_radius": "medium",
       "confidence": "low",
       "evidence": [
         {"file": "app/jcl/MAINJOB.jcl", "line": 1},
@@ -19,7 +19,7 @@
   "unassigned": [
     {
       "id": "HIDDEN01",
-      "reason": "not reached by any static edge, and 1 reachable computed call(s) could target it, for example at app/cbl/PGMMAIN.cbl:9. It moves with wave 1 if the run-time input to PGMMAIN names it."
+      "reason": "not reached by any static edge, and 1 reachable computed call(s) could target it, for example at app/cbl/PGMMAIN.cbl:9"
     }
   ],
   "deviations": []

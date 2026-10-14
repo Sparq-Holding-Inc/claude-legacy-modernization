@@ -3,20 +3,9 @@
  "unreachable": [],
  "dormant": [],
  "unknown": [
-  {
-   "id": "PROGA",
-   "reason": "No entry point in the tree, so nothing is provably unreachable. It makes a computed call itself, and it has no static caller. Not measured for dormancy: the tree has no git dates. Do not delete.",
-   "confidence": "low",
-   "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 9}]
-  },
-  {
-   "id": "PROGB",
-   "reason": "No static caller and no entry point. The computed CALL WS-PGM-NAME in PROGA could name it, and the name comes from ACCEPT at run time, so the target set cannot be bounded. Unknown, not unreachable. Not measured for dormancy: the tree has no git dates. Do not delete.",
-   "confidence": "low",
-   "evidence": [
-    {"file": "app/cbl/PROGB.cbl", "line": 1},
-    {"file": "app/cbl/PROGA.cbl", "line": 9}
-   ]
-  }
+  {"id": "PROGA", "reason": "No entry point exists in the tree, so nothing is provably reachable or unreachable. inference: it is the only program with a computed call.", "confidence": "low",
+   "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 9}]},
+  {"id": "PROGB", "reason": "No entry point exists. PROGA's computed CALL WS-PGM-NAME could name it, so it may run. It is a stub that only does GOBACK.", "confidence": "low",
+   "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 9}, {"file": "app/cbl/PROGB.cbl", "line": 4}]}
  ]
 }

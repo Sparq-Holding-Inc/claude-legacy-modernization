@@ -4,28 +4,20 @@
    "id": "PROGA",
    "port_difficulty": {
     "score": 1,
-    "why": "Seven lines: one DISPLAY, one static literal CALL and STOP RUN, with no arithmetic, files, copybooks or SQL."
+    "why": "Seven lines: one DISPLAY, one static CALL 'PROGB', STOP RUN. No arithmetic, no data division, no copybooks, no files."
    },
    "blast_radius": {
     "score": 2,
-    "why": "It writes no dataset and has one callee, but whether it sits in the nightly batch cycle cannot be shown because the tree holds no JCL or scheduler."
+    "why": "Fan-in 0, no datasets, no data hub, and it writes nothing irreversible. Whether it runs in the nightly batch cycle cannot be determined because no JCL or scheduler exists, and with no telemetry its real usage is unmeasured."
    },
    "quadrant": "low-low",
    "wave": null,
-   "driving_fact": "The only program that ends in STOP RUN and the only caller of PROGB (static CALL at app/cbl/PROGA.cbl:6). The tree has no JCL, so its place in the nightly batch cycle is unknown.",
-   "confidence": "low",
+   "driving_fact": "Statically calls PROGB at line 6 (high confidence edge) and touches no data. It is the only caller of PROGB.",
+   "confidence": "medium",
    "evidence": [
     {
      "file": "app/cbl/PROGA.cbl",
-     "line": 5
-    },
-    {
-     "file": "app/cbl/PROGA.cbl",
      "line": 6
-    },
-    {
-     "file": "app/cbl/PROGA.cbl",
-     "line": 7
     }
    ]
   },
@@ -33,24 +25,20 @@
    "id": "PROGB",
    "port_difficulty": {
     "score": 1,
-    "why": "Its whole procedure division is a single GOBACK, so there is no logic to port."
+    "why": "Four lines whose only statement is GOBACK. There is no logic to port."
    },
    "blast_radius": {
     "score": 1,
-    "why": "It reads and writes nothing and returns at once. The only doubt is whether this source is the version that is deployed."
+    "why": "Fan-in 1 (PROGA only), no datasets, no side effects. Any wrong behavior would be loud, since a missing subprogram makes PROGA's CALL fail."
    },
    "quadrant": "low-low",
    "wave": null,
-   "driving_fact": "Fan-in of 1: called only by PROGA. Its body is a no-op, which may mean a stub whose real logic lives outside the tree.",
-   "confidence": "medium",
+   "driving_fact": "Body is a bare GOBACK, so it is a stub that does nothing. Its only dependency is the one call from PROGA.",
+   "confidence": "high",
    "evidence": [
     {
      "file": "app/cbl/PROGB.cbl",
      "line": 4
-    },
-    {
-     "file": "app/cbl/PROGA.cbl",
-     "line": 6
     }
    ]
   }

@@ -1,5 +1,22 @@
 {
  "case": "13-dynamic-only-reachable",
- "harness": "subagent",
+ "wall_seconds": 114.0,
+ "returncode": 0,
+ "command": [
+  "claude",
+  "-p",
+  "/legacy-modernization:modernize-scan --target refactor --must-not-break \"the nightly batch cycle\" --telemetry none",
+  "--plugin-dir",
+  "/Users/phillipmorehead/Legacy Modernization Assessor Plugin/sparq-legacy-modernization",
+  "--permission-mode",
+  "acceptEdits",
+  "--output-format",
+  "json",
+  "--max-budget-usd",
+  "4.0",
+  "--max-turns",
+  "120",
+  "--no-session-persistence"
+ ],
  "work": "/Users/phillipmorehead/Legacy Modernization Assessor Plugin/bench/runs/13-dynamic-only-reachable/work"
 }

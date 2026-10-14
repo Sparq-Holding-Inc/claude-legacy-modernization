@@ -1,11 +1,11 @@
 {
- "target_state": "refactor",
- "waves": [],
- "unassigned": [
-  {"id": "PROGA", "reason": "no entry points in the tree"},
-  {"id": "PROGB", "reason": "no entry points in the tree"},
-  {"id": "PROGC", "reason": "no entry points in the tree"},
-  {"id": "PROGD", "reason": "no entry points in the tree"}
- ],
- "deviations": []
+  "target_state": "refactor",
+  "waves": [],
+  "unassigned": [
+    {"id": "PROGA", "reason": "No entry point in the tree: no CSD, JCL or scheduler export names a transaction or job that starts it."},
+    {"id": "PROGB", "reason": "No entry point in the tree. Reached only by a LINK from PROGA."},
+    {"id": "PROGC", "reason": "No entry point in the tree. Reached only by an XCTL from PROGA."},
+    {"id": "PROGD", "reason": "No entry point in the tree. Reached only by an XCTL from PROGA."}
+  ],
+  "deviations": []
 }

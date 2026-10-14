@@ -1,82 +1,44 @@
 # 03 Waves
 
-Target state: refactor. Two waves. The plan is the extractor's seed (`03a-wave-seed.md`) with no changes, so
-`deviations` is empty. The machine-readable plan is `modernization-assessment/waves.json`, and the scores are in
-`modernization-assessment/risks.json`.
+Target state: **refactor** (given as a flag). Plan source: `modernization-assessment/03a-wave-seed.md`, kept without change. Machine form: `modernization-assessment/waves.json`.
 
-| Wave | Family | Units | Blast radius | Confidence | Evidence |
-|---|---|---|---|---|---|
-| 1 | batch-readonly | PGMR, job:READJOB | medium | medium | `app/jcl/READJOB.jcl:1`, `app/cbl/PGMR.cbl:14` |
-| 2 | batch-writers | PGMW, job:WRITEJOB | high | low | `app/cbl/PGMW.cbl:6`, `app/cbl/PGMW.cbl:14`, `app/jcl/WRITEJOB.jcl:4` |
+## The plan
 
-## Wave 1. Reader side of the master file
+| Wave | Name | Units | Blast radius | Confidence | Unblocks | Evidence |
+|---|---|---|---|---|---|---|
+| 1 | Reader job against the legacy file | `PGMR`, `job:READJOB` | low | medium | The pinned layout and record length that wave 2 must meet | `app/jcl/READJOB.jcl:1`, `app/jcl/READJOB.jcl:3`, `app/cbl/PGMR.cbl:13` |
+| 2 | Writer job and the single layout | `PGMW`, `job:WRITEJOB` | medium | medium | Merging `LAYOUTX` and `LAYOUTY` into one definition | `app/cbl/PGMW.cbl:6`, `app/cbl/PGMW.cbl:14`, `app/jcl/WRITEJOB.jcl:3` |
 
-Units: `PGMR`, `job:READJOB`.
+Copybooks `cpy:LAYOUTX` and `cpy:LAYOUTY`, the steps, and the dataset `ds:SPARQ.TEST.MASTER` move with their owners and are not listed as units.
 
-- **Why it is a wave.** READJOB runs PGMR, which only reads `SPARQ.TEST.MASTER`. Nothing shared is written.
-  Evidence: `app/jcl/READJOB.jcl:2`, `app/jcl/READJOB.jcl:3`, `app/cbl/PGMR.cbl:13`.
-- **Risk quadrants.** PGMR is low-high (port 2, blast 3). READJOB is low-low (port 1, blast 2). Evidence:
-  `modernization-assessment/risks.json:13`, `modernization-assessment/risks.json:63`.
-- **The four wave tests.**
-  - Deployable independently: yes, behind a flag. The legacy writer keeps producing the file. Inference.
-  - Rollback independently: yes, by running the legacy job again. It is read-only. Evidence: `app/cbl/PGMR.cbl:13`.
-  - Testable boundary: weak. PGMR uses no field it reads and prints nothing, so the only observable behavior is
-    the return code. Evidence: `app/cbl/PGMR.cbl:14`. The boundary that can be tested is the input file
-    (good, short and bad records).
-  - Something a stakeholder can name: no. This wave is a toolchain proof and a chore in business terms.
-- **Unblocks.** Wave 2. The ported reader gives the writer port a consumer that decodes the record. The wave
-  should also produce one shared schema for the file, so wave 2 has something to test the writer against.
-  Inference.
-- **Confidence: medium.** The sequence follows from facts. The value is low, and the test boundary is thin.
-  The extractor found no computed calls for this wave. Evidence: analysis: `computed_calls` for wave 1 in
-  `modernization-assessment/graph.json`.
+## Why this order
 
-## Wave 2. Writer of the master file
+The seed placed the read-only job first and the writer second, from facts alone (`modernization-assessment/03a-wave-seed.md`). I checked that against the one dependency in the tree. The reader consumes what the writer produces (`app/jcl/READJOB.jcl:3`, `app/jcl/WRITEJOB.jcl:3`). Two orders are possible:
 
-Units: `PGMW`, `job:WRITEJOB`.
+- **Reader first (the plan).** The new reader is tested on files the legacy writer already made. The legacy writer is untouched, so the thing that defines the file does not change while the reader is being proved. The reader port also forces someone to write down what the file is.
+- **Writer first.** The new writer could emit a file that the legacy reader mis-reads without any error, because the two copybooks are separate and a drift between them is silent (`app/cpy/LAYOUTX.cpy:2`, `app/cpy/LAYOUTY.cpy:2`). Producer changes are the harder ones to see.
 
-- **Why it is a wave.** WRITEJOB runs PGMW, which writes the file PGMR reads. Evidence:
-  `app/jcl/WRITEJOB.jcl:2`, `app/jcl/WRITEJOB.jcl:3`, `app/cbl/PGMW.cbl:13`.
-- **Why it comes second.** Two reasons. The seed orders write families after read families. And the reader is
-  already ported by then, so the contract has a fixed, tested consumer. Evidence: analysis: `wave_seed` in
-  `modernization-assessment/graph.json`.
-- **Risk quadrants.** PGMW is high-high (port 3, blast 4). WRITEJOB is low-high (port 2, blast 4). Evidence:
-  `modernization-assessment/risks.json:38`, `modernization-assessment/risks.json:84`. A high-high unit sits in the
-  last wave, which is where the rules put it. A low-high unit can move early, but it runs a program that cannot,
-  so it stays with it.
-- **The four wave tests.**
-  - Deployable independently: yes, once the reader has been ported. The new writer has to produce a file that the
-    ported reader and the legacy reader both accept. Inference.
-  - Rollback independently: yes, but note that WRITEJOB creates and catalogs the dataset with a fixed name.
-    A rerun means deleting it first. Evidence: `app/jcl/WRITEJOB.jcl:3`. Inference on the rerun failure.
-  - Testable boundary: yes, the output file, compared against a legacy output. The legacy output may not be
-    repeatable because PGMW moves nothing into its record. Evidence: `app/cbl/PGMW.cbl:14`.
-  - Something a stakeholder can name: not from this tree. The must-not-break item, the nightly batch cycle,
-    maps to no unit here (see Open Questions in `00-summary.md`).
-- **Unblocks.** Retiring the legacy writer, and merging the two copybooks into one schema. Inference.
-- **Confidence: low.** The extractor scored the contract edge medium. The JCL sets LRECL=80 against a 15 byte
-  layout. No scheduler was supplied. There is no oracle. Evidence: `app/jcl/WRITEJOB.jcl:4`,
-  `modernization-assessment/graph.json` (edge PGMW to PGMR, `confidence`).
-- **What sits behind a facade.** Nothing needs one. There is no god module, no cycle, and no unit that
-  everything else depends on. Evidence: analysis: `god_modules` and `sccs` in `modernization-assessment/graph.json`.
+No cycle, no god module and no computed call forces another order (`analysis.sccs`, `analysis.god_modules`, `analysis.unresolved_dynamic` are all empty). **Deviations from the seed: none.** A plan with no deviations is a fine answer.
 
-## Deviations from the seed
+## Are the waves valid?
 
-None. The plan has no deviations and that is a fine answer for a system of this size.
+| Test | Wave 1 | Wave 2 |
+|---|---|---|
+| Deployed independently | Yes. Swap the `EXEC PGM=` target in one job (`app/jcl/READJOB.jcl:2`). | Yes, with the same swap (`app/jcl/WRITEJOB.jcl:2`). |
+| Rolled back independently | Yes. Point the step back at the legacy `PGMR`. Nothing it wrote needs undoing. | Yes, but only if the dataset it created is deleted or renamed first. `DISP=(NEW,CATLG,DELETE)` fails on an existing dataset (`app/jcl/WRITEJOB.jcl:3`), so a rollback re-run needs the dataset gone. inference |
+| Testable boundary | Yes. The input file is the boundary. | Yes. The output file is the boundary. |
+| Something a stakeholder can name | Weak. "The reader step of the nightly cycle is on the new code." | Moderate. "The file the cycle produces is now specified once." |
 
-- No unit was moved for a must-not-break item, because `the nightly batch cycle` cannot be tied to a unit.
-  The tree holds no scheduler and no job or program named for a cycle. Evidence: analysis: `warnings` in
-  `modernization-assessment/graph.json`.
-- No wave has more than 25 units, so nothing needed cutting.
-- Nothing the extractor could not see changes what a unit is: there are no computed calls, no embedded JCL,
-  and no file listed as not parsed. Evidence: analysis: `unresolved_dynamic`, `embedded_jcl` in
-  `modernization-assessment/graph.json`.
-- No high-high unit was placed early. PGMW is in the last wave. Evidence:
-  `modernization-assessment/risks.json:38`.
+Wave 1 is close to a chore: it unblocks wave 2 and proves the toolchain, and delivers little on its own. Say so to the steering committee.
 
-## The alternative that was considered
+## Confidence
 
-Moving all four units as one wave would also be defensible: there are only four units and the two sides share one
-file. It was not chosen because the two sides can be deployed and rolled back on their own, the dataset is an
-articulation point, and a one-wave plan would test the reader and the writer at the same time and lose the fixed
-consumer. Inference. Evidence: analysis: `articulation_points` in `modernization-assessment/graph.json`.
+Neither wave is `high`. Reasons, each cited:
+
+- The tree holds no scheduler, so the order and membership of the nightly cycle are not known (`analysis.warnings`).
+- The one contract edge is `medium` (`app/cbl/PGMR.cbl:11`, `app/cbl/PGMW.cbl:11`; see `modernization-assessment/02-coupling.md`).
+- The writer sets no field values before it writes (`app/cbl/PGMW.cbl:14`), so the behavior to preserve is not in the source.
+
+## Must-not-break mapping
+
+"The nightly batch cycle" maps to **no named unit** in the tree. There is no scheduler artifact (`analysis.warnings`), so I cannot show that `job:READJOB` and `job:WRITEJOB` are the cycle, or only part of it. I have treated both jobs as the cycle's members because they are the only batch jobs present, and that is inference. See Open Questions in `modernization-assessment/00-summary.md`.

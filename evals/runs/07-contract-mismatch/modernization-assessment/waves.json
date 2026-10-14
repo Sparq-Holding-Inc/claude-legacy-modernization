@@ -4,24 +4,32 @@
     {
       "wave": 1,
       "family": "batch-readonly",
-      "name": "Reader side of the master file",
+      "name": "Reader job against the legacy file",
       "units": ["PGMR", "job:READJOB"],
-      "rationale": "READJOB runs PGMR, which only reads SPARQ.TEST.MASTER and writes nothing shared. The wave boundary is the dataset, which the extractor marks as an articulation point. The legacy writer keeps producing the file, so the port can be tested against real legacy output and rolled back by running the legacy job. This is a sound first wave only as a toolchain proof. PGMR uses no field it reads and prints nothing, so the wave has almost no business value and the only observable behavior is the return code.",
-      "unblocks": "Wave 2. It gives the writer port a ported consumer that decodes the record, and it fixes one shared schema for the file. Otherwise it is a chore.",
-      "blast_radius": "medium",
+      "rationale": "READJOB reads SPARQ.TEST.MASTER and writes nothing another job uses, so the port can be checked against files the legacy writer already produced. It is the consumer side of the one contract in the tree, so porting it first forces the 80 byte record and the 15 byte layout to be written down before anything that produces them changes. Rollback is to run the legacy PGMR step again. No computed calls, no cycle.",
+      "unblocks": "Wave 2. The layout and record length pinned here are the specification the new writer must meet.",
+      "blast_radius": "low",
       "confidence": "medium",
-      "evidence": [{"file": "app/jcl/READJOB.jcl", "line": 1}, {"file": "app/cbl/PGMR.cbl", "line": 14}]
+      "evidence": [
+        {"file": "app/jcl/READJOB.jcl", "line": 1},
+        {"file": "app/jcl/READJOB.jcl", "line": 3},
+        {"file": "app/cbl/PGMR.cbl", "line": 13}
+      ]
     },
     {
       "wave": 2,
       "family": "batch-writers",
-      "name": "Writer of the master file",
+      "name": "Writer job and the single layout",
       "units": ["PGMW", "job:WRITEJOB"],
-      "rationale": "WRITEJOB runs PGMW, which writes SPARQ.TEST.MASTER, the file PGMR reads. It moves last because the reader is already ported by then and the contract can be held constant from the wave 1 side. The contract edge is medium confidence: the writer uses LAYOUTX and the reader uses LAYOUTY. Field by field they are byte compatible, but nothing enforces that. The JCL also sets LRECL=80 against a 15 byte layout, which the extractor cannot compare (inference). Confidence is not high for those reasons and because no scheduler was supplied.",
-      "unblocks": "Retirement of the legacy writer and of the duplicate layout copybook. It is the wave that closes the file contract.",
-      "blast_radius": "high",
-      "confidence": "low",
-      "evidence": [{"file": "app/cbl/PGMW.cbl", "line": 6}, {"file": "app/cbl/PGMW.cbl", "line": 14}, {"file": "app/jcl/WRITEJOB.jcl", "line": 4}]
+      "rationale": "WRITEJOB creates the dataset READJOB reads, so it is the producer side of the contract. It moves after the reader because the reader harness from wave 1 is what proves the new output is byte-compatible. Confidence is medium, not high: the program writes its record without setting any field, so the legacy behavior has to come from a captured output file, not from the source. The nightly cycle is the named must-not-break item and the scheduler that orders it is not in the tree.",
+      "unblocks": "Retiring the second copybook. Once the new writer matches the pinned layout, LAYOUTX and LAYOUTY can become one definition.",
+      "blast_radius": "medium",
+      "confidence": "medium",
+      "evidence": [
+        {"file": "app/cbl/PGMW.cbl", "line": 6},
+        {"file": "app/cbl/PGMW.cbl", "line": 14},
+        {"file": "app/jcl/WRITEJOB.jcl", "line": 3}
+      ]
     }
   ],
   "unassigned": [],

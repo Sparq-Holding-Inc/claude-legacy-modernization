@@ -1,77 +1,38 @@
 # 06 Test strategy
 
-The bar: for the inputs this system actually sees, the new code produces the same outputs as the old, and every difference was decided on purpose and written down.
+The bar is that the new code gives the same outputs as the old for the inputs production sees, and that every difference is on purpose and written down.
 
-The tree holds no dataset, no JCL, no CSD and no test (`01-inventory.md`). The four programs read and write no file (`app/cbl/PROGA.cbl:1-26`). So the oracle cannot come from data files. It has to come from CICS transaction traffic, job output, logs and reports the client holds. The nightly batch cycle, which must not break, has no unit in this tree, so its oracle is described only as a request to the client (below).
+## What the tree gives us
 
-## Oracle, per boundary
+There are no datasets, no JCL, no GDGs, no copybooks (`modernization-assessment/graph.json` field `meta.files_seen`). The oracle has to come from job output, logs, reports and CICS records. The client must supply them.
 
-There are no waves (`03-waves.md`). The first candidate boundary is the PROGA hub and the three programs it calls.
+## Oracle, by what can be had
 
-| Boundary | Oracle, strongest first | What to ask the client for | Confidence | Evidence |
-|---|---|---|---|---|
-| PROGA and its callees (the online chain) | 1. Parallel run: the old and new region both receive the same transaction input, and the outputs are diffed. 2. Captured traffic replay: COMMAREA in, task outcome out, over a window that includes month-end and year-end. 3. Characterization tests from the source, provisional only. | CICS journals or transaction logs for the transactions that start PROGA. CICS monitoring or SMF 110 records showing which programs ran. Any archived screen or report the transaction produced. Whether a second region can take a copy of the traffic. | low | inference |
-| The nightly batch cycle | 1. Parallel run of the cycle. 2. Archived GDG generations of every report, extract and posting file, each a dated golden master. 3. Job logs and return codes per step. | JCL and PROCs for the cycle, the scheduler export, the GDG bases with their generations, job logs for at least one month-end and one year-end, and the extract files that go to partners. | low | inference |
+| Piece | Oracle | Strength | Evidence |
+|---|---|---|---|
+| PROGB, PROGC, PROGD | None needed. Each only returns. The test is that PROGA reaches them and control comes back or does not. | n/a | `app/cbl/PROGB.cbl:4` |
+| PROGA routing | Captured CICS transaction traces or journals: commarea in, the sequence of programs out. Replay them. | strong if the capture covers a cycle | `app/cbl/PROGA.cbl:15` |
+| Fallback | Characterization tests from the source: one case each for the LINK to PROGB, XCTL to PROGC, and XCTL to PROGD. | weak and provisional. It encodes what the code says, not what it does. | `app/cbl/PROGA.cbl:12` |
+| Nightly batch cycle | Not assessable. Nothing in the tree is batch. Ask for its JCL, scheduler export and the last year of job output and SYSOUT. | none yet | inference |
 
-Do not settle for characterization tests until parallel run and captured replay have been asked about and refused.
+Parallel run is the first thing to ask about for PROGA. The program holds no data, so running both versions side by side on the same traffic is cheap if the region allows it.
 
-## What the harness has to record at PROGA
+## Cases that must be covered
 
-PROGA's behavior depends on a value it does not choose: the COMMAREA program name moved at `app/cbl/PROGA.cbl:15` and used at `app/cbl/PROGA.cbl:16`. So the harness records, for every replayed task:
-
-- the COMMAREA content and its length on entry to PROGA
-- the sequence of programs called, with LINK or XCTL, and where control ended
-- the task outcome, including any abend code
-
-The recorded COMMAREA names are also the bound the computed call is missing, so the same capture feeds the dead-code register (`05-dead-code.md`).
+- The commarea values production really sends to the computed LINK (`app/cbl/PROGA.cbl:16`). Include blank, short and unknown program names. The legacy behavior on a bad name (a PGMIDERR abend or a handled error) is the thing to reproduce. PROGA has no HANDLE or RESP clause, so inference: it abends. Confirm.
+- The XCTL at line 20 followed by the XCTL at line 23. Test which of the two actually ends the task (`app/cbl/PROGA.cbl:23`).
+- Fiscal-close and month-end traffic, if PROGA's caller varies by period. Ask.
 
 ## Normalization spec
 
-Every entry below asserts that a difference does not matter. A human signs each one.
+Short on purpose. Ignore task numbers, timestamps and terminal ids. Do not ignore abend codes or the order of programs invoked: they are the behavior. Packed decimal and collating sequence do not arise, since no data is touched. Have a person sign it.
 
-| Item | Normalize? | Why | Evidence |
-|---|---|---|---|
-| Task numbers, timestamps, terminal ids, region names | Yes | Change on every run. | inference |
-| Trailing spaces in the 8 byte program name in the COMMAREA | Decide in writing | The field is PIC X(8), so a short name is space padded. A port that trims or does not trim can change which program is found. | `app/cbl/PROGA.cbl:7` |
-| Case of the program name | No | A lower case name is a different program in some regions. Test both. | inference |
-| EBCDIC to ASCII conversion of names and content | No | The name has to survive the conversion exactly. | inference |
-| Order of programs called | No | Order is the behavior: LINK returns, XCTL does not. | `app/cbl/PROGA.cbl:12`, `app/cbl/PROGA.cbl:16`, `app/cbl/PROGA.cbl:20` |
-| Abend codes | No | A failed LINK or XCTL ends the task abnormally by default (inference). The code is part of the outcome. | `app/cbl/PROGA.cbl:16` |
-
-Not applicable here, and stated so nobody looks for them: packed decimal and COMP fields (none in the four programs), REDEFINES (none), collating order (no sorted or keyed file), record padding and low values (no record). If the real system turns out larger, revisit each.
-
-## Cases to add beyond replay
-
-- **COMMAREA names a program that exists**, one for each program the client says is valid.
-- **COMMAREA names itself** (PROGA). It would link to itself.
-- **COMMAREA names a program that does not exist.** The legacy behavior is an abnormal end of the task by default (inference). Capture it, and decide whether the new code should match.
-- **No COMMAREA, or a COMMAREA shorter than 8 bytes.** PROGA does not check the length before the MOVE (`app/cbl/PROGA.cbl:15`). What the old code does with that is behavior, so capture it.
-- **The XCTL to PROGC** is the last thing PROGA does on its normal path (`app/cbl/PROGA.cbl:20`). Assert that control does not come back and that nothing after it runs.
-- **PROGD is not called** on the normal path. Assert it. If the new code runs PROGD, that is the difference to catch (`app/cbl/PROGA.cbl:23`).
-- **The XCTL fails.** Force PROGC to be missing in the old region and record what happens. This is the only way the statement at line 23 could run.
-- **Boundary dates**: month-end, quarter-end, fiscal year-end, leap day and daylight saving changes, for whatever transactions start PROGA. The tree gives no date logic, so this is cover for the callers.
-- **The paths that run only at fiscal close.** Ask the client which COMMAREA names show up only then. A name seen once a year is the dead-code mistake in the making.
-
-## Deviation Register
-
-Nothing may differ without a row here. The rows below are candidates raised by this assessment. None is approved.
+## Deviation register
 
 | ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact | Evidence |
 |---|---|---|---|---|---|---|
-| D-1 | XCTL never returns, so the RETURN and the XCTL to PROGD after it do not run. | Not decided. A plain call in the port would run them. | Not changed yet. This row exists so the port does not change it by accident. | Not approved | PROGD could be called when it never was. | `app/cbl/PROGA.cbl:20`, `app/cbl/PROGA.cbl:23`, `app/cbl/PROGA.cbl:26` |
-| D-2 | The LINK target comes from the COMMAREA with no check of length or content. | Not decided. A router with an allow list would refuse names the old code accepts. | Not changed yet. | Not approved | A caller passing an unlisted name would be refused where the old code linked to it. | `app/cbl/PROGA.cbl:15`, `app/cbl/PROGA.cbl:16` |
+| none yet | | | | | | inference |
 
-## Exit bar, per wave
+## Exit bar
 
-No wave exists, so this is the bar the first wave has to meet:
-
-- replay diff is clean, modulo the normalization spec and the Deviation Register
-- every case above passes
-- the harness is under version control and runs in CI
-- the Deviation Register is signed by someone with the authority to sign it
-
-Not when the port compiles, and not when it passes tests written alongside the port.
-
-## Keep the harness after cutover
-
-The comparison harness becomes the regression suite for the modernized system. Budget to maintain it.
+Replay diff is clean modulo the normalization spec and register. Every case above passes. The harness is in version control and runs in CI. The register is signed. Keep the harness after cutover as the regression suite.

@@ -141,28 +141,67 @@
    "family": "batch-writers",
    "name": null,
    "units": [
-    "CBACT04C",
     "CBEXPORT",
     "CBSTM03A",
     "CBSTM03B",
-    "CBTRN02C",
-    "CBTRN03C",
     "COBSWAIT",
-    "CORPT00C",
-    "CSUTLDTC",
-    "job:ACCTFILE",
     "job:CARDFILE",
     "job:CBEXPORT",
     "job:CLOSEFIL",
-    "job:COMBTRAN",
     "job:CREASTMT",
     "job:CUSTFILE",
-    "job:DALYREJS",
-    "job:DEFGDGB",
     "job:DISCGRP",
     "job:DUSRSECJ",
-    "job:INTCALC",
     "job:OPENFIL",
+    "job:TRANCATG",
+    "job:TRANTYPE",
+    "job:WAITSTEP",
+    "job:XREFFILE",
+    "sch:DAILY-TransactionBackup/CLOSEFIL",
+    "sch:DAILY-TransactionBackup/OPENFIL",
+    "sch:DAILY-TransactionBackup/WAITSTEP",
+    "sch:MONTHLY-InterestCalculation/CLOSEFIL",
+    "sch:MONTHLY-InterestCalculation/OPENFIL",
+    "sch:MONTHLY-InterestCalculation/WAITSTEP",
+    "sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL",
+    "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP",
+    "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL",
+    "sch:WEEKLY-DisclosureGroupsRefresh/WAITSTEP"
+   ],
+   "rationale": null,
+   "unblocks": null,
+   "blast_radius": null,
+   "confidence": null,
+   "evidence": [
+    {
+     "file": "app/cbl/CBEXPORT.cbl",
+     "line": 65
+    },
+    {
+     "file": "app/cbl/CBSTM03A.CBL",
+     "line": 39
+    },
+    {
+     "file": "app/jcl/CARDFILE.jcl",
+     "line": 36
+    }
+   ]
+  },
+  {
+   "wave": 6,
+   "family": "batch-writers",
+   "name": null,
+   "units": [
+    "CBACT04C",
+    "CBTRN02C",
+    "CBTRN03C",
+    "CORPT00C",
+    "CSUTLDTC",
+    "job:ACCTFILE",
+    "job:COMBTRAN",
+    "job:DALYREJS",
+    "job:DEFGDGB",
+    "job:INTCALC",
     "job:POSTTRAN",
     "job:PRTCATBL",
     "job:REPRTEST",
@@ -170,28 +209,14 @@
     "job:SORTTEST",
     "job:TCATBALF",
     "job:TRANBKP",
-    "job:TRANCATG",
     "job:TRANFILE",
     "job:TRANIDX",
     "job:TRANREPT",
-    "job:TRANTYPE",
-    "job:WAITSTEP",
-    "job:XREFFILE",
     "proc:REPROC",
     "proc:TRANREPT",
-    "sch:DAILY-TransactionBackup/CLOSEFIL",
-    "sch:DAILY-TransactionBackup/OPENFIL",
     "sch:DAILY-TransactionBackup/TRANBKP",
-    "sch:DAILY-TransactionBackup/WAITSTEP",
-    "sch:MONTHLY-InterestCalculation/CLOSEFIL",
     "sch:MONTHLY-InterestCalculation/COMBTRAN",
     "sch:MONTHLY-InterestCalculation/INTCALC",
-    "sch:MONTHLY-InterestCalculation/OPENFIL",
-    "sch:MONTHLY-InterestCalculation/WAITSTEP",
-    "sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL",
-    "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP",
-    "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL",
-    "sch:WEEKLY-DisclosureGroupsRefresh/WAITSTEP",
     "sch:scripts/remote_refresh.sh",
     "sch:scripts/run_full_batch.sh",
     "sch:scripts/run_interest_calc.sh",
@@ -207,17 +232,17 @@
      "line": 41
     },
     {
-     "file": "app/cbl/CBEXPORT.cbl",
-     "line": 65
+     "file": "app/cbl/CBTRN02C.cbl",
+     "line": 51
     },
     {
-     "file": "app/cbl/CBSTM03A.CBL",
-     "line": 39
+     "file": "app/cbl/CBTRN03C.cbl",
+     "line": 51
     }
    ]
   },
   {
-   "wave": 6,
+   "wave": 7,
    "family": "online-writers",
    "name": null,
    "units": [
@@ -251,20 +276,14 @@
    ]
   },
   {
-   "wave": 7,
+   "wave": 8,
    "family": "subsystem",
    "name": null,
    "units": [
     "CBPAUP0C",
     "COACCT01",
-    "COBTUPDT",
     "CODATE01",
     "COPAUA0C",
-    "COPAUS0C",
-    "COPAUS1C",
-    "COPAUS2C",
-    "COTRTLIC",
-    "COTRTUPC",
     "DBUNLDGS",
     "PAUDBLOD",
     "PAUDBUNL",
@@ -272,12 +291,10 @@
     "job:CIDBCMP",
     "job:DBPAUTP0",
     "job:LOADPADB",
-    "job:MNTTRDB2",
     "job:TRANEXTR",
     "job:UNLDGSAM",
     "job:UNLDPADB",
     "proc:BLDCIDB2",
-    "sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2",
     "sch:WEEKLY-TransactionTypesDBRefresh/TRANEXTR"
    ],
    "rationale": null,
@@ -290,12 +307,45 @@
      "line": 956
     },
     {
+     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
+     "line": 222
+    },
+    {
+     "file": "app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL",
+     "line": 244
+    }
+   ]
+  },
+  {
+   "wave": 9,
+   "family": "subsystem",
+   "name": null,
+   "units": [
+    "COBTUPDT",
+    "COPAUS0C",
+    "COPAUS1C",
+    "COPAUS2C",
+    "COTRTLIC",
+    "COTRTUPC",
+    "job:MNTTRDB2",
+    "sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2"
+   ],
+   "rationale": null,
+   "unblocks": null,
+   "blast_radius": null,
+   "confidence": null,
+   "evidence": [
+    {
      "file": "app/app-authorization-ims-db2-mq/cbl/COPAUS2C.cbl",
      "line": 141
     },
     {
-     "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
-     "line": 222
+     "file": "app/app-transaction-type-db2/cbl/COBTUPDT.cbl",
+     "line": 137
+    },
+    {
+     "file": "app/app-transaction-type-db2/cbl/COTRTLIC.cbl",
+     "line": 338
     }
    ]
   }

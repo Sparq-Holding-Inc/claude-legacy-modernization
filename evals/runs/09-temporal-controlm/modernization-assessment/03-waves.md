@@ -1,58 +1,27 @@
 # 03 Waves
 
-Target state: refactor (`modernization-assessment/waves.json:2`). Refactor means the same behavior in restructured code. Here the
-"code" is two do-nothing JCL jobs and a scheduler file, so what gets restructured is the schedule and its conditions.
-
-The plan is the extractor's seed (`03a-wave-seed.md`), kept as it was. The seed cut one wave. I found no reason to change it.
-
-## The plan
+Target state: refactor. Machine-readable plan: `modernization-assessment/waves.json:1`. Starting cut: `03a-wave-seed.md`. Deviations from the seed: none.
 
 | Wave | Family | Units | Blast radius | Confidence | Evidence |
 |---|---|---|---|---|---|
-| 1 | batch-utility | `job:JOBA`, `job:JOBB`, `sch:NIGHTLY/JOBA`, `sch:NIGHTLY/JOBB` | medium | medium | `app/jcl/JOBA.jcl:1`, `app/jcl/JOBB.jcl:1`, `modernization-assessment/waves.json:5` |
+| 1 | batch-utility | `job:JOBA`, `job:JOBB`, `sch:NIGHTLY/JOBA`, `sch:NIGHTLY/JOBB` | low | low | `app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`, `app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9` |
 
-There is one wave. No unit is left unplaced (`modernization-assessment/waves.json:24`) and there are no deviations (`modernization-assessment/waves.json:25`).
+## Wave 1. Nightly Control-M cycle (JOBA then JOBB)
 
-## Wave 1. Nightly batch cycle: JOBA then JOBB
+- **What moves.** Two JCL jobs and the two Control-M job definitions that run them (`app/scheduler/nightly.xml:4`, `app/scheduler/nightly.xml:8`).
+- **Why one wave.** JOBA sets `JOBA-DONE` (`app/scheduler/nightly.xml:6`) and JOBB waits on it (`app/scheduler/nightly.xml:9`). Splitting them puts the condition across a cutover boundary. A single sentence describes the wave: the nightly cycle. That is the must-not-break item, so the whole item sits in one wave.
+- **Why batch-utility.** Both steps run `IEFBR14` (`app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`) and no DD names a dataset. No program, dataset or copybook is shared.
+- **Deployable and rollback.** Independently deployable behind the scheduler: run the new definition in a parallel folder with its own ODATE conditions. Rollback is to stop ordering the new folder and keep ordering `NIGHTLY`. Inference: nothing in the tree prevents this.
+- **Testable boundary.** The boundary is the scheduler: the order jobs start in, the conditions set and deleted, and the return codes. There is no data boundary in the tree.
+- **Stakeholder-nameable.** "The nightly batch cycle still runs, in order, on its trigger." That is the item the client named.
+- **Unblocks.** Nothing in the tree depends on it. It would prove the scheduler cutover for any work added later.
+- **Confidence: low.** The jobs do no visible work, so a green wave 1 proves the scheduler, not business logic. Whatever the cycle really does is not in this tree (see Open Questions in `00-summary.md`).
+- **Computed calls.** None (`analysis.unresolved_dynamic` is empty).
 
-**Why it is one wave.** The four units have one coupling between them, the JOBA-DONE condition (`app/scheduler/nightly.xml:6`,
-`app/scheduler/nightly.xml:9`). It forces JOBA before JOBB. Splitting the pair across waves would put a scheduler order across a wave
-boundary, so it stays whole.
+## Behavior the port must keep (it is not in the edge list)
 
-**The four wave tests.**
-
-| Test | Answer | Evidence |
-|---|---|---|
-| Deploys independently, behind a flag or facade | Yes. Nothing outside the folder calls into it and the jobs share no dataset. The switch is which scheduler holds the NIGHTLY folder. | `app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2` |
-| Rolls back independently | Yes, by re-enabling the legacy folder. The catch is the conditions: EXTERNAL-FEED must reach one scheduler only, and JOBB-DONE must go to the same consumer as before. | `app/scheduler/nightly.xml:5`, `app/scheduler/nightly.xml:11` |
-| Has a testable boundary | Yes. Assert the order of the two jobs, the conditions each sets and clears, and each return code. There is no data at the boundary. | `app/scheduler/nightly.xml:6`, `app/scheduler/nightly.xml:9`, `app/scheduler/nightly.xml:10` |
-| Delivers something a stakeholder can name | Yes: the nightly batch cycle, the item the client said must not break. The name match to the folder is inference. | `app/scheduler/nightly.xml:3` |
-
-**What it unblocks.** Nothing else in this tree. It is the only wave, and no program, dataset or copybook depends on it. By
-dependency it is a chore. It matters because it is the client's must-not-break item, and because it pins the condition contract
-(EXTERNAL-FEED in, JOBB-DONE out) that any later scheduler port has to keep.
-
-**Confidence is medium, not high.** The sequence is not in doubt, because there is only one wave and one internal order. What is in doubt
-is whether the tree is the whole cycle (inference). Both jobs run only IEFBR14 (`app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`), which
-does nothing. Either the real work sits in members we were not given, or the cycle is a set of pure scheduling signals. I did not
-raise the confidence above medium, and I did not lower it further, because no edge is low confidence and there are no computed calls.
-
-**Blast radius is medium.** The jobs do no work in this tree, so a bad port cannot corrupt data here. What it can do is start the cycle at the wrong time,
-run JOBB before JOBA, or fail to set JOBB-DONE, and any of those is silent if nobody watches the folder (inference).
-
-## Risk quadrants and how they were used
-
-Both jobs score low port difficulty and blast radius 3, which the plugin calls low-high (`modernization-assessment/risks.json:13`,
-`modernization-assessment/risks.json:42`). A low-high unit is safe to do early, once the equivalence harness is proven. Its wave is the
-first and only one, so the quadrant and the family agree and no move was needed (rule 4 of the change reasons does not fire).
-
-| Reason to change the plan | Fired | Evidence |
-|---|---|---|
-| Must-not-break item, strongly connected component or facade forces a move | No. The must-not-break item maps to this wave already, and there is no strongly connected component | analysis: `sccs` is empty |
-| A wave over 25 units needs a cut | No. The wave holds 4 units | `modernization-assessment/waves.json:8` |
-| Something the extractor could not see changes what a unit is | No. No computed call, nothing unparsed, no JCL text in a COBOL literal | analysis: `unresolved_dynamic`, `embedded_jcl` and `unparsed` are empty |
-| A high-high unit sits in an early family | No. There is no high-high unit | `modernization-assessment/risks.json:13` |
-
-## Not placed
-
-Nothing. Every unit is placed (`modernization-assessment/waves.json:24`).
+| Behavior | Detail | Confidence | Evidence |
+|---|---|---|---|
+| JOBA waits on an external condition | `EXTERNAL-FEED` is set by nothing in this tree. The new scheduler needs the same trigger, and whoever sets it must be told. | high that it is external | `app/scheduler/nightly.xml:5` |
+| JOBB deletes `JOBA-DONE` | One-shot semantics: the condition is consumed, so a rerun of JOBB waits for another JOBA. A plain-dependency port loses this. | medium (the effect follows from the Control-M `SIGN="-"` convention; intent is `inference`) | `app/scheduler/nightly.xml:10` |
+| All conditions are scoped to `ODAT` | The cycle is keyed on the order date. A scheduler that keys on wall-clock date differs around midnight and on reruns. | medium | `app/scheduler/nightly.xml:5`, `app/scheduler/nightly.xml:9` |

@@ -1,28 +1,21 @@
 {
- "target_state": "refactor",
- "waves": [
-  {
-   "wave": 1,
-   "family": "batch-readonly",
-   "name": "SEQJOB batch job, whole tree",
-   "units": [
-    "PGMA",
-    "PGMB",
-    "PGMC",
-    "job:SEQJOB"
-   ],
-   "rationale": "One entry point, no dataset, no call between programs, no strongly connected component, no god module and no articulation point, so there is nothing to cut and the seed's single wave stands. It passes the four wave tests only weakly: it can sit behind a job-level switch and roll back to the old JCL (inference), and its boundary is the job's step order and return codes, but the tree holds no dataset, so the oracle must come from outside the tree. The family name is batch-readonly because the extractor found no shared write. That is an absence of evidence, since the tree has no DD statement at all. The step name STEP2 is used twice (lines 3 and 5), so the run order is file order and is not certain. No deviation from the seed.",
-   "unblocks": "Nothing inside the tree. No later wave, copybook or dataset depends on it, so in dependency terms it is a chore. It is the whole system, so the deliverable is the nightly cycle on the target platform, if the client confirms SEQJOB is that cycle.",
-   "blast_radius": "medium",
-   "confidence": "medium",
-   "evidence": [
+  "target_state": "refactor",
+  "waves": [
     {
-     "file": "app/jcl/SEQJOB.jcl",
-     "line": 1
+      "wave": 1,
+      "family": "batch-readonly",
+      "name": "Nightly sequence job",
+      "units": ["PGMA", "PGMB", "PGMC", "job:SEQJOB"],
+      "rationale": "One job runs three programs in order and touches no shared data, so one sentence describes the wave and it needs no cut. Its boundary is the job's step order and return codes, since no dataset exists to compare. The duplicate STEP2 on line 5 must be settled before the boundary is defined.",
+      "unblocks": "Nothing in the tree. No other unit depends on it. It proves the toolchain and the step-order harness, and that is all.",
+      "blast_radius": "low",
+      "confidence": "low",
+      "evidence": [
+        {"file": "app/jcl/SEQJOB.jcl", "line": 1},
+        {"file": "app/jcl/SEQJOB.jcl", "line": 5}
+      ]
     }
-   ]
-  }
- ],
- "unassigned": [],
- "deviations": []
+  ],
+  "unassigned": [],
+  "deviations": []
 }

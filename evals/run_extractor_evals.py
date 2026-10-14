@@ -139,8 +139,8 @@ def compare_fixture(truth, graph):
                 problems.append("dead code %s: truth %s got %s" % (b, sorted(truth["dead_code"][b]), sorted(got[b])))
     if "wave_seed" in truth:
         got = graph["analysis"]["wave_seed"]
-        want_w = [(w["family"], sorted(w["units"])) for w in truth["wave_seed"]["waves"]]
-        have_w = [(w["family"], sorted(w["units"])) for w in got["waves"]]
+        want_w = [(w["family"], w.get("group"), sorted(w["units"])) for w in truth["wave_seed"]["waves"]]
+        have_w = [(w["family"], w.get("group"), sorted(w["units"])) for w in got["waves"]]
         if want_w != have_w:
             problems.append("wave seed: truth %s got %s" % (want_w, have_w))
         want_u = sorted(x["id"] for x in truth["wave_seed"]["unassigned"])

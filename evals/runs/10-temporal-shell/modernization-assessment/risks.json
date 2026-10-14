@@ -1,43 +1,18 @@
 {
  "units": [
   {
-   "id": "sch:scripts/nightly.sh",
-   "port_difficulty": {
-    "score": 2,
-    "why": "Six lines of shell that submit two jobs in order; what the submit command does and where it runs are not in the tree."
-   },
-   "blast_radius": {
-    "score": 4,
-    "why": "It is the nightly cycle: it alone sets the JOBA then JOBB order and stops on a failed submit, and a port that runs the jobs in parallel breaks the must-not-break item silently."
-   },
-   "quadrant": "low-high",
-   "wave": 1,
-   "driving_fact": "The wrapper is named 'Nightly chain' and holds the only ordering of JOBA before JOBB, at medium confidence.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "scripts/nightly.sh",
-     "line": 4
-    },
-    {
-     "file": "scripts/nightly.sh",
-     "line": 5
-    }
-   ]
-  },
-  {
    "id": "job:JOBA",
    "port_difficulty": {
     "score": 1,
-    "why": "Runs only IEFBR14 with no DD statements, so it does nothing the tree can show."
+    "why": "Single step that runs IEFBR14, a no-op utility, with no DD statements (jcl/JOBA.jcl:2)."
    },
    "blast_radius": {
-    "score": 3,
-    "why": "First job of the must-not-break nightly cycle and JOBB is ordered after it, but the tree shows no dataset effect, so the real blast is unknown."
+    "score": 2,
+    "why": "First job of the nightly chain (scripts/nightly.sh:4) but it touches no datasets, so a wrong port corrupts no data; a failure is loud because set -e stops the chain (scripts/nightly.sh:3)."
    },
-   "quadrant": "low-high",
+   "quadrant": "low-low",
    "wave": 1,
-   "driving_fact": "The wrapper submits it first, and JOBB is ordered after it with no dataset to explain why.",
+   "driving_fact": "Runs only IEFBR14 and is the first submit in the nightly chain, which is the must-not-break item (scripts/nightly.sh:4).",
    "confidence": "medium",
    "evidence": [
     {
@@ -54,15 +29,15 @@
    "id": "job:JOBB",
    "port_difficulty": {
     "score": 1,
-    "why": "Runs only IEFBR14 with no DD statements, so it does nothing the tree can show."
+    "why": "Single step that runs IEFBR14, a no-op utility, with no DD statements (jcl/JOBB.jcl:2)."
    },
    "blast_radius": {
-    "score": 3,
-    "why": "Second job of the must-not-break nightly cycle. It runs only if the JOBA submit succeeds, but the tree shows no dataset effect, so the real blast is unknown."
+    "score": 2,
+    "why": "Second job of the nightly chain (scripts/nightly.sh:5), touches no datasets; it only runs if JOBA succeeds under set -e (scripts/nightly.sh:3), so the ordering is what must be kept."
    },
-   "quadrant": "low-high",
+   "quadrant": "low-low",
    "wave": 1,
-   "driving_fact": "The only temporal edge in the graph ends here: JOBA before JOBB, from the order of two submit lines.",
+   "driving_fact": "Runs only IEFBR14 and is submitted after JOBA in the must-not-break nightly chain (scripts/nightly.sh:5).",
    "confidence": "medium",
    "evidence": [
     {
@@ -79,19 +54,19 @@
    "id": "job:JOBC",
    "port_difficulty": {
     "score": 1,
-    "why": "Runs only IEFBR14 with no DD statements, so it does nothing the tree can show."
+    "why": "Single step that runs IEFBR14 with no DD statements (jcl/JOBC.jcl:2)."
    },
    "blast_radius": {
     "score": 1,
-    "why": "The wrapper comment calls it retired and its submit is commented out, so nothing in the tree runs it."
+    "why": "Its only submit is commented out (scripts/nightly.sh:6) and the script says it is retired (scripts/nightly.sh:2); no dataset is touched."
    },
    "quadrant": "low-low",
    "wave": 1,
-   "driving_fact": "The wrapper comment says JOBC is retired and its submit line is commented out.",
-   "confidence": "low",
+   "driving_fact": "The only submit is commented out and the comment says JOBC is retired (scripts/nightly.sh:2, :6).",
+   "confidence": "medium",
    "evidence": [
     {
-     "file": "scripts/nightly.sh",
+     "file": "jcl/JOBC.jcl",
      "line": 2
     },
     {
@@ -99,12 +74,41 @@
      "line": 6
     }
    ]
+  },
+  {
+   "id": "sch:scripts/nightly.sh",
+   "port_difficulty": {
+    "score": 2,
+    "why": "Five-line shell chain; the only behavior to preserve is submit order and stop-on-first-failure from set -e (scripts/nightly.sh:3-5). The submit command is not defined in the tree, so its semantics are inference."
+   },
+   "blast_radius": {
+    "score": 3,
+    "why": "This is the nightly batch cycle the user named as must-not-break; if the ordering or set -e behavior is lost, JOBB could run after a failed JOBA. Telemetry is none, so detection latency is unknown."
+   },
+   "quadrant": "low-high",
+   "wave": 1,
+   "driving_fact": "It is the only scheduler entry that names JOBA and JOBB, in order, under set -e (scripts/nightly.sh:3-5).",
+   "confidence": "low",
+   "evidence": [
+    {
+     "file": "scripts/nightly.sh",
+     "line": 3
+    },
+    {
+     "file": "scripts/nightly.sh",
+     "line": 4
+    },
+    {
+     "file": "scripts/nightly.sh",
+     "line": 5
+    }
+   ]
   }
  ],
  "do_not_port": [
   {
    "id": "job:JOBC",
-   "reason": "Provisional. The wrapper says JOBC is retired and its submit is commented out (scripts/nightly.sh:2, scripts/nightly.sh:6). Hold it out of the port until the client confirms no other scheduler or person still submits it. Do not delete it on a comment alone, and there is no telemetry to confirm."
+   "reason": "Retired: scripts/nightly.sh:2 says so and its submit is commented out at scripts/nightly.sh:6. It runs only IEFBR14 (jcl/JOBC.jcl:2). The extractor lists it as unscheduled. Confirm with the owner that nothing else submits it, then delete it."
   }
  ]
 }

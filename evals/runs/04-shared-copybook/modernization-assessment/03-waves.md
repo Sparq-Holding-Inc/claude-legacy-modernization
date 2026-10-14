@@ -1,42 +1,21 @@
 # 03 Waves
 
-Target state: refactor. The machine readable plan is `modernization-assessment/waves.json`.
+**No waves can be proposed.** The tree has no entry point: no JCL job, CSD transaction, scheduler job or wrapper (`analysis`: `entry_points` is empty; `meta.files_seen` shows jcl 0, csd 0, controlm 0, shell 0). A wave needs an independent deploy, an independent rollback and a testable boundary. Without a job or transaction there is no boundary to test. Inventing waves would be fiction.
 
-## Result: no waves
+`modernization-assessment/waves.json:1` has `"waves": []` and target state `refactor`. Both programs are in `unassigned`.
 
-The tree has no entry point: no JCL job, no CSD transaction, no scheduler job and no shell wrapper (`analysis.entry_points` is empty, and `modernization-assessment/03a-wave-seed.md` has an empty wave table). The seed cuts waves from the families of the entry points that use each unit. With no entry point there is no family, so the seed produced no wave. `waves.json` holds `"waves": []`. `unassigned` holds both programs. `deviations` is empty because there was no plan to deviate from.
-
-Nothing can be sequenced until the client supplies JCL, a CSD or a scheduler export.
-
-I did not invent a wave, and I did not group the two programs by their shared copybook as a stand-in. Grouping by a shared copybook is a coupling argument, not a deployable wave, and it fails the four wave tests below.
-
-## Units not placed
-
-| Unit | Reason | Confidence | Evidence |
+| Unit | Reason unplaced | Evidence | Confidence |
 |---|---|---|---|
-| PROGA | No entry point runs it, so no family applies | high | `app/cbl/PROGA.cbl:1` |
-| PROGB | No entry point runs it, so no family applies | high | `app/cbl/PROGB.cbl:1` |
+| PROGA | No entry point in the tree | `app/cbl/PROGA.cbl:2` | high |
+| PROGB | No entry point in the tree | `app/cbl/PROGB.cbl:2` | high |
 
-`cpy:SHARED01` is not a unit. A copybook moves with its owner. It has two owners, PROGA and PROGB (`app/cbl/PROGA.cbl:5`, `app/cbl/PROGB.cbl:5`), so whichever wave the client's JCL eventually places them in, they should share it. That is an inference from `modernization-assessment/02-coupling.md`, pattern 1.
+## What a plan would look like once the client supplies the missing files
 
-## Why no wave passes the four tests
+Inference only, to show intent, not a plan:
 
-| Test | State | Confidence | Evidence |
-|---|---|---|---|
-| Deployable independently, behind a flag or facade | Cannot be judged. What triggers the programs is unknown | high | analysis (field `entry_points`) |
-| Rollback independently | Cannot be judged. Neither the job that submits them nor the output they feed is visible | high | analysis (field `entry_points`) |
-| Testable boundary | No boundary exists. The programs open no file and write no output | medium (inference) | `app/cbl/PROGA.cbl:7`, `app/cbl/PROGB.cbl:7` |
-| Delivers something a stakeholder can name | Unknown. "The nightly batch cycle" is the one thing named, and it maps to no unit | high | inference |
+- PROGA and PROGB share `SHARED01` (`app/cbl/PROGA.cbl:5`, `app/cbl/PROGB.cbl:5`). They should move in the same wave, or the copybook stays frozen until both have moved.
+- The nightly batch cycle is the must-not-break anchor. The JCL job stream or scheduler export that defines it decides the wave order. Until we have it, "the nightly batch cycle" maps to no unit.
 
-## What would change this
+## Deviations
 
-Once JCL or a scheduler export arrives, re-run the extractor. If a job runs PROGA or PROGB, the seed places it in a family and produces waves. The risk scores in `modernization-assessment/risks.json` already hold both programs as `low-low`, and they carry `low` confidence because the blast radius depends on where the programs sit in the cycle.
-
-## Risk scores in brief
-
-| Unit | Port difficulty | Blast radius | Quadrant | Confidence | Evidence |
-|---|---|---|---|---|---|
-| PROGA | 1 | 2 | low-low | low | `app/cbl/PROGA.cbl:7` |
-| PROGB | 1 | 2 | low-low | low | `app/cbl/PROGB.cbl:7` |
-
-No unit sits in high-high, so no facade dependency forces a move. Both units are scored on thin evidence and the blast radius could rise sharply if the client says either program is a step in the nightly cycle. The two axes are never combined.
+None. No extractor plan existed to deviate from.

@@ -1,40 +1,47 @@
-# 02 Coupling
+# Coupling
 
-`02a-edge-tables.md` holds every edge. This file holds the argument. The graph is tiny: 5 nodes and 4 edges, of which 3 are call edges and 1 is an include edge (`analysis`, fields `node_counts` and `edge_counts`). Every edge is resolved and has high confidence, so the dependency-cartographer had nothing to settle and I did not call it. I read the four source files only to make the judgments below.
+The tree is very small: one JCL job, one batch program and two subprograms. The coupling is a single
+chain, so there is little to argue about. Everything below is read from `graph.json`.
 
-## The coupling patterns that constrain the sequence
+## Patterns that constrain the sequence
 
-| Pattern | What it means for the sequence | Confidence | Evidence |
+| # | Pattern | Evidence | Confidence |
 |---|---|---|---|
-| Call coupling: one chain. `job:MAINJOB` runs step S1, S1 runs PGMMAIN, PGMMAIN calls OLDPGM and then NEWPGM. | The four units move together. Neither subprogram has a caller other than PGMMAIN, so neither can be ported, retired or reordered without touching PGMMAIN. | high | `app/jcl/MAINJOB.jcl:2`, `app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMMAIN.cbl:5` |
-| Unconditional, ordered calls. Both CALL statements are plain statements with no test around them. OLDPGM is called first. | OLDPGM is on the live path however old it is. The dormant flag on it does not make it removable. Any port must keep the call order, even though both bodies are empty today. | high | `app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMMAIN.cbl:5` |
-| No data coupling and no temporal coupling are visible. There is no dataset, no contract edge, no scheduler and no second job. | This is an absence of evidence, not evidence of absence. The job has no DD statements, so any file the cycle really uses is invisible. A plan built on this graph cannot see the cycle's order across jobs. | low | `app/jcl/MAINJOB.jcl:2`, `analysis` (fields `data_hubs`, `edge_counts`) |
+| 1 | Chain: `job:MAINJOB` runs step S1, which runs `PGMMAIN`, which calls `OLDPGM` and `NEWPGM`. Nothing else enters the tree, so all four units share one entry point and must be tested through it. | app/jcl/MAINJOB.jcl:2, app/cbl/PGMMAIN.cbl:4, app/cbl/PGMMAIN.cbl:5 | high |
+| 2 | `PGMMAIN` is the only articulation point. Cutting it separates both subprograms from the job. | analysis.articulation_points (`PGMMAIN`) | high |
+| 3 | There is no data coupling, contract coupling or temporal coupling in the tree: no dataset, copybook or DD is named. This is an absence in the tree, not proof that the batch cycle shares nothing. | analysis.data_hubs (empty), meta.files_seen (copy: 0) | medium |
 
 ## Clusters
 
-The tree is one cluster. The graph below shows it at cluster level.
-
 ```mermaid
-graph TD
-    A["Batch entry: job MAINJOB, step S1"] --> B["Facade: PGMMAIN (only articulation point)"]
-    B --> C["Called subprograms: OLDPGM then NEWPGM"]
+graph LR
+  J[job:MAINJOB] --> M[PGMMAIN]
+  M --> O[OLDPGM]
+  M --> N[NEWPGM]
 ```
+
+The graph is at program level because the whole system is four units.
 
 ## Strongly connected components
 
-None (`analysis`, field `sccs` is empty). No call cycle exists, so no unit is forced to move with another for that reason. The four units still move together for the reason above: they are one call chain.
+None (`analysis.sccs` is empty). No wave can split one.
 
 ## God modules
 
-None (`analysis`, field `god_modules` is empty). PGMMAIN has the highest fan-out, 2, and OLDPGM and NEWPGM each have a fan-in of 1 (`analysis`, fields `fan_out` and `fan_in`). That is far below anything a god module would show.
+None (`analysis.god_modules` is empty). The biggest unit is 6 lines (app/cbl/PGMMAIN.cbl:1).
 
 ## Articulation points
 
-One: PGMMAIN (`analysis`, field `articulation_points`). It is the only gateway to OLDPGM and NEWPGM. With a single wave it is not a wave boundary. It is the natural place for a facade under a refactor target: the two subprograms could be swapped behind PGMMAIN without touching MAINJOB. This is inference. The source gives no reason to do it.
+`PGMMAIN` (analysis.articulation_points). It is the natural boundary for a facade, but with a single wave
+there is no boundary to cut.
 
 ## The honest boundary
 
-- Computed calls: none. `unresolved_dynamic` is empty and both CALL targets are literals (`app/cbl/PGMMAIN.cbl:4`, `app/cbl/PGMMAIN.cbl:5`). So no program is in the unknown bucket for that reason.
-- That result covers this tree only. Nothing here says the real cycle has no computed calls, JCL text inside COBOL literals, or programs started by name from PARM. The tree is too small to be the whole nightly cycle, and I could not confirm that it is. This is inference.
-- The extractor warned that no scheduler artifact was parsed, so the order in which jobs run is unknown (`analysis`, field `warnings`).
-- The include edge from the job to its step is containment, not a dependency (`app/jcl/MAINJOB.jcl:2`).
+- **Computed calls:** none (`analysis.unresolved_dynamic` is empty). Both CALLs are literals
+  (app/cbl/PGMMAIN.cbl:4, app/cbl/PGMMAIN.cbl:5).
+- **Scheduler:** no scheduler artifact was parsed (analysis.warnings). The order of jobs across jobs is
+  unknown. `job:MAINJOB` may be one of many jobs in the nightly cycle, and this tree may be a fragment of
+  it. That is inference.
+- **Nothing in the tree is a datastore.** Every program body is a GOBACK plus the CALLs
+  (app/cbl/OLDPGM.cbl:4, app/cbl/NEWPGM.cbl:4). The real behavior is either elsewhere or absent. The client
+  must say which. That is inference.

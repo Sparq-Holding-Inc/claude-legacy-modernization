@@ -1,24 +1,23 @@
 {
- "target_state": "refactor",
- "waves": [
-  {
-   "wave": 1,
-   "family": "batch-readonly",
-   "name": "The one batch chain: MAINJOB, PGMMAIN, PGMLIVE",
-   "units": [
-    "PGMLIVE",
-    "PGMMAIN",
-    "job:MAINJOB"
-   ],
-   "rationale": "The tree has one entry point, job:MAINJOB. It runs PGMMAIN, which calls PGMLIVE. The three touch no dataset, and there are no computed calls, so the seed puts them in one family and nothing forces a cut. Splitting the chain would leave a job with no program or a program with no caller. The wave passes the deploy, rollback and boundary tests only weakly: it can be flagged on and off as one job, but its only observable output is a return code, because the job has no DD statements. It passes the fourth test only if the client confirms job:MAINJOB is the nightly batch cycle. Nothing in the tree says so.",
-   "unblocks": "Nothing inside the tree. No live unit outside the wave depends on it. It proves the toolchain and the job-level comparison harness, which is a chore unless the client confirms it is the nightly batch cycle.",
-   "blast_radius": "medium",
-   "confidence": "medium",
-   "evidence": [{"file": "app/jcl/MAINJOB.jcl", "line": 1}, {"file": "app/jcl/MAINJOB.jcl", "line": 2}, {"file": "app/cbl/PGMMAIN.cbl", "line": 4}]
-  }
- ],
- "unassigned": [
-  {"id": "PGMDEAD", "reason": "No static path from any entry point and no computed call in the tree. It joins no wave. Proposed for deletion, provisional until telemetry or the full JCL library confirms it (05-dead-code.md)."}
- ],
- "deviations": []
+  "target_state": "refactor",
+  "waves": [
+    {
+      "wave": 1,
+      "family": "batch-readonly",
+      "name": "Nightly batch cycle",
+      "units": ["PGMLIVE", "PGMMAIN", "job:MAINJOB"],
+      "rationale": "The only entry point is MAINJOB, whose single step runs PGMMAIN, which calls PGMLIVE. The tree holds no dataset, DB2, IMS or MQ access, so nothing is shared with any other entry point. One wave describes the whole system. Because it is also the must-not-break item, the wave needs a real oracle from job output before it moves.",
+      "unblocks": "Nothing further inside this tree. It is the whole system, so it unblocks the retirement of the legacy runtime.",
+      "blast_radius": "low",
+      "confidence": "medium",
+      "evidence": [
+        {"file": "app/jcl/MAINJOB.jcl", "line": 2},
+        {"file": "app/cbl/PGMMAIN.cbl", "line": 4}
+      ]
+    }
+  ],
+  "unassigned": [
+    {"id": "PGMDEAD", "reason": "No static path from any entry point and no reachable computed call in the tree. Not ported. Confirm with the client before deleting."}
+  ],
+  "deviations": []
 }

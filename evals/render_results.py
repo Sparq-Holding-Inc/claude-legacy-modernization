@@ -137,7 +137,7 @@ def main():
     if fx:
         w("## Extractor: seeded fixtures")
         w("")
-        w("Truth for fixtures 1 to 25 was written by hand before the extractor existed. For 26 to 29 the edges were reviewed by hand against the source, and the new expectations (wave seed, dead code, facts) were written before the code that computes them. Each fixture is one trap. Matching is on source, "
+        w("Truth for fixtures 1 to 25 was written by hand before the extractor existed. For 26 to 29 the edges were reviewed by hand against the source, and the new expectations (wave seed, dead code, facts) were written before the code that computes them. Fixture 30 is the exception: its wave seed expectation was written by hand from the text of the group rule after the rule was coded, and its edges were derived from the source it generates. Each fixture is one trap. Matching is on source, "
           "destination, kind and mode. A fixture passes only when confidence, the resolved flag, the evidence "
           "lines, node types, entry points, dates and dead code buckets also match.")
         w("")

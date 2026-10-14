@@ -1,75 +1,34 @@
 # 02 Coupling
 
-The full edge list is in `02a-edge-tables.md`. This file holds the argument. The tree is two COBOL
-programs, so the argument is short. Most of what matters here is what the tree does not contain.
+The tree holds two COBOL programs and no JCL, copybooks, datasets or scheduler (`modernization-assessment/graph.json:24`). The only edge is one static call.
 
-Target state: refactor. What must not break: "the nightly batch cycle".
+## Coupling patterns
 
-## Open edges
-
-The extractor left nothing open. It found no computed calls, no edge below high confidence, no
-unresolved edge and no unparsed file (`analysis` fields `unresolved_dynamic`, `edge_counts` and
-`unparsed`). There were fewer than 20 open edges, so the `dependency-cartographer` work was done
-inline. It reduced to reading the one call site and checking both source files for things the
-extractor does not model.
-
-| Item checked | Result | Confidence | Evidence |
+| Pattern | Finding | Confidence | Evidence |
 |---|---|---|---|
-| The only call is a literal, not a computed name | `CALL 'PROGB'` names its target in quotes. The edge is resolved and high confidence. | high | `app/cbl/PROGA.cbl:6` |
-| Any `EXEC CICS` RETURN TRANSID, START or SEND MAP chain | None in either file. | high | `app/cbl/PROGA.cbl:1-7`, `app/cbl/PROGB.cbl:1-4` |
-| Any job submitted through the internal reader, or any `EXEC SQL` | None in either file. This is inference from reading all 11 lines. | high | inference |
-| Any `COPY` member | None. No layout is shared through a copybook. | high | `app/cbl/PROGA.cbl:1-7` |
+| Call | PROGA calls PROGB with a literal target. Resolved, high confidence. | high | app/cbl/PROGA.cbl:6 |
+| Data | None. Neither program names a file, table or dataset. | high | app/cbl/PROGA.cbl:3, app/cbl/PROGB.cbl:3 |
+| Contract | None. No shared record layout, because no data edges exist. | high | analysis (`data_hubs` is empty) |
+| Temporal | Unknown. The nightly order lives in a scheduler or JCL that is not in the tree. | low | inference |
 
-## The coupling patterns that constrain the sequence
-
-1. **One static call, and nothing else.** PROGA calls PROGB. This is the only edge in the graph, and it
-   is a `call` edge of high confidence (`app/cbl/PROGA.cbl:6`). PROGB's fan-in is 1 and PROGA's fan-out
-   is 1. A call edge means the caller cannot run correctly unless the callee is present and
-   equivalent. The two programs move in the same wave, or PROGB moves first behind an interface that
-   PROGA still calls. PROGB is a single `GOBACK` (`app/cbl/PROGB.cbl:4`), so the second option
-   costs almost nothing.
-
-2. **No data coupling and no contract coupling.** No dataset, VSAM file or DB2 table is read or
-   written, and no record layout is shared. `analysis.edge_counts` holds only `call: 1`, and
-   `analysis.data_hubs` is empty. This is a fact about the tree. Whether it is a fact about the running
-   system depends on whether all the source was supplied, which is an open question (see
-   `00-summary.md`).
-
-3. **Temporal coupling is the constraint that matters, and the tree cannot show it.** You told us the
-   nightly batch cycle must not break. A batch cycle is defined by job order, condition codes and
-   the scheduler. The tree holds no JCL, no PROC, no scheduler export and no shell wrapper
-   (`meta.files_seen` in `graph.json` is zero for `jcl`, `proc`, `controlm` and `shell`). So the graph
-   has no `temporal` edge and no entry point (`analysis.entry_points` is empty). The order in which
-   the cycle runs is unknown, and so is whether PROGA belongs to it. This is inference from what the
-   tree lacks. It is not a finding about the system.
-
-## Clusters
-
-At cluster level there is one cluster, the PROGA to PROGB call pair. The driver that starts PROGA is
-not in the tree and is drawn dotted.
+## Cluster graph
 
 ```mermaid
 graph LR
-  D["driver: JCL or scheduler (not in tree, inference)"]:::missing -.-> A
-  subgraph C1["Cluster 1: call pair"]
-    A["PROGA (batch, 7 LOC)"] --> B["PROGB (subprogram, 4 LOC)"]
-  end
-  classDef missing stroke-dasharray: 4 4
+  PROGA --> PROGB
 ```
 
 ## Structure
 
-| Structure | Result | Confidence | Evidence |
+| Item | Result | Confidence | Evidence |
 |---|---|---|---|
-| Strongly connected components | None. A wave plan has nothing to keep whole. | high | analysis field `sccs` |
-| Self recursive programs | None. | high | analysis field `self_recursive` |
-| God modules | None. With two programs the top decile is not meaningful. | high | analysis field `god_modules` |
-| Articulation points | None reported. With two nodes and one edge this says nothing about where to cut. | medium | analysis field `articulation_points` |
+| Strongly connected components | None | high | analysis (`sccs`) |
+| God modules | None. PROGA is 7 lines, PROGB is 4. | high | app/cbl/PROGA.cbl:7, app/cbl/PROGB.cbl:4 |
+| Articulation points | None | high | analysis (`articulation_points`) |
+| Computed calls | None | high | analysis (`unresolved_dynamic`) |
+
+PROGB's body is only `GOBACK` (app/cbl/PROGB.cbl:4). It does no work in this tree. PROGA displays `CALL FAILED IF WE GET HERE` on line 5, before the call on line 6. That text prints every time PROGA runs, whatever the call does. It reads like a planted test message (inference). A port must reproduce it or record the change in the Deviation Register.
 
 ## The honest boundary
 
-There are no computed calls (`analysis.unresolved_dynamic` is empty), so no unknown program is held
-open by one. The boundary of this analysis is not computed calls. It is the missing source. The
-tree may be a fragment. A program outside it could call PROGA or PROGB, and the extractor can only
-see callers that are in the tree. Nothing here proves that PROGA and PROGB have no other callers,
-or that PROGA is or is not the entry to the nightly batch cycle.
+The graph is correct for what it holds, and it is almost empty. The user named "the nightly batch cycle" as the must-not-break item. No file in the tree maps to a batch cycle: no job, step, scheduler or entry point. Everything about the cycle's order, datasets and schedule is outside the evidence (inference).

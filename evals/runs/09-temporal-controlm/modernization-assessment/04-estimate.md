@@ -1,50 +1,32 @@
 # 04 Estimate
 
-All figures here are inference. They are judgment ranges from the graph counts, not calibrated on a team's measured velocity. None of the
-numbers below comes from the client. Wave 1 is the only wave, so there is one estimate.
+**Basis: no `--delivery` flag was given, so both cases are shown, conventional (no AI coding assistance) and AI-assisted (engineers using an AI coding agent, with human review).** This plugin carries no calibrated productivity data. Every rate below is a planning assumption, not a benchmark. Replace it with the team's measured velocity after wave 1.
 
-## Wave 1. Nightly batch cycle (JOBA then JOBB)
+The scope is two JCL jobs of two lines each (`app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`) and one 14-line Control-M file (`app/scheduler/nightly.xml:3`). There is no application code to port. The estimate is therefore almost entirely scheduler work, oracle work and client availability. It is an estimate for what is visible. If the cycle does real work elsewhere, it is invalid (assumption 1).
 
-**Method.** Weight the things the plugin says move an estimate, in order, and count what this tree shows for each.
+## Wave 1: nightly cycle
 
-| Driver | What the tree shows | Effect on the range | Evidence |
-|---|---|---|---|
-| Coupling edges crossing the wave boundary | Zero program, data or contract edges cross it. One condition enters (EXTERNAL-FEED) and one leaves (JOBB-DONE). | Small, but the two conditions are the whole risk | `app/scheduler/nightly.xml:5`, `app/scheduler/nightly.xml:11` |
-| Behavioral oracle | None in the tree. No dataset, no output, no log | Pushes effort into building an oracle | analysis: `data_hubs` is empty, `node_counts` has no dataset |
-| God modules in the wave | None | No effect | analysis: `god_modules` is empty |
-| Logic held in the database | No DB2 or SQL in the tree | No effect | inference: no file in the tree touches a database |
-| A team that can read the source language | Unknown. The source is two JCL jobs and one scheduler file, which is short to read | Low weight | inference |
+| Term | Conventional | AI-assisted | Does AI shrink it? | Evidence |
+|---|---|---|---|---|
+| Port (JCL and Control-M definitions to the target scheduler) | 2 to 4 days | 1 to 2 days | Partly. Transliteration of 14 lines of XML is quick. Review of condition semantics (ODAT, delete sign) is the real cost. Assumes review takes about as long as authoring for this size, because there are only three conditions. | `app/scheduler/nightly.xml:5` |
+| Boundary work (trigger for `EXTERNAL-FEED`, rerun and restart behavior) | 3 to 5 days | 2 to 4 days | Little. Finding who sets the feed and agreeing restart semantics is a people task. | `app/scheduler/nightly.xml:5` |
+| Equivalence harness (scheduler trace diff, see `06-test-strategy.md`) | 3 to 5 days | 2 to 3 days | Partly. Writing the trace comparer is fast. Choosing what to normalize is not. | inference |
+| Oracle gathering (Control-M job logs, SMF, history for 3 or more cycles) | 3 to 10 days elapsed | same | No. Depends on the client's access and approvals. | inference |
+| Parallel-run rehearsals and cutover | 5 to 10 days elapsed | same | No. Rehearsal windows, change approval and client availability. | inference |
+| **Wave 1 total (engineer-days, elapsed days dominated by the last two rows)** | **16 to 34** | **12 to 26** | | inference (sum of the rows above) |
 
-**Range (inference).**
+Convert at one engineer per task: roughly 3 to 7 engineer-weeks conventional, 2.5 to 5.5 AI-assisted.
 
-| Piece of work | Low | High | Evidence |
-|---|---|---|---|
-| Re-express two jobs and their conditions in the target scheduler | 2 person-days | 5 person-days | `app/scheduler/nightly.xml:4-12` |
-| Pin down where EXTERNAL-FEED and JOBB-DONE come from and go to | 2 person-days | 5 person-days | `app/scheduler/nightly.xml:5`, `app/scheduler/nightly.xml:11` |
-| Build the comparison harness and run it for one full business cycle | 5 person-days | 12 person-days | inference |
-| **Wave 1 total** | **9 person-days** | **22 person-days** | inference |
+## What the range is most sensitive to
 
-This is a range with a wide tail on purpose. I would not quote 9 to a steering committee. The number is small because the jobs do nothing in this tree. The spread
-comes almost entirely from the three assumptions below.
+1. **Assumes the two jobs are the whole cycle.** If the real jobs are elsewhere and these are stubs or wrappers, this estimate covers only the sequencing layer, and the real programs are not estimated at all. Wave count and cost then change by an order of magnitude. This is the dominant uncertainty.
+2. **Assumes the target scheduler can express consume-on-complete conditions.** If it models dependencies as a DAG and cannot delete a condition, the rerun behavior at `app/scheduler/nightly.xml:10` needs custom logic, and boundary work roughly doubles.
+3. **Assumes a parallel run is allowed.** If the old Control-M cannot run beside the new scheduler for at least three cycles, the oracle falls to archived logs, and the rehearsal term grows by a week or more.
 
-**The assumptions the range is most sensitive to.**
+## Where Claude Code helps and where it does not
 
-1. Assumes the production members JOBA and JOBB have one step each and that step runs IEFBR14, as the tree shows
-   (`app/jcl/JOBA.jcl:2`, `app/jcl/JOBB.jcl:2`). If the members in production have more steps, the total above no longer applies, and wave 1 has to be
-   estimated again from graph.json after the client supplies the full JCL. This one assumption could move the range by an order of magnitude.
-2. Assumes EXTERNAL-FEED is set by one process the client can name (`app/scheduler/nightly.xml:5`). If it is set by an operator, or by several feeds, the
-   second row roughly doubles.
-3. Assumes the target scheduler can hold a condition that JOBB clears after it runs (`app/scheduler/nightly.xml:10`). If it cannot, rerun and restart behavior
-   has to be designed and tested, and I would add 3 to 6 person-days to the first row.
+- **Strong:** transliterating the XML conditions into the target scheduler's format. Writing the trace comparer. Generating restart and rerun test cases from the three conditions.
+- **Weak:** inferring why JOBB deletes `JOBA-DONE`. Knowing who sets `EXTERNAL-FEED`. Both need the people who own the scheduler.
+- **Not applicable:** there is no business logic in the tree for an agent to infer.
 
-**Where Claude Code can do the port and where it cannot.**
-
-- Strong: writing the two job definitions and the condition wiring in the target scheduler's format. It is transliteration of 9 lines of XML
-  (`app/scheduler/nightly.xml:4-12`) with a harness to check it.
-- Strong: generating the comparison harness that checks order, conditions and return codes.
-- Weak: deciding what EXTERNAL-FEED means, who consumes JOBB-DONE, and whether IEFBR14 is a placeholder for a real program. That is undocumented
-  intent, and it needs a person at the client. It is not something Claude can read out of these files.
-
-## Not estimated
-
-There is no second wave. No estimate is given for programs, data migration or online work, because the tree holds none of them (`modernization-assessment/01-inventory.md:14-17`).
+Understanding the code is already paid for by this assessment. No discovery weeks are charged. What remains is the client's answers in `00-summary.md`.

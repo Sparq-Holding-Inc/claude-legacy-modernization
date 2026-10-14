@@ -1,0 +1,723 @@
+{
+ "case": "30-wave-seed-groups",
+ "status": "edges derived by hand from the source; wave_seed written by hand from the group rule after the rule was coded. The expectation follows the rule's text, not the output",
+ "description": "Six batch jobs write data another job reads. WRTA and WRTB both write MASTER, so they are bound and form a coupled group. WRTE and WRTF write different datasets but both call PGMX, so they are bound by the shared program and form a second coupled group. WRTC writes OTHER and no other writer shares it. WRTD reads MASTER, which WRTA and WRTB write, and writes THIRD. A reader is ordered after a writer but is not bound to it, so WRTC and WRTD are the independent group and go first. Five read-only jobs read the outputs.",
+ "edges": [
+  {
+   "src": "job:WRTA",
+   "dst": "step:WRTA.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/WRTA.jcl:2"
+   ]
+  },
+  {
+   "src": "step:WRTA.S1",
+   "dst": "PGMA",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/WRTA.jcl:2"
+   ]
+  },
+  {
+   "src": "job:WRTB",
+   "dst": "step:WRTB.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/WRTB.jcl:2"
+   ]
+  },
+  {
+   "src": "step:WRTB.S1",
+   "dst": "PGMB",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/WRTB.jcl:2"
+   ]
+  },
+  {
+   "src": "job:WRTC",
+   "dst": "step:WRTC.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/WRTC.jcl:2"
+   ]
+  },
+  {
+   "src": "step:WRTC.S1",
+   "dst": "PGMC",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/WRTC.jcl:2"
+   ]
+  },
+  {
+   "src": "job:WRTD",
+   "dst": "step:WRTD.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/WRTD.jcl:2"
+   ]
+  },
+  {
+   "src": "step:WRTD.S1",
+   "dst": "PGMD",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/WRTD.jcl:2"
+   ]
+  },
+  {
+   "src": "job:WRTE",
+   "dst": "step:WRTE.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/WRTE.jcl:2"
+   ]
+  },
+  {
+   "src": "step:WRTE.S1",
+   "dst": "PGME",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/WRTE.jcl:2"
+   ]
+  },
+  {
+   "src": "PGME",
+   "dst": "PGMX",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGME.cbl:14"
+   ]
+  },
+  {
+   "src": "job:WRTF",
+   "dst": "step:WRTF.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/WRTF.jcl:2"
+   ]
+  },
+  {
+   "src": "step:WRTF.S1",
+   "dst": "PGMF",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/WRTF.jcl:2"
+   ]
+  },
+  {
+   "src": "PGMF",
+   "dst": "PGMX",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMF.cbl:14"
+   ]
+  },
+  {
+   "src": "job:RDR1",
+   "dst": "step:RDR1.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/RDR1.jcl:2"
+   ]
+  },
+  {
+   "src": "step:RDR1.S1",
+   "dst": "PGMR1",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/RDR1.jcl:2"
+   ]
+  },
+  {
+   "src": "job:RDR2",
+   "dst": "step:RDR2.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/RDR2.jcl:2"
+   ]
+  },
+  {
+   "src": "step:RDR2.S1",
+   "dst": "PGMR2",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/RDR2.jcl:2"
+   ]
+  },
+  {
+   "src": "job:RDR3",
+   "dst": "step:RDR3.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/RDR3.jcl:2"
+   ]
+  },
+  {
+   "src": "step:RDR3.S1",
+   "dst": "PGMR3",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/RDR3.jcl:2"
+   ]
+  },
+  {
+   "src": "job:RDR4",
+   "dst": "step:RDR4.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/RDR4.jcl:2"
+   ]
+  },
+  {
+   "src": "step:RDR4.S1",
+   "dst": "PGMR4",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/RDR4.jcl:2"
+   ]
+  },
+  {
+   "src": "job:RDR5",
+   "dst": "step:RDR5.S1",
+   "kind": "include",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/RDR5.jcl:2"
+   ]
+  },
+  {
+   "src": "step:RDR5.S1",
+   "dst": "PGMR5",
+   "kind": "call",
+   "mode": null,
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/jcl/RDR5.jcl:2"
+   ]
+  },
+  {
+   "src": "PGMA",
+   "dst": "ds:SPARQ.TEST.MASTER",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMA.cbl:6",
+    "app/cbl/PGMA.cbl:12",
+    "app/jcl/WRTA.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMB",
+   "dst": "ds:SPARQ.TEST.MASTER",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMB.cbl:6",
+    "app/cbl/PGMB.cbl:12",
+    "app/jcl/WRTB.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMC",
+   "dst": "ds:SPARQ.TEST.OTHER",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMC.cbl:6",
+    "app/cbl/PGMC.cbl:12",
+    "app/jcl/WRTC.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMD",
+   "dst": "ds:SPARQ.TEST.MASTER",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMD.cbl:6",
+    "app/cbl/PGMD.cbl:15",
+    "app/jcl/WRTD.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMD",
+   "dst": "ds:SPARQ.TEST.THIRD",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMD.cbl:7",
+    "app/cbl/PGMD.cbl:16",
+    "app/jcl/WRTD.jcl:4"
+   ]
+  },
+  {
+   "src": "PGME",
+   "dst": "ds:SPARQ.TEST.ES",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGME.cbl:6",
+    "app/cbl/PGME.cbl:12",
+    "app/jcl/WRTE.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMF",
+   "dst": "ds:SPARQ.TEST.FS",
+   "kind": "data",
+   "mode": "write",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMF.cbl:6",
+    "app/cbl/PGMF.cbl:12",
+    "app/jcl/WRTF.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMR1",
+   "dst": "ds:SPARQ.TEST.MASTER",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMR1.cbl:6",
+    "app/cbl/PGMR1.cbl:12",
+    "app/jcl/RDR1.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMR2",
+   "dst": "ds:SPARQ.TEST.OTHER",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMR2.cbl:6",
+    "app/cbl/PGMR2.cbl:12",
+    "app/jcl/RDR2.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMR3",
+   "dst": "ds:SPARQ.TEST.THIRD",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMR3.cbl:6",
+    "app/cbl/PGMR3.cbl:12",
+    "app/jcl/RDR3.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMR4",
+   "dst": "ds:SPARQ.TEST.ES",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMR4.cbl:6",
+    "app/cbl/PGMR4.cbl:12",
+    "app/jcl/RDR4.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMR5",
+   "dst": "ds:SPARQ.TEST.FS",
+   "kind": "data",
+   "mode": "read",
+   "resolved": true,
+   "confidence": "high",
+   "evidence": [
+    "app/cbl/PGMR5.cbl:6",
+    "app/cbl/PGMR5.cbl:12",
+    "app/jcl/RDR5.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMA",
+   "dst": "PGMD",
+   "kind": "contract",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/cbl/PGMA.cbl:6",
+    "app/cbl/PGMA.cbl:12",
+    "app/cbl/PGMD.cbl:6",
+    "app/cbl/PGMD.cbl:15",
+    "app/jcl/WRTA.jcl:3",
+    "app/jcl/WRTD.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMA",
+   "dst": "PGMR1",
+   "kind": "contract",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/cbl/PGMA.cbl:6",
+    "app/cbl/PGMA.cbl:12",
+    "app/cbl/PGMR1.cbl:6",
+    "app/cbl/PGMR1.cbl:12",
+    "app/jcl/RDR1.jcl:3",
+    "app/jcl/WRTA.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMB",
+   "dst": "PGMD",
+   "kind": "contract",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/cbl/PGMB.cbl:6",
+    "app/cbl/PGMB.cbl:12",
+    "app/cbl/PGMD.cbl:6",
+    "app/cbl/PGMD.cbl:15",
+    "app/jcl/WRTB.jcl:3",
+    "app/jcl/WRTD.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMB",
+   "dst": "PGMR1",
+   "kind": "contract",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/cbl/PGMB.cbl:6",
+    "app/cbl/PGMB.cbl:12",
+    "app/cbl/PGMR1.cbl:6",
+    "app/cbl/PGMR1.cbl:12",
+    "app/jcl/RDR1.jcl:3",
+    "app/jcl/WRTB.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMC",
+   "dst": "PGMR2",
+   "kind": "contract",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/cbl/PGMC.cbl:6",
+    "app/cbl/PGMC.cbl:12",
+    "app/cbl/PGMR2.cbl:6",
+    "app/cbl/PGMR2.cbl:12",
+    "app/jcl/RDR2.jcl:3",
+    "app/jcl/WRTC.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMD",
+   "dst": "PGMR3",
+   "kind": "contract",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/cbl/PGMD.cbl:7",
+    "app/cbl/PGMD.cbl:16",
+    "app/cbl/PGMR3.cbl:6",
+    "app/cbl/PGMR3.cbl:12",
+    "app/jcl/RDR3.jcl:3",
+    "app/jcl/WRTD.jcl:4"
+   ]
+  },
+  {
+   "src": "PGME",
+   "dst": "PGMR4",
+   "kind": "contract",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/cbl/PGME.cbl:6",
+    "app/cbl/PGME.cbl:12",
+    "app/cbl/PGMR4.cbl:6",
+    "app/cbl/PGMR4.cbl:12",
+    "app/jcl/RDR4.jcl:3",
+    "app/jcl/WRTE.jcl:3"
+   ]
+  },
+  {
+   "src": "PGMF",
+   "dst": "PGMR5",
+   "kind": "contract",
+   "mode": null,
+   "resolved": true,
+   "confidence": "medium",
+   "evidence": [
+    "app/cbl/PGMF.cbl:6",
+    "app/cbl/PGMF.cbl:12",
+    "app/cbl/PGMR5.cbl:6",
+    "app/cbl/PGMR5.cbl:12",
+    "app/jcl/RDR5.jcl:3",
+    "app/jcl/WRTF.jcl:3"
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "id": "PGMX",
+   "unit_type": "subprogram",
+   "entry_point": false
+  },
+  {
+   "id": "PGMA",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "job:WRTA",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "PGMB",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "job:WRTB",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "PGMC",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "job:WRTC",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "PGMD",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "job:WRTD",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "PGME",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "job:WRTE",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "PGMF",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "job:WRTF",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "PGMR1",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "job:RDR1",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "PGMR2",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "job:RDR2",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "PGMR3",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "job:RDR3",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "PGMR4",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "job:RDR4",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  },
+  {
+   "id": "PGMR5",
+   "unit_type": "batch",
+   "entry_point": false
+  },
+  {
+   "id": "job:RDR5",
+   "unit_type": "jcl_job",
+   "entry_point": true
+  }
+ ],
+ "wave_seed": {
+  "waves": [
+   {
+    "family": "batch-readonly",
+    "units": [
+     "PGMR1",
+     "PGMR2",
+     "PGMR3",
+     "PGMR4",
+     "PGMR5",
+     "job:RDR1",
+     "job:RDR2",
+     "job:RDR3",
+     "job:RDR4",
+     "job:RDR5"
+    ]
+   },
+   {
+    "family": "batch-writers",
+    "group": "independent",
+    "units": [
+     "PGMC",
+     "PGMD",
+     "job:WRTC",
+     "job:WRTD"
+    ]
+   },
+   {
+    "family": "batch-writers",
+    "group": "coupled-1",
+    "units": [
+     "PGMA",
+     "PGMB",
+     "job:WRTA",
+     "job:WRTB"
+    ]
+   },
+   {
+    "family": "batch-writers",
+    "group": "coupled-2",
+    "units": [
+     "PGME",
+     "PGMF",
+     "PGMX",
+     "job:WRTE",
+     "job:WRTF"
+    ]
+   }
+  ],
+  "unassigned": []
+ }
+}

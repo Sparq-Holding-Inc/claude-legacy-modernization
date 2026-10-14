@@ -1,0 +1,13 @@
+{
+ "state": "running",
+ "target": "/Users/phillipmorehead/Legacy Modernization Assessor Plugin/bench/runs/carddemo-3/work",
+ "mode": "full",
+ "require": [
+  "graph.json",
+  "waves.json",
+  "dead-code.json",
+  "risks.json"
+ ],
+ "started": "2026-10-14T19:00:53+00:00",
+ "attempts": 0
+}

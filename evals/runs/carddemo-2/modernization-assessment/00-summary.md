@@ -1,110 +1,63 @@
 # 00 Summary
 
-Assessment of the CardDemo tree for modernization. Extractor version 0.2.0 read 44 COBOL programs, 62 copybooks, 55 JCL jobs, 6 procs, 21 BMS maps, one Control-M file and 9 shell scripts, and built a graph of 543 nodes and 1,224 edges (analysis field edge_counts).
-
 ## Scoping answers
 
-All three answers came as flags, so nothing was asked and no defaults applied.
+| Question | Answer | Source |
+|---|---|---|
+| Scope | Current directory (the whole tree) | No scope argument given |
+| Target state | refactor | `--target refactor` |
+| Must not break | Daily transaction posting, the account and card master refresh, and the transaction report | `--must-not-break` |
+| Telemetry | none. Every dead-code claim is provisional. | `--telemetry none` |
+| Delivery | Not given. The estimate shows conventional and AI-assisted side by side. | `--delivery` absent |
+| Defaults applied | No defaults applied | All three scoping answers came as flags |
 
-| Question | Answer | Source | Confidence | Evidence |
-|---|---|---|---|---|
-| Target state | refactor | flag `--target refactor` | high | inference |
-| What must not break | daily transaction posting, the account and card master refresh, and the transaction report | flag `--must-not-break` | high | inference |
-| Runtime telemetry | none | flag `--telemetry none` | high | inference |
+## What the tree is
 
-No defaults applied. With telemetry none, every dead-code claim is provisional (`modernization-assessment/05-dead-code.md`).
+A small card-processing demonstration: 44 COBOL programs, 62 copybooks, 55 JCL jobs, 6 procs, 21 BMS maps, one Control-M export, nine wrapper scripts and 22,489 lines of COBOL (`modernization-assessment/graph.json:24`, `modernization-assessment/01-inventory.md:20`). Nine waves, 123 units placed, one unit not placed (`modernization-assessment/waves.json:1`). The extractor found 318 call edges, 62 contract edges, 235 data edges and 133 ordering edges (`modernization-assessment/graph.json:28812`).
 
-Where the three must-not-break items land in the tree:
+How the three must-not-break items map to units. None is missing from the tree.
 
-| Item you named | Units | Wave | Confidence | Evidence |
-|---|---|---|---|---|
-| Daily transaction posting | job:POSTTRAN, CBTRN02C | 5 | high | `app/jcl/POSTTRAN.jcl:23`, `app/cbl/CBTRN02C.cbl:256` |
-| The account and card master refresh | job:ACCTFILE, job:CARDFILE. The refresh wrapper labels them Refresh Account Master file and Refresh Card Master | 5 | medium | `scripts/remote_refresh.sh:16`, `scripts/remote_refresh.sh:19` |
-| The transaction report | job:TRANREPT, proc:TRANREPT, CBTRN03C, and CORPT00C which submits the proc from CICS | 5 | medium | `app/jcl/TRANREPT.jcl:1`, `app/cbl/CORPT00C.cbl:94` |
-
-Each maps to a unit. Two map thinly. The tree names the refresh jobs only in developer FTP wrappers, and names TRANREPT in no scheduler at all. Questions 2 and 3 below.
-
-## The plan
-
-Seven waves, in `modernization-assessment/03-waves.md` and `modernization-assessment/waves.json`. The plan keeps the extractor's seven families and makes two changes: job:CREADB2 moves from wave 1 to wave 7 because it runs DB2 DDL, and job:TXT2PDF1 moves from wave 4 to wave 5 because it converts the statement file that wave 5 writes. No wave has high confidence. Waves 1 and 4 are chores, and wave 5 is the largest and least safe: it holds all three must-not-break items and 14 of the 29 high-high units (`modernization-assessment/risks.json:2`).
-
-Estimate: 179 to 312 engineer-weeks, low confidence, all of it inference (`modernization-assessment/04-estimate.md`).
+| Item | Units | Wave | Evidence |
+|---|---|---|---|
+| Daily transaction posting | job:POSTTRAN, CBTRN02C, and the wrapper `run_posting.sh` | 6 | `app/jcl/POSTTRAN.jcl:23`, `scripts/run_posting.sh:26` |
+| Account and card master refresh | job:ACCTFILE (account, wave 6). job:CARDFILE, XREFFILE and CUSTFILE (card, cross-reference, customer, wave 5). "Master refresh" could also mean the weekly reference-data refresh in Control-M. I took the first reading. | 5 and 6 | `app/jcl/ACCTFILE.jcl:25`, `app/jcl/CARDFILE.jcl:36`, `app/scheduler/CardDemo.controlm:26` |
+| Transaction report | job:TRANREPT, CBTRN03C, and the online screen CORPT00C that submits the same procedure | 6 | `app/jcl/TRANREPT.jcl:59`, `app/cbl/CORPT00C.cbl:94` |
 
 ## Largest risk
 
-The definition of correct for the daily posting cycle is not in any one place, and the order of the jobs decides what the transaction master contains. Four artifacts give four different orders: the Control-M daily folder never runs posting, the CA-7 listing runs it after an IMS job and without a backup, and the two wrapper scripts differ from each other (`app/scheduler/CardDemo.controlm:5`, `app/scheduler/CardDemo.ca7:70`, `scripts/run_posting.sh:26`, `scripts/run_full_batch.sh:47`). Depending on which runs, the master is copied and emptied (`app/jcl/TRANBKP.jcl:40`), opened for output and refilled by CBTRN02C (`app/cbl/CBTRN02C.cbl:256`), rebuilt from generation (0) of a backup base (`app/jcl/COMBTRAN.jcl:24`), and the report job writes to that same base (`app/jcl/TRANREPT.jcl:33`). No abend marks a wrong generation, and CBTRN02C itself has arithmetic that truncates and a reject that is set and never written (`app/cbl/CBTRN02C.cbl:187`, `app/cbl/CBTRN02C.cbl:556`). A port that gets every program right can still lose or repeat a day of transactions. The plan mitigates it with a data facade, a scheduler bridge and a generation catalog before wave 5 (`modernization-assessment/03-waves.md`).
+**The daily cycle is destructive, and there is no oracle in the tree.** The posting wrapper reloads the account master from a flat file, backs up and deletes the transaction master, and CBTRN02C then opens the transaction file for output and adds each posted amount to the account balance (`scripts/run_posting.sh:17`, `app/jcl/TRANBKP.jcl:40`, `app/cbl/CBTRN02C.cbl:256`, `app/cbl/CBTRN02C.cbl:547`). The state of the books at the end of a run is a function of a flat file and a chain of backup generations that are not in this tree. A port that is correct on every paragraph can still be wrong on the state it starts from. Interest truncates rather than rounds (`app/cbl/CBACT04C.cbl:465`), and the report job has its dates hard-coded to 2022 (`app/jcl/TRANREPT.jcl:43`). The risk is not complexity. It is that the three items that must not break all sit in one 29-unit wave (wave 6, blast radius high, confidence low), and the only way to prove them is a parallel run or archived generations that the client has to supply.
 
-## Open Questions
+`risks.json` rates CBTRN02C, CBACT04C, CBTRN03C, CORPT00C, job:POSTTRAN, job:INTCALC and job:TRANREPT high on both port difficulty and blast radius (`modernization-assessment/risks.json:1`). That file is a first read and most scores are low confidence; only three programs were read closely.
 
-For the client's own engineers. There are nineteen, plus the unparsed files and limits below.
+## Estimate
 
-1. Which scheduler runs the daily posting cycle in production: the Control-M daily folder, the CA-7 chain, or the FTP wrapper scripts? They disagree about the order and about whether TRANBKP runs (`app/scheduler/CardDemo.controlm:5`, `app/scheduler/CardDemo.ca7:70`, `scripts/run_full_batch.sh:47`).
-2. Is the transaction master meant to hold only one cycle's postings? TRANBKP empties it, CBTRN02C opens it for output and COMBTRAN rebuilds it. Where is transaction history kept (`app/jcl/TRANBKP.jcl:40`, `app/cbl/CBTRN02C.cbl:256`, `app/jcl/COMBTRAN.jcl:48`)?
-3. What runs the account and card master refresh and the transaction report in production? The refresh jobs appear only in developer FTP wrappers, TRANREPT in no scheduler. Does the reload of the account master overwrite what online users changed (`scripts/remote_refresh.sh:17`, `app/jcl/TRANREPT.jcl:1`, `app/cbl/COACTUPC.cbl:573`)?
-4. Where does the DATEPARM file come from, and can its date range differ from the range the sort step uses? No program or job in the tree writes it (`app/jcl/TRANREPT.jcl:73`, `app/cbl/CBTRN03C.cbl:173`).
-5. Does the report job's backup generation ever get read by COMBTRAN as generation (0)? Has that misfired (`app/jcl/TRANREPT.jcl:33`, `app/jcl/COMBTRAN.jcl:24`)?
-6. Is the CA-7 listing current and in production? It names two jobs with no JCL in the tree and it runs POSTTRAN after CBPAUP0J (`app/scheduler/CardDemo.ca7:216`, `app/scheduler/CardDemo.ca7:70`).
-7. Three writers create keys in the transaction file: the feed id, online highest-plus-one, and the interest date string. What guarantees they never collide (`app/cbl/CBTRN02C.cbl:425`, `app/cbl/COBIL00C.cbl:217`, `app/cbl/CBACT04C.cbl:476`)?
-8. Who calls the MQ services COACCT01 and CODATE01, and what must the pending-authorization subsystem keep doing? Should it be ported at all (`app/app-vsam-mq/cbl/COACCT01.cbl:115`, `app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl:956`)?
-9. What does COBDATFT do for each type code, and is anything else assembler-based (`app/cbl/CBACT01C.cbl:231`, `app/asm/COBDATFT.asm:17`)?
-10. Program COCRDSEC, run by CICS transaction CDV1, has no source in the tree. What does it do (`app/csd/CARDDEMO.CSD:388`)?
-11. Does CBTRN01C ever run? Nothing in the tree names it (`app/cbl/CBTRN01C.cbl:23`).
-12. Does CBIMPORT run? Its program selects a DD its JCL never maps (`app/cbl/CBIMPORT.cbl:63`, `app/jcl/CBIMPORT.jcl:22`).
-13. CREASTMT has a corrupt JCL line, and TXT2PDF1 runs a REXX exec that is not in the tree. Do statements run in production (`app/jcl/CREASTMT.JCL:90`, `app/jcl/TXT2PDF1.JCL:31`)?
-14. The report base is defined with two different generation limits. Which is live (`app/jcl/DEFGDGB.jcl:37`, `app/jcl/REPTFILE.jcl:27`)?
-15. Are the fixed 2022 dates in INTCALC and TRANREPT overridden in production, and how (`app/jcl/INTCALC.jcl:22`, `app/jcl/TRANREPT.jcl:43`)?
-16. Sign-on compares a clear-text password, and one FTP job holds a host and login in clear text. Which of these must the port fix, and who owns the authentication design (`app/cbl/COSGN00C.cbl:223`, `app/jcl/FTPJCL.JCL:33`)?
-17. The posting limit test stores its sum in nine digits while balances hold ten. Has an over-limit transaction ever been accepted because of it (`app/cbl/CBTRN02C.cbl:187`)?
-18. Which of the 27 jobs that no scheduler I could read names are still used, especially DALYREJS and DEFGDGB, which posting depends on (`modernization-assessment/05-dead-code.md`)?
-19. COACTUPC and COTRTUPC use COPY with REPLACING, which the extractor does not apply. Does any replaced field change behavior (`app/cbl/COACTUPC.cbl:3208`, `app/app-transaction-type-db2/cbl/COTRTUPC.cbl:1358`)?
+94 to 160 engineer-weeks conventional, or 64 to 112 AI-assisted, for all nine waves. Waves 1 to 6, which carry the three items, are 40 to 68 conventional or 27 to 46 AI-assisted (`modernization-assessment/04-estimate.md:1`). These are planning assumptions with no calibrated data behind them.
 
-## Files the extractor did not parse
+## Open Questions for the client's engineers
 
-Each is an open question. None is a footnote.
+1. **Is a parallel run possible for wave 6, and do archived generations of `TRANSACT.BKUP`, `DALYREJS` and `TRANREPT` exist for at least one month end and one year end?** Without them the oracle is characterization only (`modernization-assessment/06-test-strategy.md:1`).
+2. **Is the account reload in front of posting intended?** `run_posting.sh` rebuilds the account master from `ACCTDATA.PS` before POSTTRAN, and CBTRN02C opens the transaction file for output. Which job writes the flat file back, and who owns the books between runs? (`scripts/run_posting.sh:17`, `app/jcl/ACCTFILE.jcl:57`)
+3. **What do the 28 computed calls reach?** The list is at `modernization-assessment/05a-dead-code-candidates.md:61`. Send the program-name tables or the CICS transaction definitions. This decides the confidence of waves 3, 6, 7 and 9, and the status of CBTRN01C.
+4. **Is CBTRN01C run?** No JCL runs it, and it reads the daily transaction file (`app/cbl/CBTRN01C.cbl:254`). If it is a pre-posting check, it belongs in wave 6.
+5. **What does the CA-7 listing schedule?** `app/scheduler/CardDemo.ca7` is not parsed, so the 35 jobs reported as unscheduled may be scheduled there. Which of them still run? (`modernization-assessment/graph.json:27469`)
+6. **Who owns the five shared VSAM masters during the transition?** Batch (wave 6) and online (wave 7) write the same files, and one side must go through an adapter (`modernization-assessment/graph.json:28699`).
+7. **Are the transaction report's hard-coded dates (2022-01-01 to 2022-07-06) the production setting?** And is the online screen's report the same output as the batch job's? (`app/jcl/TRANREPT.jcl:43`, `app/cbl/CORPT00C.cbl:94`)
+8. **Are the over-limit and expired reject codes the intended behavior when both apply?** The later test wins (`app/cbl/CBTRN02C.cbl:417`). Should the interest divide round? (`app/cbl/CBACT04C.cbl:465`). Both go in the Deviation Register.
+9. **Do the assembler routines `COBDATFT` and `MVSWAIT` matter to posting or the batch window?** They are not read (`modernization-assessment/graph.json:27459`).
 
-| File or group | What it holds | Question | Confidence | Evidence |
-|---|---|---|---|---|
-| `app/scheduler/CardDemo.ca7` | CA-7 job and trigger listing, 570 lines. I read it by hand | Is it the production scheduler, and is it current? It is the only place CREASTMT, PRTCATBL and the READ jobs are chained, and the only place POSTTRAN follows CBPAUP0J | medium | `app/scheduler/CardDemo.ca7:18` |
-| `app/app-authorization-ims-db2-mq/dcl/AUTHFRDS.dcl`, `app/app-transaction-type-db2/dcl/DCLTRCAT.dcl`, `app/app-transaction-type-db2/dcl/DCLTRTYP.dcl` | DB2 DCLGEN members | Do the host variables match the tables | low | inference |
-| `app/app-authorization-ims-db2-mq/ddl/AUTHFRDS.ddl`, `app/app-authorization-ims-db2-mq/ddl/XAUTHFRD.ddl`, `app/app-transaction-type-db2/ddl/TRNTYCAT.ddl`, `app/app-transaction-type-db2/ddl/TRNTYPE.ddl`, `app/app-transaction-type-db2/ddl/XTRNTYCAT.ddl`, `app/app-transaction-type-db2/ddl/XTRNTYPE.ddl` | DB2 DDL, six files | What constraints, indexes and keys exist | low | inference |
-| `app/app-authorization-ims-db2-mq/ims/DBPAUTP0.dbd`, `app/app-authorization-ims-db2-mq/ims/DBPAUTX0.dbd`, `app/app-authorization-ims-db2-mq/ims/PADFLDBD.DBD`, `app/app-authorization-ims-db2-mq/ims/PASFLDBD.DBD` | IMS database definitions, four files | Segment layout, keys and secondary indexes of the authorization database | low | inference |
-| `app/app-authorization-ims-db2-mq/ims/DLIGSAMP.PSB`, `app/app-authorization-ims-db2-mq/ims/PAUTBUNL.PSB`, `app/app-authorization-ims-db2-mq/ims/PSBPAUTB.psb`, `app/app-authorization-ims-db2-mq/ims/PSBPAUTL.psb` | IMS program specification blocks, four files | Which program may read or change which segments | low | inference |
-| `app/app-transaction-type-db2/ctl/DB2CREAT.ctl` and six others in that folder, `app/ctl/REPROCT.ctl` | Control cards, eight files. REPROCT is a plain REPRO. The DB2 ones create and load tables | Do the DB2 cards match the DDL | medium | `app/ctl/REPROCT.ctl:15`, `app/app-transaction-type-db2/ctl/DB2CREAT.ctl:35` |
-| `app/asm/COBDATFT.asm`, `app/asm/MVSWAIT.asm` | Assembler date formatter and timer | Full behavior, and are there callers I did not see | medium | `app/asm/COBDATFT.asm:17`, `app/asm/MVSWAIT.asm:19` |
-| `app/maclib/ASMWAIT.mac`, `app/maclib/COCDATFT.mac` | Assembler macros for the two modules | Same | low | inference |
+## Not parsed, and limits that touch this system
 
-## Extractor limits that touch this system
+| Item | Effect | Evidence |
+|---|---|---|
+| IMS DBD and PSB files (4 each), DB2 DDL (6) and DCLGEN (3), control cards (8) | Wave 8 and 9 data structures are unseen | `modernization-assessment/graph.json:27435`, `modernization-assessment/graph.json:27449` |
+| Assembler source and macros (2 each) | Date and wait routines are unseen | `modernization-assessment/graph.json:27459`, `modernization-assessment/graph.json:27464` |
+| CA-7 scheduler listing | Unscheduled job count is overstated | `modernization-assessment/graph.json:27469` |
+| DCB, LRECL, RECFM not read | Record length on a DD is not compared with a copybook. Contract edges rated high mean a shared layout, not proven equal. | `modernization-assessment/graph.json:20`, `modernization-assessment/graph.json:21` |
+| IF/THEN/ELSE and COND= in JCL not modeled | Conditional steps look unconditional. TRANBKP's define step has `COND=(4,LT)`. | `modernization-assessment/graph.json:16`, `app/jcl/TRANBKP.jcl:51` |
+| CICS RETURN TRANSID, START and SEND MAP are not edges | The screen flow is under-counted | `modernization-assessment/graph.json:18` |
+| Jobs DEFCUST and TRANREPT repeat a step name | The extractor renamed the second step | `app/jcl/DEFCUST.jcl:32`, `app/jcl/TRANREPT.jcl:37` |
+| Control-M `SIGN -` conditions | Deletions of conditions are not edges | `app/scheduler/CardDemo.controlm:10` |
 
-From `meta.limits` in `graph.json`. Each says what the extractor could not see, and where it bites here.
+## Files
 
-| Limit | Touches this system | Confidence | Evidence |
-|---|---|---|---|
-| COBOL is read as fixed format. Free format is not parsed | No. Every source file parsed | high | analysis field meta.files_seen |
-| COPY REPLACING is not applied | Yes. COACTUPC uses it seven times and COTRTUPC once | high | `app/cbl/COACTUPC.cbl:3208`, `app/app-transaction-type-db2/cbl/COTRTUPC.cbl:1358` |
-| A variable call target resolves only from VALUE clauses and literal MOVEs in the same program | Yes. 28 computed calls, bounded by hand | high | `app/cbl/COMEN01C.cbl:185`, `modernization-assessment/02-coupling.md:101` |
-| A called subprogram gets no DDs from its caller's step | Yes. CBSTM03B has four unmapped DDs | high | `app/cbl/CBSTM03B.CBL:31` |
-| SORT and most in-stream cards are not read | Yes. The report, statement, category listing and combine jobs use fixed offsets | high | `app/jcl/TRANREPT.jcl:41`, `app/jcl/CREASTMT.JCL:53`, `app/jcl/COMBTRAN.jcl:28` |
-| The program a step runs is read only from PARM for DFSRRC00 and from RUN PROGRAM for IKJEFT01 | Yes. TXT2PDF1 runs a REXX exec under IKJEFT1B | high | `app/jcl/TXT2PDF1.JCL:24` |
-| IF, THEN, ELSE and COND= are not modeled | Yes. TRANBKP's define step is skipped if an earlier step ends with a code above 4 | high | `app/jcl/TRANBKP.jcl:51` |
-| Nested PROC calls and JCL inside a COBOL literal make no edge | Yes. TRANREPT calls REPROC, CORPT00C embeds a job | high | `app/proc/TRANREPT.prc:21`, `app/cbl/CORPT00C.cbl:94` |
-| RETURN TRANSID, START and SEND MAP are not edges | Yes. All online flows | high | `app/cbl/COSGN00C.cbl:99` |
-| Only Control-M XML and shell wrappers are read as schedulers | Yes. CA-7 is not read | high | `app/scheduler/CardDemo.ca7:18` |
-| DCB, LRECL and RECFM are not read | Yes. A report line of 133 and a reject record of 430 are not compared with the layouts | high | `app/jcl/TRANREPT.jcl:78`, `app/jcl/POSTTRAN.jcl:36` |
-| A contract edge is high when both sides copy one layout | Yes. CBTRN03C copies CVTRA05Y and reads through a private split | high | `app/cbl/CBTRN03C.cbl:63` |
-| LINK and XCTL are both call edges and control flow is not modeled | Yes. XCTL never returns, which matters for the menu cycle | high | `app/cbl/COMEN01C.cbl:185` |
-
-## What else is in this folder
-
-| File | Holds |
-|---|---|
-| `modernization-assessment/01-inventory.md` | Inventory, generated |
-| `modernization-assessment/02-coupling.md` | Coupling argument and the computed calls |
-| `modernization-assessment/02a-edge-tables.md` | Every edge, generated |
-| `modernization-assessment/03-waves.md`, `modernization-assessment/waves.json` | The wave plan |
-| `modernization-assessment/03a-wave-seed.md`, `modernization-assessment/03a-waves-draft.json` | The extractor's seed, generated |
-| `modernization-assessment/04-estimate.md` | Estimate |
-| `modernization-assessment/05-dead-code.md`, `modernization-assessment/dead-code.json` | Dead code register |
-| `modernization-assessment/05a-dead-code-candidates.md` | The extractor's candidates, generated |
-| `modernization-assessment/06-test-strategy.md` | Oracle, normalization, deviation register |
-| `modernization-assessment/risks.json` | Two-axis scores for 99 units |
-| `modernization-assessment/graph.json` | The facts |
+`01-inventory.md`, `02-coupling.md`, `02a-edge-tables.md`, `03-waves.md`, `03a-wave-seed.md`, `04-estimate.md`, `05-dead-code.md`, `05a-dead-code-candidates.md`, `06-test-strategy.md`, plus `graph.json`, `waves.json`, `risks.json`, `dead-code.json`.

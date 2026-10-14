@@ -27473,7 +27473,7 @@
   }
  ],
  "analysis": {
-  "as_of": "2026-09-30",
+  "as_of": "2026-10-14",
   "dormant_years": 5,
   "entry_points": [
    "COACCT01",
@@ -29002,28 +29002,79 @@
      "family": "batch-writers",
      "description": "Batch jobs that write a dataset another entry point also uses",
      "units": [
-      "CBACT04C",
       "CBEXPORT",
       "CBSTM03A",
       "CBSTM03B",
-      "CBTRN02C",
-      "CBTRN03C",
       "COBSWAIT",
-      "CORPT00C",
-      "CSUTLDTC",
-      "job:ACCTFILE",
       "job:CARDFILE",
       "job:CBEXPORT",
       "job:CLOSEFIL",
-      "job:COMBTRAN",
       "job:CREASTMT",
       "job:CUSTFILE",
-      "job:DALYREJS",
-      "job:DEFGDGB",
       "job:DISCGRP",
       "job:DUSRSECJ",
-      "job:INTCALC",
       "job:OPENFIL",
+      "job:TRANCATG",
+      "job:TRANTYPE",
+      "job:WAITSTEP",
+      "job:XREFFILE",
+      "sch:DAILY-TransactionBackup/CLOSEFIL",
+      "sch:DAILY-TransactionBackup/OPENFIL",
+      "sch:DAILY-TransactionBackup/WAITSTEP",
+      "sch:MONTHLY-InterestCalculation/CLOSEFIL",
+      "sch:MONTHLY-InterestCalculation/OPENFIL",
+      "sch:MONTHLY-InterestCalculation/WAITSTEP",
+      "sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL",
+      "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP",
+      "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL",
+      "sch:WEEKLY-DisclosureGroupsRefresh/WAITSTEP"
+     ],
+     "entry_points": [
+      "job:CARDFILE",
+      "job:CBEXPORT",
+      "job:CLOSEFIL",
+      "job:CREASTMT",
+      "job:CUSTFILE",
+      "job:DISCGRP",
+      "job:DUSRSECJ",
+      "job:OPENFIL",
+      "job:TRANCATG",
+      "job:TRANTYPE",
+      "job:WAITSTEP",
+      "job:XREFFILE"
+     ],
+     "computed_calls": [],
+     "evidence": [
+      {
+       "file": "app/cbl/CBEXPORT.cbl",
+       "line": 65
+      },
+      {
+       "file": "app/cbl/CBSTM03A.CBL",
+       "line": 39
+      },
+      {
+       "file": "app/jcl/CARDFILE.jcl",
+       "line": 36
+      }
+     ],
+     "group": "independent"
+    },
+    {
+     "wave": 6,
+     "family": "batch-writers",
+     "description": "Batch jobs that write a dataset another entry point also uses",
+     "units": [
+      "CBACT04C",
+      "CBTRN02C",
+      "CBTRN03C",
+      "CORPT00C",
+      "CSUTLDTC",
+      "job:ACCTFILE",
+      "job:COMBTRAN",
+      "job:DALYREJS",
+      "job:DEFGDGB",
+      "job:INTCALC",
       "job:POSTTRAN",
       "job:PRTCATBL",
       "job:REPRTEST",
@@ -29031,28 +29082,14 @@
       "job:SORTTEST",
       "job:TCATBALF",
       "job:TRANBKP",
-      "job:TRANCATG",
       "job:TRANFILE",
       "job:TRANIDX",
       "job:TRANREPT",
-      "job:TRANTYPE",
-      "job:WAITSTEP",
-      "job:XREFFILE",
       "proc:REPROC",
       "proc:TRANREPT",
-      "sch:DAILY-TransactionBackup/CLOSEFIL",
-      "sch:DAILY-TransactionBackup/OPENFIL",
       "sch:DAILY-TransactionBackup/TRANBKP",
-      "sch:DAILY-TransactionBackup/WAITSTEP",
-      "sch:MONTHLY-InterestCalculation/CLOSEFIL",
       "sch:MONTHLY-InterestCalculation/COMBTRAN",
       "sch:MONTHLY-InterestCalculation/INTCALC",
-      "sch:MONTHLY-InterestCalculation/OPENFIL",
-      "sch:MONTHLY-InterestCalculation/WAITSTEP",
-      "sch:WEEKLY-DisclosureGroupsRefresh/CLOSEFIL",
-      "sch:WEEKLY-DisclosureGroupsRefresh/DISCGRP",
-      "sch:WEEKLY-DisclosureGroupsRefresh/OPENFIL",
-      "sch:WEEKLY-DisclosureGroupsRefresh/WAITSTEP",
       "sch:scripts/remote_refresh.sh",
       "sch:scripts/run_full_batch.sh",
       "sch:scripts/run_interest_calc.sh",
@@ -29061,18 +29098,10 @@
      "entry_points": [
       "CORPT00C",
       "job:ACCTFILE",
-      "job:CARDFILE",
-      "job:CBEXPORT",
-      "job:CLOSEFIL",
       "job:COMBTRAN",
-      "job:CREASTMT",
-      "job:CUSTFILE",
       "job:DALYREJS",
       "job:DEFGDGB",
-      "job:DISCGRP",
-      "job:DUSRSECJ",
       "job:INTCALC",
-      "job:OPENFIL",
       "job:POSTTRAN",
       "job:PRTCATBL",
       "job:REPRTEST",
@@ -29080,13 +29109,9 @@
       "job:SORTTEST",
       "job:TCATBALF",
       "job:TRANBKP",
-      "job:TRANCATG",
       "job:TRANFILE",
       "job:TRANIDX",
-      "job:TRANREPT",
-      "job:TRANTYPE",
-      "job:WAITSTEP",
-      "job:XREFFILE"
+      "job:TRANREPT"
      ],
      "computed_calls": [
       "CORPT00C"
@@ -29097,17 +29122,18 @@
        "line": 41
       },
       {
-       "file": "app/cbl/CBEXPORT.cbl",
-       "line": 65
+       "file": "app/cbl/CBTRN02C.cbl",
+       "line": 51
       },
       {
-       "file": "app/cbl/CBSTM03A.CBL",
-       "line": 39
+       "file": "app/cbl/CBTRN03C.cbl",
+       "line": 51
       }
-     ]
+     ],
+     "group": "coupled"
     },
     {
-     "wave": 6,
+     "wave": 7,
      "family": "online-writers",
      "description": "Online transactions that write a dataset another entry point also uses",
      "units": [
@@ -29159,20 +29185,14 @@
      ]
     },
     {
-     "wave": 7,
+     "wave": 8,
      "family": "subsystem",
      "description": "Entry points that touch DB2, IMS or MQ",
      "units": [
       "CBPAUP0C",
       "COACCT01",
-      "COBTUPDT",
       "CODATE01",
       "COPAUA0C",
-      "COPAUS0C",
-      "COPAUS1C",
-      "COPAUS2C",
-      "COTRTLIC",
-      "COTRTUPC",
       "DBUNLDGS",
       "PAUDBLOD",
       "PAUDBUNL",
@@ -29180,30 +29200,61 @@
       "job:CIDBCMP",
       "job:DBPAUTP0",
       "job:LOADPADB",
-      "job:MNTTRDB2",
       "job:TRANEXTR",
       "job:UNLDGSAM",
       "job:UNLDPADB",
       "proc:BLDCIDB2",
-      "sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2",
       "sch:WEEKLY-TransactionTypesDBRefresh/TRANEXTR"
      ],
      "entry_points": [
       "COACCT01",
       "CODATE01",
       "COPAUA0C",
-      "COPAUS0C",
-      "COPAUS1C",
-      "COTRTLIC",
-      "COTRTUPC",
       "job:CBPAUP0J",
       "job:CIDBCMP",
       "job:DBPAUTP0",
       "job:LOADPADB",
-      "job:MNTTRDB2",
       "job:TRANEXTR",
       "job:UNLDGSAM",
       "job:UNLDPADB"
+     ],
+     "computed_calls": [],
+     "evidence": [
+      {
+       "file": "app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl",
+       "line": 956
+      },
+      {
+       "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
+       "line": 222
+      },
+      {
+       "file": "app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL",
+       "line": 244
+      }
+     ],
+     "group": "independent"
+    },
+    {
+     "wave": 9,
+     "family": "subsystem",
+     "description": "Entry points that touch DB2, IMS or MQ",
+     "units": [
+      "COBTUPDT",
+      "COPAUS0C",
+      "COPAUS1C",
+      "COPAUS2C",
+      "COTRTLIC",
+      "COTRTUPC",
+      "job:MNTTRDB2",
+      "sch:WEEKLY-TransactionTypesDBRefresh/MNTTRDB2"
+     ],
+     "entry_points": [
+      "COPAUS0C",
+      "COPAUS1C",
+      "COTRTLIC",
+      "COTRTUPC",
+      "job:MNTTRDB2"
      ],
      "computed_calls": [
       "COPAUS0C",
@@ -29213,18 +29264,19 @@
      ],
      "evidence": [
       {
-       "file": "app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl",
-       "line": 956
-      },
-      {
        "file": "app/app-authorization-ims-db2-mq/cbl/COPAUS2C.cbl",
        "line": 141
       },
       {
-       "file": "app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL",
-       "line": 222
+       "file": "app/app-transaction-type-db2/cbl/COBTUPDT.cbl",
+       "line": 137
+      },
+      {
+       "file": "app/app-transaction-type-db2/cbl/COTRTLIC.cbl",
+       "line": 338
       }
-     ]
+     ],
+     "group": "coupled"
     }
    ],
    "unassigned": [

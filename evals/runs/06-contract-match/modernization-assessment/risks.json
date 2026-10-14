@@ -3,21 +3,25 @@
   {
    "id": "PGMR",
    "port_difficulty": {
-    "score": 1,
-    "why": "Opens, reads one record and closes. There is no logic and the record is never used."
+    "score": 2,
+    "why": "Opens, reads one record and closes; no logic, but the record carries a COMP-3 field whose bytes must be read identically."
    },
    "blast_radius": {
     "score": 2,
-    "why": "Read only and produces no output, but it is the only consumer on the shared contract and its place in the nightly cycle is unconfirmed."
+    "why": "Read-only on SPARQ.TEST.MASTER with no writes; a failure is loud (open/read abend) and fully rerunnable."
    },
    "quadrant": "low-low",
    "wave": 1,
-   "driving_fact": "Reads SPARQ.TEST.MASTER through copybook LAYOUTX, the layout PGMW writes (contract edge, high).",
-   "confidence": "medium",
+   "driving_fact": "Reads SPARQ.TEST.MASTER (DISP=SHR) through the LAYOUTX copybook shared with PGMW, and writes nothing.",
+   "confidence": "high",
    "evidence": [
     {
      "file": "app/cbl/PGMR.cbl",
      "line": 13
+    },
+    {
+     "file": "app/cpy/LAYOUTX.cpy",
+     "line": 3
     }
    ]
   },
@@ -25,20 +29,24 @@
    "id": "PGMW",
    "port_difficulty": {
     "score": 2,
-    "why": "No logic, but it writes a record with a packed decimal field and never moves any value into it."
+    "why": "Opens output, writes one record and closes; no computation, but LR-AMT is S9(7)V99 COMP-3 and the file must be byte-identical to what PGMR expects."
    },
    "blast_radius": {
     "score": 3,
-    "why": "Sole writer of the shared master, so a layout break is silent for the reader, and its nightly-cycle membership is unconfirmed."
+    "why": "Sole writer of SPARQ.TEST.MASTER, the only data hub; a layout or length error is silent to the writer and only surfaces in PGMR or a later consumer."
    },
    "quadrant": "low-high",
    "wave": 2,
-   "driving_fact": "Sole writer of SPARQ.TEST.MASTER. Its record layout LAYOUTX is the undocumented API that PGMR reads.",
+   "driving_fact": "Only writer of SPARQ.TEST.MASTER, the single data hub and articulation point; the PGMW to PGMR contract edge is high confidence but means shared copybook, not proven equal record length.",
    "confidence": "medium",
    "evidence": [
     {
      "file": "app/cbl/PGMW.cbl",
      "line": 14
+    },
+    {
+     "file": "app/jcl/WRITEJOB.jcl",
+     "line": 3
     }
    ]
   },
@@ -46,17 +54,21 @@
    "id": "job:READJOB",
    "port_difficulty": {
     "score": 1,
-    "why": "One step, one DD with DISP=SHR and a SYSOUT. Nothing to translate."
+    "why": "One step, one DD with DISP=SHR and a SYSOUT; nothing to translate beyond the dataset binding."
    },
    "blast_radius": {
     "score": 2,
-    "why": "Reads the master only. It must run after WRITEJOB has cataloged the dataset, and no scheduler in the tree enforces that."
+    "why": "Read-only job; failure is loud and rerun is harmless. Whether it sits in the nightly cycle is unknown because no scheduler artifact exists."
    },
    "quadrant": "low-low",
    "wave": 1,
-   "driving_fact": "Reads the dataset WRITEJOB creates, with DISP=SHR, and no scheduler orders the two jobs.",
+   "driving_fact": "Runs PGMR against SPARQ.TEST.MASTER with DISP=SHR; no scheduler artifact places it in the nightly batch cycle.",
    "confidence": "medium",
    "evidence": [
+    {
+     "file": "app/jcl/READJOB.jcl",
+     "line": 2
+    },
     {
      "file": "app/jcl/READJOB.jcl",
      "line": 3
@@ -67,15 +79,15 @@
    "id": "job:WRITEJOB",
    "port_difficulty": {
     "score": 2,
-    "why": "One step, but the allocation carries DISP=(NEW,CATLG,DELETE), one track of space and LRECL=80 that a port must reproduce."
+    "why": "One step, but the DD carries the real contract: DISP=(NEW,CATLG,DELETE), SPACE and DCB RECFM=FB,LRECL=80 live in JCL, not in the program."
    },
    "blast_radius": {
     "score": 3,
-    "why": "Creates the shared master. Its LRECL=80 is not compared with the 15 byte layout, and a rerun against an existing dataset fails at allocation."
+    "why": "Creates and catalogs the master that READJOB depends on; NEW disposition abends loudly on rerun, but LRECL=80 against a 15-byte copybook record is a silent layout question."
    },
    "quadrant": "low-high",
    "wave": 2,
-   "driving_fact": "Creates SPARQ.TEST.MASTER as NEW,CATLG with LRECL=80, while the copybook describes a shorter record (inference).",
+   "driving_fact": "WRITEJOB declares LRECL=80 for SPARQ.TEST.MASTER while LAYOUTX defines a 15-byte record (X(10) plus COMP-3 S9(7)V99); the reader's DD declares no DCB. The extractor does not compare these.",
    "confidence": "medium",
    "evidence": [
     {
@@ -85,6 +97,10 @@
     {
      "file": "app/jcl/WRITEJOB.jcl",
      "line": 4
+    },
+    {
+     "file": "app/cpy/LAYOUTX.cpy",
+     "line": 2
     }
    ]
   }

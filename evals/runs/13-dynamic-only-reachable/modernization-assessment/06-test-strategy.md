@@ -1,66 +1,41 @@
 # 06 Test strategy
 
-This follows the `behavioral-equivalence` skill. The bar is: for the inputs the nightly batch cycle
-sees in production, the ported job produces the same outputs as the legacy job, and every difference
-is written down and approved.
+Anchor: "the nightly batch cycle". The tree maps it to `job:MAINJOB` only by inference, since MAINJOB is the sole job (`app/jcl/MAINJOB.jcl:1`).
 
-## The tree holds no datasets
+## Oracle
 
-Neither program opens a file, and the job has no DD statement (`app/cbl/PGMMAIN.cbl:1`,
-`app/cbl/HIDDEN01.cbl:1`, `app/jcl/MAINJOB.jcl:2`, and `analysis`, field `data_hubs`, which is empty).
-No dataset can be replayed from this tree. The oracle has to come from job output, logs and reports
-the client holds. `inference`
+The tree holds no datasets, DDs or tables (`analysis` field `data_hubs` is empty, `app/jcl/MAINJOB.jcl:2` has no DD cards). So there is no file to diff. The oracle has to come from job output, logs and reports. Ask the client for these, in this order:
 
-**What to ask the client to supply**
+| Rank | Oracle | What to ask for | Confidence | Evidence |
+|---|---|---|---|---|
+| 1 | Parallel run | Can the old MAINJOB run beside the new one on the same input for several nights? | not known | inference |
+| 2 | Captured replay | The SYSIN or PARM values PGMMAIN received, over a period that holds month-end and, if financial, year-end | not known | `app/cbl/PGMMAIN.cbl:8` |
+| 3 | Golden master | Archived job logs, SYSOUT, return codes and any GDG generations the job wrote, with dates | not known | inference |
+| 4 | Characterization tests | Generated from source. Provisional only. | low | `app/cbl/PGMMAIN.cbl:9` |
 
-| Ask | Why | Confidence | Evidence |
-|---|---|---|---|
-| Job logs or SMF records for `MAINJOB`, twelve months, including a month end and a year end | Show return codes, run time and which programs ran. They also settle what `ACCEPT` supplied | low | `app/cbl/PGMMAIN.cbl:8` |
-| The `SYSIN` member, wrapper or scheduler entry that feeds `WS-PGM-NAME` | The JCL in the tree does not supply the name | medium | `app/jcl/MAINJOB.jcl:2` |
-| Every program the run-time name can select, with its source | The callee set is open, so the harness boundary is open | low | `app/cbl/PGMMAIN.cbl:9` |
-| Archived reports, extracts and generations the callee produces, and the files sent to partners | Each is a dated golden master | low | inference |
-| What "the nightly batch cycle" contains, as a list of jobs and their order | The tree has one job and no scheduler | low | `analysis`, field `warnings` |
+Until the client answers, the oracle for wave 1 is rank 4, and coverage is provisional. Characterization encodes what the code says, not what it does. PGMMAIN says only "call whatever name arrives", so a characterization test says nothing about the outcome.
 
-## Oracle per wave
+## What the harness asserts
 
-| Wave | Oracle, strongest first | Provisional? | Evidence |
-|---|---|---|---|
-| 1 (`job:MAINJOB`, `PGMMAIN`) | 1. Parallel run of the legacy and the ported job on the same nightly input, if the legacy job can stay up. Ask first. 2. Replay of captured run-time inputs against the port. 3. Golden master from archived job output and reports. 4. Characterization tests, only if 1 to 3 are unavailable | Yes until the callee set is bounded and one of 1 to 3 exists. Characterization coverage is provisional | `modernization-assessment/waves.json:8` |
+1. For each name that arrives in `WS-PGM-NAME`, the new job calls the equivalent unit and the old and new job end with the same return code.
+2. A name that matches no program: the old behavior is a run-time call failure. Capture what the old job did (abend code, message) and reproduce it, or record a deviation. The tree does not say what happens (inference).
+3. HIDDEN01 as a target: output and return code are empty and zero (`app/cbl/HIDDEN01.cbl:4`).
+4. Blank input to the ACCEPT. Same treatment as case 2.
 
-There is only one wave, so there is one oracle decision.
+## Normalization spec (for human sign-off)
 
-## Normalization spec, for wave 1
+| Item | Treatment | Evidence |
+|---|---|---|
+| Timestamps, job numbers, page headers in SYSOUT | Masked | inference |
+| Packed decimal and collating sequence | None found in this tree. Put them in the spec when the called programs are known. | `app/cbl/PGMMAIN.cbl:5` |
+| Record order | Not applicable. No output files in the tree. | `analysis` field `data_hubs` |
 
-Each line asserts that a difference does not matter. A human signs off the list.
+## Cases to add deliberately
 
-| Item | Rule | Risk if wrong | Evidence |
-|---|---|---|---|
-| Job return code | Compare exactly. It is the one output the tree shows, because `PGMMAIN` ends with `GOBACK` | A silent change of return code changes what the scheduler does next | `app/cbl/PGMMAIN.cbl:10` |
-| Timestamps, run IDs, job numbers, page numbers in job output | Mask before diffing | A real change hidden under a mask | inference |
-| Packed decimal and rounding | Not present in the two programs. Add a zero-tolerance decimal rule when the callee arrives, if it has money fields | Float rounding is a defect, not noise | inference |
-| Record order and collating sequence | Not present here. Confirm for the callee's files | An ASCII sort reorders a key sequence silently | inference |
-| Trailing whitespace and padding | Decide per output once outputs are known | Padding a partner extract breaks the partner | inference |
-
-## Input space to cover on purpose
-
-| Case | Why | Confidence | Evidence |
-|---|---|---|---|
-| Every program name seen in the run-time input over twelve months | The name selects the whole behavior of the job | low | `app/cbl/PGMMAIN.cbl:9` |
-| A blank name | `WS-PGM-NAME` has no initial value and `ACCEPT` may leave it blank | medium | `app/cbl/PGMMAIN.cbl:5` |
-| A name that does not resolve to a program | The `CALL` has no exception handling, so the legacy run-time decides what happens. The port must reproduce it, and the harness must capture it | medium | `app/cbl/PGMMAIN.cbl:9` |
-| No `SYSIN` present | The JCL has none. Whether the job abends or takes a default is not shown | low | `app/jcl/MAINJOB.jcl:2` |
-| Month end, quarter end, year end and leap day runs | The cycle is nightly, so paths that fire only at close are the main risk. Which callee runs at close is unknown | low | inference |
-| `HIDDEN01` named as the callee | It is in the tree and is the one known candidate. Expected result is a return with no output | medium | `app/cbl/HIDDEN01.cbl:4` |
-
-## Job order
-
-The temporal edges in `graph.json` are the orders the harness must keep. There are none: the tree has
-no scheduler and one step (`analysis`, field `warnings`, and `app/jcl/MAINJOB.jcl:2`). If the nightly
-cycle has more jobs, this section is incomplete. `inference`
+- Boundary dates: month-end, year-end, leap day. PGMMAIN has no date logic (`app/cbl/PGMMAIN.cbl:6`), but the programs it calls might. Ask which names arrive at fiscal close, since a call that happens once a year is the common cutover failure.
+- A zero-record night and an oversized night, for the called programs.
 
 ## Deviation Register
-
-Empty. No intentional difference is proposed. Nothing gets to differ without a row here.
 
 | ID | Legacy behavior | New behavior | Why changed | Approved by | Downstream impact | Evidence |
 |---|---|---|---|---|---|---|
@@ -68,16 +43,8 @@ Empty. No intentional difference is proposed. Nothing gets to differ without a r
 
 ## Exit bar for wave 1
 
-Wave 1 is done when all of these hold:
+Replay diff clean under the signed normalization spec, every case above passing, the harness in version control and CI, and the register signed. Keep the harness after cutover as the regression suite.
 
-- the replay or parallel-run diff is clean, apart from the normalization spec and the register
-- every case in the input-space table passes
-- the harness is under version control and runs in CI
-- the register is signed by someone with the authority to sign it
-- the callee set has been named by the client, and every callee has an oracle
+## Rollback
 
-Not when the port compiles, and not when it passes tests written alongside it.
-
-## Keep the harness after cutover
-
-The harness becomes the regression suite. Budget to maintain it. `inference`
+Run the old MAINJOB from the old load library. The harness's parallel run keeps the old job live until the exit bar is met (inference).

@@ -1,69 +1,14 @@
 {
- "telemetry": "none",
- "unreachable": [
-  {
-   "id": "cpy:UNUSED1Y",
-   "reason": "No program includes it, and the name appears in no other file in the tree. It describes a user record with a clear-text password field. Safe to propose for deletion, but provisional: telemetry is none and the extractor reads only COPY and INCLUDE statements.",
-   "confidence": "high",
-   "evidence": [
-    {
-     "file": "app/cpy/UNUSED1Y.cpy",
-     "line": 1
-    },
-    {
-     "file": "app/cpy/UNUSED1Y.cpy",
-     "line": 5
-    }
-   ]
-  }
- ],
- "dormant": [],
- "unknown": [
-  {
-   "id": "CBTRN01C",
-   "reason": "Kept in unknown, as the validator requires. Nothing in the tree names it: no JCL step, no CSD entry, no scheduler and no menu table. The 28 computed calls in reachable code are all CICS transfers. The two menu tables bound the table-driven ones to 17 named online programs and the rest move literal screen names, so none can reach a batch program. Its six DDs are mapped by no JCL step. That points to dead code, but only telemetry or the client can say it never runs. It reads the daily transaction file and the masters, so it may be an older validation pass before CBTRN02C. Do not delete on this evidence.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/cbl/CBTRN01C.cbl",
-     "line": 23
-    },
-    {
-     "file": "app/cbl/COMEN01C.cbl",
-     "line": 185
-    },
-    {
-     "file": "app/cpy/COMEN02Y.cpy",
-     "line": 28
-    },
-    {
-     "file": "app/cpy/COADM02Y.cpy",
-     "line": 29
-    }
-   ]
-  },
-  {
-   "id": "proc:TRANREPT",
-   "reason": "Named only in JCL text held inside a COBOL literal. CORPT00C (menu option 9, Transaction Reports) writes that text to the JOBS transient data queue, which the CSD maps to the internal reader, so the proc runs whenever a user confirms the report. It is almost certainly live. No graph edge exists, so it is unknown, never unreachable. It also calls the proc REPROC in a nested step, which the extractor does not follow.",
-   "confidence": "high",
-   "evidence": [
-    {
-     "file": "app/cbl/CORPT00C.cbl",
-     "line": 94
-    },
-    {
-     "file": "app/cbl/CORPT00C.cbl",
-     "line": 517
-    },
-    {
-     "file": "app/csd/CARDDEMO.CSD",
-     "line": 499
-    },
-    {
-     "file": "app/proc/TRANREPT.prc",
-     "line": 21
-    }
-   ]
-  }
- ]
+  "telemetry": "none",
+  "unreachable": [
+    {"id": "cpy:UNUSED1Y", "reason": "No program includes it and no reachable computed call can name a copybook. Last changed 2022-09-01. Provisional: no telemetry, and a copybook can be pulled in by a build step outside the tree.", "confidence": "medium",
+     "evidence": [{"file": "app/cpy/UNUSED1Y.cpy", "line": 1}]}
+  ],
+  "dormant": [],
+  "unknown": [
+    {"id": "CBTRN01C", "reason": "No JCL step runs it, and 28 reachable computed calls could target it. Its DDs (DALYTRAN, TRANFILE, XREFFILE, CARDFILE, ACCTFILE, CUSTFILE) are not mapped by any JCL in the tree. It reads the same daily transaction file as CBTRN02C, so it may be a pre-posting verification run by hand. Do not delete.", "confidence": "low",
+     "evidence": [{"file": "app/cbl/CBTRN01C.cbl", "line": 1}, {"file": "app/cbl/COACTUPC.cbl", "line": 956}]},
+    {"id": "proc:TRANREPT", "reason": "The online report screen CORPT00C builds JCL text that runs this proc and submits it at run time. No static edge exists, so it is unknown, not unreachable. It is part of the transaction report must-not-break item.", "confidence": "low",
+     "evidence": [{"file": "app/proc/TRANREPT.prc", "line": 1}, {"file": "app/cbl/CORPT00C.cbl", "line": 94}]}
+  ]
 }

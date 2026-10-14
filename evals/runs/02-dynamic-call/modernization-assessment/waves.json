@@ -2,8 +2,8 @@
  "target_state": "refactor",
  "waves": [],
  "unassigned": [
-  {"id": "PROGA", "reason": "No entry points in the tree: no JCL job, CSD transaction or scheduler names it. It makes a computed call, so it cannot be sequenced until the client supplies JCL, a CSD or a scheduler export."},
-  {"id": "PROGB", "reason": "No entry points in the tree and no static caller. PROGA's computed call could reach it, so it cannot be sequenced until the client supplies JCL, a CSD or a scheduler export."}
+  {"id": "PROGA", "reason": "no entry points in the tree"},
+  {"id": "PROGB", "reason": "no entry points in the tree"}
  ],
  "deviations": []
 }

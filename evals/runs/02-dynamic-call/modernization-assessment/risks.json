@@ -3,22 +3,18 @@
   {
    "id": "PROGA",
    "port_difficulty": {
-    "score": 2,
-    "why": "Four executable lines that ACCEPT a program name and CALL it, so the code is trivial but the target needs a dispatch table, and what belongs in that table is unknown."
+    "score": 3,
+    "why": "Four statements, no arithmetic, but CALL WS-PGM-NAME (app/cbl/PROGA.cbl:9) takes its target from ACCEPT (line 8), so the real behavior is whatever the runtime input names, which no code or JCL in the tree shows. The target set is unknown (inference)."
    },
    "blast_radius": {
-    "score": 3,
-    "why": "It starts whatever program name it is given at run time, so a wrong port could run the wrong program or none, quietly, and the reachable set cannot be bounded from the source."
+    "score": 2,
+    "why": "Fan-in is 0, it touches no dataset, and no JCL, scheduler or entry point exists, so no must-not-break item (the nightly batch cycle) maps to it. Scored low on what is visible; the called program is unresolved (PROGA.cbl:9) and could raise this (inference)."
    },
-   "quadrant": "low-high",
+   "quadrant": "high-low",
    "wave": null,
-   "driving_fact": "The CALL target WS-PGM-NAME has no VALUE clause and is set only by ACCEPT, so the set of programs it can start is unbounded.",
+   "driving_fact": "PROGA calls a program named at runtime via ACCEPT into WS-PGM-NAME (PROGA.cbl:8-9), an unresolved computed call, so its real dependencies cannot be known statically.",
    "confidence": "low",
    "evidence": [
-    {
-     "file": "app/cbl/PROGA.cbl",
-     "line": 8
-    },
     {
      "file": "app/cbl/PROGA.cbl",
      "line": 9
@@ -29,15 +25,15 @@
    "id": "PROGB",
    "port_difficulty": {
     "score": 1,
-    "why": "The program body is a single GOBACK with no logic, data or files."
+    "why": "The whole body is GOBACK (app/cbl/PROGB.cbl:4): no logic, data or arithmetic."
    },
    "blast_radius": {
     "score": 1,
-    "why": "It does nothing, so a wrong port changes no data and no output, but a caller that expects a side effect from it would not show up in this tree."
+    "why": "Fan-in is 0 in graph.json, it has no data edges, and nothing in the tree links it to the nightly batch cycle. PROGA could call it by name at runtime, but nothing in the tree shows that (inference)."
    },
    "quadrant": "low-low",
    "wave": null,
-   "driving_fact": "PROGB has no static caller and no entry point, and PROGA's computed CALL could name it, so it is unknown, not dead.",
+   "driving_fact": "PROGB is a stub that only executes GOBACK (PROGB.cbl:4) and has no resolved callers.",
    "confidence": "medium",
    "evidence": [
     {

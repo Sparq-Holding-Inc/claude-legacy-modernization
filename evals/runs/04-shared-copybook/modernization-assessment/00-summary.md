@@ -4,62 +4,41 @@
 
 | Question | Answer | Source |
 |---|---|---|
-| Scope | `.` (the work folder) | argument |
 | Target state | refactor | `--target refactor` |
-| What must not break | "the nightly batch cycle" | `--must-not-break` |
-| Runtime telemetry | none | `--telemetry none` |
+| Must not break | "the nightly batch cycle" | `--must-not-break` |
+| Telemetry | none | `--telemetry none` |
+| Delivery | not given. Estimate shows conventional and AI-assisted | no `--delivery` flag |
 
-All three answers came as flags, so no defaults applied.
+No defaults applied. All three scoping answers came as flags.
 
-## What is in the tree
+## Headline
 
-Two batch COBOL programs and one copybook, 19 lines in all. Both programs COPY the same layout copybook (`app/cbl/PROGA.cbl:5`, `app/cbl/PROGB.cbl:5`). There is no JCL, no CSD, no scheduler export, no dataset and no call between the programs. The extractor found 2 edges, both `include` (`modernization-assessment/graph.json` field `analysis.edge_counts`).
+- **Waves: 0.** The tree has two programs and one copybook, and no entry point (`modernization-assessment/graph.json:154`). Nothing can be sequenced until the client supplies JCL, a CSD or a scheduler export. `modernization-assessment/waves.json:3` is empty and both programs are `unassigned`.
+- **Dead code: all unknown.** No telemetry and no entry points. Nothing is proven unreachable and dormancy was not measured (`modernization-assessment/graph.json:153`).
+- **Estimate: not producible per wave.** See `04-estimate.md`.
 
-## Wave count
+## Largest risk
 
-**Zero.** The tree has no entry point (`analysis.entry_points` is empty, warning at `modernization-assessment/graph.json:152`). Nothing can be sequenced until the client supplies JCL, a CSD or a scheduler export. `modernization-assessment/waves.json` holds `"waves": []` and both programs in `unassigned`. No wave was invented.
-
-## Single largest risk
-
-The item that must not break, "the nightly batch cycle", maps to no unit in this tree. There is no job or scheduler that names it, so no unit can be tied to it. The assessment cannot say whether PROGA or PROGB belongs to the cycle, and it cannot anchor an equivalence test to the cycle. The mapping was not invented.
-
-The one concrete coupling that will bite a port is the shared layout `app/cpy/SHARED01.cpy:3`, a packed decimal `SH-BALANCE`. Both programs include it and neither uses that field (`app/cbl/PROGA.cbl:7`, `app/cbl/PROGB.cbl:7`). A port that changes the layout, or types the field as a float, changes both programs together.
-
-## Findings
-
-| Finding | Confidence | Evidence |
-|---|---|---|
-| The tree has no entry point, so no wave, no reachability and no unreachable code can be established | high | analysis (fields `entry_points`, `wave_seed`, `dead_code_candidates`) |
-| PROGA and PROGB are coupled only through the layout copybook SHARED01 | high | `app/cbl/PROGA.cbl:5`, `app/cbl/PROGB.cbl:5` |
-| SHARED01 holds a packed decimal balance field that neither program reads or writes | high | `app/cpy/SHARED01.cpy:3` |
-| Each program moves a literal into `SH-CUST-ID` in its own working storage, and neither produces output | medium (inference from 8-line programs) | `app/cbl/PROGA.cbl:7`, `app/cbl/PROGB.cbl:7` |
-| Every dead-code claim is provisional: no telemetry and no last-modified dates | high | analysis (field `warnings`) |
-| The must-not-break item maps to no unit in the tree | high | inference |
+The must-not-break item, "the nightly batch cycle", maps to no unit in this tree. There is no JCL job, scheduler job or wrapper (`modernization-assessment/graph.json:30`). The refactor is being scoped without the thing it must not break. Second, the shared copybook holds a packed-decimal balance (`app/cpy/SHARED01.cpy:3`) used by both programs (`app/cbl/PROGA.cbl:5`, `app/cbl/PROGB.cbl:5`). A float port would be a silent defect. Confidence: high on the first, medium on the second since neither program uses the field today (`app/cbl/PROGA.cbl:7`).
 
 ## Open Questions for the client's engineers
 
-1. Which JCL jobs and which scheduler run PROGA and PROGB? Please supply the JCL library, the CSD if any program is online, and the scheduler export (Control-M XML or the shell wrappers). Without one of these there is no entry point and no wave.
-2. What is "the nightly batch cycle"? List its jobs and the programs they run, in order, so each can be mapped to a unit. Today no unit in the tree maps to it.
-3. Is this tree the whole system or an excerpt? Two 8-line programs with no file access look like stubs or a slice. If it is an excerpt, which other programs also COPY SHARED01?
-4. Does any program outside this tree read or write a record laid out by SHARED01 (`app/cpy/SHARED01.cpy:1-3`)? If a dataset holds that record, the writer to reader layout is an undocumented API and it is not visible here.
-5. What do the literals mean, `1` in PROGA and `2` in PROGB (`app/cbl/PROGA.cbl:7`, `app/cbl/PROGB.cbl:7`)? They look like hard coded customer ids. Are they test fixtures, or business rules?
-6. Can you supply 12 months of job logs or SMF records for the two programs? With no telemetry, both programs and the copybook stay in the unknown dead-code bucket.
-7. Can you supply source control history or last-modified dates? The target is not a git repository, so dormancy was not measured.
-8. Is a parallel run of the nightly cycle possible, or are archived generations of its outputs available? That decides the oracle (see `modernization-assessment/06-test-strategy.md`).
+1. Where is the JCL, or the scheduler export (Control-M or other), for the nightly batch cycle? Which jobs run PROGA and PROGB, and in what order? Evidence: no JCL or scheduler file exists, `modernization-assessment/graph.json:30`.
+2. Is this tree the whole system, or a fragment? Which other programs COPY `SHARED01`? Evidence: `app/cpy/SHARED01.cpy:1`.
+3. What datasets, VSAM files or DB2 tables does the cycle read and write? None appear in the tree (`modernization-assessment/graph.json:129`). Which fields carry `SH-BALANCE` between jobs?
+4. Do PROGA and PROGB still run? Can you supply 12 months of job logs or SMF records? Telemetry is `none`, so every dead-code claim is provisional (`modernization-assessment/dead-code.json:2`).
+5. Which cycle steps run only at month-end or fiscal close? None are visible.
+6. Can the old and new systems run in parallel on the same input? If not, which archived generations (GDG), reports and partner extracts exist as golden masters? See `06-test-strategy.md`.
+7. Source dates are missing because the tree is not a git repository. Can you supply last-modified dates or the repository history (`modernization-assessment/graph.json:153`)?
+8. Are there files the extractor does not read: free-format COBOL, PL/I, assembler, stored procedures, other schedulers, shell wrappers that do not name JCL? Nothing was listed as not parsed, but the extractor only reads COBOL, copybooks, JCL, PROCs, CICS CSD, Control-M XML and some shell wrappers (`modernization-assessment/graph.json:10`).
+9. Does either program read the record through a private layout, or does `COPY REPLACING` appear anywhere? The extractor does not apply COPY REPLACING (`modernization-assessment/graph.json:11`).
 
 ## Extractor limits that touch this system
 
-Nothing was listed as not parsed (`modernization-assessment/graph.json` field `unparsed` is empty). These entries of `meta.limits` apply here:
+- No dates, so no dormancy (`modernization-assessment/graph.json:153`).
+- DCB, LRECL and RECFM are not read (`modernization-assessment/graph.json:20`). Record lengths cannot be checked against `SHARED01`.
+- Contract edges are high only when both sides COPY the same layout (`modernization-assessment/graph.json:21`).
 
-| Limit | Effect here | Evidence |
-|---|---|---|
-| COBOL is read as fixed format | Both programs read as fixed format. Free format would have been listed as not parsed, and none was | analysis (field `meta.limits`) |
-| COPY REPLACING is not applied | Both COPY statements name the member only, so nothing was missed here | `app/cbl/PROGA.cbl:5` |
-| DCB, LRECL and RECFM are not read | There is no JCL, so no record length could be compared with the layout | analysis (field `meta.limits`) |
-| Only Control-M XML and shell wrappers that name JCL files are read as schedulers | No scheduler was found, and a scheduler in another format would not have been read | analysis (field `meta.limits`) |
-| A called subprogram gets no DDs from its caller's JCL step | Not exercised, because no program calls another | analysis (field `meta.limits`) |
-| A contract edge is high only when both sides COPY the same layout | No contract edge exists, because no dataset exists | analysis (field `edge_counts`) |
+## Files
 
-## Files in this assessment
-
-`01-inventory.md`, `02a-edge-tables.md`, `02-coupling.md`, `03a-wave-seed.md`, `03-waves.md`, `04-estimate.md`, `05a-dead-code-candidates.md`, `05-dead-code.md`, `06-test-strategy.md`, plus `graph.json`, `waves.json`, `dead-code.json`, `risks.json`.
+`01-inventory.md`, `02-coupling.md`, `03-waves.md`, `04-estimate.md`, `05-dead-code.md`, `06-test-strategy.md`, `graph.json`, `waves.json`, `risks.json`, `dead-code.json`.

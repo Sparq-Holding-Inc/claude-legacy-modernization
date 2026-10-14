@@ -1,24 +1,11 @@
 {
- "telemetry": "none",
- "unreachable": [],
- "dormant": [],
- "unknown": [
-  {
-   "id": "PROGA",
-   "reason": "The tree has no JCL job, CSD transaction, scheduler job or wrapper, so no entry point exists and nothing can be shown unreachable. PROGA ends in STOP RUN, so it looks like a batch main program, and a job outside the tree may run it. No telemetry, so this is provisional.",
-   "confidence": "low",
-   "evidence": [
-    {"file": "app/cbl/PROGA.cbl", "line": 7}
-   ]
-  },
-  {
-   "id": "PROGB",
-   "reason": "No entry point exists in the tree. PROGB is called statically by PROGA, so if PROGA runs, PROGB runs. Its own status follows PROGA's. No telemetry, so this is provisional.",
-   "confidence": "low",
-   "evidence": [
-    {"file": "app/cbl/PROGA.cbl", "line": 6},
-    {"file": "app/cbl/PROGB.cbl", "line": 4}
-   ]
-  }
- ]
+  "telemetry": "none",
+  "unreachable": [],
+  "dormant": [],
+  "unknown": [
+    {"id": "PROGA", "reason": "No entry point exists in the tree, so nothing can be proven unreachable. No JCL step is supplied that runs it.", "confidence": "low",
+     "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 2}]},
+    {"id": "PROGB", "reason": "Called statically by PROGA, but PROGA is itself unplaced, so reachability is unproven.", "confidence": "low",
+     "evidence": [{"file": "app/cbl/PROGA.cbl", "line": 6}]}
+  ]
 }

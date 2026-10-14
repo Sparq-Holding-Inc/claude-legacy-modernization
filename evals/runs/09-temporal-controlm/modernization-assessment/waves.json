@@ -1,26 +1,28 @@
 {
- "target_state": "refactor",
- "waves": [
-  {
-   "wave": 1,
-   "family": "batch-utility",
-   "name": "Nightly batch cycle: JOBA then JOBB",
-   "units": [
-    "job:JOBA",
-    "job:JOBB",
-    "sch:NIGHTLY/JOBA",
-    "sch:NIGHTLY/JOBB"
-   ],
-   "rationale": "The whole tree is one family: two JCL jobs that each run only IEFBR14, and the two scheduler entries that order them. One wave is sound because the only coupling between the units is the JOBA-DONE condition, which forces JOBA before JOBB, so splitting them would split a temporal pair. It can be deployed and rolled back as one unit, by keeping the legacy scheduler folder live behind a switch. Its boundary is testable: the order, the conditions set and cleared, and the return codes of the two jobs. A business stakeholder can name it: it is the nightly batch cycle the client said must not break. The name match to the NIGHTLY folder is an inference, since the tree does not say the two jobs are the whole cycle.",
-   "unblocks": "Nothing else in this tree, because it is the only wave and no program, dataset or copybook depends on it. It is a chore by dependency, but it holds the must-not-break item, and it fixes the condition contract (EXTERNAL-FEED in, JOBA-DONE internal, JOBB-DONE out) that any later scheduler port must keep.",
-   "blast_radius": "medium",
-   "confidence": "medium",
-   "evidence": [
-    {"file": "app/jcl/JOBA.jcl", "line": 1},
-    {"file": "app/jcl/JOBB.jcl", "line": 1}
-   ]
-  }
- ],
- "unassigned": [],
- "deviations": []
+  "target_state": "refactor",
+  "waves": [
+    {
+      "wave": 1,
+      "family": "batch-utility",
+      "name": "Nightly Control-M cycle (JOBA then JOBB)",
+      "units": [
+        "job:JOBA",
+        "job:JOBB",
+        "sch:NIGHTLY/JOBA",
+        "sch:NIGHTLY/JOBB"
+      ],
+      "rationale": "Both jobs run only IEFBR14 and touch no dataset, so the family is batch-utility. They are chained by condition JOBA-DONE, so they move together as one wave. One wave is the right size: one sentence describes it, and splitting it would put the JOBA-DONE condition across a cutover boundary. The wave carries the whole must-not-break item, the nightly batch cycle, so its boundary is the scheduler ordering and not any data. Confidence is limited because the jobs do no visible work.",
+      "unblocks": "Nothing inside this tree. No program, copybook or dataset depends on it. It would prove the scheduler cutover path (condition handling, the external feed trigger) for any real work that is added later.",
+      "blast_radius": "low",
+      "confidence": "low",
+      "evidence": [
+        {"file": "app/jcl/JOBA.jcl", "line": 2},
+        {"file": "app/jcl/JOBB.jcl", "line": 2},
+        {"file": "app/scheduler/nightly.xml", "line": 6},
+        {"file": "app/scheduler/nightly.xml", "line": 9}
+      ]
+    }
+  ],
+  "unassigned": [],
+  "deviations": []
 }

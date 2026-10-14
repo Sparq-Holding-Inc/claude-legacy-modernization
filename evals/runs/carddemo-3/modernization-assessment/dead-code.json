@@ -1,49 +1,14 @@
 {
  "telemetry": "none",
  "unreachable": [
-  {
-   "id": "cpy:UNUSED1Y",
-   "reason": "No program includes it and no path from an entry point reaches it. Provisional, because no telemetry was supplied and other repositories were not searched.",
-   "confidence": "medium",
-   "evidence": [
-    {
-     "file": "app/cpy/UNUSED1Y.cpy",
-     "line": 1
-    }
-   ]
-  }
+  {"id": "cpy:UNUSED1Y", "reason": "No program includes it and no reachable computed call can name a copybook. Provisional: no telemetry, and copybooks are compile-time only.", "confidence": "medium",
+   "evidence": [{"file": "app/cpy/UNUSED1Y.cpy", "line": 1}]}
  ],
  "dormant": [],
  "unknown": [
-  {
-   "id": "CBTRN01C",
-   "reason": "No JCL step in the tree runs it and no static caller exists. Computed calls in reachable code could target it. It shares CBTRN02C's header comment, so it may be a retired copy, but that is not proven.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/cbl/CBTRN01C.cbl",
-     "line": 1
-    },
-    {
-     "file": "app/cbl/COACTUPC.cbl",
-     "line": 956
-    }
-   ]
-  },
-  {
-   "id": "proc:TRANREPT",
-   "reason": "Named only in JCL text inside CORPT00C, which a running program writes to the JOBS transaction data queue. It is live whenever the report screen is used.",
-   "confidence": "low",
-   "evidence": [
-    {
-     "file": "app/cbl/CORPT00C.cbl",
-     "line": 94
-    },
-    {
-     "file": "app/cbl/CORPT00C.cbl",
-     "line": 517
-    }
-   ]
-  }
+  {"id": "CBTRN01C", "reason": "No JCL step, script or scheduler names it. The cartographer read all 28 computed calls and none can reach it, so it is probably unreferenced in this tree. It stays unknown because an operator or an external scheduler could run it, and the CA-7 listing could not be parsed.", "confidence": "low",
+   "evidence": [{"file": "app/cbl/CBTRN01C.cbl", "line": 1}]},
+  {"id": "proc:TRANREPT", "reason": "Named only in JCL text inside CORPT00C, which submits it at run time. It is on the transaction report path and must not be deleted.", "confidence": "high",
+   "evidence": [{"file": "app/proc/TRANREPT.prc", "line": 1}, {"file": "app/cbl/CORPT00C.cbl", "line": 94}]}
  ]
 }

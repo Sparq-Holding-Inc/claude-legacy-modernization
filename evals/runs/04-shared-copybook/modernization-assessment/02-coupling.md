@@ -1,53 +1,44 @@
 # 02 Coupling
 
-The full edge list is in `modernization-assessment/02a-edge-tables.md`. This file holds the argument.
+The tree holds two programs and one copybook. The extractor found two edges, both `include` (`analysis`: `edge_counts`).
 
-There are two edges in the tree and both are `include`. There is no call, data, contract or temporal edge. The dependency-cartographer step was not needed: `analysis.unresolved_dynamic` is empty and every edge is `high` confidence and resolved, so no edge was left open.
+## The pattern that matters: one layout, two programs
 
-## Coupling patterns that constrain the sequence
+| Pattern | What it is | Evidence | Confidence |
+|---|---|---|---|
+| Shared copybook | PROGA copies `SHARED01` | `app/cbl/PROGA.cbl:5` | high |
+| Shared copybook | PROGB copies `SHARED01` | `app/cbl/PROGB.cbl:5` | high |
+| Layout content | `SH-CUST-ID PIC 9(9)` and `SH-BALANCE PIC S9(9)V99 COMP-3` | `app/cpy/SHARED01.cpy:2`, `app/cpy/SHARED01.cpy:3` | high |
 
-| # | Pattern | Effect on the migration sequence | Confidence | Evidence |
-|---|---|---|---|---|
-| 1 | Layout coupling. PROGA and PROGB both COPY SHARED01 | The copybook belongs to two owners, so PROGA and PROGB should move in the same wave. If they split, the layout has to be versioned or copied, and the two copies can drift | high (the edges), medium (the sequencing advice) | `app/cbl/PROGA.cbl:5`, `app/cbl/PROGB.cbl:5` |
-| 2 | The shared layout carries packed decimal money. `SH-BALANCE` is `PIC S9(9)V99 COMP-3` | A target type for that field is a decision that hits both programs. It must be a decimal type with zero tolerance. Today neither program reads it | high | `app/cpy/SHARED01.cpy:3` |
-| 3 | No runtime data flows between the programs. Each MOVE writes to its own working storage, and neither program opens a file | The two programs are independent at run time. The only thing they share is the source of a layout. Whether the same layout appears on a file elsewhere is not visible | medium (inference) | `app/cbl/PROGA.cbl:7`, `app/cbl/PROGB.cbl:7` |
+Consequences for sequence:
 
-## What the coupling does to the sequence
+- `SHARED01` has two users, so it cannot be ported or changed in isolation. Whichever program moves first fixes the target layout for the other. Both move in the same wave, or the copybook stays a shared contract until both are done. This is inference from the two includes; no dataset or call edge ties the programs together.
+- `SH-BALANCE` is packed decimal (`app/cpy/SHARED01.cpy:3`). It is money. Target type must be decimal with zero tolerance. A float port is a defect. See `06-test-strategy.md`.
+- Each program only moves a literal into `SH-CUST-ID` (`app/cbl/PROGA.cbl:7`, `app/cbl/PROGB.cbl:7`). Neither reads or writes a file. There is no data coupling and no contract edge in `graph.json`. Whether the real system passes this record between jobs is not visible here. Inference.
 
-1. **Call coupling.** None. No program calls another (`analysis.fan_in` and `analysis.fan_out` are empty).
-2. **Data coupling.** None found. There is no dataset node, so `analysis.data_hubs` is empty. This is a gap, not a finding. The tree holds no JCL, so no DD could map a dataset to a program. Inference: a real batch program in a nightly cycle reads or writes files, so the tree is probably an excerpt.
-3. **Contract coupling.** None found, for the same reason. Two programs that share a layout copybook are the setup for a `high` contract edge, but no dataset connects a writer to a reader (`modernization-assessment/02a-edge-tables.md`, section "Contract edges", is empty).
-4. **Temporal coupling.** None found. No JCL step order, no Control-M condition and no wrapper exists in the tree. The order of the nightly cycle is unknown, and a plan built without it is not a plan.
+## Not found
 
-## Clusters
+| Coupling kind | Result | Evidence |
+|---|---|---|
+| Call | None. No `CALL`, `LINK` or `XCTL` | `analysis`: `edge_counts` has only `include` |
+| Data / contract | None. No dataset, VSAM or DB2 edge, so no `data_hubs` | `analysis`: `data_hubs` is empty |
+| Temporal | None. No JCL, scheduler or wrapper in the tree | `modernization-assessment/graph.json:30`, `modernization-assessment/graph.json:27`, `modernization-assessment/graph.json:32` (files_seen: jcl, controlm, shell all 0) |
+| Computed calls | None | `analysis`: `unresolved_dynamic` is empty |
+
+## Structure
+
+- Strongly connected components: none (`analysis`: `sccs` empty).
+- God modules: none. Articulation points: none, so there is no natural wave boundary here.
+- Fan-in and fan-out are empty because no entry points exist (`analysis`: `structure_basis` is "all programs (no entry points were found)").
+
+## Cluster view
 
 ```mermaid
 graph LR
-  subgraph layout["Layout cluster (SHARED01)"]
-    PROGA
-    PROGB
-    SHARED01["cpy:SHARED01"]
-  end
-  PROGA -->|include| SHARED01
-  PROGB -->|include| SHARED01
+  PROGA --> SHARED01[SHARED01 copybook]
+  PROGB --> SHARED01
 ```
-
-The tree holds one cluster. The graph is at program level only because it has two programs.
-
-## Structure computed from the graph
-
-| Fact | Units | Evidence |
-|---|---|---|
-| Strongly connected components | none, so no move-together constraint from a call cycle | analysis (field `sccs`) |
-| God modules | none | analysis (field `god_modules`) |
-| Articulation points (candidate wave boundaries) | none | analysis (field `articulation_points`) |
-| Data hubs | none | analysis (field `data_hubs`) |
-| Self recursive programs | none | analysis (field `self_recursive`) |
-
-Because there is no call cycle and no articulation point, no wave boundary can be drawn from the structure. The only constraint is the pattern 1 advice above, which is an inference.
 
 ## The honest boundary
 
-- Computed calls: none (`analysis.unresolved_dynamic` is empty). That is an accurate statement about this tree. It says nothing about programs outside it.
-- Not parsed: nothing was skipped.
-- Not in the tree: JCL, CSD, scheduler, datasets, and every other program of the nightly batch cycle. Every statement about the whole system is therefore inference or an open question. See `modernization-assessment/00-summary.md`.
+This tree is a fragment. The must-not-break item, "the nightly batch cycle", maps to no unit in it: there is no JCL job, scheduler job or wrapper. Everything about order, datasets and the cycle lives in files the client has not supplied. Coupling in the real system is unknown, not low.

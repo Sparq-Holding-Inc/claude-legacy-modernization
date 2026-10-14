@@ -1,42 +1,29 @@
 {
-  "target_state": "refactor",
-  "waves": [
-    {
-      "wave": 1,
-      "family": "online-readonly",
-      "name": "Account read transaction TRNR",
-      "units": [
-        "PROGR"
-      ],
-      "rationale": "PROGR reads the ACCTDAT file and writes nothing, so it is the only unit that can move without changing any data. Moving it first proves the toolchain and builds the decoder for the ACCTREC record (a display key and a packed decimal balance) that wave 2 also needs. It also gives wave 2 a reader to check the records PROGW writes. The wave boundary is the shared file, the articulation point, so the new reader must read the legacy file while PROGW still writes it. The wave can be rolled back by pointing TRNR back at the old program in the CSD. Sound as a wave, but thin: the source shows no business logic in it, so what a stakeholder can name is inference.",
-      "unblocks": "The ACCTREC decoder and the read-side comparison harness that wave 2 uses to check what PROGW writes.",
-      "blast_radius": "low",
-      "confidence": "medium",
-      "evidence": [
-        {
-          "file": "app/csd/DEMO.CSD",
-          "line": 6
-        }
-      ]
-    },
-    {
-      "wave": 2,
-      "family": "online-writers",
-      "name": "Account write transaction TRNW",
-      "units": [
-        "PROGW"
-      ],
-      "rationale": "PROGW writes the ACCTDAT file that PROGR reads, so it goes after the reader and its boundary. It is the only writer in the tree and writes irreversibly to a system of record, so it needs the harness from wave 1 and a shadow or parallel run first. The nightly batch cycle that must not break is not in the tree, so we cannot say what else writes or reads this file. That caps confidence at low. The wave delivers the account update path, which is inference from the transaction name only.",
-      "unblocks": "Retiring the legacy owner of the ACCTDAT file, so the data can move. Nothing else in the tree waits on it.",
-      "blast_radius": "high",
-      "confidence": "low",
-      "evidence": [
-        {
-          "file": "app/cbl/PROGW.cbl",
-          "line": 7
-        }
-      ]
-    }
-  ],
-  "unassigned": []
+ "target_state": "refactor",
+ "waves": [
+  {
+   "wave": 1,
+   "family": "online-readonly",
+   "name": "Account inquiry (TRNR)",
+   "units": ["PROGR"],
+   "rationale": "PROGR only reads ACCTDAT and returns (app/cbl/PROGR.cbl:7). It is the cheapest unit to prove the toolchain and the comparison harness on. The VSAM file stays where it is, so the ported reader reads records the legacy writer still produces. That is a sound wave only if the ported reader decodes the COMP-3 balance identically (app/cpy/ACCTREC.cpy:3).",
+   "unblocks": "The decoded ACCTREC layout and the record-level harness that wave 2 reuses.",
+   "blast_radius": "low",
+   "confidence": "medium",
+   "evidence": [{"file": "app/csd/DEMO.CSD", "line": 6}, {"file": "app/cbl/PROGR.cbl", "line": 7}]
+  },
+  {
+   "wave": 2,
+   "family": "online-writers",
+   "name": "Account write (TRNW)",
+   "units": ["PROGW"],
+   "rationale": "PROGW is the only writer of ACCTDAT (app/cbl/PROGW.cbl:7), and PROGR reads what it writes through the same copybook (modernization-assessment/graph.json contract edge PROGW to PROGR). Once it moves, the dataset has a single owner and the VSAM file can be retired behind it. The cutover has to flip the file owner and the writer together.",
+   "unblocks": "Retiring the shared KSDS, the only shared state in the tree.",
+   "blast_radius": "medium",
+   "confidence": "medium",
+   "evidence": [{"file": "app/cbl/PROGW.cbl", "line": 7}, {"file": "app/csd/DEMO.CSD", "line": 4}]
+  }
+ ],
+ "unassigned": [],
+ "deviations": []
 }
