@@ -10,7 +10,6 @@
   },
   "homepage": "https://teamsparq.com",
   "repository": "https://github.com/Sparq-Holding-Inc/claude-legacy-modernization",
-  "icon": ".claude-plugin/icon.png",
   "documentationUrl": "https://github.com/Sparq-Holding-Inc/claude-legacy-modernization#readme",
   "supportUrl": "https://github.com/Sparq-Holding-Inc/claude-legacy-modernization/issues",
   "privacyPolicyUrl": "https://github.com/Sparq-Holding-Inc/claude-legacy-modernization#privacy",

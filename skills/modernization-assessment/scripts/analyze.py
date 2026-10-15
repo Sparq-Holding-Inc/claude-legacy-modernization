@@ -550,7 +550,7 @@ def analyze(nodes, edges, as_of, dormant_years=5, notices=None, embedded=None, p
     jobs = [n for n in nodes if n["unit_type"] == "jcl_job" and n.get("path")]
     if jobs and not sched:
         warnings.append("%d JCL job(s) are in the tree but no scheduler artifact was parsed. The order jobs run "
-                        "in across jobs is unknown. Ask for the scheduler export." % len(jobs))
+                        "in across jobs is unknown. Ask for the scheduler's job definitions." % len(jobs))
     if jobs and sched:
         called = {e["dst"] for e in edges if e["kind"] == "call" and e["src"].startswith("sch:")}
         unscheduled = sorted(n["id"] for n in nodes if n["unit_type"] == "jcl_job" and n["id"] not in called
