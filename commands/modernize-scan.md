@@ -2,7 +2,10 @@
 description: Assess a COBOL, CICS, JCL and VSAM codebase for modernization. Scripts extract the coupling graph. Claude cuts the waves and scores the risk.
 argument-hint: '[path] [--target rehost|replatform|refactor|rewrite] [--must-not-break "text"] [--telemetry none|partial|provided] [--delivery conventional|ai-assisted|agent-led] [--wave N]'
 allowed-tools:
-  - 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/*)'
+  - 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/extract.py" *)'
+  - 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py" *)'
+  - 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/marker.py" *)'
+  - 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/schema.py" *)'
   - 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/hooks/check_citations.py" *)'
 ---
 

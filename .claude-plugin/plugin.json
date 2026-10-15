@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "description": "Assess a COBOL, CICS, JCL and VSAM codebase for modernization. Scripts extract the coupling graph with file and line evidence. Claude cuts the migration waves, scores risk, and designs the behavioral-equivalence tests.",
   "author": {
-    "name": "Sparq",
+    "name": "Sparq Holdings, Inc.",
     "url": "https://teamsparq.com"
   },
   "homepage": "https://teamsparq.com",
