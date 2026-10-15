@@ -8,7 +8,7 @@ reading the source.
 
 | Partition | Only in one pass | Decision | Reason |
 |---|---|---|---|
-| O1 | pass B: `COACTUPC -> CSUTLDTC` call | include | `COACTUPC.cbl:4232` says `COPY CSUTLDPY`. `CSUTLDPY.cpy:293` holds `CALL 'CSUTLDTC'`. COPY puts that source inside COACTUPC at compile time, so the call belongs to COACTUPC. A scan of every copybook in scope found this is the only executable statement inside a copybook, and only COACTUPC copies that member. |
+| O1 | second labeler pass: `COACTUPC -> CSUTLDTC` call | include | `COACTUPC.cbl:4232` says `COPY CSUTLDPY`. `CSUTLDPY.cpy:293` holds `CALL 'CSUTLDTC'`. COPY puts that source inside COACTUPC at compile time, so the call belongs to COACTUPC. A scan of every copybook in scope found this is the only executable statement inside a copybook, and only COACTUPC copies that member. |
 
 ## Rule this adds
 
