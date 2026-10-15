@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Extractor evals. Python standard library only.
 
     python3 evals/run_extractor_evals.py [--fixtures-only] [--carddemo PATH]

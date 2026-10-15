@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Single source of truth for every JSON shape the plugin reads or writes.
 
 The extractors, the citation hook and the evals all import this file.

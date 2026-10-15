@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Graph facts computed from nodes and edges. Python standard library only.
 
 Everything here is arithmetic on the graph. Nothing is a judgment call.

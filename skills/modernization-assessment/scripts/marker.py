@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Run marker for the citation hook. Python standard library only.
 
     marker.py start --scope PATH [--mode full|wave]   run begins

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Can the validators reject a wrong assessment? Each case plants one defect and expects an error.
 
     python3 evals/test_validators.py

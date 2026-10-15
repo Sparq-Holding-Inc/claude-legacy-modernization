@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Is a wave plan a good cut, apart from whether runs agree on it? Python standard library only.
 
     python3 evals/wave_quality.py RUN_DIR            # RUN_DIR holds graph.json and waves.json (and risks.json)

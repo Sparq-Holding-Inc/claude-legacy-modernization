@@ -62,7 +62,9 @@ Changed
   or when the source trees the runs assessed are missing.
 - The fixture runner passes git only the variables it needs, not the caller's whole environment.
 - `plugin.json` carries the directory listing fields: documentation, support and privacy links. The
-  directory finds the icon at `.claude-plugin/icon.png` without a field.
+  directory finds the icon without a field.
+- The Python scripts drop their `#!/usr/bin/env python3` line. None is executable, and every caller
+  runs them with `python3`.
 - The eval provenance now describes the headless runs of 2026-10-14, including the two CardDemo runs
   where the citation hook skipped its check.
 

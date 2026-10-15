@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Graph builder shared by the extractors. Python standard library only."""
 
 import os

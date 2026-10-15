@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Merge the independent CardDemo labeler files into evals/carddemo/truth.json.
 
 This file never imports or runs an extractor. It only reads the labeler

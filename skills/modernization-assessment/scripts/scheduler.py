@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Scheduler reader. Python standard library only.
 
 Parses

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """JCL reader. Python standard library only.
 
 Reads jobs, steps, DD statements, in-stream and cataloged PROCs.

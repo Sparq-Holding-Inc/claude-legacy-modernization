@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """COBOL fixed-format reader and fact extractor. Python standard library only.
 
 What it reads

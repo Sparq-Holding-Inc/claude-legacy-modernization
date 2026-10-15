@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Can the wave quality checks fail? Plant bad plans and expect the matching metric to notice.
 
     python3 evals/test_wave_quality.py

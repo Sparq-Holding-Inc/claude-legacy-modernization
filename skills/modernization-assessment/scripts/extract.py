@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Entry point. Builds graph.json from a legacy tree. Python standard library only.
 
     python3 extract.py TARGET [--out DIR] [--as-of YYYY-MM-DD] [--dormant-years N] [--no-git]

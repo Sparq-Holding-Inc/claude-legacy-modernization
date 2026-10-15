@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Build evals/RESULTS.md from the scorecards. Python standard library only.
 
     python3 evals/render_results.py

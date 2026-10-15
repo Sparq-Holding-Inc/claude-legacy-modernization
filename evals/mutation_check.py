@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Is the eval able to fail? Break the extractor on purpose and see who notices.
 
     python3 evals/mutation_check.py

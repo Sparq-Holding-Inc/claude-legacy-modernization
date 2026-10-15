@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """End to end evals. Python standard library only.
 
     python3 evals/run_e2e_evals.py --cases all            run headless, then score

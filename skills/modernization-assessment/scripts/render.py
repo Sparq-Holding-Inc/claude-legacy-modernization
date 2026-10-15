@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Render graph.json as markdown fact tables. Python standard library only.
 
     render.py inventory GRAPH.json --out modernization-assessment/01-inventory.md

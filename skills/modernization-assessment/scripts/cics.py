@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """CICS system definition (CSD) reader. Python standard library only.
 
 Reads DEFINE TRANSACTION, DEFINE PROGRAM and DEFINE FILE entries.

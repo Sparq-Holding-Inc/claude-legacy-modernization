@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Tests for the citation hook. Python standard library only.
 
     python3 evals/test_hook.py

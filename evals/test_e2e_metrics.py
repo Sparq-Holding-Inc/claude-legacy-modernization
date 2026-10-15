@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Tests for the end to end scoring code. Python standard library only.
 
     python3 evals/test_e2e_metrics.py

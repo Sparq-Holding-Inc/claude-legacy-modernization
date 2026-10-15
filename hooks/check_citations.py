@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Stop hook. A finished assessment cannot leave with a citation that does not resolve.
 
 It does nothing unless modernization-assessment/.in-progress exists and its
