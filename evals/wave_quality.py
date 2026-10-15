@@ -223,7 +223,8 @@ def score_dir(run_dir):
     return score(graph, waves, _load(rp) if os.path.exists(rp) else None)
 
 
-# loop -> the commit that recorded that loop's CardDemo runs
+# loop -> the commit that recorded that loop's CardDemo runs. Read through git at that commit, when the runs
+# were still in this repo under evals/runs. The current runs are in the evidence repo.
 LOOP_COMMITS = [(0, "8777f8d"), (1, "37ec46f"), (2, "cdaa9fc"), (3, "9bdd91a")]
 
 

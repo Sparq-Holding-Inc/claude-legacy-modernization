@@ -19,7 +19,11 @@ Everything here exists to answer one question: how good is this plugin, and how 
 | `test_validators.py` | Plants wrong assessments (an entry point called unreachable, a plan with a made-up unit, a risk in wave 999) and checks that validation rejects them. |
 | `run_e2e_evals.py` | Runs full assessments headless and scores them. |
 | `scorecard/` | JSON written by the runners. `RESULTS.md` is built from it. |
-| `runs/` | The saved output of every end to end run. |
+
+The saved output of every end to end run is in its own repo,
+[claude-legacy-modernization-evidence](https://github.com/Sparq-Holding-Inc/claude-legacy-modernization-evidence),
+with the full `graph.json` behind `examples/carddemo/`. Clone it next to this repo. The scorer and
+`test_wave_quality.py` look for it at `../claude-legacy-modernization-evidence`.
 
 Python 3 and the standard library. Nothing to install.
 
@@ -31,8 +35,9 @@ python3 evals/mutation_check.py                  # can the fixtures fail?
 python3 evals/test_hook.py                       # citation hook
 python3 evals/test_e2e_metrics.py                # scorer
 python3 evals/test_validators.py                 # validators reject wrong assessments
+python3 evals/test_wave_quality.py               # planted bad plans score worse (needs the evidence repo)
 python3 evals/run_e2e_evals.py --cases all       # headless runs, then score (calls the model)
-python3 evals/run_e2e_evals.py --score-only      # score runs that already exist
+python3 evals/run_e2e_evals.py --score-only      # score the saved runs in the evidence repo
 python3 evals/render_results.py                  # rebuild RESULTS.md
 ```
 
@@ -41,9 +46,12 @@ Two ways to run the end to end evals:
 - **Headless.** `run_e2e_evals.py --cases all` calls `claude -p` with the plugin loaded. This is the real
   harness. It needs Claude Code signed in, and it captures dollar cost.
 - **By hand.** `run_e2e_evals.py --prepare` makes clean work folders. Run the command and the skill files
-  by hand in each (for example through subagents), then `--collect <label>` and `--score-only`. The saved runs
-  in `runs/` were made this way, because headless sign-in was not available. `scorecard/e2e-provenance.json`
-  says what that harness did not exercise.
+  by hand in each (for example through subagents), then `--collect <label>` and `--score-only`. The runs of
+  2026-09-30 were made this way, because headless sign-in had expired.
+
+The saved runs were made headless on 2026-10-14. `scorecard/e2e-provenance.json` says how, and what that
+harness did not exercise. `--score-only` stops without writing anything when it finds no saved runs, or when the source trees they
+assessed are missing from `../bench/runs` (`--prepare` rebuilds them).
 
 The CardDemo checkout is expected at `../bench/carddemo`. See `carddemo/SOURCE.md` for the pinned
 commit. The end to end runner calls `claude -p` with `--plugin-dir` pointing at this folder. It
@@ -82,4 +90,4 @@ labeled data edges by the rule in the labeling guide.
 
 `claude plugin eval` treats `<plugin>/evals/` as its case folder, but only counts a folder as a case
 when it holds a `prompt.md` or a `case.yaml`. Nothing here does. Its results go to
-`evals/results/`, which this repo ignores. Ours go to `evals/scorecard/` and `evals/runs/`.
+`evals/results/`, which this repo ignores. Ours go to `evals/scorecard/` and to the evidence repo.

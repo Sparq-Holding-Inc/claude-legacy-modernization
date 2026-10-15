@@ -1,9 +1,0 @@
-{
-  "target_state": "refactor",
-  "waves": [],
-  "unassigned": [
-    {"id": "PROGA", "reason": "no entry points in the tree. No JCL, CSD or scheduler export was supplied, so nothing can be sequenced."},
-    {"id": "PROGB", "reason": "no entry points in the tree. Called by PROGA, so it moves with PROGA once PROGA is placed."}
-  ],
-  "deviations": []
-}

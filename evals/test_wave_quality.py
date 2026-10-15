@@ -4,6 +4,8 @@
     python3 evals/test_wave_quality.py
 
 The baseline is a real plan, the CardDemo run saved in examples/carddemo. Each case damages a copy of it.
+Its graph.json is in the evidence repo, claude-legacy-modernization-evidence, cloned next to this one.
+Pass another checkout as the first argument. Without the graph the test is skipped, not passed.
 Reversing the waves must flip the ordering score and leave the cut alone, which shows the metrics measure
 different things. Python standard library only.
 """
@@ -20,7 +22,13 @@ sys.path.insert(0, HERE)
 import wave_quality as Q  # noqa: E402
 
 BASE = os.path.join(PLUGIN, "examples", "carddemo")
-graph = json.load(open(os.path.join(BASE, "graph.json")))
+EVIDENCE = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(PLUGIN), "claude-legacy-modernization-evidence")
+GRAPH = os.path.join(EVIDENCE, "examples", "carddemo", "graph.json")
+if not os.path.exists(GRAPH):
+    print("SKIPPED: %s not found. Clone claude-legacy-modernization-evidence next to this repo, or pass its path."
+          % GRAPH)
+    sys.exit(0)
+graph = json.load(open(GRAPH))
 waves = json.load(open(os.path.join(BASE, "waves.json")))
 risks = json.load(open(os.path.join(BASE, "risks.json")))
 results = []

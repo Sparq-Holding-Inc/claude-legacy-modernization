@@ -63,7 +63,10 @@ def make_git_history(repo, history):
     """Commit each file on its own date so `git log` reports it. history: default plus files."""
     default = history.get("default", "2026-01-01")
     when = history.get("files", {})
-    env = dict(os.environ, GIT_CONFIG_GLOBAL="/dev/null", GIT_CONFIG_SYSTEM="/dev/null")
+    # Only what git needs. No other variable from the caller's environment reaches it.
+    env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": repo, "GIT_CONFIG_GLOBAL": "/dev/null",
+           "GIT_CONFIG_SYSTEM": "/dev/null", "GIT_AUTHOR_NAME": "evals", "GIT_AUTHOR_EMAIL": "evals@example.invalid",
+           "GIT_COMMITTER_NAME": "evals", "GIT_COMMITTER_EMAIL": "evals@example.invalid"}
     run = lambda *a, **kw: subprocess.run(["git", "-C", repo] + list(a), check=True, capture_output=True,
                                           env=dict(env, **kw.get("env", {})))
     run("init", "-q")

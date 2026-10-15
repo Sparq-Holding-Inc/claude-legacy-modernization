@@ -1,5 +1,5 @@
 {
- "note": "Runs through the real headless harness (claude -p with --plugin-dir). Only one fixture was run, to check the harness and measure cost. The full set was not run, to save usage. These trials are not part of the scorecard, which is built from the subagent runs.",
+ "note": "The first trials of the real headless harness (claude -p with --plugin-dir), on one fixture, to check the harness and measure cost. They came before the full headless runs of 2026-10-14 that the scorecard is built from, and are kept for the cost lesson.",
  "trials": [
   {
    "case": "11-dead-program",
@@ -32,7 +32,7 @@
     "no 'Unresolved citations' section was needed",
     "the plugin's own agent ran as legacy-modernization:migration-risk-assessor"
    ],
-   "output": "evals/real-harness/11-dead-program"
+   "output": "claude-legacy-modernization-evidence: real-harness/11-dead-program"
   }
  ],
  "cost_lesson": "A six-file tree cost about $2.70 and 6 minutes through the real harness. The default cap of $2 per fixture is too low and $8 per CardDemo run is probably too low. A full run of 13 fixtures and 3 CardDemo runs is likely to cost tens of dollars and to eat a large share of a usage window."

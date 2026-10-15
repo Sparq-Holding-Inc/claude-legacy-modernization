@@ -82,6 +82,22 @@ You can also just ask: "assess this codebase for modernization".
 
 Everything is written to `./modernization-assessment/`.
 
+## Try it in two minutes
+
+Fixture 11 is a five-file COBOL and JCL repo with one trap: `PGMDEAD` calls a live program, but nothing
+calls it. From a clone of this repo, copy the fixture out and assess it:
+
+```
+cp -R evals/fixtures/11-dead-program/repo /tmp/lma-try
+cd /tmp/lma-try
+claude --plugin-dir <path to this repo>
+/legacy-modernization:modernize-scan --target refactor --must-not-break "the nightly batch cycle" --telemetry none
+```
+
+`modernization-assessment/05-dead-code.md` should put `PGMDEAD` and the copybook `UNUSED` in the
+unreachable bucket, each with a cited line. Our headless run of this fixture took 93 seconds and cost $0.88
+on Claude Sonnet 5.5. A finished assessment of a real benchmark is in `examples/carddemo/`.
+
 ## What it reads
 
 | Reads | Notes |
@@ -123,6 +139,9 @@ Read this before you trust it.
   each family into groups that are bound by a shared written dataset or a shared program. It does
   not know your business. It puts a compile job and a posting job in neighboring families if both
   write shared data. Claude and you are expected to argue with it.
+- **The citation hook checks only a run that marks itself done.** In two of the three headless CardDemo
+  runs, Claude finished without that step, so the hook did not check them. The scorer's separate check found
+  that every citation in those runs resolves. See `evals/RESULTS.md`.
 - **A citation proves a line exists, not that it says what the claim says.** The hook and the
   validators check structure: the file and line are real, the plan covers every unit, the dead code
   buckets agree with the extractor, and a risk's wave matches the plan. Whether the cited line
@@ -145,7 +164,8 @@ your code that it needs through your Claude session, the way it does in any Clau
 ## Evals
 
 `evals/RESULTS.md` holds the scorecard. `evals/README.md` explains how to run it. The sample
-assessment of CardDemo is in `examples/carddemo/`.
+assessment of CardDemo is in `examples/carddemo/`. The saved runs behind the scorecard are in
+[claude-legacy-modernization-evidence](https://github.com/Sparq-Holding-Inc/claude-legacy-modernization-evidence).
 
 ## Roadmap
 

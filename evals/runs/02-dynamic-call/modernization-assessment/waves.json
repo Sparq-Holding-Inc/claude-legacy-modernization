@@ -1,9 +1,0 @@
-{
- "target_state": "refactor",
- "waves": [],
- "unassigned": [
-  {"id": "PROGA", "reason": "no entry points in the tree"},
-  {"id": "PROGB", "reason": "no entry points in the tree"}
- ],
- "deviations": []
-}

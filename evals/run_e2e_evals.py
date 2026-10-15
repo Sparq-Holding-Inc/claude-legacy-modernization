@@ -8,8 +8,9 @@
 
 Each run starts a fresh copy of the target in ../bench/runs/<case>-<n>/work and
 calls `claude -p` with the plugin loaded from this folder (`--plugin-dir`). The
-run's assessment folder and Claude's JSON result are saved under
-evals/runs/<case>-<n>/. Scoring reads only those saved files.
+run's assessment folder and Claude's JSON result are saved under runs/<case>-<n>/
+in the evidence repo, claude-legacy-modernization-evidence, cloned next to this
+one (or --evidence DIR). Scoring reads only those saved files.
 
 Metrics (the ship bar, section 7 of the build plan)
     citations that resolve                     bar 100%
@@ -42,7 +43,9 @@ sys.path.insert(0, HERE)
 import check_citations as cc  # noqa: E402
 import schema  # noqa: E402
 
-RUNS = os.path.join(HERE, "runs")
+# The saved runs live in their own repo, cloned next to this one. --evidence points elsewhere.
+EVIDENCE = os.path.normpath(os.path.join(PLUGIN, "..", "claude-legacy-modernization-evidence"))
+RUNS = os.path.join(EVIDENCE, "runs")
 BENCH = os.path.normpath(os.path.join(PLUGIN, "..", "bench"))
 CARDDEMO = os.path.join(BENCH, "carddemo")
 FIXTURES = os.path.join(HERE, "fixtures")
@@ -99,7 +102,7 @@ def prepare_only(cases, n_runs):
 
 
 def collect_only(cases, n_runs, harness):
-    """Copy each finished work folder's assessment into evals/runs and record how it was produced."""
+    """Copy each finished work folder's assessment into the evidence runs and record how it was produced."""
     for case in cases:
         for name in run_names(case, n_runs):
             run_dir = os.path.join(RUNS, name)
@@ -292,6 +295,7 @@ def score_run(run_dir, case):
         return res
     res["ran"] = True
     work = (meta.get("work") or "").replace("<workspace>", os.path.dirname(PLUGIN))
+    res["work_found"] = os.path.isdir(work)
     roots = [work, out_dir]
     total, bad = citation_stats(out_dir, roots)
     res["citations"] = {"total": total, "unresolved": bad,
@@ -368,14 +372,17 @@ def main():
     ap.add_argument("--score-only", action="store_true")
     ap.add_argument("--prepare", action="store_true", help="create work folders and print them, run nothing")
     ap.add_argument("--collect", default=None, metavar="HARNESS",
-                    help="copy finished work folders into evals/runs and label how they were produced")
+                    help="copy finished work folders into the evidence runs and label how they were produced")
     ap.add_argument("--budget-usd", type=float, default=30.0, help="cap per CardDemo run. One fixture cost 2.69, a CardDemo run was not measured")
     ap.add_argument("--fixture-budget-usd", type=float, default=6.0, help="cap per fixture run. A $2 cap stopped a six file tree at 32 turns")
     ap.add_argument("--model", default=None)
     ap.add_argument("--only", default=None, help="run one case name, for example carddemo or 11-dead-program")
     ap.add_argument("--carddemo-runs", type=int, default=CARDDEMO_RUNS)
     ap.add_argument("--out", default=os.path.join(HERE, "scorecard", "e2e.json"))
+    ap.add_argument("--evidence", default=EVIDENCE, help="checkout of claude-legacy-modernization-evidence")
     a = ap.parse_args()
+    global RUNS
+    RUNS = os.path.join(os.path.abspath(a.evidence), "runs")
     cases = []
     if a.cases in ("all", "carddemo"):
         cases.append("carddemo")
@@ -401,6 +408,15 @@ def main():
                     print("Claude Code is not signed in. Run `claude auth login`, then rerun this command.")
                     return 3
     result = score_all(cases, a.carddemo_runs)
+    if not result["summary"]["runs_scored"]:
+        print("No saved runs found in %s. Clone claude-legacy-modernization-evidence next to this repo, or pass "
+              "--evidence DIR. %s was not written." % (RUNS, a.out))
+        return 2
+    lost = [r["run"] for r in result["runs"] if r.get("ran") and not r.get("work_found")]
+    if lost:
+        print("The source trees these runs assessed are missing (%s), so their citations cannot resolve. Run "
+              "--prepare to rebuild them under ../bench/runs. %s was not written." % (", ".join(lost), a.out))
+        return 2
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
     json.dump(result, open(a.out, "w"), indent=1)
     s = result["summary"]

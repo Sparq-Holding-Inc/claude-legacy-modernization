@@ -55,6 +55,15 @@ Changed
   a combined score.
 - The README privacy and partner statements were rewritten.
 - The marketplace file now has a description, so `claude plugin validate --strict` passes.
+- The saved eval runs and the sample's full `graph.json` moved to
+  [claude-legacy-modernization-evidence](https://github.com/Sparq-Holding-Inc/claude-legacy-modernization-evidence),
+  copied byte for byte from commit `229de03`. This repo now holds the plugin and the code that tests it.
+  `run_e2e_evals.py --score-only` reads the evidence repo. It stops without writing when it finds no runs,
+  or when the source trees the runs assessed are missing.
+- The fixture runner passes git only the variables it needs, not the caller's whole environment.
+- `plugin.json` carries the directory listing fields: icon, documentation, support and privacy links.
+- The eval provenance now describes the headless runs of 2026-10-14, including the two CardDemo runs
+  where the citation hook skipped its check.
 
 Kept, on purpose
 - Two risk axes, never multiplied.

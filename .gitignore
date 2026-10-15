@@ -2,5 +2,5 @@ __pycache__/
 *.pyc
 .DS_Store
 /modernization-assessment/
-# Anthropic's own eval runner writes here. Ours writes to evals/scorecard/ and evals/runs/.
+# Anthropic's own eval runner writes here. Ours writes to evals/scorecard/ and the evidence repo.
 evals/results/

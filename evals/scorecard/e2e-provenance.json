@@ -1,16 +1,14 @@
 {
- "harness": "subagents",
- "date": "2026-09-30",
- "plugin_commit_at_start": "319ddc0 for the 13 fixture runs (loop 2), c3df5c5 for the 3 CardDemo runs (loop 3)",
- "why": "Headless `claude -p` could not sign in in the build environment (OAuth login expired). The same command and skill files were run by hand through Claude subagents, then scored by the same scorer.",
- "model": "Claude Sonnet 5.5 subagents (the plugin's own agents use sonnet at medium effort)",
+ "harness": "claude -p",
+ "date": "2026-10-14",
+ "plugin_commit_at_start": "91cdfe2 for the 13 fixture runs; the working tree committed as a50b16d for the 3 CardDemo runs",
+ "why": "Real headless runs. `run_e2e_evals.py` called `claude -p` with `--plugin-dir` pointing at this repo, so the plugin was loaded and the namespaced command ran. The saved runs are in the evidence repo, claude-legacy-modernization-evidence.",
+ "model": "Claude Sonnet 5.5 (claude-sonnet-5-5, the CLI default). The plugin's own agents use sonnet at medium effort",
  "not_exercised": [
-  "Loading the plugin with --plugin-dir and the namespaced command name",
-  "The live Stop hook. It was tested with test_hook.py. Each agent ran the same checker by hand before finishing.",
-  "The plugin's own subagents. The subagents did that work inline.",
-  "Dollar cost. Tokens and time are reported instead.",
-  "Interactive scoping questions"
+  "Interactive scoping questions. Every run passed the three scoping answers as flags.",
+  "The live citation check in carddemo-1 and carddemo-3. The Stop hook fired, but those runs ended without marking the assessment done, so the hook skipped its check and left the marker. The scorer's own citation check covers every run."
  ],
- "changes_during_runs": "The plugin changed between rounds (see the fix loops table). Fixture seeds are byte identical between the two commits and all 13 fixture runs pass the current validators, but the fixture runs were not repeated at the later commit. The three CardDemo runs of loop 3 used a private scratch folder each. The three runs of loop 1 shared one, and two agents reported a sibling overwriting a helper script. Every saved graph.json was re-checked against a fresh extraction and is identical.",
- "rerun": "After `claude auth login`: python3 evals/run_e2e_evals.py --cases all"
+ "changes_during_runs": "The wave seed group cut landed between the fixture runs and the CardDemo runs. The CardDemo runs were repeated after it. The fixture runs were not. The scorer re-checks every saved graph.json against a fresh extraction with today's extractor, and all 16 are identical.",
+ "earlier": "The runs of 2026-09-30 (fix loops 0 to 3) were made by hand through Claude subagents, because headless sign-in had expired. They are in this repo's git history before a50b16d. The sample in examples/carddemo comes from loop 3.",
+ "rerun": "after `claude auth login`, with the evidence repo cloned next to this one, run `python3 evals/run_e2e_evals.py --cases all`."
 }

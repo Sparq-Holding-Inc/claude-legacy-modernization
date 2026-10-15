@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-14",
+ "generated": "2026-10-15",
  "summary": {
   "citations": {
    "total": 10230,
@@ -55,6 +55,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 3083,
     "unresolved": 0,
@@ -91,6 +92,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 3097,
     "unresolved": 0,
@@ -127,6 +129,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 2989,
     "unresolved": 0,
@@ -163,6 +166,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 41,
     "unresolved": 0,
@@ -199,6 +203,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 49,
     "unresolved": 0,
@@ -235,6 +240,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 89,
     "unresolved": 0,
@@ -271,6 +277,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 73,
     "unresolved": 0,
@@ -307,6 +314,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 92,
     "unresolved": 0,
@@ -343,6 +351,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 136,
     "unresolved": 0,
@@ -379,6 +388,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 125,
     "unresolved": 0,
@@ -415,6 +425,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 90,
     "unresolved": 0,
@@ -451,6 +462,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 100,
     "unresolved": 0,
@@ -487,6 +499,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 98,
     "unresolved": 0,
@@ -523,6 +536,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 45,
     "unresolved": 0,
@@ -564,6 +578,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 57,
     "unresolved": 0,
@@ -605,6 +620,7 @@
     "error_text": null
    },
    "ran": true,
+   "work_found": true,
    "citations": {
     "total": 66,
     "unresolved": 0,

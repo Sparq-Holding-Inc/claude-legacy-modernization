@@ -8,11 +8,11 @@ exercise modernization tools. Commit `59cc6c2fd7ebd7ef7925cad552a01a4b8b6e4d5e`.
 Apache-2.0. See `NOTICE` at the top of this repo. CardDemo is a small, synthetic system. Do not read this
 sample as a measure of what the plugin does on a large production estate.
 
-**How it was produced.** Claude subagents followed the plugin's command and skill files by hand on 2026-09-30, because headless sign-in was not available in the build environment. Model: Claude Sonnet 5.5. Plugin commit `c3df5c5`. It was not run through `claude -p`, so plugin loading, the namespaced command and the live Stop hook were not exercised.
+**How it was produced.** Claude subagents followed the plugin's command and skill files by hand on 2026-09-30, because headless sign-in was not available in the build environment. Model: Claude Sonnet 5.5. Plugin commit `c3df5c5`. It was not run through `claude -p`, so plugin loading, the namespaced command and the live Stop hook were not exercised. The later headless runs of 2026-10-14 did run through `claude -p`. They are described in `evals/RESULTS.md`.
 
 **Which run this is.** Three runs were made in the last round. This is the one with the most citations that
 all resolve, among the runs that passed every automatic check. The rule was written before the runs finished.
-The other two runs are in `evals/runs/`. Risk scores differ between runs, and `evals/RESULTS.md` says by how much.
+The other two runs of that round are in this repo's git history before commit `a50b16d`. Risk scores differ between runs, and `evals/RESULTS.md` says by how much.
 
 **How much of the wave plan is Claude's.** Less than it looks. The extractor computes a first cut of the waves
 from facts, and Claude named the waves and changed the plan in 2 place(s). Each change is in `deviations` in
@@ -21,6 +21,9 @@ repeatability. It is not evidence that the wave boundaries are right. A mainfram
 `03-waves.md` before anyone relies on it.
 
 **Paths in citations.** A citation such as `modernization-assessment/waves.json:365` points at a file in this folder. The run wrote its output to a folder with that name. Every other citation is a path inside the CardDemo checkout.
+
+**The wave plan in this sample predates the group cut in the wave seed.** This plan has 7 waves. The current
+plugin cuts the 55-unit batch writers family into groups, and its three headless CardDemo runs each made 9 waves.
 
 **The estimate in this sample predates the two-case rule.** `04-estimate.md` is on a conventional basis and does
 not show an AI-assisted case. The skill now asks for both, and states the basis in the first line.
@@ -43,4 +46,4 @@ not show an AI-assisted case. The skill now asks for both, and states the basis 
 | `05-dead-code.md`, `dead-code.json`, `05a-dead-code-candidates.md` | Three buckets |
 | `06-test-strategy.md` | The behavioral-equivalence strategy |
 | `risks.json` | Two scores per unit, never combined |
-| `graph.json` | The full graph |
+| `graph.json` | The full graph. At 560 KB it is kept in the [evidence repo](https://github.com/Sparq-Holding-Inc/claude-legacy-modernization-evidence/blob/main/examples/carddemo/graph.json), not here |

@@ -309,7 +309,9 @@ def main():
         for x in prov["not_exercised"]:
             w("  - " + x)
         w("- %s" % prov["changes_during_runs"])
-        w("- To replace these with real headless runs: `%s`" % prov["rerun"])
+        if prov.get("earlier"):
+            w("- %s" % prov["earlier"])
+        w("- To rerun them: %s" % prov["rerun"])
         w("")
     return "\n".join(L) + "\n"
 
