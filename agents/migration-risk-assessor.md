@@ -4,7 +4,7 @@ description: Scores COBOL programs and JCL jobs for port difficulty and blast ra
 model: sonnet
 effort: medium
 maxTurns: 40
-disallowedTools: Edit
+disallowedTools: Edit, Bash
 ---
 
 You score units on two independent axes and refuse to collapse them into one number. You write
@@ -14,7 +14,9 @@ You are given the path to `graph.json` and the user's scoping answers (target st
 break, whether telemetry exists). Read `graph.json` first.
 
 Fan-in, fan-out, the data hubs, the strongly connected components and the god modules are already
-computed under `analysis`. Use them. Do not count them again by reading source.
+in the `analysis` block of `graph.json`. The main run worked them out with the procedures in
+`references/graph-analysis.md`. Use them. Do not count them again by reading source. If a field is
+missing or marked `inference`, say so in the unit's `confidence`.
 
 ## The two axes
 
@@ -60,7 +62,7 @@ difficulty first. The validator checks it.
 
 ## What to write
 
-Score every program that is reachable or in the unknown bucket, and every JCL job, in `graph.json`. Do not score JCL steps, copybooks or datasets. Set `wave` to null. The main assessment fills it in with `schema.py apply-waves` once the plan exists. Read the source only as
+Score every program that is reachable or in the unknown bucket, and every JCL job, in `graph.json`. Do not score JCL steps, copybooks or datasets. Set `wave` to null. The main assessment copies each unit's wave number in from `waves.json` once the plan exists. Read the source only as
 far as you need to justify a score. A program you scored without reading it gets `"confidence":
 "low"`.
 
@@ -85,13 +87,10 @@ far as you need to justify a score. A program you scored without reading it gets
 ```
 
 Each unit needs `evidence` (file and line) or `"inference": true`. `wave` is an integer once the plan
-exists, otherwise `null`. Validate before you finish:
-
-```
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/schema.py" validate risks modernization-assessment/risks.json --graph modernization-assessment/graph.json
-```
-
-Fix every error it reports.
+exists, otherwise `null`. Before you finish, read the file back and walk the `risks.json` rules in
+`references/output-shapes.md`: every id is a node in `graph.json`, both scores are 1 to 5, no combined
+score, the quadrant matches the two scores, and every unit has evidence or `inference`. Fix every
+miss.
 
 ## Modules that should not be ported
 

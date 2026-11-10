@@ -1,12 +1,7 @@
 ---
-description: Assess a COBOL, CICS, JCL and VSAM codebase for modernization. Scripts extract the coupling graph. Claude cuts the waves and scores the risk.
+description: Assess a COBOL, CICS, JCL and VSAM codebase for modernization. Claude reads the source with grep recipes, cuts the waves and scores the risk. Every claim cites a file and line.
 argument-hint: '[path] [--target rehost|replatform|refactor|rewrite] [--must-not-break "text"] [--telemetry none|partial|provided] [--delivery conventional|ai-assisted|agent-led] [--wave N]'
-allowed-tools:
-  - 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/extract.py" *)'
-  - 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py" *)'
-  - 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/marker.py" *)'
-  - 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/schema.py" *)'
-  - 'Bash(python3 "${CLAUDE_PLUGIN_ROOT}/hooks/check_citations.py" *)'
+allowed-tools: Read, Grep, Glob, LS
 ---
 
 Assess the codebase with the `modernization-assessment` skill. Then run the
@@ -41,17 +36,12 @@ as flags, write `no defaults applied`.
 
 ## Run
 
-1. Once the scope is settled, start the run marker. It turns on the citation check for this run only.
-   `<scope>` is the folder path, or `.` when none was given. It is not the target state.
+1. Once the scope is settled, follow the `modernization-assessment` skill from Step 0 to Finish.
+   `<scope>` is the folder path, or `.` when none was given. It is not the target state. Write every
+   artifact to `./modernization-assessment/`. Claude asks your permission before it writes there.
 
-   ```
-   python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/marker.py" start --scope <scope>
-   ```
-
-2. Follow the `modernization-assessment` skill from Step 0 to Finish. Write every artifact to
-   `./modernization-assessment/`. The skill ends by marking the run done. Do not delete the marker
-   yourself. The citation check removes it after it passes. If the stop hook does not run in your
-   environment, the marker stays at `done`. That is harmless.
+2. The skill ends by running the `citation-verifier` agent over the folder and fixing what it
+   reports. Do not skip it. Nothing else checks the citations.
 
 3. Finish by printing a short summary in the conversation: the wave count, the single largest risk
    you found, and the top three open questions for the client's engineers.
@@ -59,13 +49,9 @@ as flags, write `no defaults applied`.
 ## With --wave N
 
 The full artifacts must already exist in `./modernization-assessment/`. If `graph.json` is
-missing, say so and stop. Start the marker with `--mode wave`:
-
-```
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/marker.py" start --scope <scope> --mode wave
-```
+missing, say so and stop.
 
 Read `graph.json`, `waves.json` and `risks.json`. Write `07-wave-N-plan.md` for wave N only, with
 citations: the program-by-program port order, the test harness for that wave's boundary (use the
-`behavioral-equivalence` skill), and the rollback procedure. Then run `marker.py done` and print a
-short summary.
+`behavioral-equivalence` skill), and the rollback procedure. Run the `citation-verifier` agent over
+`07-wave-N-plan.md`, fix what it reports, and print a short summary.

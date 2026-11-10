@@ -5,14 +5,14 @@ output looks like before you run it on your own system.
 
 **What was assessed.** AWS CardDemo, an open source COBOL, CICS, JCL and VSAM application built by AWS to
 exercise modernization tools. Commit `59cc6c2fd7ebd7ef7925cad552a01a4b8b6e4d5e`. It is licensed under
-Apache-2.0. See `NOTICE` at the top of this repo. CardDemo is a small, synthetic system. Do not read this
+Apache-2.0. See `NOTICE.md` at the top of this repo. CardDemo is a small, synthetic system. Do not read this
 sample as a measure of what the plugin does on a large production estate.
 
-**How it was produced.** Claude subagents followed the plugin's command and skill files by hand on 2026-09-30, because headless sign-in was not available in the build environment. Model: Claude Sonnet 5.5. Plugin commit `c3df5c5`. It was not run through `claude -p`, so plugin loading, the namespaced command and the live Stop hook were not exercised. The later headless runs of 2026-10-14 did run through `claude -p`. They are described in `evals/RESULTS.md`.
+**How it was produced.** By version 0.2.0 of this plugin, the scripted engine, not by this build. The engine extracted the graph with a Python parser and checked citations with a Stop hook. This build finds the same facts with grep recipes, so its output on the same tree can differ. The files here are kept as a sample of the output format and the depth of the argument. Model: Claude Sonnet 5.5.
 
 **Which run this is.** Three runs were made in the last round. This is the one with the most citations that
 all resolve, among the runs that passed every automatic check. The rule was written before the runs finished.
-The other two runs of that round are in this repo's git history before commit `a50b16d`. Risk scores differ between runs, and `evals/RESULTS.md` says by how much.
+The other two runs of that round are in the scripted engine's evidence repository. Risk scores differ between runs.
 
 **How much of the wave plan is Claude's.** Less than it looks. The extractor computes a first cut of the waves
 from facts, and Claude named the waves and changed the plan in 2 place(s). Each change is in `deviations` in

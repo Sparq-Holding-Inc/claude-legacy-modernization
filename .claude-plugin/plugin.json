@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "legacy-modernization",
   "displayName": "Legacy Modernization Assessor",
-  "version": "0.2.0",
-  "description": "Assess a COBOL, CICS, JCL and VSAM codebase for modernization. Scripts extract the coupling graph with file and line evidence. Claude cuts the migration waves, scores risk, and designs the behavioral-equivalence tests.",
+  "version": "0.3.0",
+  "description": "Assess a COBOL, CICS, JCL and VSAM codebase for modernization. Claude reads the source with grep recipes and builds a coupling graph with file and line evidence, cuts the migration waves, scores risk, and designs the behavioral-equivalence tests.",
   "author": {
     "name": "Sparq Holdings, Inc.",
     "url": "https://teamsparq.com"

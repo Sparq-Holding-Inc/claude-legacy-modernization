@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.3.0 (candidate, not released)
+
+The directory build. No scripts, no hooks, no pre-approved tools.
+
+The plugin directory accepts hooks, tool pre-approvals and non-document files only from Verified
+organizations. Sparq is not one, so this build is Markdown, JSON and one icon.
+
+Changed
+- The Python extractor is gone. Claude finds the facts with the grep recipes in
+  `skills/modernization-assessment/references/` and assembles `graph.json` from the hits. Every edge
+  still cites a file and a line.
+- The Stop hook is gone. The new `citation-verifier` agent checks every citation at the end of a run.
+  Claude fixes what it reports, once. A second failure goes in the summary as unresolved.
+- The command pre-approves only `Read`, `Grep`, `Glob` and `LS`. Claude asks before it writes the
+  output folder.
+- Graph analysis (fan-in, call cycles, articulation points, dead code buckets, the wave seed) is now
+  worked by hand from `references/graph-analysis.md`. Above about 60 source files Claude splits the
+  tree into partitions and labels what it could not compute across them as `inference`.
+- The JSON validators are now a checklist in `references/output-shapes.md`.
+- `NOTICE` is now `NOTICE.md`. The eval suite and its fixtures left this repo. They belong to the
+  scripted engine.
+
+Removed
+- The eval scorecards. They measured the engine. Nothing has been measured on this build yet.
+
+Upgrading from 0.2.x
+- Version 0.3.0 does not run the 0.2 scripts. If you want the parser and the Stop hook, use the
+  scripted engine at the `v0.2.0` tag (<https://github.com/Sparq-Holding-Inc/claude-legacy-modernization/tree/v0.2.0>).
+
 ## 0.2.0 (candidate, not released)
 
 Facts now come from scripts. Judgment still comes from Claude.

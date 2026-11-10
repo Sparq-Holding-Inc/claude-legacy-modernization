@@ -13,10 +13,10 @@ where you still do not know what you are dealing with.
 | **Wave** | A group of units that ship together, in a set order. Each wave must deploy on its own, roll back on its own, have a boundary you can test, and be something a stakeholder can name. |
 | **Blast radius** | How much breaks, and how far away, if a wave goes wrong. |
 | **Dead code** | Code that may be safe to retire, in three buckets. Unreachable: no path from any entry point. Dormant: reachable on paper, but untouched for years. Unknown: a computed call could reach it. |
-| **Computed call** | A call whose target is a variable, so the extractor cannot always see where it goes. |
+| **Computed call** | A call whose target is a variable, so a search cannot always see where it goes. |
 | **Behavioral equivalence** | Proof that the new system does what the old one did. The test that proves it needs an oracle. |
 | **Oracle** | The source of truth the new system is compared against, such as archived output from the old system. |
-| **Citation** | A file and line that backs a claim. The Stop hook checks that each one exists. |
+| **Citation** | A file and line that backs a claim. The `citation-verifier` agent checks that each one exists. |
 
 Point the plugin at a COBOL, CICS, JCL and VSAM codebase. It produces what an engineering leader can take
 into a steering meeting:
@@ -25,8 +25,8 @@ into a steering meeting:
    together by a file layout nobody wrote down, and which jobs must run in order. Every edge cites a
    file and a line.
 2. **A risk-ranked wave plan.** The system cut into waves that can ship on their own. Cheap,
-   low-blast-radius work goes first, so it pays for the rest and teaches the team. The extractor
-   proposes the cut from the graph. Claude explains it and can change it, with a cited reason.
+   low-blast-radius work goes first, so it pays for the rest and teaches the team. A first cut comes
+   from the graph. Claude explains it and can change it, with a cited reason.
 3. **A dead code register.** Three buckets: unreachable, dormant, and unknown. Unknown is where a
    computed call could reach the code. Nothing is called dead over a call it cannot see.
 4. **A behavioral-equivalence test strategy.** How you prove the new system does what the old one did,
@@ -41,15 +41,18 @@ Most modernization programs fail in the assessment, not the build. The estimate 
 code instead of coupling. Nobody wrote down what "correct" means before the rewrite started.
 
 Asking a model to read a large mainframe estate and report what is coupled to what gives you
-fluent text and no way to check it. So this plugin splits the work:
+fluent text and no way to check it. So this plugin makes the work checkable:
 
-- **Scripts find the facts.** A small Python extractor reads the source and builds the graph.
+- **Search recipes find the facts.** Claude runs fixed grep patterns for COBOL, JCL, CICS and
+  scheduler files. Every hit is a file and a line, so every edge cites its source.
 - **Claude makes the judgments.** How much business logic a program holds, where to cut the waves,
-  what the real risk is, what to do about the edges the scripts could not resolve.
-- **A hook checks the citations.** When the assessment finishes, a Stop hook checks that every cited
-  file and line exists. It blocks the first stop and lists the bad ones. If they are still wrong on
-  the second try, it lets the run end and adds an "Unresolved citations" section to the summary.
-  A bad citation is made visible. It is not made impossible.
+  what the real risk is, what to do about the edges a search could not resolve.
+- **A second agent checks the citations.** When the assessment finishes, the `citation-verifier`
+  agent opens every cited file and line. Claude fixes what it reports. If anything is still wrong
+  after the second pass, the summary says so. A bad citation is made visible. It is not made impossible.
+
+This build has no scripts and no hooks. Claude assembles the graph by reading search hits, so it is
+slower and less certain than a parser. See "Where it is weak".
 
 ## Install
 
@@ -65,7 +68,7 @@ To try it from a local clone without installing, point Claude Code at the folder
 claude --plugin-dir <path to this folder>
 ```
 
-You need Python 3 on your path. The scripts use the standard library only. Nothing to install.
+Nothing else to install. Claude asks your permission before it writes `./modernization-assessment/`.
 
 ## Use
 
@@ -82,28 +85,17 @@ You can also just ask: "assess this codebase for modernization".
 
 Everything is written to `./modernization-assessment/`.
 
-## Try it in two minutes
+## Try it
 
-Fixture 11 is a five-file COBOL and JCL repo with one trap: `PGMDEAD` calls a live program, but nothing
-calls it. From a clone of this repo, copy the fixture out and assess it:
-
-```
-cp -R evals/fixtures/11-dead-program/repo /tmp/lma-try
-cd /tmp/lma-try
-claude --plugin-dir <path to this repo>
-/legacy-modernization:modernize-scan --target refactor --must-not-break "the nightly batch cycle" --telemetry none
-```
-
-`modernization-assessment/05-dead-code.md` should put `PGMDEAD` and the copybook `UNUSED` in the
-unreachable bucket, each with a cited line. Our headless run of this fixture took 93 seconds and cost $0.88
-on Claude Sonnet 5.5. A finished assessment of a real benchmark is in `examples/carddemo/`.
+Start with a small folder: a few COBOL programs, their copybooks and the JCL that runs them. A finished
+assessment of a real benchmark is in `examples/carddemo/`. Read `00-summary.md` there first.
 
 ## What it reads
 
 | Reads | Notes |
 |---|---|
 | COBOL source | Fixed format. Free format files are listed as not parsed. |
-| Copybooks | Expanded, so a statement inside a copybook counts for every program that copies it. |
+| Copybooks | Followed from `COPY` statements. |
 | CICS | `EXEC CICS` LINK, XCTL and file I/O. The CICS system definition (CSD) gives entry points and the CICS file to dataset mapping. |
 | JCL and PROCs | Steps, DDs, PROC expansion, symbolic parameters, DD overrides. |
 | VSAM | Through `SELECT ... ASSIGN`, `OPEN` modes, CICS file I/O and JCL DDs. |
@@ -117,59 +109,55 @@ Anything else that looks like a scheduler is listed as not parsed. It is never s
 
 Read this before you trust it.
 
-- **It has been measured on one open source benchmark**, AWS CardDemo. The benchmark's answer key was
-  labeled by Claude subagents reading the source. It has not been confirmed by a mainframe
-  engineer. The scores in `evals/RESULTS.md` are provisional until that happens.
-- **A computed call stays unresolved.** The extractor resolves a variable target only from `VALUE`
-  clauses and literal `MOVE`s in the same program. A menu table or a value from a queue is out of its
-  reach. It says so, and the dead code register keeps everything that call could reach in the
-  unknown bucket.
+- **There is no parser.** Claude builds the graph from search hits and works fan-in, call cycles and
+  articulation points by hand. On a large tree it partitions the work and labels what it could not
+  compute across partitions as `inference`. Expect it to be slower, to cost more on big estates, and
+  to miss edges a parser would find.
+- **Nothing has been measured on this build yet.** The scores we published for version 0.2 describe
+  the scripted engine, not this one. We do not carry them over.
+- **A computed call stays unresolved.** The recipes resolve a variable target only from `VALUE`
+  clauses and literal `MOVE`s in the same program. A menu table or a value from a queue is out of
+  reach. The dead code register keeps everything that call could reach in the unknown bucket.
 - **A called subprogram gets no DDs from its caller.** In a real run its files belong to the calling
-  step. The extractor does not model that.
+  step. The recipes do not model that.
 - **Utility steps take their dataset mode from `DISP`.** An IDCAMS `REPRO` target is `DISP=SHR` and
-  is read as a read on the edge. The IDCAMS `DELETE`, `DEFINE` and `REPRO` cards are read as separate
-  facts (`utility_writes`), and the wave seed uses them. SORT cards and other in-stream input are not
-  parsed. A card that uses a symbol such as `&HLQ` is skipped.
-- **A program named at run time is a fact, not an edge.** IMS `PARM` and TSO `RUN PROGRAM` cards are
-  read, so the program counts as reachable. Other drivers that start a program by name are not.
+  is read as a read on the edge. IDCAMS `DELETE`, `DEFINE` and `REPRO` cards are read as separate
+  facts. SORT cards and other in-stream input are not parsed.
+- **Dormancy is not computed without dates.** Without git history or dates you supply, the dormant
+  list is empty and the summary says it was not measured.
 - **JCL `IF/THEN/ELSE` and `COND=` are not modeled.** Step order is file order.
 - **`RETURN TRANSID`, `START`, `SEND MAP`, IMS and MQ are not edges.**
 - **COPY `REPLACING` is not applied.**
-- **The wave seed is crude.** It sorts entry points by what they write and where they run, then cuts
-  each family into groups that are bound by a shared written dataset or a shared program. It does
-  not know your business. It puts a compile job and a posting job in neighboring families if both
-  write shared data. Claude and you are expected to argue with it.
-- **The citation hook checks only a run that marks itself done.** In two of the three headless CardDemo
-  runs, Claude finished without that step, so the hook did not check them. The scorer's separate check found
-  that every citation in those runs resolves. See `evals/RESULTS.md`.
-- **A citation proves a line exists, not that it says what the claim says.** The hook and the
-  validators check structure: the file and line are real, the plan covers every unit, the dead code
-  buckets agree with the extractor, and a risk's wave matches the plan. Whether the cited line
-  supports the sentence is for a person to check.
+- **The wave seed is crude.** It sorts entry points by what they write and where they run. It does
+  not know your business. Claude and you are expected to argue with it.
+- **A citation proves a line exists, not that it says what the claim says.** The verifier checks
+  that the file and line are real and spot-checks that the line matches the claim. Whether the
+  cited line supports the sentence is for a person to check.
 - **The estimate is uncalibrated, and it is shown on two bases.** `04-estimate.md` gives engineer-weeks for a
   conventional team and for an AI-assisted team, and says which parts shrink with AI and which do not
   (getting the oracle, approvals, cutover). Every rate in it is Claude's planning assumption. The plugin carries
   no measured productivity data. Replace the rates with your team's measured velocity from the first wave.
   `--delivery conventional|ai-assisted|agent-led` picks which case leads the summary.
 - **The judgment is Claude's.** Risk scores and every change to the wave seed are opinions with
-  cited reasons. Two runs on the same graph can differ. `evals/RESULTS.md` says by how much.
+  cited reasons. Two runs on the same tree can differ.
 
 ## Privacy
 
 Outputs stay local. Nothing leaves beyond your own Claude session.
 
-The extractor makes no network calls. It is Python standard library only. Claude reads the parts of
-your code that it needs through your Claude session, the way it does in any Claude Code work.
+The plugin ships no code and makes no network calls. Claude reads the parts of your code that it
+needs through your Claude session, the way it does in any Claude Code work.
 
-## Evals
+## The scripted engine
 
-`evals/RESULTS.md` holds the scorecard. `evals/README.md` explains how to run it. The sample
-assessment of CardDemo is in `examples/carddemo/`. The saved runs behind the scorecard are in
-[claude-legacy-modernization-evidence](https://github.com/Sparq-Holding-Inc/claude-legacy-modernization-evidence).
+Version 0.2 used a Python extractor and a Stop hook. That build is kept at the `v0.2.0` tag of this
+repository, for people who can install scripts:
+<https://github.com/Sparq-Holding-Inc/claude-legacy-modernization/tree/v0.2.0>. The sample assessment in
+`examples/carddemo/` was produced by that engine.
 
 ## Roadmap
 
-Not supported today: RPG, Oracle ADF, PL/SQL, .NET Framework, and Java. Each needs its own extractor
+Not supported today: RPG, Oracle ADF, PL/SQL, .NET Framework, and Java. Each needs its own recipes
 and its own benchmark. None is claimed until it has been measured.
 
 ## Support
@@ -192,4 +180,4 @@ Issues are acknowledged within five business days.
 
 Sparq is a Select partner in the Claude Partner Network Services Track.
 
-Issues and pull requests are welcome. Apache-2.0. See `LICENSE` and `NOTICE`.
+Issues and pull requests are welcome. Apache-2.0. See `LICENSE` and `NOTICE.md`.

@@ -1,6 +1,0 @@
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID. PGMMAIN.
-       PROCEDURE DIVISION.
-           CALL 'OLDPGM'.
-           CALL 'NEWPGM'.
-           GOBACK.

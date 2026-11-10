@@ -11,24 +11,27 @@ attached.
 
 ## How the work is split
 
-**Facts come from scripts. Judgment comes from you.**
+**Facts come from grep recipes. Judgment comes from you.**
 
-A small Python extractor reads the source and writes `graph.json`. Every edge in it cites a file
-and a line. It found the calls, the copybook includes, the dataset reads and writes, the record
-layouts two programs share, and the job order a scheduler enforces. You do not re-derive any of
-that by reading the tree.
+The recipes in `references/` tell you what to search for in COBOL, JCL, PROCs, CICS system
+definitions and scheduler files. Each hit is a file and a line, so every edge in `graph.json` can
+cite its source. You assemble the hits into the graph and work the analysis by hand with the
+procedures in `references/graph-analysis.md`. That is slower and less certain than a program.
+Say so in `00-summary.md`: the graph was assembled by reading search hits, not computed by a parser.
 
-You do the things a script cannot: how much business logic a program holds, whether its
+Then you do the things only judgment can do: how much business logic a program holds, whether its
 arithmetic is sensitive, where the waves should be cut, what the risk really is, and what to do
-about the edges the script gave up on.
+about the edges the recipes could not settle.
 
-Two rules follow.
+Three rules follow.
 
-1. **Never rebuild the graph by reading source.** Read source to make a judgment, or to settle an
-   edge the extractor could not resolve.
-2. **Every claim carries a `path:line` citation or the word `inference`.** A stop hook checks
-   this. A citation that points at a file or line that does not exist blocks the first finish and is
-   listed in the summary if it is still wrong on the second.
+1. **Never write an edge you did not see.** An edge comes from a grep hit or a line you read. Not from
+   a program's name, and not from what a program ought to call.
+2. **Every claim carries a `path:line` citation or the word `inference`.** The `citation-verifier`
+   agent checks this at the end. Nothing else does.
+3. **A fact you could not compute is not a fact.** Where the tree is too large to do an analysis by
+   hand, say so and label the result `inference`. `references/graph-model.md` says when to
+   partition the tree and how.
 
 ## Before you start
 
@@ -49,31 +52,35 @@ them as flags, so check what you were given before you ask.
    dead-code register goes from speculation to evidence. If no, say clearly that every dead-code
    claim is provisional.
 
-## Step 0. Run the extractor
+## Step 0. Build the graph
 
-```
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/extract.py" <target> --out modernization-assessment
-```
+1. **Survey.** Use Glob to list the source by kind: COBOL, copybooks, JCL, PROCs, CICS system
+   definitions (CSD), scheduler exports, shell wrappers. Count lines per kind with Grep (`-c` on the
+   pattern `^`). Count files first. If there are more than about 60 source files, read the Large trees
+   section of `references/graph-model.md` before you go on. Write `01-inventory.md`: a table of
+   kinds, file counts and line counts, then what is surprising.
+2. **Extract.** Run the recipes over the tree, one file kind at a time:
+   `references/cobol-recipes.md`, `references/jcl-recipes.md`, `references/cics-recipes.md`,
+   `references/scheduler-recipes.md`. Keep every hit's file and line. Resolve targets and assemble
+   the nodes and edges as `references/graph-model.md` says. Write `02a-edge-tables.md`, one table
+   per edge kind with an `Evidence` column, and `graph.json`.
+3. **Analyse.** Work `references/graph-analysis.md` in order: entry points, reachability, fan-in and
+   fan-out, strongly connected components, articulation points, data hubs, dead-code candidates, the
+   wave seed. Write the results into the `analysis` block of `graph.json`, and write
+   `05a-dead-code-candidates.md`, `03a-wave-seed.md` and `03a-waves-draft.json`.
+4. **Record what you could not read.** Every file you could not parse, every pattern you could not
+   express as a search, and every limit that touches this system goes in an `unparsed` list and in
+   `meta.limits` of `graph.json`. They become Open Questions.
 
-Flags: `--as-of YYYY-MM-DD` and `--dormant-years N` (default 5) for the dormancy rule, `--no-git` to
-skip git dates. It uses the Python standard library only. It makes no network calls. If `cloc` is
-installed it uses it for line counts.
+Dormancy needs a last-modified date. You have none unless the user supplies dates or git history in
+the tree. Without them, say that dormancy was not computed. An empty dormant list then means not
+measured.
 
-Then write the fact tables. These are generated, so their citations are correct by construction:
-
-```
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py" inventory modernization-assessment/graph.json --out modernization-assessment/01-inventory.md
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py" edges modernization-assessment/graph.json --out modernization-assessment/02a-edge-tables.md
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py" deadcode modernization-assessment/graph.json --out modernization-assessment/05a-dead-code-candidates.md
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py" waveseed modernization-assessment/graph.json --out modernization-assessment/03a-wave-seed.md
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/render.py" wavedraft modernization-assessment/graph.json --out modernization-assessment/03a-waves-draft.json
-```
-
-Now read `graph.json`. Start with the `analysis` block. It already holds:
+Now read `graph.json`. The `analysis` block holds:
 
 - `entry_points`, `reachable_nodes`, `reachable_programs`
 - `dead_code_candidates` (unreachable, dormant, unknown) with `dead_code_reasons`
-- `unresolved_dynamic`: every computed call the script could not resolve
+- `unresolved_dynamic`: every computed call the recipes could not resolve
 - `embedded_jcl`: JCL text found inside a COBOL literal. The program can submit it at run time. The
   proc or program it names has no edge, so it is unknown, never unreachable
 - `runtime_named`: programs a step starts by name inside PARM or an in-stream card (IMS regions, TSO
@@ -88,7 +95,7 @@ Now read `graph.json`. Start with the `analysis` block. It already holds:
 - `structure_basis`: fan-in, cycles, articulation points and god modules are computed over reachable
   programs only, so dead callers do not distort them
 
-Also read `unparsed` and `meta.limits`. A scheduler or source file the extractor could not parse
+Also read `unparsed` and `meta.limits`. A scheduler or source file you could not parse
 is not a footnote. It goes into Open Questions.
 
 **Edge kinds and what they mean**
@@ -107,20 +114,20 @@ check. Node ids: programs are bare (`CBTRN02C`). Others carry a prefix: `cpy:`, 
 
 ## Phase 1. Inventory
 
-`01-inventory.md` is already written by `render.py`. Do not retype it. Read it for what is
+`01-inventory.md` came from the survey. Read it again for what is
 surprising: an old copybook, a program with no last-modified date, a job no scheduler names.
 
 Legacy systems hide behavior in JCL, shell wrappers, scheduler definitions, and stored procedures.
 An assessment that counts only application source under-scopes by a wide and embarrassing margin.
-The extractor reads COBOL, copybooks, JCL and PROCs, CICS system definitions, Control-M XML, and
-shell wrappers that name JCL files. It does not read anything else. Whatever it lists as not
+The recipes cover COBOL, copybooks, JCL and PROCs, CICS system definitions, Control-M XML, and
+shell wrappers that name JCL files. They cover nothing else. Whatever you list as not
 parsed, you must ask about.
 
 ## Phase 2. Coupling
 
-`02a-edge-tables.md` holds every edge. Your file, `02-coupling.md`, holds the argument.
+`02a-edge-tables.md` holds every edge you found. Your file, `02-coupling.md`, holds the argument.
 
-For anything the extractor left open, work the edges yourself if there are a few. If there are
+For anything the recipes left open, work the edges yourself if there are a few. If there are
 more than about 20, hand them to the `dependency-cartographer` agent. Give it the path to
 `graph.json`. What it reports back is inference. Label it that way and cite it.
 
@@ -131,7 +138,7 @@ Then think about what the coupling does to the sequence:
    dependency is real and invisible in the call graph. Use `data_hubs`.
 3. **Contract coupling** matters most. Program A writes a file and program B reads it by column
    offset. Nobody wrote the format down. `high` means both sides use the same layout copybook.
-   `medium` means they do not, or the extractor could not tell. Every `medium` contract edge is a
+   `medium` means they do not, or the recipes could not tell. Every `medium` contract edge is a
    place a port silently breaks.
 4. **Temporal coupling** lives in the scheduler, not in the code. A plan built without it is not a
    plan.
@@ -147,11 +154,11 @@ Write `02-coupling.md` with:
 - the god modules. They cannot move in one wave. They are strangled behind a facade, never ported
   wholesale
 - the articulation points. They are the natural wave boundaries
-- the honest boundary: the computed calls (`unresolved_dynamic`), and what they mean for the rest
+- the honest boundary: the computed calls (`unresolved_dynamic`), what you could not search for, and what both mean for the rest
 
 ## Phase 3. Waves
 
-The extractor already cut a first plan from facts. Read `03a-wave-seed.md`. Start from
+You already cut a first plan from facts in Step 0. Read `03a-wave-seed.md`. Start from
 `03a-waves-draft.json`. It puts every entry point in one family, in this fixed order:
 
 1. batch jobs that touch no shared data and run no application program
@@ -165,7 +172,7 @@ The extractor already cut a first plan from facts. Read `03a-wave-seed.md`. Star
 A unit that several entry points use moves with the earliest family that uses it. A scheduler job
 moves with the last family among the jobs it runs. A call cycle always moves whole.
 
-The extractor then cuts a family into groups. Two entry points in a family are bound together when both
+The seed then cuts a family into groups. Two entry points in a family are bound together when both
 write the same dataset or run the same application program. Bound entry points form a coupled group and
 share a wave. Entry points bound to none form an independent group, which goes first. A wave in the seed
 carries a `group` field of `independent`, `coupled` or `coupled-N` when its family was cut. A reader of a
@@ -177,7 +184,7 @@ Jobs that a scheduler chains together (temporal edges from a wrapper script, Con
 a Control-M folder) move together, in the latest of their families, except a job that touches DB2,
 IMS or MQ. A program that submits JCL through the internal reader counts as batch, and it owns the
 proc or program it submits.
-Every unit is placed, or listed as not placed with a reason. The validator checks that no program, job,
+Every unit is placed, or listed as not placed with a reason. The self-check in `references/output-shapes.md` requires that no program, job,
 proc or scheduler job is missing, listed twice, or both placed and unplaced. Some families may be empty.
 
 If the tree has no entry point (no JCL job, no CSD transaction, no scheduler), the seed has no waves and
@@ -211,7 +218,7 @@ Change the plan only for a reason you can cite. These are the reasons that count
 2. A wave holds more than 25 units and one argument needs it cut. Size alone is not a reason. A wave of
    26 units that one sentence describes needs no cut. Cut it at an articulation point
    from `analysis.articulation_points`, and name the point.
-3. Something the extractor could not see changes what a unit is: a computed call, a file listed as
+3. Something the recipes could not see changes what a unit is: a computed call, a file listed as
    not parsed, JCL text inside COBOL. Cite it.
 4. `risks.json` puts a unit in high-high and its family puts it early. Move it to the last wave
    that does not break a dependency.
@@ -223,8 +230,8 @@ and the evidence. A plan with no deviations is a fine answer.
 Write `03-waves.md` and `waves.json`. A unit is a program, a JCL job (`job:`), a proc, or a scheduler
 job. Steps, copybooks and datasets move with their owner, so do not list them. Every unit must be a
 node id in `graph.json`. Every wave needs `evidence` or `"inference": true`. Once the plan exists, set
-the `wave` field on each unit in `risks.json` with
-`python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/schema.py" apply-waves modernization-assessment`.
+the `wave` field on each unit in `risks.json` to the wave that holds it in `waves.json`. Edit the
+file by hand and read it back. A unit in no wave keeps `null`.
 
 ```json
 {
@@ -251,7 +258,7 @@ the `wave` field on each unit in `risks.json` with
 ```
 
 `target_state` is one of `rehost`, `replatform`, `refactor`, `rewrite`, `unknown`. Wave numbers run
-1 to N with no gaps. `blast_radius` is `low`, `medium` or `high`. The validator rejects a plan that
+1 to N with no gaps. `blast_radius` is `low`, `medium` or `high`. The self-check rejects a plan that
 splits a strongly connected component. Units the seed did not place stay in `unassigned` with its
 reason, unless a deviation places them.
 
@@ -271,8 +278,8 @@ If the user passed `--delivery conventional`, `ai-assisted` or `agent-led`, the 
 Split each wave into its terms (port, boundary work, equivalence harness, cutover) and say for each whether
 AI assistance shrinks it:
 
-- **Understanding the code.** This assessment already did it. Do not charge discovery weeks for what the
-  extractor and this run produced. What remains is the client's answers in `00-summary.md`.
+- **Understanding the code.** This assessment already did it. Do not charge discovery weeks for what
+  this run produced. What remains is the client's answers in `00-summary.md`.
 - **Port.** An AI coding agent is strong at transliteration when a comparison harness exists. The cost moves
   to review. Say how much review time you assume for each 1,000 lines.
 - **Boundary work and harness code.** Partly. The code is quick to write. Choosing what the boundary is, is not.
@@ -301,13 +308,13 @@ transliteration with a good test harness. It is weak at inferring intent from un
 rules. Name which parts are which.
 
 A totals row sums the rows above it. It has no source line of its own. Put the word `inference` in its
-Evidence cell. The citation hook flags a table row with neither a citation nor that word.
+Evidence cell. The citation check flags a table row with neither a citation nor that word.
 
 Write `04-estimate.md`.
 
 ## Phase 5. Dead code
 
-Three buckets, never two. The extractor computed the candidates. Start from `dead_code_candidates`.
+Three buckets, never two. Step 0 computed the candidates. Start from `dead_code_candidates`.
 
 - **Unreachable.** No static path from any entry point, and no reachable code makes a computed call.
   Safe to propose for deletion.
@@ -317,17 +324,17 @@ Three buckets, never two. The extractor computed the candidates. Start from `dea
   it loudly. A confident dead-code claim over a computed call is how you delete something that runs
   once a year at fiscal close.
 
-Every extractor candidate stays in one of the three buckets. Unreachable is only for what the extractor
-called unreachable, and dormant only for what it called dormant. The validator rejects anything else.
+Every candidate from Step 0 stays in one of the three buckets. Unreachable is only for what Step 0
+called unreachable, and dormant only for what it called dormant. The self-check rejects anything else.
 
-**You may not move a program from unknown to unreachable.** The validator rejects it. If you find
-evidence that an extractor bucket is wrong, for example a run-time submit it could not see, move the
+**You may not move a program from unknown to unreachable.** The self-check rejects it. If you find
+evidence that a bucket is wrong, for example a run-time submit it could not see, move the
 item toward unknown, never away from it, cite the evidence, and add no keys to `dead-code.json`. If you can
 bound a computed call (the value comes from a table you can read), say so in the reason, and leave
 the program in unknown.
 
 Dormant means old, not unused. If a live program calls a dormant program unconditionally, it very
-likely runs. Say that in the reason. Keep the extractor's dormant list as it is, and never propose
+likely runs. Say that in the reason. Keep the dormant list from Step 0 as it is, and never propose
 deletion on a date alone.
 
 A job that no parsed scheduler names still counts as an entry point, so it never shows in a bucket.
@@ -361,14 +368,14 @@ All three keys must be present, even when a list is empty. `telemetry` is `none`
 
 - Every claim carries a `path:line` citation or is labeled `inference`.
 - Any table of findings has a column headed exactly `Evidence`. A row with no citation says `inference`.
-- Cite paths from the project root. A file inside the assessment folder is cited as
+- Cite paths from the project root, in full: `app/cbl/PGMLIVE.cbl:1`, never `PGMLIVE.cbl:1`. A bare file name does not resolve. A file inside the assessment folder is cited as
   `modernization-assessment/waves.json:2`. A fact computed in `graph.json`'s `analysis` block has no
   source line: cite the source line behind it, or write `analysis` in the Evidence cell and name the field.
 - Keep a **Confidence** column. Low-confidence findings are not omitted. They are the ones the
   humans need to go verify.
 - Write `00-summary.md`: the scoping answers, the wave count, the single largest risk, and an
   **Open Questions** section addressed to the client's own engineers. Fewer than five items on a
-  system of any size means you were not looking hard enough. Include every file the extractor
+  system of any size means you were not looking hard enough. Include every file you
   listed as not parsed, and every limit in `meta.limits` that touches this system.
 
 ## Finish
@@ -377,16 +384,13 @@ Hand off to the `behavioral-equivalence` skill and write `06-test-strategy.md`. 
 without a definition of "correct" is a wish. If the tree holds no datasets, say the oracle has to
 come from job output, logs and reports, and say what you would ask the client to supply.
 
-Then check your work. The first command checks the four JSON files. The second checks every citation
-in the markdown, the same way the stop hook will:
+Then check your work.
 
-```
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/schema.py" validate-dir modernization-assessment
-python3 "${CLAUDE_PLUGIN_ROOT}/hooks/check_citations.py" --check modernization-assessment
-```
-
-Fix every problem. Then mark the run done, so the citation check runs when you finish:
-
-```
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/modernization-assessment/scripts/marker.py" done
-```
+1. Read each of the four JSON files back and walk the Self-check list in `references/output-shapes.md`.
+   Fix every miss.
+2. Run the `citation-verifier` agent. Give it the folder `modernization-assessment/` and the scope
+   you assessed. It carries its own rules and returns a list. It does not read plugin files, so do not
+   ask it to.
+3. Fix every item on the list, and run the verifier once more. If problems remain after the second
+   pass, finish anyway. Add an `## Unresolved citations` section to `00-summary.md` that lists them,
+   and say the affected claims are unverified. Do not run it a third time.

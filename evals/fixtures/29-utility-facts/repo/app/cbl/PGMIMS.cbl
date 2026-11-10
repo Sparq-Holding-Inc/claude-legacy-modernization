@@ -1,5 +1,0 @@
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID. PGMIMS.
-       PROCEDURE DIVISION.
-           CALL 'CBLTDLI'.
-           GOBACK.
